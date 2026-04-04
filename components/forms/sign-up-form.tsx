@@ -38,19 +38,35 @@ export function SignUpForm() {
     const supabase = createClient();
 
     try {
-      const { error } = await supabase.auth.signUp({
+      //Get the anonymous user
+      const { data: sessionData } = await supabase.auth.getSession();
+      const guestId = sessionData?.session?.user?.id ?? null;
+
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
           data: {
             firstName: data.firstName,
-            lastName: data.lastName,
+            lastName: data.lastName
           },
         },
       });
-
       if (error) throw error;
+      const newUserId = signUpData.user?.id
+
+      //Merge cart if there was an anonymous session
+      if (guestId && signUpData && guestId !== newUserId) {
+        try {
+          await supabase.rpc("merge_cart", {
+            p_old_user_id: guestId,
+            p_new_user_id: newUserId,
+          });
+        } catch (mergeError) {
+          console.error("Cart merge error:", mergeError)
+        }
+      }
 
       reset();
       setMessage("User signed up successfully");
