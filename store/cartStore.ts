@@ -9,7 +9,8 @@ export type CartItem = {
 
 
 type CartState = {
-    items: CartItem[]
+
+    cart: CartItem[]
     loading: boolean
     error: string | null
 
@@ -19,8 +20,8 @@ type CartState = {
     removeItem: (productId: string) => Promise<void>
 };
 
-export const useCartStore = create<CartState>((set) => ({
-    items: [],
+export const useCartStore = create<CartState>((set, get) => ({
+    cart: [],
     loading: false,
     error: null,
 
@@ -34,7 +35,7 @@ export const useCartStore = create<CartState>((set) => ({
             }
 
             const data = await res.json();
-            set({ items: data, loading: false })
+            set({ cart: data, loading: false })
         } catch (err: unknown) {
             const message =
                 err instanceof Error ? err.message : "Unknown error";
@@ -42,9 +43,25 @@ export const useCartStore = create<CartState>((set) => ({
         }
     },
 
-    addItem: async (productId, quantity) => {
+    addItem: async (productId, quantity = 1) => {
+        const previousCart = get().cart
         set({ loading: true, error: null });
 
+        // Update UI first
+        const existingItem = previousCart.find((item) => item.product_id === productId)
+        let optCart: CartItem[]
+
+        if (existingItem) {
+            optCart = previousCart.map((item) =>
+                item.product_id === productId ? { ...item, quantity: item.quantity + quantity } : item
+            )
+        } else {
+            optCart = [...previousCart, { user_id: '', product_id: productId, quantity: quantity }]
+        }
+
+        set({ cart: optCart })
+
+        //Database
         try {
             const res = await fetch('/api/cart', {
                 method: "POST",
@@ -54,21 +71,21 @@ export const useCartStore = create<CartState>((set) => ({
             if (!res.ok) {
                 throw new Error("Failed to add item");
             }
-
-            const updated = await fetch('/api/cart');
-            const data = await updated.json();
-
-            set({ items: data, loading: false })
-
+            set({ loading: false })
         } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message : "Unknown error";
-            set({ error: message, loading: false });
+            const message = err instanceof Error ? err.message : "Unknown error";
+            set({ cart: previousCart, error: message, loading: false });
         }
 
     },
     updateItem: async (productId, quantity) => {
+        const previousCart = get().cart;
         set({ loading: true, error: null });
+
+        const optCart = previousCart.map((item) =>
+            item.product_id === productId ? { ...item, quantity } : item
+        )
+        set({ cart: optCart })
 
         try {
             const res = await fetch('/api/cart', {
@@ -80,19 +97,20 @@ export const useCartStore = create<CartState>((set) => ({
                 throw new Error("Failed to update item");
             }
 
-            const updated = await fetch('/api/cart');
-            const data = await updated.json();
-            set({ items: data, loading: false })
+            set({ loading: false })
 
         } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message : "Unknown error";
-            set({ error: message, loading: false });
+            const message = err instanceof Error ? err.message : "Unknown error";
+            set({ cart: previousCart, error: message, loading: false });
         }
 
     },
     removeItem: async (productId) => {
+        const previousCart = get().cart;
         set({ loading: true, error: null });
+
+        const optCart = previousCart.filter((item) => item.product_id !== productId)
+        set({ cart: optCart })
 
         try {
             const res = await fetch('/api/cart', {
@@ -104,15 +122,11 @@ export const useCartStore = create<CartState>((set) => ({
             if (!res.ok) {
                 throw new Error("Failed to update item");
             }
-
-            const updated = await fetch('/api/cart');
-            const data = await updated.json();
-            set({ items: data, loading: false })
+            set({ loading: false })
 
         } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message : "Unknown error";
-            set({ error: message, loading: false });
+            const message = err instanceof Error ? err.message : "Unknown error";
+            set({ cart: previousCart, error: message, loading: false });
         }
 
     },
