@@ -11,16 +11,34 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  //Get current session to check for anonymous user
+  const { data: sessionData } = await supabase.auth.getSession();
+  const guestId = sessionData?.session?.user?.id;
 
-  if (error) {
-    console.error("OAuth error:", error.message);
-    return NextResponse.redirect(
-      `${requestUrl.origin}/login?error=auth_failed`
-    );
+
+  // Exchange code for new OAuth session
+  const { data: authData, error } = await supabase.auth.exchangeCodeForSession(code);
+
+  if (error || !authData?.session) {
+    console.error("OAuth error:", error?.message);
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
   }
 
-  const response = NextResponse.redirect(`${requestUrl.origin}/`);
+  const authUserId = authData.session.user.id;
 
-  return response;
+  //Merge cart if there was an anonymous session
+  if (guestId && authUserId && guestId !== authUserId) {
+    try {
+      await supabase.rpc("merge_cart", {
+        p_old_user_id: guestId,
+        p_new_user_id: authUserId,
+      })
+    } catch (mergeError) {
+      console.error("Cart merge error:", mergeError)
+    }
+  }
+
+
+  return NextResponse.redirect(`${requestUrl.origin}/`);
+
 }
