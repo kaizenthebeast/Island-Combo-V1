@@ -1,64 +1,67 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type CartOwner = {
-    type: 'user' | 'guest';
-    id: string;
+export type CartItems = {
+  userId: string;
+  productId: string;
+  quantity?: number;
 };
 
-// Fetch the items from the cart based on the getOwner function in api
-export async function getUserCart(owner: CartOwner) {
-    const supabase = await createClient();
-    const query = supabase.from('cart').select('*');
-    const { data, error } = await query.eq(owner.type === 'user' ? 'user_id' : 'guest_id', owner.id);
+// Get cart items
+export async function getCart(userId: string) {
+  const supabase = await createClient();
 
-    if (error) throw new Error(error.message);
-    return data;
+  const { data, error } = await supabase
+    .from('cart')
+    .select('*, products(*)')
+    .eq('user_id', userId);
+
+  if (error) throw error;
+
+  return data;
 }
 
-//Call this function upon login / sign up 
-export async function mergeCart(guestId: string, userId: string) {
-    const supabase = await createClient();
-    const { error } = await supabase.rpc('merge_cart', {
-        p_guest_id: guestId,
-        p_user_id: userId
-    });
-    if (error) throw new Error(error.message);
-}
+// Add to cart (RPC)
+export async function addToCart(items: CartItems) {
+  const supabase = await createClient();
 
-
-export async function addProductToCart(productId: string, quantity: number, owner: CartOwner) {
-    const supabase = await createClient();
-
-    // Check who's user is currently adding an item to the cart
-    const { data: existing, error } = await supabase.from('cart')
-        .select('*')
-        .eq(owner.type === 'user' ? 'user_id' : 'guest_id', owner.id)
-        .eq('product_id', productId)
-
-    if (error) {
-        throw new Error(error.message)
+  const { data, error } = await supabase.rpc(
+    'add_to_cart_increment',
+    {
+      p_user_id: items.userId,
+      p_product_id: items.productId,
+      p_quantity: items.quantity ?? 1, // fallback
     }
+  );
 
-    if (existing?.length) {
-        await supabase.from('cart').update({ quantity: existing[0].quantity + quantity })
-        .eq(owner.type === 'user' ? 'user_id' : 'guest_id', owner.id)
-        .eq('product_id', productId)
-    } else {
-        await supabase.from('cart').insert([{
-            product_id: productId,
-            quantity: quantity,
-            user_id: owner.type === 'user' ? owner.id : null,
-            guest_id: owner.type === 'guest' ? owner.id : null,
-        }])
-    }
+  if (error) throw error;
 
+  return data;
 }
 
-export async function removeProductFromCart(productId: string, owner: CartOwner) {
-    const supabase = await createClient();
-    await supabase
-        .from('cart')
-        .delete()
-        .eq(owner.type === 'user' ? 'user_id' : 'guest_id', owner.id)
-        .eq('product_id', productId);
+// Update quantity
+export async function updateCartQuantity(items: CartItems) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('cart')
+    .update({ quantity: items.quantity ?? 1 })
+    .eq('user_id', items.userId)
+    .eq('product_id', items.productId);
+
+  if (error) throw error;
+
+  return data;
+}
+
+// Remove item
+export async function removeFromCart(items: CartItems) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('cart')
+    .delete()
+    .eq('user_id', items.userId)
+    .eq('product_id', items.productId);
+
+  if (error) throw error;
 }
