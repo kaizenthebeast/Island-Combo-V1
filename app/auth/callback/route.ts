@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const response = NextResponse.redirect(`${requestUrl.origin}/protected`);
+  const response = NextResponse.redirect(`${requestUrl.origin}/`);
 
   return response;
 }

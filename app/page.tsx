@@ -1,6 +1,7 @@
 import { AuthButton } from "@/components/functional-ui/auth-button";
 
 
+
 import Link from "next/link";
 import { Suspense } from "react";
 import ProductContainer from "@/components/section_container/ProductContainer";

@@ -1,4 +1,10 @@
 "use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState} from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {loginSchema, LoginFormInput} from "@/form-schema/loginSchema"
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,33 +17,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-// Zod schema for login
-const loginSchema = z.object({
-  email: z.string().nonempty("Email is required").email("Invalid email"),
-  password: z.string().nonempty("Password is required"),
-});
-
-type LoginFormInput = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormInput>({
-    resolver: zodResolver(loginSchema),
-  });
+
+  const {register,handleSubmit,formState: { errors },} = useForm<LoginFormInput>({resolver: zodResolver(loginSchema),});
 
   const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     setMessage("");
@@ -50,7 +37,7 @@ export function LoginForm() {
         password: data.password,
       });
       if (error) throw error;
-      router.push("/protected");
+      router.push("/");
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
     } finally {
