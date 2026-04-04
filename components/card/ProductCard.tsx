@@ -18,7 +18,7 @@ type Props = {
 }
 
 const MIN_QTY = 1
-const MAX_QTY = 10
+const MAX_QTY = 100
 
 const clampQuantity = (value: number) =>
   Math.min(Math.max(value, MIN_QTY), MAX_QTY)

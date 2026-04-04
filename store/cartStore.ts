@@ -1,130 +1,155 @@
-import { create } from 'zustand'
+import { create } from "zustand";
+import { ensureAnonymousUser } from "@/lib/supabase/anon-user";
 
 export type CartItem = {
-    user_id: string
-    product_id: string
-    quantity: number
-}
+  user_id: string;
+  product_id: string;
+  quantity: number;
+};
+
 type CartState = {
+  cart: CartItem[];
+  loading: boolean;
+  error: string | null;
 
-    cart: CartItem[]
-    loading: boolean
-    error: string | null
-
-    fetchCart: () => Promise<void>
-    addItem: (productId: string, quantity?: number) => Promise<void>
-    updateItem: (productId: string, quantity: number) => Promise<void>
-    removeItem: (productId: string) => Promise<void>
+  fetchCart: () => Promise<void>;
+  addItem: (productId: string, quantity?: number) => Promise<void>;
+  updateItem: (productId: string, quantity: number) => Promise<void>;
+  removeItem: (productId: string) => Promise<void>;
 };
 
 export const useCartStore = create<CartState>((set, get) => ({
-    cart: [],
-    loading: false,
-    error: null,
+  cart: [],
+  loading: false,
+  error: null,
 
-    fetchCart: async () => {
-        set({ loading: true, error: null });
+  fetchCart: async () => {
+    set({ loading: true, error: null });
 
-        try {
-            const res = await fetch("/api/cart");
-            if (!res.ok) {
-                throw new Error("Failed to fetch cart");
-            }
+    try {
+      await ensureAnonymousUser();
 
-            const data = await res.json();
-            set({ cart: data, loading: false })
-        } catch (err: unknown) {
-            const message =
-                err instanceof Error ? err.message : "Unknown error";
-            set({ error: message, loading: false });
-        }
-    },
+      const res = await fetch("/api/cart", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      });
 
-    addItem: async (productId, quantity = 1) => {
-        const previousCart = get().cart
-        set({ loading: true, error: null });
+      const body = await res.json();
 
-        // Update UI first
-        const existingItem = previousCart.find((item) => item.product_id === productId)
-        let optCart: CartItem[]
+      if (!res.ok) {
+        throw new Error(body?.error ?? "Failed to fetch cart");
+      }
 
-        if (existingItem) {
-            optCart = previousCart.map((item) =>
-                item.product_id === productId ? { ...item, quantity: item.quantity + quantity } : item
-            )
-        } else {
-            optCart = [...previousCart, { user_id: '', product_id: productId, quantity: quantity }]
-        }
+      set({ cart: body, loading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      set({ error: message, loading: false });
+    }
+  },
 
-        set({ cart: optCart })
+  addItem: async (productId, quantity = 1) => {
+    const previousCart = get().cart;
+    set({ loading: true, error: null });
 
-        //Database
-        try {
-            const res = await fetch('/api/cart', {
-                method: "POST",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, quantity }),
-            })
-            if (!res.ok) {
-                throw new Error("Failed to add item");
-            }
-            set({ loading: false })
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Unknown error";
-            set({ cart: previousCart, error: message, loading: false });
-        }
+    const existingItem = previousCart.find((item) => item.product_id === productId);
 
-    },
-    updateItem: async (productId, quantity) => {
-        const previousCart = get().cart;
-        set({ loading: true, error: null });
-
-        const optCart = previousCart.map((item) =>
-            item.product_id === productId ? { ...item, quantity } : item
+    const optimisticCart: CartItem[] = existingItem
+      ? previousCart.map((item) =>
+          item.product_id === productId
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
         )
-        set({ cart: optCart })
+      : [...previousCart, { user_id: "temp", product_id: productId, quantity }];
 
-        try {
-            const res = await fetch('/api/cart', {
-                method: "PATCH",
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, quantity })
-            })
-            if (!res.ok) {
-                throw new Error("Failed to update item");
-            }
+    set({ cart: optimisticCart });
 
-            set({ loading: false })
+    try {
+      await ensureAnonymousUser();
 
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Unknown error";
-            set({ cart: previousCart, error: message, loading: false });
-        }
+      const res = await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId, quantity }),
+      });
 
-    },
-    removeItem: async (productId) => {
-        const previousCart = get().cart;
-        set({ loading: true, error: null });
+      const body = await res.json();
 
-        const optCart = previousCart.filter((item) => item.product_id !== productId)
-        set({ cart: optCart })
+      if (!res.ok) {
+        throw new Error(body?.error ?? "Failed to add item");
+      }
 
-        try {
-            const res = await fetch('/api/cart', {
-                method: "DELETE",
-                headers: { "Content-Type": 'application/json' },
-                body: JSON.stringify({ productId })
-            })
+      await get().fetchCart();
+      set({ loading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      set({ cart: previousCart, error: message, loading: false });
+    }
+  },
 
-            if (!res.ok) {
-                throw new Error("Failed to update item");
-            }
-            set({ loading: false })
+  updateItem: async (productId, quantity) => {
+    const previousCart = get().cart;
+    set({ loading: true, error: null });
 
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Unknown error";
-            set({ cart: previousCart, error: message, loading: false });
-        }
+    const optimisticCart = previousCart.map((item) =>
+      item.product_id === productId ? { ...item, quantity } : item
+    );
 
-    },
-}))
+    set({ cart: optimisticCart });
+
+    try {
+      await ensureAnonymousUser();
+
+      const res = await fetch("/api/cart", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId, quantity }),
+      });
+
+      const body = await res.json();
+
+      if (!res.ok) {
+        throw new Error(body?.error ?? "Failed to update item");
+      }
+
+      await get().fetchCart();
+      set({ loading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      set({ cart: previousCart, error: message, loading: false });
+    }
+  },
+
+  removeItem: async (productId) => {
+    const previousCart = get().cart;
+    set({ loading: true, error: null });
+
+    const optimisticCart = previousCart.filter((item) => item.product_id !== productId);
+    set({ cart: optimisticCart });
+
+    try {
+      await ensureAnonymousUser();
+
+      const res = await fetch("/api/cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ productId }),
+      });
+
+      const body = await res.json();
+
+      if (!res.ok) {
+        throw new Error(body?.error ?? "Failed to remove item");
+      }
+
+      await get().fetchCart();
+      set({ loading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      set({ cart: previousCart, error: message, loading: false });
+    }
+  },
+}));

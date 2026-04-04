@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
+import CartSync from "@/helper/CartSync";
+import EnsureAnonSession from "@/helper/EnsureAnonSession"
+
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
@@ -26,9 +29,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-    
-          {children}
-      
+        <EnsureAnonSession />
+        <CartSync />
+        {children}
+
       </body>
     </html>
   );
