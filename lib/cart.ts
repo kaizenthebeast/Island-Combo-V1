@@ -22,7 +22,7 @@ export interface CartItem {
   product_id: string;
   quantity: number;
   added_at?: string;
-  products?: Product;        // joined product info
+  products: Product;        // joined product info
 }
 
 export type CartItemsInput = {

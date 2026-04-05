@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { UserProfile } from '@/lib/users';
 import { PromoCodeModal } from '../functional-ui/PromoCodeModal';
@@ -10,18 +10,24 @@ interface CheckoutCardProps {
 }
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
     const { cart, fetchCart } = useCartStore();
+    const [discount, setDiscount] = useState(0);
+    const [promoCode, setPromoCode] = useState('');
+
     useEffect(() => {
         fetchCart();
     }, [fetchCart])
 
     //calculate total
     const total = cart.reduce((sum, item) => sum + Number(item.products?.price || 0) * item.quantity, 0)
+    //subtotal - discount
+    const discountedPrice = total - discount;
 
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
             {/* Billing Sumamry */}
             <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Billing Summary</h2>
+                <p>{promoCode}</p>
                 {cart.map((item) => (
                     <div className="space-y-4" key={item.id}>
                         <div className="flex justify-between border-b pb-2">
@@ -32,11 +38,12 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
                 ))}
                 <div className='flex justify-between font-bold pt-2'>
                     <span>Discount</span>
+                    <span>{discount}</span>
                 </div>
                 {cart.length > 0 && (
                     <div className="flex justify-between font-bold pt-2">
                         <span>Total</span>
-                        <span>${total.toFixed(2)}</span>
+                        <span>${discountedPrice.toFixed(2)}</span>
                     </div>
                 )}
             </section>
@@ -87,7 +94,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Place Order */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoCodeModal>
+                <PromoCodeModal setDiscount={setDiscount} setPromoCode={setPromoCode}>
                     <Button size="lg" variant={"outline"}>
                         Enter Promo Code
                     </Button>

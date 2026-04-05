@@ -1,6 +1,6 @@
 // app/api/cart/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from '@/lib/auth'
 import {
   getCart,
   addToCart,
@@ -8,19 +8,6 @@ import {
   removeFromCart,
 } from "@/lib/cart";
 
-async function requireUser() {
-  const supabase = await createClient();
-  const { data: { user },  error, } = await supabase.auth.getUser();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  if (!user) {
-    return null;
-  }
-  return user;
-}
 
 export async function GET() {
   try {

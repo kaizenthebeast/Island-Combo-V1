@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -20,10 +21,13 @@ const promoCodeSchema = z.object({
 type PromoCodeForm = z.infer<typeof promoCodeSchema>;
 
 interface PromoCodeModalProps {
-  children: React.ReactElement; 
+  children: React.ReactElement
+  setDiscount: React.Dispatch<React.SetStateAction<number>>;
+  setPromoCode: React.Dispatch<React.SetStateAction<string>>;
+
 }
 
-export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ children }) => {
+export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, setPromoCode, children }) => {
   const [open, setOpen] = React.useState(false);
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<PromoCodeForm>({
@@ -35,26 +39,23 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ children }) => {
 
   const onSubmit = async (data: PromoCodeForm) => {
     try {
-      // Example API call to apply promo code
-      const res = await fetch("/api/apply-promo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ promoCode: data.promoCode }),
-      });
-      const result = await res.json();
+      const res = await fetch(`/api/checkout?code${data.promoCode}`, {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+      })
 
-      if (result.success) {
-        alert(`Promo applied! New total: $${result.newTotal}`);
-        // Optional: update cart store if you use Zustand/Redux
-      } else {
-        alert(`Promo code invalid: ${result.message}`);
+      const body = await res.json()
+
+      if (!res.ok) {
+        throw new Error(body?.error ?? "Failed to fetch cart");
       }
 
+      setPromoCode(body.code)
+      setDiscount(body.discount)
       reset();
-      setOpen(false);
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Please try again.");
+    } catch {
+      throw new Error;
     }
   };
 
