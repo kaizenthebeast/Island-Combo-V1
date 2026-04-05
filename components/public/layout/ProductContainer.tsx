@@ -1,6 +1,8 @@
 import React from 'react'
 import { getAllProducts } from '@/lib/product'
-import ProductCard from '../../card/ProductCard';
+import ProductCard from '@/components/card/ProductCard';
+
+
 
 const ProductContainer = async () => {
     const products = await getAllProducts();
@@ -10,7 +12,7 @@ const ProductContainer = async () => {
             {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
             ))}
-
+     
         </div>
     )
 }

@@ -13,29 +13,37 @@ export type UserProfile = {
   role: string;
 };
 
-export async function getCurrentUser(): Promise<UserProfile> {
-  const supabase = await createClient();
+export class User {
+  private static profile: UserProfile | null = null;
 
-  //Auth check
-  const { data: authData, error } = await supabase.auth.getClaims();
+  // Fetch the current user and store internally
+  public static async current(): Promise<UserProfile> {
+    if (User.profile) return User.profile; // return cached profile
 
-  if (error || !authData?.claims) {
-    redirect("/auth/login");
+    const supabase = await createClient();
+
+    // Auth check
+    const { data: authData, error } = await supabase.auth.getClaims();
+    if (error || !authData?.claims) redirect("/auth/login");
+
+    const userId = authData.claims.sub;
+
+    // Fetch profile
+    const { data: userProfile, error: userProfileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle(); // safer than .single()
+
+    if (userProfileError) throw new Error(userProfileError.message);
+    if (!userProfile) redirect("/protected/setup-profile");
+
+    User.profile = userProfile as UserProfile; // cache internally
+    return User.profile;
   }
 
-  const userId = authData.claims.sub;
-
-  // Fetch profile
-  const { data: userProfile, error: userProfileError } = await supabase
-    .from("profiles")
-    .select("*") // FIXED
-    .eq("user_id", userId)
-    .single();
-
-  if (userProfileError || !userProfile) {
-    throw new Error(userProfileError?.message || "Profile not found");
+  // Optional: clear cached profile (for logout)
+  public static clear() {
+    User.profile = null;
   }
-
-  //  Return object 
-  return userProfile as UserProfile;
 }
