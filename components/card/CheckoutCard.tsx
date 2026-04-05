@@ -28,6 +28,9 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
                         </div>
                     </div>
                 ))}
+                <div className='flex justify-between font-bold pt-2'>
+                    <span>Discount</span>
+                </div>
                 {cart.length > 0 && (
                     <div className="flex justify-between font-bold pt-2">
                         <span>Total</span>
