@@ -1,13 +1,38 @@
 import { createClient } from '@/lib/supabase/server';
 
-export type CartItems = {
+export interface Categories {
+   name: string
+}
+
+export interface Product {
+  id: string
+  name: string
+  description: string
+  price: number
+  image_url?: string[]
+  stock?: number
+  is_active: boolean
+  category: Categories
+  slug: string
+}
+
+export interface CartItem {
+  id: string;               // cart row id
+  user_id: string;
+  product_id: string;
+  quantity: number;
+  added_at?: string;
+  products?: Product;        // joined product info
+}
+
+export type CartItemsInput = {
   userId: string;
   productId: string;
   quantity?: number;
 };
 
 // Get cart items
-export async function getCart(userId: string) {
+export async function getCart(userId: string):Promise<CartItem[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -17,11 +42,11 @@ export async function getCart(userId: string) {
 
   if (error) throw error;
 
-  return data;
+  return data as CartItem[];
 }
 
 // Add to cart (RPC)
-export async function addToCart(items: CartItems) {
+export async function addToCart(items: CartItemsInput) {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc(
@@ -39,7 +64,7 @@ export async function addToCart(items: CartItems) {
 }
 
 // Update quantity
-export async function updateCartQuantity(items: CartItems) {
+export async function updateCartQuantity(items: CartItemsInput) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -54,7 +79,7 @@ export async function updateCartQuantity(items: CartItems) {
 }
 
 // Remove item
-export async function removeFromCart(items: CartItems) {
+export async function removeFromCart(items: CartItemsInput) {
   const supabase = await createClient();
 
   const { error } = await supabase

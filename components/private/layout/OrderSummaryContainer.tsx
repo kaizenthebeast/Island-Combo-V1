@@ -1,16 +1,24 @@
-// components/cart/OrderSummaryContainer.tsx
+'use client'
 import React from 'react';
+import { useCartStore } from '@/store/cartStore';
+import { CartItem } from '@/lib/cart';
 
-const OrderSummaryContainer = () => {
+interface OrderSummaryProps{
+    cartItems: CartItem[]
+}
+
+const OrderSummaryContainer = ({cartItems}:OrderSummaryProps) => {
+    const { updateItem, removeItem } = useCartStore();
+
     return (
         <div className="bg-white shadow-md rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
 
             {/* Product List */}
             <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
+                {cartItems.map((item) => (
                     <div
-                        key={item}
+                        key={item.id}
                         className="flex items-center justify-between border-b pb-4"
                     >
                         {/* Product Image */}
@@ -18,8 +26,8 @@ const OrderSummaryContainer = () => {
 
                         {/* Product Info */}
                         <div className="flex-1">
-                            <p className="font-semibold">Product Name</p>
-                            <p className="text-gray-500">$XX.XX</p>
+                            <p className="font-semibold">{item.products?.name}</p>
+                            <p className="text-gray-500">${item.products?.price}</p>
                         </div>
 
                         {/* Quantity Input & Remove */}
@@ -28,9 +36,10 @@ const OrderSummaryContainer = () => {
                                 type="number"
                                 defaultValue={1}
                                 min={1}
+                                onChange={(e) => updateItem(item.id, Number(e.target.value))}
                                 className="w-16 border rounded p-1 text-center"
                             />
-                            <button className="text-red-500 hover:text-red-700 font-semibold">
+                            <button className="text-red-500 hover:text-red-700 font-semibold" onClick={() => removeItem(item.id)}>
                                 Remove
                             </button>
                         </div>

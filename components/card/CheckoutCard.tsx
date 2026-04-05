@@ -1,10 +1,12 @@
 import React from 'react';
-import { User } from "@/lib/users";
-import { getCart } from '@/lib/cart'
+import { CartItem } from '@/lib/cart';
+import { UserProfile } from '@/lib/users';
 
-const CheckoutCard = async () => {
-    const user = await User.current();
-    const cartItems = await getCart(user.user_id);
+interface CheckoutCardProps {
+    user: UserProfile;
+    cartItems: CartItem[];
+}
+const CheckoutCard = ({ cartItems, user }: CheckoutCardProps) => {
 
     //calculate total
     const total = cartItems.reduce((sum, item) => sum + Number(item.products?.price || 0) * item.quantity, 0)
@@ -50,7 +52,7 @@ const CheckoutCard = async () => {
                     <input
                         type="text"
                         placeholder="Address"
-                         defaultValue={user.address || ''}
+                        defaultValue={user.address || ''}
                         className="border p-2 rounded w-full sm:col-span-2"
                         readOnly
                     />
