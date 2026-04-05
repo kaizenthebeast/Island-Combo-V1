@@ -1,3 +1,5 @@
+// /lib/user.ts
+
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,33 +18,38 @@ export type UserProfile = {
 export class User {
   private static profile: UserProfile | null = null;
 
-  // Fetch the current user and store internally
   public static async current(): Promise<UserProfile> {
-    if (User.profile) return User.profile; // return cached profile
-
     const supabase = await createClient();
 
-    // Auth check
+    // ✅ FAST check
     const { data: authData, error } = await supabase.auth.getClaims();
-    if (error || !authData?.claims) redirect("/auth/login");
+
+    if (error || !authData?.claims?.sub) {
+      User.clear();
+      redirect("/auth/login");
+    }
 
     const userId = authData.claims.sub;
+
+    // ✅ validate cached user matches session
+    if (User.profile && User.profile.user_id === userId) {
+      return User.profile;
+    }
 
     // Fetch profile
     const { data: userProfile, error: userProfileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", userId)
-      .maybeSingle(); // safer than .single()
+      .maybeSingle();
 
     if (userProfileError) throw new Error(userProfileError.message);
     if (!userProfile) redirect("/protected/setup-profile");
 
-    User.profile = userProfile as UserProfile; // cache internally
+    User.profile = userProfile as UserProfile;
     return User.profile;
   }
 
-  // Optional: clear cached profile (for logout)
   public static clear() {
     User.profile = null;
   }
