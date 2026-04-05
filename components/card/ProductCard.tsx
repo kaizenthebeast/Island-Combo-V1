@@ -47,7 +47,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       </CardContent>
 
       <CardFooter className="p-5 pt-0">
-        {/* Simple Quantity Controls */}
         <div className="flex w-full items-center justify-center rounded-xl border px-3 py-2 space-x-4">
           <Button
             variant="ghost"
@@ -61,8 +60,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
           >
             <Minus className="h-4 w-4" />
           </Button>
-
-
 
           <Button
             variant="ghost"
