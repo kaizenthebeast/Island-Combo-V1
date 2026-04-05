@@ -9,9 +9,6 @@ interface CheckoutCardProps {
     user: UserProfile;
 }
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
-    const handleApply = (code: string) => {
-        alert(`Promo code applied: ${code}`);
-    };
     const { cart, fetchCart } = useCartStore();
     useEffect(() => {
         fetchCart();
@@ -90,7 +87,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Place Order */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoCodeModal onApply={handleApply}>
+                <PromoCodeModal>
                     <Button size="lg" variant={"outline"}>
                         Enter Promo Code
                     </Button>
