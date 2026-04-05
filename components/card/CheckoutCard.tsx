@@ -2,11 +2,15 @@
 import React, { useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { UserProfile } from '@/lib/users';
+import { PromoCodeModal } from '../functional-ui/PromoCodeModal';
 
 interface CheckoutCardProps {
     user: UserProfile;
 }
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
+    const handleApply = (code: string) => {
+        alert(`Promo code applied: ${code}`);
+    };
     const { cart, fetchCart } = useCartStore();
     useEffect(() => {
         fetchCart();
@@ -85,7 +89,12 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Place Order */}
             <section className="w-full">
-                <button className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">
+                <PromoCodeModal onApply={handleApply}>
+                    <button type='button' className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">
+                        Enter Promo Code
+                    </button>
+                </PromoCodeModal>
+                <button type='button' className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">
                     Place Order
                 </button>
             </section>
