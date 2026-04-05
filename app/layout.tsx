@@ -5,6 +5,9 @@ import "./globals.css";
 
 import CartSync from "@/helper/CartSync";
 import EnsureAnonSession from "@/helper/EnsureAnonSession";
+import Navbar from "@/components/public/layout/Navbar";
+
+
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -32,6 +35,7 @@ export default function RootLayout({
       <body className={`${geistSans.className} antialiased`}>
         <EnsureAnonSession />
         <CartSync />
+         <Navbar />
         {children}
       </body>
     </html>
