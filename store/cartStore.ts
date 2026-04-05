@@ -1,18 +1,14 @@
 import { create } from "zustand";
 import { ensureAnonymousUser } from "@/lib/supabase/anon-user";
+import { CartItem } from "@/lib/cart"; // <-- import the server type
 
-export type CartItem = {
-  user_id: string;
-  product_id: string;
-  quantity: number;
-};
 
 type CartState = {
   cart: CartItem[];
   loading: boolean;
   error: string | null;
 
-  fetchCart: () => Promise<void>;
+  fetchCart: (initialCart?: CartItem[]) => void;
   addItem: (productId: string, quantity?: number) => Promise<void>;
   updateItem: (productId: string, quantity: number) => Promise<void>;
   removeItem: (productId: string) => Promise<void>;
@@ -23,8 +19,11 @@ export const useCartStore = create<CartState>((set, get) => ({
   loading: false,
   error: null,
 
-  fetchCart: async () => {
-    set({ loading: true, error: null });
+  fetchCart: async (initialCart) => {
+      if (initialCart) {
+      set({ cart: initialCart });
+      return;
+    }
 
     try {
       await ensureAnonymousUser();
@@ -56,11 +55,20 @@ export const useCartStore = create<CartState>((set, get) => ({
 
     const optimisticCart: CartItem[] = existingItem
       ? previousCart.map((item) =>
-          item.product_id === productId
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        )
-      : [...previousCart, { user_id: "temp", product_id: productId, quantity }];
+        item.product_id === productId
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      )
+      : [
+          ...previousCart,
+          {
+            id: crypto.randomUUID(), 
+            user_id: "temp",
+            product_id: productId,
+            quantity,
+            products: undefined,
+          },
+        ];
 
     set({ cart: optimisticCart });
 
@@ -80,7 +88,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         throw new Error(body?.error ?? "Failed to add item");
       }
 
-      await get().fetchCart();
+      get().fetchCart();
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -114,7 +122,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         throw new Error(body?.error ?? "Failed to update item");
       }
 
-      await get().fetchCart();
+       get().fetchCart();
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -145,7 +153,7 @@ export const useCartStore = create<CartState>((set, get) => ({
         throw new Error(body?.error ?? "Failed to remove item");
       }
 
-      await get().fetchCart();
+      get().fetchCart();
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";

@@ -1,14 +1,16 @@
 'use client'
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
-import { CartItem } from '@/lib/cart';
 
-interface OrderSummaryProps{
-    cartItems: CartItem[]
-}
 
-const OrderSummaryContainer = ({cartItems}:OrderSummaryProps) => {
-    const { updateItem, removeItem } = useCartStore();
+
+
+const OrderSummaryContainer = () => {
+    const { cart, fetchCart, updateItem, removeItem } = useCartStore();
+
+    useEffect(() => {
+        fetchCart();
+    }, [fetchCart])
 
     return (
         <div className="bg-white shadow-md rounded-lg p-6">
@@ -16,7 +18,7 @@ const OrderSummaryContainer = ({cartItems}:OrderSummaryProps) => {
 
             {/* Product List */}
             <div className="space-y-4">
-                {cartItems.map((item) => (
+                {cart.map((item) => (
                     <div
                         key={item.id}
                         className="flex items-center justify-between border-b pb-4"
@@ -34,12 +36,12 @@ const OrderSummaryContainer = ({cartItems}:OrderSummaryProps) => {
                         <div className="flex items-center space-x-2">
                             <input
                                 type="number"
-                                defaultValue={1}
+                                value={item.quantity}
                                 min={1}
-                                onChange={(e) => updateItem(item.id, Number(e.target.value))}
-                                className="w-16 border rounded p-1 text-center"
+                                onChange={(e) => updateItem(item.product_id, Number(e.target.value))}
+                                className="w-16 border rounded p-1 text-center no-spinner"
                             />
-                            <button className="text-red-500 hover:text-red-700 font-semibold" onClick={() => removeItem(item.id)}>
+                            <button className="text-red-500 hover:text-red-700 font-semibold" onClick={() => removeItem(item.product_id)}>
                                 Remove
                             </button>
                         </div>
