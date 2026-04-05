@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useCartStore } from '@/store/cartStore';
 import { UserProfile } from '@/lib/users';
 import { PromoCodeModal } from '../functional-ui/PromoCodeModal';
+import { Button } from '../ui/button';
 
 interface CheckoutCardProps {
     user: UserProfile;
@@ -88,15 +89,15 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
             </section>
 
             {/* Place Order */}
-            <section className="w-full">
+            <section className="w-full flex flex-col space-y-3">
                 <PromoCodeModal onApply={handleApply}>
-                    <button type='button' className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">
+                    <Button size="lg" variant={"outline"}>
                         Enter Promo Code
-                    </button>
+                    </Button>
                 </PromoCodeModal>
-                <button type='button' className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700 w-full">
+                <Button size="lg" variant={"default"}>
                     Place Order
-                </button>
+                </Button>
             </section>
         </div>
 

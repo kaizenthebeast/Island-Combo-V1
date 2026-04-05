@@ -1,4 +1,3 @@
-// PromoCodeModal.tsx
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -22,13 +21,12 @@ type PromoCodeForm = z.infer<typeof promoCodeSchema>;
 
 interface PromoCodeModalProps {
   onApply: (code: string) => void;
+  children: React.ReactElement; // <-- ensure exactly one React element
 }
 
-export const PromoCodeModal: React.FC<PromoCodeModalProps & { children: React.ReactNode }> = ({
-  onApply,
-  children,
-}) => {
+export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ onApply, children }) => {
   const [open, setOpen] = React.useState(false);
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm<PromoCodeForm>({
     resolver: zodResolver(promoCodeSchema),
   });
@@ -41,9 +39,11 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps & { children: React.Re
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+      {/* Only one element allowed here */}
       <DialogTrigger asChild>
-        {children} {/* your button becomes the trigger */}
+        {children}
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Enter Your Promo Code</DialogTitle>

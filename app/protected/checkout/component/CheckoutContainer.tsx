@@ -13,14 +13,11 @@ const CheckoutContainer = async () => {
             <div className="w-full lg:w-2/3">
                 <OrderSummaryContainer />
             </div>
-            {!user.email ? (
-                <div className="w-full lg:w-1/3">
-                    <p>You must login or sign up first</p>
-                </div>) : (
-                <div className="w-full lg:w-1/3">
-                    <CheckoutCard user={user} />
-                </div>
-            )}
+
+            <div className="w-full lg:w-1/3">
+                <CheckoutCard user={user} />
+            </div>
+
 
         </div>
     )
