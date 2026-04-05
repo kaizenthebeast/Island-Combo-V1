@@ -16,16 +16,17 @@ export async function AuthButton() {
 
   return isAuthenticated ? (
     <div className="flex items-center gap-4">
-      <CartCount />
+
       Hey, {user.email}
-       <Button asChild size="sm" variant={"outline"}>
+      <Button asChild size="sm" variant={"outline"}>
         <Link href="/protected/checkout">checkout</Link>
       </Button>
       <LogoutButton />
+      Cart Count:  <CartCount />
     </div>
   ) : (
-    <div className="flex gap-2">
-      <CartCount />
+    <div className="flex gap-2 items-center">
+      Cart Count:  <CartCount />
       <Button asChild size="sm" variant={"outline"}>
         <Link href="/auth/login">Sign in</Link>
       </Button>
