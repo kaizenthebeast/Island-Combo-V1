@@ -1,21 +1,26 @@
-import React from 'react';
-import { CartItem } from '@/lib/cart';
+'use client'
+import React, { useEffect } from 'react';
+import { useCartStore } from '@/store/cartStore';
 import { UserProfile } from '@/lib/users';
 
 interface CheckoutCardProps {
     user: UserProfile;
-    cartItems: CartItem[];
 }
-const CheckoutCard = ({ cartItems, user }: CheckoutCardProps) => {
+const CheckoutCard = ({ user }: CheckoutCardProps) => {
+    const { cart, fetchCart } = useCartStore();
+    useEffect(() => {
+        fetchCart();
+    }, [fetchCart])
 
     //calculate total
-    const total = cartItems.reduce((sum, item) => sum + Number(item.products?.price || 0) * item.quantity, 0)
+    const total = cart.reduce((sum, item) => sum + Number(item.products?.price || 0) * item.quantity, 0)
+
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
             {/* Billing Sumamry */}
             <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Billing Summary</h2>
-                {cartItems.map((item) => (
+                {cart.map((item) => (
                     <div className="space-y-4" key={item.id}>
                         <div className="flex justify-between border-b pb-2">
                             <span>{item.products?.name}</span>
@@ -23,7 +28,7 @@ const CheckoutCard = ({ cartItems, user }: CheckoutCardProps) => {
                         </div>
                     </div>
                 ))}
-                {cartItems.length > 0 && (
+                {cart.length > 0 && (
                     <div className="flex justify-between font-bold pt-2">
                         <span>Total</span>
                         <span>${total.toFixed(2)}</span>
