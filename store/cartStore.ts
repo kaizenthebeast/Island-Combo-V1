@@ -1,6 +1,5 @@
 import { create } from "zustand";
-import { ensureAnonymousUser } from "@/lib/supabase/anon-user";
-import { CartItem } from "@/lib/cart"; // <-- import the server type
+import { CartItem } from "@/lib/cart";
 
 
 type CartState = {
@@ -26,8 +25,6 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
 
     try {
-      await ensureAnonymousUser();
-
       const res = await fetch("/api/cart", {
         method: "GET",
         credentials: "include",
@@ -73,8 +70,6 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ cart: optimisticCart });
 
     try {
-      await ensureAnonymousUser();
-
       const res = await fetch("/api/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,8 +102,6 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ cart: optimisticCart });
 
     try {
-      await ensureAnonymousUser();
-
       const res = await fetch("/api/cart", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -138,8 +131,6 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ cart: optimisticCart });
 
     try {
-      await ensureAnonymousUser();
-
       const res = await fetch("/api/cart", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },

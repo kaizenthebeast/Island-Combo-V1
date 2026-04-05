@@ -1,9 +1,10 @@
+// /app/layout.tsx
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
 import CartSync from "@/helper/CartSync";
-import EnsureAnonSession from "@/helper/EnsureAnonSession"
+import EnsureAnonSession from "@/helper/EnsureAnonSession";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -23,16 +24,15 @@ const geistSans = Geist({
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
         <EnsureAnonSession />
         <CartSync />
         {children}
-
       </body>
     </html>
   );

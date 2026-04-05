@@ -23,5 +23,5 @@ export default function CartSync() {
     };
   }, [fetchCart]);
 
- 
+  return null;
 }
