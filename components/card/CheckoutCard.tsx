@@ -16,7 +16,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
     useEffect(() => {
         fetchCart();
     }, [fetchCart])
-    
+
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
             {/* Billing Sumamry */}
@@ -42,7 +42,6 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
                     <span>Total</span>
                     <span>${isFinalTotal.toFixed(2)}</span>
                 </div>
-
             </section>
 
             {/* User Info */}
