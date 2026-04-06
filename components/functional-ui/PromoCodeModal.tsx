@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogFooter,
   DialogTrigger,
@@ -64,7 +65,7 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, set
       setDiscount(body.discount);
 
       reset();
-      setOpen(false); 
+      setOpen(false);
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Unknown error";
@@ -77,16 +78,21 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, set
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" >
         <DialogHeader>
           <DialogTitle>Enter Your Promo Code</DialogTitle>
+          <DialogDescription id="promo-description">
+            Enter your promo code to apply a discount to your total.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-4">
           <Input
-            placeholder="Promo code"
+            placeholder="Code..."
             {...register("promoCode")}
             maxLength={20}
+            min={6}
+            required
           />
 
           {(errors.promoCode || isErrorMessage) && (
