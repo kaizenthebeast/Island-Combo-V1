@@ -1,7 +1,5 @@
-// /app/api/checkout/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
-// import { requireUser } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 import { findPromoCode } from "@/lib/checkout";
 
 type RequestBody = {
@@ -12,8 +10,13 @@ type RequestBody = {
 
 export async function POST(req: NextRequest) {
     try {
-        // auth (optional for testing → comment out if needed)
-
+        const user = requireUser();
+        if (!user) {
+            return NextResponse.json(
+                { error: "Access denied" },
+                { status: 401 }
+            )
+        }
 
         const body: RequestBody = await req.json();
         const { promoCode, quantity, subtotal } = body;
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
         }
 
         const promo = await findPromoCode(promoCode);
-
+        
         if (!promo) {
             return NextResponse.json(
                 { error: "Invalid or expired promo code" },

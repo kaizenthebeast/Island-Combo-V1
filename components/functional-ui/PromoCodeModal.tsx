@@ -25,11 +25,11 @@ interface PromoCodeModalProps {
   totalQty: number,
   subtotal: number,
   setDiscount: React.Dispatch<React.SetStateAction<number>>;
-  setPromoCode: React.Dispatch<React.SetStateAction<string>>;
+  setIsFinalTotal: React.Dispatch<React.SetStateAction<string>>;
 
 }
 
-export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, setPromoCode, totalQty, subtotal, children }) => {
+export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, setIsFinalTotal, totalQty, subtotal, children }) => {
   const [open, setOpen] = React.useState(false);
   const [isErrorMessage, setIsErrorMessage] = React.useState('');
 
@@ -60,12 +60,11 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, set
         throw new Error(body?.error ?? "Failed to apply promo code");
       }
 
-      setPromoCode(body.promo);
+      setIsFinalTotal(body.finalTotal);
       setDiscount(body.discount);
 
       reset();
-      setOpen(false); // close modal on success
-
+      setOpen(false); 
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Unknown error";

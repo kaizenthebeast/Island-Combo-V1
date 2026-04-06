@@ -11,7 +11,7 @@ interface CheckoutCardProps {
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
     const { cart, fetchCart, totalQty, subtotal } = useCartStore();
     const [discount, setDiscount] = useState(0);
-    const [promoCode, setPromoCode] = useState('');
+    const [isFinalTotal, setIsFinalTotal] = useState(0);
 
     useEffect(() => {
         fetchCart();
@@ -25,9 +25,6 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
             {/* Billing Sumamry */}
             <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Billing Summary</h2>
-                {promoCode && (
-                    <p>{promoCode}</p>
-                )}
                 {cart.map((item) => (
                     <div className="space-y-4" key={item.id}>
                         <div className="flex justify-between border-b pb-2">
@@ -94,7 +91,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Place Order */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoCodeModal setDiscount={setDiscount} setPromoCode={setPromoCode} totalQty={totalQty} subtotal={subtotal}>
+                <PromoCodeModal setDiscount={setDiscount} setIsFinalTotal={setIsFinalTotal} totalQty={totalQty} subtotal={subtotal}>
                     <Button size="lg" variant={"outline"}>
                         Enter Promo Code
                     </Button>
