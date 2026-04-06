@@ -1,15 +1,18 @@
 import { create } from "zustand";
 import { CartItem } from "@/lib/cart";
+import { calculateCartTotals } from "@/helper/cartUtils";
 
 
 type CartState = {
-  cart: CartItem[];
-  loading: boolean;
-  error: string | null;
+  cart: CartItem[]
+  loading: boolean
+  error: string | null
+  totalQty: number | 0
+  subtotal: number | 0
 
-  fetchCart: (initialCart?: CartItem[]) => void;
-  addItem: (productId: string, quantity?: number) => Promise<void>;
-  updateItem: (productId: string, quantity: number) => Promise<void>;
+  fetchCart: (initialCart?: CartItem[]) => void
+  addItem: (productId: string, quantity?: number) => Promise<void>
+  updateItem: (productId: string, quantity: number) => Promise<void>
   removeItem: (productId: string) => Promise<void>;
 };
 
@@ -17,9 +20,11 @@ export const useCartStore = create<CartState>((set, get) => ({
   cart: [],
   loading: false,
   error: null,
+  totalQty: 0,
+  subtotal: 0,
 
   fetchCart: async (initialCart) => {
-      if (initialCart) {
+    if (initialCart) {
       set({ cart: initialCart });
       return;
     }
@@ -46,7 +51,10 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   addItem: async (productId, quantity = 1) => {
     const previousCart = get().cart;
+    const previousSubtotal = get().subtotal;
+    const previousTotalQty = get().totalQty;
     set({ loading: true, error: null });
+
 
     const existingItem = previousCart.find((item) => item.product_id === productId);
 
@@ -57,17 +65,26 @@ export const useCartStore = create<CartState>((set, get) => ({
           : item
       )
       : [
-          ...previousCart,
-          {
-            id: crypto.randomUUID(), 
-            user_id: "temp",
-            product_id: productId,
-            quantity,
-            products: undefined,
+        ...previousCart,
+        {
+          id: crypto.randomUUID(),
+          user_id: "temp",
+          product_id: productId,
+          quantity,
+          products: {
+            id: productId,
+            name: "Loading...",
+            description: "",
+            price: 0,
+            is_active: true,
+            category: { name: "Unknown" },
+            slug: "",
           },
-        ];
+        },
+      ];
+    const { totalQty, subtotal } = calculateCartTotals(optimisticCart);
 
-    set({ cart: optimisticCart });
+    set({ cart: optimisticCart, totalQty, subtotal });
 
     try {
       const res = await fetch("/api/cart", {
@@ -87,19 +104,29 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      set({ cart: previousCart, error: message, loading: false });
+      set({
+        cart: previousCart,
+        totalQty: previousTotalQty,
+        subtotal: previousSubtotal,
+        error: message,
+        loading: false,
+      });
     }
   },
 
   updateItem: async (productId, quantity) => {
     const previousCart = get().cart;
+    const previousSubtotal = get().subtotal;
+    const previousTotalQty = get().totalQty;
+
     set({ loading: true, error: null });
 
     const optimisticCart = previousCart.map((item) =>
       item.product_id === productId ? { ...item, quantity } : item
     );
 
-    set({ cart: optimisticCart });
+    const { subtotal, totalQty } = calculateCartTotals(optimisticCart);
+    set({ cart: optimisticCart, subtotal: subtotal, totalQty: totalQty });
 
     try {
       const res = await fetch("/api/cart", {
@@ -115,20 +142,31 @@ export const useCartStore = create<CartState>((set, get) => ({
         throw new Error(body?.error ?? "Failed to update item");
       }
 
-       get().fetchCart();
+      get().fetchCart();
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      set({ cart: previousCart, error: message, loading: false });
+      set({
+        cart: previousCart,
+        totalQty: previousTotalQty,
+        subtotal: previousSubtotal,
+        error: message,
+        loading: false,
+      });
     }
   },
 
   removeItem: async (productId) => {
     const previousCart = get().cart;
+    const previousSubtotal = get().subtotal;
+    const previousTotalQty = get().totalQty;
+
     set({ loading: true, error: null });
 
     const optimisticCart = previousCart.filter((item) => item.product_id !== productId);
-    set({ cart: optimisticCart });
+    const { subtotal, totalQty } = calculateCartTotals(optimisticCart);
+
+    set({ cart: optimisticCart, subtotal: subtotal, totalQty: totalQty });
 
     try {
       const res = await fetch("/api/cart", {
@@ -148,7 +186,13 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      set({ cart: previousCart, error: message, loading: false });
+      set({
+        cart: previousCart,
+        totalQty: previousTotalQty,
+        subtotal: previousSubtotal,
+        error: message,
+        loading: false,
+      });
     }
   },
 }));

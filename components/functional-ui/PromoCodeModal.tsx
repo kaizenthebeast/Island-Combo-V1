@@ -22,40 +22,55 @@ type PromoCodeForm = z.infer<typeof promoCodeSchema>;
 
 interface PromoCodeModalProps {
   children: React.ReactElement
+  totalQty: number,
+  subtotal: number,
   setDiscount: React.Dispatch<React.SetStateAction<number>>;
   setPromoCode: React.Dispatch<React.SetStateAction<string>>;
 
 }
 
-export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, setPromoCode, children }) => {
+export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, setPromoCode, totalQty, subtotal, children }) => {
   const [open, setOpen] = React.useState(false);
+  const [isErrorMessage, setIsErrorMessage] = React.useState('');
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<PromoCodeForm>({
     resolver: zodResolver(promoCodeSchema),
   });
 
   const promoCodeValue = watch("promoCode") || "";
-  const isValid = promoCodeValue.length >= 3; // matches Zod min length
+  const isValid = promoCodeValue.length >= 3;
 
   const onSubmit = async (data: PromoCodeForm) => {
-    try {
-      const res = await fetch(`/api/checkout?code${data.promoCode}`, {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      })
+    setIsErrorMessage("");
 
-      const body = await res.json()
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          promoCode: data.promoCode,
+          quantity: totalQty,
+          subtotal,
+        }),
+      });
+
+      const body = await res.json();
 
       if (!res.ok) {
-        throw new Error(body?.error ?? "Failed to fetch cart");
+        throw new Error(body?.error ?? "Failed to apply promo code");
       }
 
-      setPromoCode(body.code)
-      setDiscount(body.discount)
+      setPromoCode(body.promo);
+      setDiscount(body.discount);
+
       reset();
-    } catch {
-      throw new Error;
+      setOpen(false); // close modal on success
+
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "Unknown error";
+
+      setIsErrorMessage(message);
     }
   };
 
@@ -72,11 +87,13 @@ export const PromoCodeModal: React.FC<PromoCodeModalProps> = ({ setDiscount, set
           <Input
             placeholder="Promo code"
             {...register("promoCode")}
-            maxLength={8}
+            maxLength={20}
           />
 
-          {errors.promoCode && (
-            <p className="text-red-500 text-sm">{errors.promoCode.message}</p>
+          {(errors.promoCode || isErrorMessage) && (
+            <p className="text-red-500 text-sm">
+              {errors.promoCode?.message || isErrorMessage}
+            </p>
           )}
 
           <DialogFooter>

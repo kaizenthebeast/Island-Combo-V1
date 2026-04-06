@@ -50,7 +50,7 @@ export async function findPromoCode(promoCode: string) {
     const { data, error } = await supabase.from('promotions').select('code, type, value, min_quantity, expires_at')
         .eq('code', promoCode)
         .eq('is_active', true)
-        .lte('expires_at', new Date().toISOString());
+        .gte('expires_at', new Date().toISOString());
 
     if (error) {
         throw new Error(error.message)

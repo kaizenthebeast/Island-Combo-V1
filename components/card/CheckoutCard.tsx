@@ -9,7 +9,7 @@ interface CheckoutCardProps {
     user: UserProfile;
 }
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
-    const { cart, fetchCart } = useCartStore();
+    const { cart, fetchCart, totalQty, subtotal } = useCartStore();
     const [discount, setDiscount] = useState(0);
     const [promoCode, setPromoCode] = useState('');
 
@@ -17,28 +17,28 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
         fetchCart();
     }, [fetchCart])
 
-    //calculate total
-    const total = cart.reduce((sum, item) => sum + Number(item.products?.price || 0) * item.quantity, 0)
     //subtotal - discount
-    const discountedPrice = total - discount;
+    const discountedPrice = subtotal - discount;
 
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
             {/* Billing Sumamry */}
             <section className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Billing Summary</h2>
-                <p>{promoCode}</p>
+                {promoCode && (
+                    <p>{promoCode}</p>
+                )}
                 {cart.map((item) => (
                     <div className="space-y-4" key={item.id}>
                         <div className="flex justify-between border-b pb-2">
                             <span>{item.products?.name}</span>
-                            <span>${((item.products?.price || 0) * item.quantity).toFixed(2)}</span>
+                            <span>{item.quantity} × ${item.products?.price.toFixed(2)}</span>
                         </div>
                     </div>
                 ))}
                 <div className='flex justify-between font-bold pt-2'>
                     <span>Discount</span>
-                    <span>{discount}</span>
+                    <span>${discount.toFixed(2)}</span>
                 </div>
                 {cart.length > 0 && (
                     <div className="flex justify-between font-bold pt-2">
@@ -94,12 +94,12 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Place Order */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoCodeModal setDiscount={setDiscount} setPromoCode={setPromoCode}>
+                <PromoCodeModal setDiscount={setDiscount} setPromoCode={setPromoCode} totalQty={totalQty} subtotal={subtotal}>
                     <Button size="lg" variant={"outline"}>
                         Enter Promo Code
                     </Button>
                 </PromoCodeModal>
-                <Button size="lg" variant={"default"}>
+                <Button size="lg" variant={"default"} disabled={cart.length === 0}>
                     Place Order
                 </Button>
             </section>
