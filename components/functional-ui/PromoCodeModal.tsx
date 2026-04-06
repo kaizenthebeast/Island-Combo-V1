@@ -25,7 +25,7 @@ interface PromoCodeModalProps {
   totalQty: number,
   subtotal: number,
   setDiscount: React.Dispatch<React.SetStateAction<number>>;
-  setIsFinalTotal: React.Dispatch<React.SetStateAction<string>>;
+  setIsFinalTotal: React.Dispatch<React.SetStateAction<number>>;
 
 }
 

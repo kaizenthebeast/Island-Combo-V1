@@ -16,10 +16,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
     useEffect(() => {
         fetchCart();
     }, [fetchCart])
-
-    //subtotal - discount
-    const discountedPrice = subtotal - discount;
-
+    
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
             {/* Billing Sumamry */}
@@ -33,16 +30,19 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
                         </div>
                     </div>
                 ))}
+                <div className="flex justify-between font-bold pt-2">
+                    <span>Subotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                </div>
                 <div className='flex justify-between font-bold pt-2'>
                     <span>Discount</span>
                     <span>${discount.toFixed(2)}</span>
                 </div>
-                {cart.length > 0 && (
-                    <div className="flex justify-between font-bold pt-2">
-                        <span>Total</span>
-                        <span>${discountedPrice.toFixed(2)}</span>
-                    </div>
-                )}
+                <div className="flex justify-between font-bold pt-2">
+                    <span>Total</span>
+                    <span>${isFinalTotal.toFixed(2)}</span>
+                </div>
+
             </section>
 
             {/* User Info */}
