@@ -10,7 +10,7 @@ const Navbar = () => {
             <nav className="max-w-7xl mx-auto flex items-center gap-7 px-4 py-3">
 
                 {/* LEFT - LOGO */}
-                <Link href="/product" className="flex items-center gap-2 shrink-0">
+                <Link href="/" className="flex items-center gap-2 shrink-0">
                     <Image
                         src="/images/logo.png"
                         alt="Logo"
