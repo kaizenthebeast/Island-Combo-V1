@@ -7,7 +7,7 @@ import { AuthButton } from "@/components/functional-ui/auth-button";
 const Navbar = () => {
     return (
         <header className="w-full  bg-white">
-            <nav className="max-w-7xl mx-auto flex items-center gap-7 px-4 py-3">
+            <nav className="max-w-6xl mx-auto flex items-center gap-7 px-4 py-3">
 
                 {/* LEFT - LOGO */}
                 <Link href="/" className="flex items-center gap-2 shrink-0">
