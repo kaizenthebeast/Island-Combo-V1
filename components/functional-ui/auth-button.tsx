@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
 import CartCount from "../functional-ui/CartCount"
+import { ShoppingCart, Heart } from 'lucide-react';
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -25,17 +26,19 @@ export async function AuthButton() {
       Cart Count:  <CartCount />
     </div>
   ) : (
-    <div className="flex gap-2 items-center">
-      Cart Count:  <CartCount />
-      <Button asChild size="sm" variant={"outline"}>
+    <div className="flex gap-8 items-center">
+      <div className="flex items-center gap-4">
+        <Link href="/checkout" className="flex items-center gap-2">
+          <ShoppingCart size={18} />  <CartCount />
+        </Link>
+        <Link href="/">
+          <Heart size={18} />
+        </Link>
+      </div>
+      <div className="flex gap-6 font-bold">
         <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
         <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
-       <Button asChild size="sm" variant={"outline"}>
-        <Link href="/checkout">checkout</Link>
-      </Button>
+      </div>
     </div>
   );
 }
