@@ -67,6 +67,10 @@
   }
 }
 
+@theme inline{
+   --primary-color: oklch(0.38 0.19 350);
+}
+
 /* Chrome, Safari, Edge */
 .no-spinner::-webkit-outer-spin-button,
 .no-spinner::-webkit-inner-spin-button {
@@ -78,3 +82,5 @@
 .no-spinner {
   -moz-appearance: textfield;
 }
+
+
