@@ -31,7 +31,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       )}
 
       {/* Image */}
-      <div className="relative w-full h-[180px] flex items-center justify-center">
+      <div className="relative w-full h-[70%] flex items-center justify-center">
         <Image
           src={product.imageUrl || '/images/placeholder.png'}
           alt={product.name}
