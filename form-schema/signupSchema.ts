@@ -1,8 +1,6 @@
 import { z } from "zod";
 
 export const signupSchema = z.object({
-    firstName: z.string().nonempty("First Name is required"),
-    lastName: z.string().nonempty("Last Name is required"),
     email: z.string().nonempty("Email is required").email("Invalid email address"),
     password: z.string().nonempty("Password is required").min(8, "Password must at least 8 characters").max(16, "Password must not exceed 16 characters"),
     confirmPassword: z.string().nonempty("Password is required").min(8, "Password must at least 8 characters").max(16, "Password must not exceed 16 characters"),

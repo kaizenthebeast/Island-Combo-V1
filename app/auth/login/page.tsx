@@ -11,6 +11,7 @@ export default function Page() {
           height={361}
           src="/images/logo.png"
           alt="Logo"
+          loading="eager"
           className="object-contain"
         />
 

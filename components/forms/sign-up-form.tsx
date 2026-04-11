@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupFormInput } from "@/form-schema/signupSchema";
+import Image from "next/image";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -47,10 +47,6 @@ export function SignUpForm() {
         password: data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
-          data: {
-            firstName: data.firstName,
-            lastName: data.lastName
-          },
         },
       });
       if (error) throw error;
@@ -88,47 +84,17 @@ export function SignUpForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto shadow-lg rounded-xl space-y-6 flex flex-col justify-center">
-      <Card>
+    <div className="w-full max-w-md mx-auto space-y-6 flex flex-col justify-center">
+      <Card className="border-0 shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Create Account</CardTitle>
-          <CardDescription className="text-center">
-            Sign up with email or Google
-          </CardDescription>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* Google Signup */}
-          <button
-            type="button"
-            onClick={googleSignUp}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition mb-4"
-          >
-            Sign up with Google
-          </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="text-sm text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-300" />
-          </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* First Name */}
-            <div>
-              <Label>First Name</Label>
-              <Input placeholder="John" {...register("firstName")} />
-              {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
-            </div>
-
-            {/* Last Name */}
-            <div>
-              <Label>Last Name</Label>
-              <Input placeholder="Doe" {...register("lastName")} />
-              {errors.lastName && <p className="text-sm text-red-500">{errors.lastName.message}</p>}
-            </div>
-
+        
             {/* Email */}
             <div>
               <Label>Email</Label>
@@ -153,10 +119,34 @@ export function SignUpForm() {
             {/* Message */}
             {message && <p className="text-sm text-green-600">{message}</p>}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="text-md text-gray-500">or</span>
+            <div className="flex-1 h-px bg-gray-300" />
+          </div>
+          {/* Google Login */}
+          <button
+            type="button"
+            onClick={googleSignUp}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition mb-4"
+          >
+            <Image
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google logo"
+              width={20}
+              height={20}
+            />
+
+            <span className="font-medium text-gray-700">
+              Continue with Google
+            </span>
+          </button>
 
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
