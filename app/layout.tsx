@@ -1,13 +1,9 @@
-// /app/layout.tsx
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
 import CartSync from "@/helper/CartSync";
 import EnsureAnonSession from "@/helper/EnsureAnonSession";
-import Navbar from "@/components/public/layout/Navbar";
-
-
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,10 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
+        
+        {/* GLOBAL LOGIC*/}
         <EnsureAnonSession />
         <CartSync />
-         <Navbar />
+
+        {/* PAGE CONTENT ONLY */}
         {children}
+
       </body>
     </html>
   );
