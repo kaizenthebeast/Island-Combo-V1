@@ -23,13 +23,14 @@ type CheckoutState = {
 
 interface PromoModalProps {
   setCheckout: (value: CheckoutState) => void
+  setPromoCode: (code: string | null) => void
 }
 
 type PromoForm = {
   promoCode: string
 }
 
-export function PromoModal({ setCheckout }: PromoModalProps) {
+export function PromoModal({ setCheckout, setPromoCode }: PromoModalProps) {
   const {
     register,
     handleSubmit,
@@ -58,8 +59,8 @@ export function PromoModal({ setCheckout }: PromoModalProps) {
         setMessage(body.error || "Something went wrong")
         return
       }
-
-      // ✅ SINGLE SOURCE OF TRUTH (backend totals)
+      setPromoCode(data.promoCode.trim())
+      // backend totals
       setCheckout({
         subtotal: body.totals.subtotal,
         discount: body.totals.discount,

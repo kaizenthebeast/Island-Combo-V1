@@ -23,18 +23,57 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
         total: 0,
     })
 
+    const [promoCode, setPromoCode] = useState<string | null>(null);
+
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
 
-    // keep checkout in sync with cart changes
     useEffect(() => {
-        setCheckout(prev => ({
-            ...prev,
-            subtotal,
-            total: subtotal - prev.discount,
-        }))
-    }, [subtotal])
+        if (!promoCode) {
+            setCheckout({
+                subtotal,
+                discount: 0,
+                total: subtotal
+            })
+        }
+    }, [subtotal, promoCode])
+
+    //Revalidate promo on cart change
+    useEffect(() => {
+         if (!promoCode) return
+
+        const revalidate = async () => {
+            try {
+                const res = await fetch('/api/checkout', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ promoCode }),
+                })
+
+                const body = await res.json();
+                if (!res.ok) {
+                    setPromoCode(null)
+                    setCheckout({
+                        subtotal,
+                        discount: 0,
+                        total: subtotal
+                    })
+                    return
+                }
+                setCheckout(body.totals)
+            } catch {
+                // fallback
+                setCheckout({
+                    subtotal,
+                    discount: 0,
+                    total: subtotal
+                })
+            }
+        }
+        revalidate();
+
+    }, [subtotal, promoCode])
 
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
@@ -112,7 +151,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Actions */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoModal setCheckout={setCheckout} />
+                <PromoModal setCheckout={setCheckout} setPromoCode={setPromoCode} />
                 <Button size="lg" disabled={cart.length === 0}>
                     Place Order
                 </Button>
