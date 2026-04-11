@@ -1,3 +1,4 @@
+
 import { createClient } from './supabase/server'
 
 export type ProductProps = {
@@ -67,22 +68,18 @@ export async function getProductBySlug(slug: string) {
     const { data, error } = await supabase
         .from('products')
         .select(`
-      id,
-      name,
-      price,
-      description,
-      image_url,
-      discount,
-      wholesale,
-      slug,
-      category:categories(name)
-    `)
+            id,
+            name,
+            price,
+            description,
+            image_url,
+            discount,
+            slug
+        `)
         .eq('slug', slug)
         .single()
 
-    if (error) {
-        throw new Error(error.message)
-    }
+    if (error) throw new Error(error.message)
 
     return data
 }
