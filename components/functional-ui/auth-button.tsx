@@ -1,41 +1,48 @@
 import Link from "next/link";
-import { Button } from "../ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
-import CartCount from "../functional-ui/CartCount"
-import { ShoppingCart, Heart } from 'lucide-react';
+import CartCount from "../functional-ui/CartCount";
+import { ShoppingCart, Heart } from "lucide-react";
 
 export async function AuthButton() {
   const supabase = await createClient();
-
-  // Get session claims
   const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
 
-  // Only treat as authenticated if there's an email
+  const user = data?.claims;
   const isAuthenticated = !!user?.email;
 
-  return isAuthenticated ? (
-    <div className="flex items-center gap-4">
+  const Actions = () => (
+    <div className="flex items-center gap-6">
+      {/* CART */}
+      <Link href="/checkout" className="relative flex items-center">
+        <ShoppingCart size={22} />
+        <span className="absolute -top-2 -right-2 text-xs bg-[#900036] text-white rounded-full px-1.5">
+          <CartCount />
+        </span>
+      </Link>
 
-      Hey, {user.email}
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/protected/checkout">checkout</Link>
-      </Button>
+      {/* FAVORITES */}
+      <Link href="/">
+        <Heart size={22} />
+      </Link>
+    </div>
+  );
+
+  return isAuthenticated ? (
+    <div className="flex items-center gap-9">
+      <span className="hidden md:block text-sm">
+        Hey, {user.email}
+      </span>
+
+      <Actions />
+
       <LogoutButton />
-      Cart Count:  <CartCount />
     </div>
   ) : (
-    <div className="flex gap-8 items-center">
-      <div className="flex items-center gap-4">
-        <Link href="/checkout" className="flex items-center gap-2">
-          <ShoppingCart size={18} />  <CartCount />
-        </Link>
-        <Link href="/">
-          <Heart size={18} />
-        </Link>
-      </div>
-      <div className="flex gap-6 font-bold">
+    <div className="flex items-center gap-6">
+      <Actions />
+
+      <div className="flex gap-4 font-semibold text-sm">
         <Link href="/auth/login">Sign in</Link>
         <Link href="/auth/sign-up">Sign up</Link>
       </div>

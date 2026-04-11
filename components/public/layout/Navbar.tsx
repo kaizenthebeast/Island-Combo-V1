@@ -1,42 +1,54 @@
-import React from 'react'
-import { Suspense } from "react";
-import { AuthButton } from "@/components/functional-ui/auth-button";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import Image from 'next/image';
+import Image from "next/image";
+import { Search } from "lucide-react";
+import { AuthButton } from "@/components/functional-ui/auth-button";
 
 const Navbar = () => {
     return (
-        <header>
-            <nav className="w-full flex justify-center h-16">
-                <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
-                    {/* LOGO */}
-                    <div className="flex gap-5 items-center font-semibold">
-                        <Link href={"/"} className='flex items-center gap-3'>
-                            <Image src="/images/logo.png"
-                                alt="Logo"
-                                width={50}
-                                height={50}
-                                className="object-contain" />
-                            <h5 className="font-bold text-xl text-[#900036]">
-                                Island Combo
-                            </h5>
-                        </Link>
+        <header className="w-full  bg-white">
+            <nav className="max-w-7xl mx-auto flex items-center gap-7 px-4 py-3">
 
-                    </div>
-                    {/* SEARCH BAR */}
-                    <div>
+                {/* LEFT - LOGO */}
+                <Link href="/" className="flex items-center gap-2 shrink-0">
+                    <Image
+                        src="/images/logo.png"
+                        alt="Logo"
+                        width={40}
+                        height={40}
+                        className="object-contain"
+                    />
+                    <span className="font-bold text-lg text-[#900036] hidden sm:block">
+                        Island Combo
+                    </span>
+                </Link>
 
-                    </div>
+                {/* CENTER - SEARCH (takes most width) */}
+                <div className="flex-1 relative">
+                    <Search
+                        size={18}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
 
-                    {/* CART/ SIGN */}
+                    <input
+                        type="text"
+                        placeholder="Search products..."
+                        className="w-full pl-4 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#900036]"
+                    />
+                </div>
+
+                {/* RIGHT - ACTIONS */}
+                <div className="flex items-center gap-4 shrink-0">
+
+
                     <Suspense>
                         <AuthButton />
                     </Suspense>
-
                 </div>
+
             </nav>
         </header>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;
