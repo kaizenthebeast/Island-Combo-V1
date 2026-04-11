@@ -1,4 +1,3 @@
-
 import { createClient } from './supabase/server'
 
 export type ProductProps = {
@@ -9,6 +8,10 @@ export type ProductProps = {
     stock?: number
     isActive?: boolean
     slug?: string
+    imageUrl?: string
+    oldPrice?: number
+    wholeSale?: number
+    discount?: number
 }
 
 export async function getAllProducts() {
@@ -35,15 +38,15 @@ export async function getAllProducts() {
         throw new Error(error.message)
     }
 
-    //Convert storage path -> public url
     const products = data?.map((product) => {
         const imagePath = product.image_url?.[0]
 
         const imageUrl = imagePath
-            ? supabase.storage.from('Product images').getPublicUrl(imagePath).data.publicUrl
+            ? supabase.storage.from('Product images')
+                .getPublicUrl(imagePath).data.publicUrl
             : '/images/placeholder.png'
 
-        const discount = product.discount
+        const discount = product.discount ?? 0
         const oldPrice = product.price
 
         const finalPrice =
@@ -74,12 +77,36 @@ export async function getProductBySlug(slug: string) {
             description,
             image_url,
             discount,
-            slug
+            wholesale,
+            slug,
+            category:categories(name)
         `)
         .eq('slug', slug)
         .single()
 
-    if (error) throw new Error(error.message)
+    if (error) {
+        throw new Error(error.message)
+    }
 
-    return data
+    const imagePath = data?.image_url?.[0]
+
+    const imageUrl = imagePath
+        ? supabase.storage.from('Product images')
+            .getPublicUrl(imagePath).data.publicUrl
+        : '/images/placeholder.png'
+
+    const discount = data?.discount ?? 0
+    const oldPrice = data.price
+
+    const finalPrice =
+        discount > 0
+            ? data.price - (data.price * discount / 100)
+            : data.price
+
+    return {
+        ...data,
+        imageUrl,
+        price: finalPrice,
+        oldPrice,
+    }
 }

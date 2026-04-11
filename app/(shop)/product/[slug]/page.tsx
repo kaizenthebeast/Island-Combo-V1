@@ -1,4 +1,4 @@
-import ProductDetails from '@/components/functional-ui/ProductDetails'
+import ProductDetailsContainer from '@/components/public/ProductDetailsContainer'
 
 type Props = {
     params: Promise<{ slug: string }>
@@ -6,9 +6,8 @@ type Props = {
 
 const ProductDetailsPage = async ({ params }: Props) => {
     const { slug } = await params
-
     return (
-        <ProductDetails slug={slug} />
+        <ProductDetailsContainer slug={slug} />
     )
 }
 
