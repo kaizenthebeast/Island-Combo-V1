@@ -1,78 +1,72 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { Minus, Plus } from 'lucide-react'
-import { useCartStore } from '@/store/cartStore'
 
 type Product = {
   id: string
   name: string
   price: number
+  oldPrice?: number
   imageUrl?: string
+  discount?: number
+  wholesale?: boolean
 }
+
 
 type Props = {
   product: Product
 }
 
 const ProductCard: React.FC<Props> = ({ product }) => {
-  const { cart, addItem, updateItem, removeItem } = useCartStore();
-  const cartItem = cart.find((item) => item.product_id === product.id);
-  const currentQty = cartItem?.quantity ?? 0;
-
   return (
-    <Card className="w-full max-w-sm rounded-2xl border shadow-sm transition hover:shadow-md overflow-hidden">
-      {/* Product Image */}
-      {product.imageUrl && (
-        <div className="relative w-full h-48">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover"
-            priority
-          />
+    <Card className="w-[224px] h-[336px] border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer">
+
+      {/* Badge */}
+      {product.wholesale === true && (
+        <div className="absolute top-0 right-0 bg-[#900036] text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10">
+          Wholesale available
         </div>
       )}
 
-      <CardContent className="space-y-4 p-5">
-        {/* Product Info */}
-        <div className="space-y-1">
-          <h2 className="line-clamp-2 text-lg font-semibold tracking-tight">{product.name}</h2>
-          <p className="text-base font-medium text-muted-foreground">${product.price}</p>
-        </div>
+      {/* Image */}
+      <div className="relative w-full h-[180px] flex items-center justify-center">
+        <Image
+          src={product.imageUrl || '/images/placeholder.png'}
+          alt={product.name}
+          fill
+          className="object-fill"
+          priority
+        />
+      </div>
+
+      <CardContent className="px-0 pt-2 pb-0 space-y-1 flex-1">
+
+        {/* Title */}
+        <h3 className="text-sm font-medium leading-snug line-clamp-2">
+          {product.name}
+        </h3>
+
+        {/* Price */}
+        <p className="text-lg font-semibold">
+          ${product.price.toFixed(2)}
+        </p>
+
+        {/* Old price + discount */}
+        {product.oldPrice && product.discount ? (
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-400 line-through">
+              ${product.oldPrice.toFixed(2)}
+            </span>
+
+            <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
+              -{product.discount}%
+            </span>
+          </div>
+        ) : null}
+
       </CardContent>
-
-      <CardFooter className="p-5 pt-0">
-        <div className="flex w-full items-center justify-center rounded-xl border px-3 py-2 space-x-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (currentQty > 1) updateItem(product.id, currentQty - 1)
-              else removeItem(product.id)
-            }
-            }
-            disabled={currentQty === 0}
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              if (currentQty > 1) updateItem(product.id, currentQty + 1)
-              else addItem(product.id)
-            }}
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardFooter>
     </Card>
   )
 }

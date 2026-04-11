@@ -1,18 +1,15 @@
 import { Suspense } from "react";
 import ProductContainer from "@/components/public/layout/ProductContainer";
-import Footer from "@/components/public/layout/Footer";
+// import SampleProductCard from "@/components/card/SampleProductCard";
+
 
 export default function Home() {
-
   return (
-    <main className="min-h-screen flex flex-col items-center relative">
-      <div className="flex-1 w-full flex flex-col gap-20 items-center">
+      <div className="flex min-h-svh w-full items-center justify-center  md:p-10">
         <Suspense fallback={<div>Loading...</div>}>
           <ProductContainer />
         </Suspense>
 
       </div>
-      <Footer />
-    </main>
   );
 }
