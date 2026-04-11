@@ -9,17 +9,32 @@ interface CheckoutCardProps {
     user: UserProfile;
 }
 
+type CheckoutState = {
+    subtotal: number
+    discount: number
+    total: number
+}
+
 const CheckoutCard = ({ user }: CheckoutCardProps) => {
-    const { cart, fetchCart, totalQty, subtotal } = useCartStore();
-
-    const [discount, setDiscount] = useState(0);
-    const [finalTotal, setFinalTotal] = useState<number | null>(null);
-
-    const displayTotal = finalTotal ?? subtotal;
+    const { cart, fetchCart, subtotal } = useCartStore()
+    const [checkout, setCheckout] = useState<CheckoutState>({
+        subtotal: 0,
+        discount: 0,
+        total: 0,
+    })
 
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
+
+    // keep checkout in sync with cart changes
+    useEffect(() => {
+        setCheckout(prev => ({
+            ...prev,
+            subtotal,
+            total: subtotal - prev.discount,
+        }))
+    }, [subtotal])
 
     return (
         <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
@@ -39,17 +54,17 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
                 <div className="flex justify-between font-bold pt-2">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>${checkout.subtotal.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between font-bold pt-2">
                     <span>Discount</span>
-                    <span>${discount.toFixed(2)}</span>
+                    <span>${checkout.discount.toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between font-bold pt-2">
                     <span>Total</span>
-                    <span>${displayTotal.toFixed(2)}</span>
+                    <span>${checkout.total.toFixed(2)}</span>
                 </div>
             </section>
 
@@ -97,7 +112,7 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
 
             {/* Actions */}
             <section className="w-full flex flex-col space-y-3">
-                <PromoModal setDiscount={setDiscount} setFinalTotal={setFinalTotal} totalQty={totalQty} subtotal={subtotal} />
+                <PromoModal setCheckout={setCheckout} />
                 <Button size="lg" disabled={cart.length === 0}>
                     Place Order
                 </Button>

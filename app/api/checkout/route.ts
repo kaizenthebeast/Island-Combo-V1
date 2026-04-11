@@ -1,71 +1,47 @@
-import { NextRequest, NextResponse } from "next/server";
-import { requireUser } from '@/lib/auth';
-import { findPromoCode } from "@/lib/checkout";
-
-type RequestBody = {
-    promoCode: string;
-    totalQty: number;
-    subtotal: number;
-};
+import { NextRequest, NextResponse } from "next/server"
+import { requireUser } from "@/lib/auth"
+import { getCart, findPromoCode, calculateTotalCart } from "@/lib/checkout"
 
 export async function POST(req: NextRequest) {
-    try {
-        const user = await requireUser(); 
-        if (!user) {
-            return NextResponse.json(
-                { error: "Access denied" },
-                { status: 401 }
-            );
-        }
+  try {
+    // check auth user
+    const user = await requireUser();
 
-        const body: RequestBody = await req.json();
-        const { promoCode, totalQty, subtotal } = body;
-
-        if (!promoCode || !subtotal || totalQty == null) {
-            return NextResponse.json(
-                { error: "Missing required fields" },
-                { status: 400 }
-            );
-        }
-
-        const promo = await findPromoCode(promoCode);
-
-        if (!promo) {
-            return NextResponse.json(
-                { error: "Invalid or expired promo code" },
-                { status: 404 }
-            );
-        }
-
-        if (totalQty < (promo.min_quantity || 0)) {
-            return NextResponse.json(
-                { error: `Minimum totalQty is ${promo.min_quantity}` },
-                { status: 400 }
-            );
-        }
-
-        let discount = 0;
-
-        if (promo.type === "percent") {
-            discount = (subtotal * promo.value) / 100;
-        } else if (promo.type === "fixed") {
-            discount = promo.value;
-        }
-
-        const finalTotal = Math.max(subtotal - discount, 0);
-
-        return NextResponse.json({
-            success: true,
-            promo: promo.code,
-            discount,
-            finalTotal,
-        });
-
-    } catch (error: unknown) {
-        const message =  error instanceof Error ? error.message : "Internal Server Error";
-        return NextResponse.json(
-            { error: message },
-            { status: 500 }
-        );
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized access" },
+        { status: 401 }
+      )
     }
+
+    // get the value of promo
+    const { promoCode } = await req.json();
+    // get the value of the cart of that user
+    const cart = await getCart(user.id)
+    //check if the promo code is existing
+    const promo = promoCode ? await findPromoCode(promoCode) : null
+
+    //get the total
+    const totals = await calculateTotalCart(cart, promo || undefined)
+
+    //validation
+    if (promoCode && !totals.promoValid) {
+      return NextResponse.json(
+        { error: "Code is not valid for current cart" },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      totals,
+      cart,
+      promo
+    })
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error"
+
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

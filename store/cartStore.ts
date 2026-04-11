@@ -1,216 +1,180 @@
-import { create } from "zustand";
-import { CartItem } from "@/lib/cart";
-import { calculateCartTotals } from "@/helper/cartUtils";
+// /store/cartStore.ts
 
+import { create } from "zustand"
+import { CartItem } from "@/lib/cart"
+import { calculateCartTotals } from "@/helper/cartUtils"
 
 type CartState = {
   cart: CartItem[]
   loading: boolean
   error: string | null
-  totalQty: number | 0
-  subtotal: number | 0
+  totalQty: number
+  subtotal: number
 
-  fetchCart: (initialCart?: CartItem[]) => void
-  addItem: (productId: string, quantity?: number) => Promise<void>
-  updateItem: (productId: string, quantity: number) => Promise<void>
-  removeItem: (productId: string) => Promise<void>;
-};
+  fetchCart: () => Promise<void>
+  addItem: (productId: string, qty?: number) => Promise<void>
+  updateItem: (productId: string, qty: number) => Promise<void>
+  removeItem: (productId: string) => Promise<void>
+}
 
-export const useCartStore = create<CartState>((set, get) => ({
-  cart: [],
-  loading: false,
-  error: null,
-  totalQty: 0,
-  subtotal: 0,
+export const useCartStore = create<CartState>((set, get) => {
+  // central recalculation
+  const recalc = (cart: CartItem[]) => {
+    return calculateCartTotals(cart)
+  }
 
-  fetchCart: async (initialCart) => {
-    set({ loading: true, error: null });
+  // single source setter
+  const setCartState = (cart: CartItem[]) => {
+    const { totalQty, subtotal } = recalc(cart)
 
-    //Initial state load these values
-    if (initialCart) {
-      const { totalQty, subtotal } = calculateCartTotals(initialCart);
-      set({
-        cart: initialCart,
-        subtotal,
-        totalQty,
-        loading: false,
-      });
-      return;
-    };
+    set({
+      cart,
+      totalQty,
+      subtotal,
+    })
+  }
 
-    try {
-      const res = await fetch("/api/cart", {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      });
+  return {
+    cart: [],
+    loading: false,
+    error: null,
+    totalQty: 0,
+    subtotal: 0,
 
-      const body = await res.json();
+    fetchCart: async () => {
+      try {
+        set({ loading: true, error: null })
 
+        const res = await fetch("/api/cart")
+        const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(body?.error ?? "Failed to fetch cart");
+        if (!res.ok) throw new Error(data.error)
+
+        setCartState(data)
+        set({ loading: false })
+
+      } catch (err: unknown) {
+        set({
+          error: err instanceof Error ? err.message : "Unknown error",
+          loading: false,
+        })
+      }
+    },
+
+    addItem: async (productId, qty = 1) => {
+      const prev = get()
+      set({ error: null })
+
+      const previousCart = prev.cart
+
+      const existing = previousCart.find(i => i.product_id === productId)
+
+      let updatedCart: CartItem[]
+
+      if (existing) {
+        updatedCart = previousCart.map(i =>
+          i.product_id === productId
+            ? { ...i, quantity: i.quantity + qty }
+            : i
+        )
+      } else {
+        updatedCart = [
+          ...previousCart,
+          {
+            product_id: productId,
+            quantity: qty,
+          } as CartItem,
+        ]
       }
 
-      //fetch cart
-      const { subtotal, totalQty } = calculateCartTotals(body)
-      set({
-        cart: body,
-        subtotal,
-        totalQty,
-        loading: false
-      })
+      // optimistic update (WITH totals)
+      setCartState(updatedCart)
 
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      set({ error: message, loading: false });
-    }
-  },
+      try {
+        const res = await fetch("/api/cart", {
+          method: "POST",
+          body: JSON.stringify({ productId, quantity: qty }),
+          headers: { "Content-Type": "application/json" },
+        })
 
-  addItem: async (productId, quantity = 1) => {
-    const previousCart = get().cart;
-    const previousSubtotal = get().subtotal;
-    const previousTotalQty = get().totalQty;
-    set({ loading: true, error: null });
+        if (!res.ok) throw new Error("Failed to add item")
 
+        await get().fetchCart()
 
-    const existingItem = previousCart.find((item) => item.product_id === productId);
+      } catch (err) {
+        // rollback (WITH totals)
+        setCartState(previousCart)
 
-    const optimisticCart: CartItem[] = existingItem
-      ? previousCart.map((item) =>
-        item.product_id === productId
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
+        set({
+          error: err instanceof Error ? err.message : "Unknown error",
+        })
+      }
+    },
+
+    updateItem: async (productId, qty) => {
+      const prev = get()
+      set({ error: null })
+
+      const previousCart = prev.cart
+
+      const updatedCart = previousCart.map(i =>
+        i.product_id === productId
+          ? { ...i, quantity: qty }
+          : i
       )
-      : [
-        ...previousCart,
-        {
-          id: crypto.randomUUID(),
-          user_id: "temp",
-          product_id: productId,
-          quantity,
-          products: {
-            id: productId,
-            name: "Loading...",
-            description: "",
-            price: 0,
-            is_active: true,
-            category: { name: "Unknown" },
-            slug: "",
-          },
-        },
-      ];
-    const { totalQty, subtotal } = calculateCartTotals(optimisticCart);
 
-    set({ cart: optimisticCart, totalQty, subtotal });
+      setCartState(updatedCart)
 
-    try {
-      const res = await fetch("/api/cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ productId, quantity }),
-      });
+      try {
+        const res = await fetch("/api/cart", {
+          method: "PATCH",
+          body: JSON.stringify({ productId, quantity: qty }),
+          headers: { "Content-Type": "application/json" },
+        })
 
-      const body = await res.json();
+        if (!res.ok) throw new Error("Update failed")
 
-      if (!res.ok) {
-        throw new Error(body?.error ?? "Failed to add item");
+        await get().fetchCart()
+
+      } catch (err) {
+        setCartState(previousCart)
+
+        set({
+          error: err instanceof Error ? err.message : "Unknown error",
+        })
       }
+    },
 
-      get().fetchCart();
-      set({ loading: false });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      set({
-        cart: previousCart,
-        totalQty: previousTotalQty,
-        subtotal: previousSubtotal,
-        error: message,
-        loading: false,
-      });
-    }
-  },
+    removeItem: async (productId) => {
+      const prev = get()
+      set({ error: null })
 
-  updateItem: async (productId, quantity) => {
-    const previousCart = get().cart;
-    const previousSubtotal = get().subtotal;
-    const previousTotalQty = get().totalQty;
+      const previousCart = prev.cart
 
-    set({ loading: true, error: null });
+      const updatedCart = previousCart.filter(
+        i => i.product_id !== productId
+      )
 
-    const optimisticCart = previousCart.map((item) =>
-      item.product_id === productId ? { ...item, quantity } : item
-    );
+      setCartState(updatedCart)
 
-    const { subtotal, totalQty } = calculateCartTotals(optimisticCart);
-    set({ cart: optimisticCart, subtotal: subtotal, totalQty: totalQty });
+      try {
+        const res = await fetch("/api/cart", {
+          method: "DELETE",
+          body: JSON.stringify({ productId }),
+          headers: { "Content-Type": "application/json" },
+        })
 
-    try {
-      const res = await fetch("/api/cart", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ productId, quantity }),
-      });
+        if (!res.ok) throw new Error("Remove failed")
 
-      const body = await res.json();
+        await get().fetchCart()
 
-      if (!res.ok) {
-        throw new Error(body?.error ?? "Failed to update item");
+      } catch (err) {
+        setCartState(previousCart)
+
+        set({
+          error: err instanceof Error ? err.message : "Unknown error",
+        })
       }
-
-      get().fetchCart();
-      set({ loading: false });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      set({
-        cart: previousCart,
-        totalQty: previousTotalQty,
-        subtotal: previousSubtotal,
-        error: message,
-        loading: false,
-      });
-    }
-  },
-
-  removeItem: async (productId) => {
-    const previousCart = get().cart;
-    const previousSubtotal = get().subtotal;
-    const previousTotalQty = get().totalQty;
-
-    set({ loading: true, error: null });
-
-    const optimisticCart = previousCart.filter((item) => item.product_id !== productId);
-    const { subtotal, totalQty } = calculateCartTotals(optimisticCart);
-
-    set({ cart: optimisticCart, subtotal: subtotal, totalQty: totalQty });
-
-    try {
-      const res = await fetch("/api/cart", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ productId }),
-      });
-
-      const body = await res.json();
-
-      if (!res.ok) {
-        throw new Error(body?.error ?? "Failed to remove item");
-      }
-
-      get().fetchCart();
-      set({ loading: false });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      set({
-        cart: previousCart,
-        totalQty: previousTotalQty,
-        subtotal: previousSubtotal,
-        error: message,
-        loading: false,
-      });
-    }
-  },
-}));
+    },
+  }
+})

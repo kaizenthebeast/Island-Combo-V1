@@ -1,54 +1,51 @@
 import { createClient } from './supabase/server';
 import { CartItem } from './cart';
-import { UserProfile } from './users';
+import { calculateCartTotals } from '@/helper/cartUtils'
 
+export type Promo = {
+    code: string
+    type: "fixed" | "percentage"
+    value: number
+    min_quantity: number
+    expires_at: string | null
+}
 
-// add cart item to order item
-export async function createOrderFromCart(cart: CartItem[], user: UserProfile, discount = 0, discountType: string, promoCode?: string,) {
-    if (!cart.length) throw new Error('Cart is empty');
-    const supabase = await createClient();
-    const subtotal = cart.reduce((sum, item) => sum + item.products.price * item.quantity, 0);
+//Get user cart
+export async function getCart(userId: string): Promise<CartItem[]> {
+  const supabase = await createClient()
 
-    //Create a new order (immutable once created)
-    const { data: newOrder, error: orderError } = await supabase.from('orders')
-        .insert({
-            user_id: user.user_id,
-            total_amount: subtotal - discount,
-            shipping_address: user.address,
-            phone_number: user.phone,
-            discount_amount: discount,
-            discount_type: discountType,
-            promo_code: promoCode,
-            status: 'pending'
-        }).select().single()
+  const { data, error } = await supabase
+    .from("cart")
+    .select(`
+      id,
+      user_id,
+      product_id,
+      quantity,
+      added_at,
+      products:products (
+        id,
+        name,
+        description,
+        price,
+        image_url,
+        stock,
+        is_active,
+        slug,
+        category_id
+      )
+    `)
+    .eq("user_id", userId)
 
-    if (orderError || !newOrder) {
-        throw new Error(orderError?.message);
-    }
+  if (error) throw new Error(error.message)
 
-    const orderId = newOrder.id
-
-    //Create order items and linked to the orderId
-    const { error: errorOrderItem } = await supabase.from('order_items').insert(
-        cart.map((item) => ({
-            order_id: orderId,
-            product_id: item.product_id,
-            quantity: item.quantity,
-            price: item.products?.price
-        }))
-    )
-    if (errorOrderItem) {
-        throw new Error(errorOrderItem.message)
-    }
-
-
+  return data as unknown as CartItem[]
 }
 
 //Find the promo 
 export async function findPromoCode(promoCode: string) {
     const supabase = await createClient()
 
-
+    // Voucher
     const { data, error } = await supabase
         .from('vouchers')
         .select('code, type, value, min_quantity, expires_at')
@@ -68,3 +65,32 @@ export async function findPromoCode(promoCode: string) {
 
     return validPromo ?? null
 }
+
+// Calculate the totalCart
+export async function calculateTotalCart(cart: CartItem[], promo?: Promo) {
+    const { subtotal, totalQty } = calculateCartTotals(cart);
+    let discount = 0
+    let promoValid = false
+
+    if (promo) {
+        if (totalQty >= promo.min_quantity) {
+            promoValid = true;
+            if (promo.type === "fixed") {
+                discount = promo.value
+            } else {
+                discount = subtotal * (promo.value / 100);
+            }
+        }
+
+    }
+
+    return {
+        subtotal,
+        totalQty,
+        discount: Math.min(discount, subtotal),
+        total: Math.max(subtotal - discount, 0),
+        promoValid
+    }
+}
+
+
