@@ -1,4 +1,5 @@
 import AuthNavbar from "./components/authNavbar";
+import Footer from "@/components/public/layout/Footer";
 
 export default function ShopLayout({
   children,
@@ -13,6 +14,8 @@ export default function ShopLayout({
       <main className="min-h-screen">
         {children}
       </main>
+
+      <Footer />
     </>
   );
 }

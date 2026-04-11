@@ -11,12 +11,12 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 
 export function LoginForm() {
   const router = useRouter();
@@ -76,30 +76,13 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white shadow-lg rounded-xl  space-y-6 flex flex-col justify-center">
-      <Card>
+    <div className="w-full max-w-md mx-auto space-y-6 flex flex-col justify-center">
+      <Card className="border-none shadow-none">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Login</CardTitle>
-          <CardDescription className="text-center">
-            Login with email or Google
-          </CardDescription>
+          <CardTitle className="text-2xl">Login</CardTitle>
+
         </CardHeader>
         <CardContent>
-          {/* Google Login */}
-          <button
-            type="button"
-            onClick={googleLogin}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition mb-4"
-          >
-            <span className="font-medium text-gray-700">Login with Google</span>
-          </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="text-sm text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-300" />
-          </div>
 
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -117,12 +100,7 @@ export function LoginForm() {
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="ml-auto text-sm underline-offset-4 hover:underline"
-                >
-                  Forgot your password?
-                </Link>
+
               </div>
               <Input
                 id="password"
@@ -134,18 +112,49 @@ export function LoginForm() {
             </div>
 
             {message && <p className="text-sm text-red-500">{message}</p>}
+            <Link
+              href="/auth/forgot-password"
+              className="ml-auto text-sm underline-offset-4 hover:underline"
+            >
+              Forgot your password?
+            </Link>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading} >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
 
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-gray-300" />
+            <span className="text-md text-gray-500">or</span>
+            <div className="flex-1 h-px bg-gray-300" />
+          </div>
+          {/* Google Login */}
+          <button
+            type="button"
+            onClick={googleLogin}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition mb-4"
+          >
+            <Image
+              src="https://developers.google.com/identity/images/g-logo.png"
+              alt="Google logo"
+              width={20}
+              height={20}
+            />
+
+            <span className="font-medium text-gray-700">
+              Continue with Google
+            </span>
+          </button>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
             <Link href="/auth/sign-up" className="underline underline-offset-4">
               Sign up
             </Link>
           </div>
+
+
         </CardContent>
       </Card>
     </div>
