@@ -24,10 +24,19 @@ export const useCartStore = create<CartState>((set, get) => ({
   subtotal: 0,
 
   fetchCart: async (initialCart) => {
+    set({ loading: true, error: null });
+
+    //Initial state load these values
     if (initialCart) {
-      set({ cart: initialCart });
+      const { totalQty, subtotal } = calculateCartTotals(initialCart);
+      set({
+        cart: initialCart,
+        subtotal,
+        totalQty,
+        loading: false,
+      });
       return;
-    }
+    };
 
     try {
       const res = await fetch("/api/cart", {
@@ -38,11 +47,20 @@ export const useCartStore = create<CartState>((set, get) => ({
 
       const body = await res.json();
 
+
       if (!res.ok) {
         throw new Error(body?.error ?? "Failed to fetch cart");
       }
 
-      set({ cart: body, loading: false });
+      //fetch cart
+      const { subtotal, totalQty } = calculateCartTotals(body)
+      set({
+        cart: body,
+        subtotal,
+        totalQty,
+        loading: false
+      })
+
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
       set({ error: message, loading: false });

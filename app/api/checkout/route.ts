@@ -4,24 +4,24 @@ import { findPromoCode } from "@/lib/checkout";
 
 type RequestBody = {
     promoCode: string;
-    quantity: number;
+    totalQty: number;
     subtotal: number;
 };
 
 export async function POST(req: NextRequest) {
     try {
-        const user = requireUser();
+        const user = await requireUser(); 
         if (!user) {
             return NextResponse.json(
                 { error: "Access denied" },
                 { status: 401 }
-            )
+            );
         }
 
         const body: RequestBody = await req.json();
-        const { promoCode, quantity, subtotal } = body;
+        const { promoCode, totalQty, subtotal } = body;
 
-        if (!promoCode || !subtotal || quantity == null) {
+        if (!promoCode || !subtotal || totalQty == null) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         }
 
         const promo = await findPromoCode(promoCode);
-        
+
         if (!promo) {
             return NextResponse.json(
                 { error: "Invalid or expired promo code" },
@@ -37,10 +37,9 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // min quantity check
-        if (quantity < (promo.min_quantity || 0)) {
+        if (totalQty < (promo.min_quantity || 0)) {
             return NextResponse.json(
-                { error: `Minimum quantity is ${promo.min_quantity}` },
+                { error: `Minimum totalQty is ${promo.min_quantity}` },
                 { status: 400 }
             );
         }
@@ -63,9 +62,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (error: unknown) {
-        const message =
-            error instanceof Error ? error.message : "Internal Server Error";
-
+        const message =  error instanceof Error ? error.message : "Internal Server Error";
         return NextResponse.json(
             { error: message },
             { status: 500 }

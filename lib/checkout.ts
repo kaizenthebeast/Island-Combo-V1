@@ -4,7 +4,7 @@ import { UserProfile } from './users';
 
 
 // add cart item to order item
-export async function createOrderFromCart(cart: CartItem[], user: UserProfile, discount = 0, discountType: string, promoCode?: string, ) {
+export async function createOrderFromCart(cart: CartItem[], user: UserProfile, discount = 0, discountType: string, promoCode?: string,) {
     if (!cart.length) throw new Error('Cart is empty');
     const supabase = await createClient();
     const subtotal = cart.reduce((sum, item) => sum + item.products.price * item.quantity, 0);
@@ -46,22 +46,25 @@ export async function createOrderFromCart(cart: CartItem[], user: UserProfile, d
 
 //Find the promo 
 export async function findPromoCode(promoCode: string) {
-    const supabase = await createClient();
-    const { data, error } = await supabase.from('promotions').select('code, type, value, min_quantity, expires_at')
-        .eq('code', promoCode)
+    const supabase = await createClient()
+
+
+    const { data, error } = await supabase
+        .from('vouchers')
+        .select('code, type, value, min_quantity, expires_at')
+        .eq('code', promoCode.toUpperCase())
         .eq('is_active', true)
-        .gte('expires_at', new Date().toISOString());
 
-    if (error) {
-        throw new Error(error.message)
-    }
-    // filter for expired promo (expires_at null = never expires)
-    const validPromo = data?.find(promo => !promo.expires_at || new Date(promo.expires_at) > new Date());
+    if (error) throw new Error(error.message)
 
-    if (!validPromo) {
-        return null;
-    }
+    if (!data || data.length === 0) return null
 
-    return validPromo;
+    const now = new Date()
 
+    const validPromo = data.find((p) => {
+        if (!p.expires_at) return true
+        return new Date(p.expires_at) > now
+    })
+
+    return validPromo ?? null
 }
