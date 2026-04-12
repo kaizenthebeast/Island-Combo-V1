@@ -1,36 +1,8 @@
 import { createClient } from './supabase/server'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
+import type {Variant, Product} from '@/types/product'
 
-type Category = {
-    id: string
-    name: string
-}
 
-type Variant = {
-    id: string
-    sku: string
-    price: number
-    stock: number
-    image_url: string | null
-    final_price: number
-}
-
-type DefaultVariant = Variant | null
-
-export type Product = {
-    id: string
-    name: string
-    description: string | null
-    slug: string
-    discount: number
-    wholesale: boolean
-    is_active: boolean
-    created_at: string
-    category: Category
-    default_variant: DefaultVariant | null
-    variants: Variant[]
-    lowest_price: number
-}
 
 function mapProduct(product: Product): Product {
     return {

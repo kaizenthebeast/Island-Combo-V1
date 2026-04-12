@@ -86,14 +86,14 @@ const CheckoutCard = ({ user }: CheckoutCardProps) => {
                     <div className="space-y-4" key={item.id}>
                         <div className="flex justify-between border-b pb-2">
                             <span>{item.products?.name}</span>
-                            <span>{item.quantity} × ${item.products?.price.toFixed(2)}</span>
+                            <span>{item.products?.default_variant?.price?.toFixed(2)}</span>
                         </div>
                     </div>
                 ))}
 
                 <div className="flex justify-between font-bold pt-2">
                     <span>Subtotal</span>
-                    <span>${checkout.subtotal.toFixed(2)}</span>
+                    <span>${(checkout.subtotal ?? 0).toFixed(2)}</span>
                 </div>
 
                 <div className="flex justify-between font-bold pt-2">
