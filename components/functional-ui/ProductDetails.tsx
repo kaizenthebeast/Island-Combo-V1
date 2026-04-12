@@ -1,5 +1,5 @@
 'use client'
-
+import { useState } from 'react'
 import Image from 'next/image'
 import type { Product } from '@/types/product'
 import { ShoppingCart, Heart } from 'lucide-react'
@@ -11,13 +11,15 @@ type Props = {
 }
 const sizes = ["XS", "S", "M", "L", "XL"]
 const ProductDetails = ({ product }: Props) => {
+    const [selectVariant, setSelectedVariant] = useState(product.default_variant ?? product.variants[0]);
+    const [selectSize, setSelectSize] = useState(null);
     return (
         <>
 
-            {/* Product Image */}
+            {/* Product Image  change the Image based on the variant by default its default variant img*/}
             <div className="relative w-full md:w-1/2 aspect-square">
                 <Image
-                    src={product.default_variant.image_url}
+                    src={selectVariant.image_url}
                     alt={product.name}
                     fill
                     className="object-cover rounded-xl"
@@ -47,13 +49,13 @@ const ProductDetails = ({ product }: Props) => {
                 {/* Price Section */}
                 <div className="flex items-center gap-3">
                     <p className="text-4xl font-bold text-[#900036]">
-                        ${product.default_variant?.final_price}
+                        ${selectVariant.final_price}
                     </p>
 
                     {product.default_variant?.price && product.default_variant.price > product.default_variant.final_price && (
                         <div className='flex gap-3 text-[#900036] items-center'>
                             <p className="text-lg line-through ">
-                                ${product.default_variant.price}
+                                ${selectVariant.price}
                             </p>
                             <p className="text-sm bg-[#900036] text-white p-2 rounded-md">
                                 -{product.discount}%
@@ -68,9 +70,19 @@ const ProductDetails = ({ product }: Props) => {
                     <p className="text-sm font-medium text-gray-700">Variants</p>
 
                     <div className="flex gap-3 flex-wrap">
-                        <button type='button' className={cn("relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all")}>
-                            <Image src={product.default_variant.image_url} alt={product.name} fill className='object-cover'/>
-                        </button>
+                        {product.variants.map((variant) => {
+                            const isActive = selectVariant.id === variant.id
+                            return (
+                                <button key={variant.id}
+                                    type='button'
+                                    onClick={() => setSelectedVariant(variant)}
+                                    className={cn("relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all",
+                                        isActive ? "border-[#900036] scale-105 shadow-md" :
+                                            "border-gray-200 hover:border-[#900036]")}>
+                                    <Image src={variant.image_url} alt={variant.sku} fill className='object-cover' />
+                                </button>
+                            )
+                        })}
                     </div>
                 </div>
 
