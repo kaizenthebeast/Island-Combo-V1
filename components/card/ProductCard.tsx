@@ -10,6 +10,8 @@ type Props = {
   product: Product
 }
 const ProductCard: React.FC<Props> = ({ product }) => {
+  const defaultVariant = product.variants[0];
+
   return (
     <Link href={`/product/${product.slug}`}>
 
@@ -25,7 +27,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         {/* Image */}
         <div className="relative w-full h-[70%] flex items-center justify-center">
           <Image
-            src={product.default_variant.image_url}
+            src={defaultVariant.image_url || '/images/placeholder.png'}
             alt={product.name}
             fill
             className="object-fill"
@@ -41,20 +43,20 @@ const ProductCard: React.FC<Props> = ({ product }) => {
           </h3>
 
           <p className="text-lg font-semibold">
-            ${product.default_variant?.final_price}
+            ${defaultVariant.final_price.toFixed(2)}
           </p>
 
-          {product.default_variant?.price && product.discount ? (
+          {product.discount > 0 && (
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-400 line-through">
-                ${product.default_variant.price.toFixed(2)}
+                ${defaultVariant.price.toFixed(2)}
               </span>
 
               <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
                 -{product.discount}%
               </span>
             </div>
-          ) : null}
+          )}
 
         </CardContent>
 

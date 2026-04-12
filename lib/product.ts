@@ -15,21 +15,20 @@ function mapProduct(product: Product): Product {
         is_active: product.is_active,
         created_at: product.created_at,
         category: product.category,
-        default_variant: product.default_variant
-            ? {
-                  ...product.default_variant,
-                  image_url: getPublicImageUrl(product.default_variant.image_url),
-              }
-            : null,
 
         variants: (product.variants || []).map((v: Variant) => ({
             ...v,
-            image_url: getPublicImageUrl(v.image_url),
+            image_url: v.image_url
+                ? getPublicImageUrl(v.image_url)
+                : '/images/placeholder.png',
+
+            variant_attributes: v.variant_attributes || [],
         })),
 
         lowest_price: product.lowest_price,
     }
 }
+
 
 export async function getAllProducts(): Promise<Product[]> {
     const supabase = await createClient()
