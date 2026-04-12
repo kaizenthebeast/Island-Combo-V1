@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId, quantity } = await req.json();
+    const { variantId, quantity } = await req.json();
 
     const data = await addToCart({
       userId: user.id,
-      productId,
+      variantId,
       quantity,
     });
 
@@ -56,11 +56,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId, quantity } = await req.json();
+    const { variantId, quantity } = await req.json();
 
     const data = await updateCartQuantity({
       userId: user.id,
-      productId,
+      variantId,
       quantity,
     });
 
@@ -79,11 +79,11 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId } = await req.json();
+    const { variantId } = await req.json();
 
     await removeFromCart({
       userId: user.id,
-      productId,
+      variantId,
     });
 
     return NextResponse.json({ success: true });

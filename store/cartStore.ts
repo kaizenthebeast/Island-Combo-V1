@@ -1,5 +1,3 @@
-// /store/cartStore.ts
-
 import { create } from "zustand"
 import { CartItem } from "@/lib/cart"
 import { calculateCartTotals } from "@/helper/cartUtils"
@@ -61,19 +59,19 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    addItem: async (productId, qty = 1) => {
+    addItem: async (variantId, qty = 1) => {
       const prev = get()
       set({ error: null })
 
       const previousCart = prev.cart
 
-      const existing = previousCart.find(i => i.product_id === productId)
+      const existing = previousCart.find(i => i.variant_id === variantId)
 
       let updatedCart: CartItem[]
 
       if (existing) {
         updatedCart = previousCart.map(i =>
-          i.product_id === productId
+          i.variant_id === variantId
             ? { ...i, quantity: i.quantity + qty }
             : i
         )
@@ -81,7 +79,7 @@ export const useCartStore = create<CartState>((set, get) => {
         updatedCart = [
           ...previousCart,
           {
-            product_id: productId,
+            variant_id: variantId,
             quantity: qty,
           } as CartItem,
         ]
@@ -93,7 +91,7 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const res = await fetch("/api/cart", {
           method: "POST",
-          body: JSON.stringify({ productId, quantity: qty }),
+          body: JSON.stringify({ variantId, quantity: qty }),
           headers: { "Content-Type": "application/json" },
         })
 
@@ -111,14 +109,14 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    updateItem: async (productId, qty) => {
+    updateItem: async (variantId, qty) => {
       const prev = get()
       set({ error: null })
 
       const previousCart = prev.cart
 
       const updatedCart = previousCart.map(i =>
-        i.product_id === productId
+        i.variant_id === variantId
           ? { ...i, quantity: qty }
           : i
       )
@@ -128,7 +126,7 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const res = await fetch("/api/cart", {
           method: "PATCH",
-          body: JSON.stringify({ productId, quantity: qty }),
+          body: JSON.stringify({ variantId, quantity: qty }),
           headers: { "Content-Type": "application/json" },
         })
 
@@ -145,14 +143,14 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    removeItem: async (productId) => {
+    removeItem: async (variantId) => {
       const prev = get()
       set({ error: null })
 
       const previousCart = prev.cart
 
       const updatedCart = previousCart.filter(
-        i => i.product_id !== productId
+        i => i.variant_id !== variantId
       )
 
       setCartState(updatedCart)
@@ -160,7 +158,7 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const res = await fetch("/api/cart", {
           method: "DELETE",
-          body: JSON.stringify({ productId }),
+          body: JSON.stringify({ variantId }),
           headers: { "Content-Type": "application/json" },
         })
 
