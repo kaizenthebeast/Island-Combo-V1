@@ -30,6 +30,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             fill
             className="object-fill"
             priority
+            sizes='235'
           />
         </div>
 

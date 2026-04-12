@@ -10,12 +10,22 @@ export default function CartSync() {
   useEffect(() => {
     const supabase = createClient();
 
-    void fetchCart();
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (data.session) {
+        await fetchCart();
+      }
+    };
+
+    void init();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
-      void fetchCart();
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        void fetchCart();
+      }
     });
 
     return () => {

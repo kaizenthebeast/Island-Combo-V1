@@ -1,4 +1,3 @@
-// app/api/cart/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from '@/lib/auth'
 import {

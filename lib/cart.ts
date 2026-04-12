@@ -6,13 +6,32 @@ export type { CartItem, CartItemInput } from '@/types/cart'
 export async function getCart(userId: string): Promise<CartItem[]> {
   const supabase = await createClient();
 
- const { data, error } = await supabase
-        .from('product_catalog_view')
-        .select('*')
+  const { data, error } = await supabase
+    .from('cart')
+    .select(`
+      id,
+      quantity,
+      added_at,
+      variant:product_variants (
+        id,
+        sku,
+        price,
+        stock,
+        image_url,
+        product:products (
+          id,
+          name,
+          slug,
+          discount,
+          is_active
+        )
+      )
+    `)
     .eq('user_id', userId);
+
   if (error) throw error;
 
-  return data as CartItem[];
+  return data as unknown as CartItem[];
 }
 
 

@@ -32,8 +32,6 @@ export default function RootLayout({
         
         {/* GLOBAL LOGIC*/}
         <EnsureAnonSession />
-        <CartSync />
-
         {/* PAGE CONTENT ONLY */}
         {children}
 
