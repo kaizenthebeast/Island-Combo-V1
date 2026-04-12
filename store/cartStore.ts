@@ -13,6 +13,7 @@ type CartState = {
   addItem: (productId: string, qty?: number) => Promise<void>
   updateItem: (productId: string, qty: number) => Promise<void>
   removeItem: (productId: string) => Promise<void>
+  sizeItem: (size: string) => Promise<void>
 }
 
 export const useCartStore = create<CartState>((set, get) => {
@@ -174,5 +175,9 @@ export const useCartStore = create<CartState>((set, get) => {
         })
       }
     },
+
+    sizeItem: async(size) => {
+      
+    }
   }
 })

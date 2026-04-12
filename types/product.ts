@@ -8,7 +8,7 @@ export type Variant = {
     sku: string
     price: number
     stock: number
-    image_url: string | null
+    image_url: string 
     final_price: number
 }
 export type VariantAttribute = {
@@ -28,7 +28,7 @@ export type Product = {
     is_active: boolean
     created_at: string
     category: Category
-    default_variant: DefaultVariant | null
+    default_variant: DefaultVariant
     variants: Variant[]
     lowest_price: number
 }

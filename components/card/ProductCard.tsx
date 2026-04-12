@@ -25,7 +25,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         {/* Image */}
         <div className="relative w-full h-[70%] flex items-center justify-center">
           <Image
-            src={product.default_variant?.image_url || '/images/bug.png'}
+            src={product.default_variant.image_url}
             alt={product.name}
             fill
             className="object-fill"
