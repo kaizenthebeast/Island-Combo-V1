@@ -1,17 +1,20 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   images: {
-    domains: ["developers.google.com"],
-     remotePatterns: [
+    remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'egxjmbitmuxufyfgwgbs.supabase.co',
-        pathname: '/storage/v1/object/**',
+        protocol: "https",
+        hostname: "developers.google.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "egxjmbitmuxufyfgbs.supabase.co",
+        pathname: "/storage/v1/object/**",
       },
     ],
-  }
-};
+  },
+}
 
-export default nextConfig;
+export default nextConfig

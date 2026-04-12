@@ -4,17 +4,33 @@ import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
 import Link from 'next/link'
+type Variant = {
+  id: string
+  sku: string
+  price: number
+  stock: number
+  image_url: string | null
+  final_price: number
+}
 
+type Category = {
+  id: string
+  name: string
+}
 type Product = {
   id: string
   name: string
-  price: number
-  oldPrice?: number
-  imageUrl?: string
-  discount?: number
-  wholesale?: boolean
+  description: string | null
   slug: string
+  discount: number
+  wholesale: boolean
+  category: Category | null
+  variant: Variant
+  imageUrl: string
+  price: number
+  oldPrice: number
 }
+
 
 
 type Props = {

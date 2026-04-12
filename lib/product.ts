@@ -1,112 +1,86 @@
 import { createClient } from './supabase/server'
+import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 
-export type ProductProps = {
+type Category = {
+    id: string
     name: string
+}
+
+type Variant = {
+    id: string
+    sku: string
     price: number
-    description?: string
-    categoryId?: string
-    stock?: number
-    isActive?: boolean
-    slug?: string
-    imageUrl?: string
-    oldPrice?: number
-    wholeSale?: number
-    discount?: number
+    stock: number
+    image_url: string | null
+    final_price: number
 }
 
-export async function getAllProducts() {
-    const supabase = await createClient()
+type DefaultVariant = Variant | null
 
-    const { data, error } = await supabase
-        .from('products')
-        .select(`
-      id,
-      name,
-      image_url,
-      price,
-      description,
-      discount,
-      wholesale,
-      slug,
-      search_vector,
-      is_active,
-      category:categories(name)
-    `)
-        .eq('is_active', true)
+export type Product = {
+    id: string
+    name: string
+    description: string | null
+    slug: string
+    discount: number
+    wholesale: boolean
+    is_active: boolean
+    created_at: string
+    category: Category
+    default_variant: DefaultVariant | null
+    variants: Variant[]
+    lowest_price: number
+}
 
-    if (error) {
-        throw new Error(error.message)
+function mapProduct(product: Product): Product {
+    return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        slug: product.slug,
+        discount: product.discount,
+        wholesale: product.wholesale,
+        is_active: product.is_active,
+        created_at: product.created_at,
+        category: product.category,
+        default_variant: product.default_variant
+            ? {
+                  ...product.default_variant,
+                  image_url: getPublicImageUrl(product.default_variant.image_url),
+              }
+            : null,
+
+        variants: (product.variants || []).map((v: Variant) => ({
+            ...v,
+            image_url: getPublicImageUrl(v.image_url),
+        })),
+
+        lowest_price: product.lowest_price,
     }
-
-    const products = data?.map((product) => {
-        const imagePath = product.image_url?.[0]
-
-        const imageUrl = imagePath
-            ? supabase.storage.from('Product images')
-                .getPublicUrl(imagePath).data.publicUrl
-            : '/images/placeholder.png'
-
-        const discount = product.discount ?? 0
-        const oldPrice = product.price
-
-        const finalPrice =
-            discount > 0
-                ? product.price - (product.price * discount / 100)
-                : product.price
-
-        return {
-            ...product,
-            imageUrl,
-            price: finalPrice,
-            oldPrice,
-        }
-    })
-
-    return products
 }
 
-export async function getProductBySlug(slug: string) {
+export async function getAllProducts(): Promise<Product[]> {
     const supabase = await createClient()
 
     const { data, error } = await supabase
-        .from('products')
-        .select(`
-            id,
-            name,
-            price,
-            description,
-            image_url,
-            discount,
-            wholesale,
-            slug,
-            category:categories(name)
-        `)
+        .from('product_catalog_view')
+        .select('*')
+
+    if (error) throw new Error(error.message)
+
+    return (data || []).map(mapProduct)
+}
+
+export async function getProductBySlug(slug: string): Promise<Product> {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+        .from('product_catalog_view')
+        .select('*')
         .eq('slug', slug)
         .single()
 
-    if (error) {
-        throw new Error(error.message)
-    }
+    if (error) throw new Error(error.message)
 
-    const imagePath = data?.image_url?.[0]
-
-    const imageUrl = imagePath
-        ? supabase.storage.from('Product images')
-            .getPublicUrl(imagePath).data.publicUrl
-        : '/images/placeholder.png'
-
-    const discount = data?.discount ?? 0
-    const oldPrice = data.price
-
-    const finalPrice =
-        discount > 0
-            ? data.price - (data.price * discount / 100)
-            : data.price
-
-    return {
-        ...data,
-        imageUrl,
-        price: finalPrice,
-        oldPrice,
-    }
+    return mapProduct(data)
 }
