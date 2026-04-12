@@ -2,41 +2,13 @@
 
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import type { Product } from '@/types/product'
 import Image from 'next/image'
 import Link from 'next/link'
-type Variant = {
-  id: string
-  sku: string
-  price: number
-  stock: number
-  image_url: string | null
-  final_price: number
-}
-
-type Category = {
-  id: string
-  name: string
-}
-type Product = {
-  id: string
-  name: string
-  description: string | null
-  slug: string
-  discount: number
-  wholesale: boolean
-  category: Category | null
-  variant: Variant
-  imageUrl: string
-  price: number
-  oldPrice: number
-}
-
-
 
 type Props = {
   product: Product
 }
-
 const ProductCard: React.FC<Props> = ({ product }) => {
   return (
     <Link href={`/product/${product.slug}`}>
@@ -53,7 +25,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         {/* Image */}
         <div className="relative w-full h-[70%] flex items-center justify-center">
           <Image
-            src={product.imageUrl || '/images/placeholder.png'}
+            src={product.default_variant?.image_url || '/images/bug.png'}
             alt={product.name}
             fill
             className="object-fill"
@@ -68,13 +40,13 @@ const ProductCard: React.FC<Props> = ({ product }) => {
           </h3>
 
           <p className="text-lg font-semibold">
-            ${product.price.toFixed(2)}
+            ${product.default_variant?.final_price}
           </p>
 
-          {product.oldPrice && product.discount ? (
+          {product.default_variant?.price && product.discount ? (
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-400 line-through">
-                ${product.oldPrice.toFixed(2)}
+                ${product.default_variant.price.toFixed(2)}
               </span>
 
               <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">

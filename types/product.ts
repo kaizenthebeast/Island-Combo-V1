@@ -16,7 +16,7 @@ export type VariantAttribute = {
   attribute_value: string
 }
 
-export type DefaultVariant = Variant | null
+export type DefaultVariant = Variant
 
 export type Product = {
     id: string
