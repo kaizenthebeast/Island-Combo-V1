@@ -41,8 +41,6 @@ function mapProductDetails(product: ProductDetails): ProductDetails {
             price: v.price,
             final_price: v.final_price,
             stock: v.stock,
-
-            // DB → storage → public URL
             image_url: v.image_url?.length
                 ? v.image_url.map((img) =>
                     getPublicImageUrl(img) ?? '/images/placeholder.png'

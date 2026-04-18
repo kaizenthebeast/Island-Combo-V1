@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import {useState } from 'react'
 import Image from 'next/image'
 import type { ProductDetails } from '@/types/product'
-import { ShoppingCart, Heart } from 'lucide-react'
+import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from "@/lib/utils"
+import { useCartStore } from '@/store/cartStore'
 
 type Props = {
     product: ProductDetails
@@ -14,13 +14,20 @@ type Props = {
 const ProductDetails = ({ product }: Props) => {
     const defaultVariant = product.variants?.[0];
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
+    const [selectedSize, setSelectedSize] = useState('')
     const hasDiscount = product.discount !== null && product.discount > 0
 
+    
+    // Sizes
+    const sizes = Array.from(
+        new Set(product.variants.flatMap((v) => v.attributes?.filter((att) => att.name === 'size').map((a) => a.value)))
+    )
 
-       return (
-        <>
+
+    return (
+        <div className="grid md:grid-cols-2  grid-cols-1 w-full gap-5" >
             {/* IMAGE */}
-            <div className="relative w-full md:w-1/2 aspect-square">
+            <div className="relative w-full  min-h-[500px]">
                 <Image
                     src={selectedVariant.image_url[0] ?? 'images/placeholder.png'}
                     alt={product.name}
@@ -30,11 +37,12 @@ const ProductDetails = ({ product }: Props) => {
                 />
             </div>
 
-            {/* DETAILS */}
-            <div className="flex flex-col gap-4 md:w-1/2">
+            {/* PRICING DETAILS */}
+            <div className="flex flex-col gap-4">
 
                 {product.wholesale && (
-                    <div className="bg-[#900036] text-white text-xs text-center p-3 w-[140px] rounded-full">
+                    <div className="flex items-center gap-2 bg-[#900036] text-white text-xs text-center p-2 w-[165px] rounded-md">
+                        <Package />
                         Wholesale available
                     </div>
                 )}
@@ -43,6 +51,7 @@ const ProductDetails = ({ product }: Props) => {
 
                 <p className="text-gray-600 leading-relaxed">
                     {product.description}
+                    {product.wholesale}
                 </p>
 
                 {/* PRICE */}
@@ -51,7 +60,7 @@ const ProductDetails = ({ product }: Props) => {
                         ${selectedVariant.final_price.toFixed(2)}
                     </p>
 
-                    {hasDiscount&& (
+                    {hasDiscount && (
                         <div className='flex gap-3 text-[#900036] items-center'>
                             <p className="text-lg line-through">
                                 ${selectedVariant.price.toFixed(2)}
@@ -63,75 +72,98 @@ const ProductDetails = ({ product }: Props) => {
                     )}
                 </div>
 
-                {/* STYLE (VARIANTS IMAGE) */}
-                {/* <div className="flex flex-col gap-2">
-                    <p className="text-sm font-medium text-gray-700">Variant</p>
+                {/* Variant Image */}
+                <div className='flex flex-col space-y-3'>
+                    <p className="text-sm font-medium text-gray-700">Variants</p>
+                    <div className='flex flex-wrap gap-2'>
+                        {/* Loop through variants */}
+                        {product.variants.map((variant) => {
+                            const isActive = selectedVariant.variant_id === variant.variant_id
 
-                    <div className="flex gap-3 flex-wrap">
-                        {styles.map((style) => {
-                            const variantForStyle = product.variants.find(v =>
-                                v.variant_attributes.some(
-                                    a =>
-                                        a.attribute_name.toLowerCase() === 'style' &&
-                                        a.attribute_value === style
-                                )
-                            )
-
-                            const isActive = selectedStyle === style
-
-                            if (!variantForStyle) return null
 
                             return (
-                                <button
-                                    key={style}
-                                    onClick={() => handleStyleSelect(style)}
-                                    className={cn(
-                                        "relative w-16 h-16 rounded-lg overflow-hidden border-2",
-                                        isActive
-                                            ? "border-[#900036] scale-105"
-                                            : "border-gray-200"
-                                    )}
-                                >
-                                    <Image
-                                        src={variantForStyle.image_url}
-                                        alt={style}
-                                        fill
-                                        className="object-cover"
-                                    />
+                                <button type='button' key={variant.variant_id}
+                                    onClick={() => setSelectedVariant(variant)}
+                                    className={`w-20 h-20 relative overflow-hidden border rounded-md
+                                  ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}>
+                                    <Image src={variant.image_url?.[0]} fill className='object-cover' alt='variant-image' />
                                 </button>
                             )
                         })}
                     </div>
-                </div> */}
+
+                </div>
+
 
                 {/* SIZES */}
-                {/* <div className="flex flex-col gap-2">
-                    <p className="text-sm font-medium text-gray-700">Size</p>
-
-                    <div className="flex flex-wrap gap-2">
+                <div className='flex flex-col space-y-3'>
+                    <p className="text-sm font-medium text-gray-700">Sizes</p>
+                    <div className='flex flex-wrap gap-2'>
                         {sizes.map((size) => {
                             const isActive = selectedSize === size
+
 
                             return (
                                 <button
                                     key={size}
-                                    onClick={() => handleSizeSelect(size)}
-                                    className={cn(
-                                        "px-4 py-2 border rounded-md",
-                                        isActive
-                                            ? "bg-[#900036] text-white"
-                                            : "border-gray-300"
-                                    )}
+                                    type="button"
+                                    onClick={() => setSelectedSize(size)}
+                                    className={`px-4 py-2 border rounded-md ${isActive
+                                        ? "bg-[#900036] text-white"
+                                        : "border-gray-300"
+                                        }`}
                                 >
                                     {size}
                                 </button>
                             )
                         })}
                     </div>
-                </div> */}
+                </div>
 
                 {/* STOCK */}
-                <p>Stocks: {selectedVariant.stock}</p>
+                <p className="text-md font-medium text-gray-700">Stocks: {selectedVariant.stock}</p>
+
+
+                {/* QUANTITY CONTROL*/}
+                
+                <div className="flex items-center gap-3">
+                    <p className="text-md font-medium text-gray-700">Quantity</p>
+
+                    {/* QUANTITY CONTROL */}
+                    <div className="flex items-center gap-4">
+
+                        <button
+                            type="button"
+                            className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
+                        >
+                            −
+                        </button>
+
+                        <span className="min-w-[20px] text-center font-medium">
+                            0
+                        </span>
+
+                        <button
+                            type="button"
+                            className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
+                        >
+                            +
+                        </button>
+
+                    </div>
+                    {/* STATUS BADGE */}
+                    {product.wholesale && (
+                        <div className="flex items-center gap-2 text-white bg-green-500 px-4 py-2 rounded-md w-fit ">
+                            <CircleCheckBig />
+                            <p className="text-sm font-medium">
+                                Wholesale pricing applied to your order!
+                            </p>
+
+                        </div>
+                    )}
+
+                </div>
+
 
                 {/* ACTIONS */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
@@ -153,7 +185,7 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
 
             </div>
-        </>
+        </div>
     )
 }
 
