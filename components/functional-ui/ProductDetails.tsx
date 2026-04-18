@@ -2,113 +2,27 @@
 
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
-import type { Product, Variant } from '@/types/product'
+import type { ProductDetails } from '@/types/product'
 import { ShoppingCart, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from "@/lib/utils"
 
 type Props = {
-    product: Product
+    product: ProductDetails
 }
 
 const ProductDetails = ({ product }: Props) => {
-    const [selectedStyle, setSelectedStyle] = useState<string | null>(null)
-    const [selectedSize, setSelectedSize] = useState<string | null>(null)
-    const [selectedVariant, setSelectedVariant] = useState<Variant>(product.variants[0])
-
-    /**
-     * Extract styles
-     */
-    const styles = useMemo(() => {
-        return Array.from(
-            new Set(
-                product.variants.flatMap(v =>
-                    v.variant_attributes
-                        .filter(a => a.attribute_name.toLowerCase() === 'style')
-                        .map(a => a.attribute_value)
-                )
-            )
-        )
-    }, [product.variants])
-
-    /**
-     * Extract sizes based on selected style
-     */
-    const sizes = useMemo(() => {
-        return Array.from(
-            new Set(
-                product.variants
-                    .filter(v =>
-                        selectedStyle
-                            ? v.variant_attributes.some(
-                                a =>
-                                    a.attribute_name.toLowerCase() === 'style' &&
-                                    a.attribute_value === selectedStyle
-                            )
-                            : true
-                    )
-                    .flatMap(v =>
-                        v.variant_attributes
-                            .filter(a => a.attribute_name.toLowerCase() === 'size')
-                            .map(a => a.attribute_value)
-                    )
-            )
-        )
-    }, [product.variants, selectedStyle])
-
-  
-    /**
-     * Handlers
-     */
-    const handleStyleSelect = (style: string) => {
-        setSelectedStyle(style)
-        setSelectedSize(null)
-
-        const firstMatch = product.variants.find(v =>
-            v.variant_attributes.some(
-                a => a.attribute_name.toLowerCase() === 'style' &&
-                    a.attribute_value === style
-            )
-        )
-
-        if (firstMatch) {
-            setSelectedVariant(firstMatch)
-        }
-    }
-
-    const handleSizeSelect = (size: string) => {
-        setSelectedSize(size)
-
-        const match = product.variants.find(v => {
-            const hasStyle = selectedStyle
-                ? v.variant_attributes.some(
-                    a =>
-                        a.attribute_name.toLowerCase() === 'style' &&
-                        a.attribute_value === selectedStyle
-                )
-                : true
-
-            const hasSize = v.variant_attributes.some(
-                a =>
-                    a.attribute_name.toLowerCase() === 'size' &&
-                    a.attribute_value === size
-            )
-
-            return hasStyle && hasSize
-        })
-
-        if (match) {
-            setSelectedVariant(match)
-        }
-    }
+    const defaultVariant = product.variants?.[0];
+    const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
+    const hasDiscount = product.discount !== null && product.discount > 0
 
 
-    return (
+       return (
         <>
             {/* IMAGE */}
             <div className="relative w-full md:w-1/2 aspect-square">
                 <Image
-                    src={selectedVariant.image_url}
+                    src={selectedVariant.image_url[0] ?? 'images/placeholder.png'}
                     alt={product.name}
                     fill
                     className="object-cover rounded-xl"
@@ -134,13 +48,13 @@ const ProductDetails = ({ product }: Props) => {
                 {/* PRICE */}
                 <div className="flex items-center gap-3">
                     <p className="text-4xl font-bold text-[#900036]">
-                        ${selectedVariant.final_price}
+                        ${selectedVariant.final_price.toFixed(2)}
                     </p>
 
-                    {product.discount > 0 && (
+                    {hasDiscount&& (
                         <div className='flex gap-3 text-[#900036] items-center'>
                             <p className="text-lg line-through">
-                                ${selectedVariant.price}
+                                ${selectedVariant.price.toFixed(2)}
                             </p>
                             <p className="text-sm bg-[#900036] text-white p-2 rounded-md">
                                 -{product.discount}%
@@ -150,7 +64,7 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
 
                 {/* STYLE (VARIANTS IMAGE) */}
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                     <p className="text-sm font-medium text-gray-700">Variant</p>
 
                     <div className="flex gap-3 flex-wrap">
@@ -188,10 +102,10 @@ const ProductDetails = ({ product }: Props) => {
                             )
                         })}
                     </div>
-                </div>
+                </div> */}
 
                 {/* SIZES */}
-                <div className="flex flex-col gap-2">
+                {/* <div className="flex flex-col gap-2">
                     <p className="text-sm font-medium text-gray-700">Size</p>
 
                     <div className="flex flex-wrap gap-2">
@@ -214,7 +128,7 @@ const ProductDetails = ({ product }: Props) => {
                             )
                         })}
                     </div>
-                </div>
+                </div> */}
 
                 {/* STOCK */}
                 <p>Stocks: {selectedVariant.stock}</p>

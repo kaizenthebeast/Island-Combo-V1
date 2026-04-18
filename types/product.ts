@@ -4,14 +4,10 @@ export type ProductCatalogItem = {
   slug: string
   wholesale: boolean
   discount: number | null
-
   category_id: number | null
   category_name: string | null
-
   base_price: number
   final_price: number
-
-  // ✅ NEW: catalog preview image
   image_url: string | null
 }
 
@@ -38,12 +34,8 @@ export type ProductDetails = {
     price: number
     final_price: number
     stock: number
-
-    // ⚠️ FIX: DB returns string[]
     image_url: string[]
-
     is_active: boolean
-
     attributes: {
       name: string
       value: string

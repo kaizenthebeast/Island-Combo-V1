@@ -71,11 +71,11 @@ export async function getAllProducts(): Promise<ProductCatalogItem[]> {
 
 
 
-export async function getProductBySlug(slug: string): Promise<ProductDetails> {
+export async function getProductBySlug(p_slug: string): Promise<ProductDetails> {
     const supabase = await createClient()
 
     const { data, error } = await supabase
-        .rpc('get_product_details', { p_slug: slug })
+        .rpc('get_product_details', {p_slug})
 
     if (error) throw new Error(error.message)
 
