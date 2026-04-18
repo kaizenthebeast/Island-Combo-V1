@@ -1,13 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useCartStore } from "@/store/cartStore";
+import { calculateCartTotals } from "@/helper/cartUtils";
 
 const CartCount = () => {
   const cart = useCartStore((state) => state.cart);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const fetchCart = useCartStore((state) => state.fetchCart);
 
-  return <>{totalItems}</>;
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+
+  const { totalQty } = calculateCartTotals(cart);
+
+  return <>{totalQty}</>;
 };
 
 export default CartCount;
