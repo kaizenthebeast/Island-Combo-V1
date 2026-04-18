@@ -22,7 +22,7 @@ const ProductDetails = ({ product }: Props) => {
     const [quantity, setQuantity] = useState(1)
 
     // STORE
-    const { addItem, updateItem, removeItem } = useCartStore();
+    const { addItem} = useCartStore();
 
     async function handleAddToCart() {
         if (!selectedVariant) return

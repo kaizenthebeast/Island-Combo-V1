@@ -58,7 +58,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // ✅ ADD ITEM (safe optimistic)
+    // ADD ITEM
     addItem: async (variantId, qty, size) => {
       const prev = get().cart
 
@@ -66,7 +66,7 @@ export const useCartStore = create<CartState>((set, get) => {
         i => i.variant_id === variantId && i.size === size
       )
 
-      // ✅ only optimistic if exists
+      // only optimistic if exists
       if (existing) {
         const updated = prev.map(i =>
           i.variant_id === variantId && i.size === size
@@ -96,7 +96,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // 🟡 UPDATE ITEM
+    // UPDATE ITEM
     updateItem: async (variantId, qty, size) => {
       const prev = get().cart
 
@@ -127,7 +127,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // 🔴 REMOVE ITEM
+    // REMOVE ITEM
     removeItem: async (variantId, size) => {
       const prev = get().cart
 

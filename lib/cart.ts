@@ -52,7 +52,10 @@ export async function addToCart(item: CartItemInput) {
       size: item.size,
     })
 
-  if (error) throw error
+  if (error) {
+    console.error("INSERT ERROR:", error)
+    throw error
+  }
 
   return data
 }
@@ -68,8 +71,10 @@ export async function updateCartQuantity(items: CartItemInput) {
     .eq('user_id', items.userId)
     .eq('variant_id', items.variantId);
 
-  if (error) throw error;
-
+  if (error) {
+    console.error("UPDATE ERROR:", error)
+    throw error
+  }
   return data;
 }
 
@@ -83,5 +88,8 @@ export async function removeFromCart(items: CartItemInput) {
     .eq('user_id', items.userId)
     .eq('variant_id', items.variantId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("INSERT ERROR:", error)
+    throw error
+  }
 }

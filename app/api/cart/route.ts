@@ -34,9 +34,7 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-
     const { variantId, quantity, size } = await req.json()
-
     if (!variantId || !quantity || !size) {
       return NextResponse.json(
         { error: "variantId, quantity, and size are required" },
@@ -53,7 +51,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(data)
   } catch (err: unknown) {
+    console.error("API CART ERROR:", err)
     const message = err instanceof Error ? err.message : "Unknown error"
+
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
