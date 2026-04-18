@@ -1,3 +1,5 @@
+// store/cartStore.ts
+
 import { create } from "zustand"
 import { CartItem } from "@/types/cart"
 import { calculateCartTotals } from "@/helper/cartUtils"
@@ -10,19 +12,15 @@ type CartState = {
   subtotal: number
 
   fetchCart: () => Promise<void>
-  addItem: (productId: string, qty?: number) => Promise<void>
-  updateItem: (productId: string, qty: number) => Promise<void>
-  removeItem: (productId: string) => Promise<void>
-  sizeItem: (size: string) => Promise<void>
+  addItem: (variantId: number, qty: number, size: string) => Promise<void>
+  updateItem: (variantId: number, qty: number, size: string) => Promise<void>
+  removeItem: (variantId: number, size: string) => Promise<void>
 }
 
 export const useCartStore = create<CartState>((set, get) => {
-  // central recalculation
-  const recalc = (cart: CartItem[]) => {
-    return calculateCartTotals(cart)
-  }
 
-  // single source setter
+  const recalc = (cart: CartItem[]) => calculateCartTotals(cart)
+
   const setCartState = (cart: CartItem[]) => {
     const { totalQty, subtotal } = recalc(cart)
 
@@ -50,49 +48,39 @@ export const useCartStore = create<CartState>((set, get) => {
         if (!res.ok) throw new Error(data.error)
 
         setCartState(data)
-        set({ loading: false })
 
       } catch (err: unknown) {
         set({
           error: err instanceof Error ? err.message : "Unknown error",
-          loading: false,
         })
+      } finally {
+        set({ loading: false })
       }
     },
 
-    addItem: async (variantId, qty = 1) => {
-      const prev = get()
-      set({ error: null })
+    // ✅ ADD ITEM (safe optimistic)
+    addItem: async (variantId, qty, size) => {
+      const prev = get().cart
 
-      const previousCart = prev.cart
+      const existing = prev.find(
+        i => i.variant_id === variantId && i.size === size
+      )
 
-      const existing = previousCart.find(i => i.variant_id === variantId)
-
-      let updatedCart: CartItem[]
-
+      // ✅ only optimistic if exists
       if (existing) {
-        updatedCart = previousCart.map(i =>
-          i.variant_id === variantId
+        const updated = prev.map(i =>
+          i.variant_id === variantId && i.size === size
             ? { ...i, quantity: i.quantity + qty }
             : i
         )
-      } else {
-        updatedCart = [
-          ...previousCart,
-          {
-            variant_id: variantId,
-            quantity: qty,
-          } as CartItem,
-        ]
-      }
 
-      // optimistic update (WITH totals)
-      setCartState(updatedCart)
+        setCartState(updated)
+      }
 
       try {
         const res = await fetch("/api/cart", {
           method: "POST",
-          body: JSON.stringify({ variantId, quantity: qty }),
+          body: JSON.stringify({ variantId, quantity: qty, size }),
           headers: { "Content-Type": "application/json" },
         })
 
@@ -101,33 +89,29 @@ export const useCartStore = create<CartState>((set, get) => {
         await get().fetchCart()
 
       } catch (err) {
-        // rollback (WITH totals)
-        setCartState(previousCart)
-
+        setCartState(prev)
         set({
           error: err instanceof Error ? err.message : "Unknown error",
         })
       }
     },
 
-    updateItem: async (variantId, qty) => {
-      const prev = get()
-      set({ error: null })
+    // 🟡 UPDATE ITEM
+    updateItem: async (variantId, qty, size) => {
+      const prev = get().cart
 
-      const previousCart = prev.cart
-
-      const updatedCart = previousCart.map(i =>
-        i.variant_id === variantId
+      const updated = prev.map(i =>
+        i.variant_id === variantId && i.size === size
           ? { ...i, quantity: qty }
           : i
       )
 
-      setCartState(updatedCart)
+      setCartState(updated)
 
       try {
         const res = await fetch("/api/cart", {
           method: "PATCH",
-          body: JSON.stringify({ variantId, quantity: qty }),
+          body: JSON.stringify({ variantId, quantity: qty, size }),
           headers: { "Content-Type": "application/json" },
         })
 
@@ -136,30 +120,27 @@ export const useCartStore = create<CartState>((set, get) => {
         await get().fetchCart()
 
       } catch (err) {
-        setCartState(previousCart)
-
+        setCartState(prev)
         set({
           error: err instanceof Error ? err.message : "Unknown error",
         })
       }
     },
 
-    removeItem: async (variantId) => {
-      const prev = get()
-      set({ error: null })
+    // 🔴 REMOVE ITEM
+    removeItem: async (variantId, size) => {
+      const prev = get().cart
 
-      const previousCart = prev.cart
-
-      const updatedCart = previousCart.filter(
-        i => i.variant_id !== variantId
+      const updated = prev.filter(
+        i => !(i.variant_id === variantId && i.size === size)
       )
 
-      setCartState(updatedCart)
+      setCartState(updated)
 
       try {
         const res = await fetch("/api/cart", {
           method: "DELETE",
-          body: JSON.stringify({ variantId }),
+          body: JSON.stringify({ variantId, size }),
           headers: { "Content-Type": "application/json" },
         })
 
@@ -168,16 +149,11 @@ export const useCartStore = create<CartState>((set, get) => {
         await get().fetchCart()
 
       } catch (err) {
-        setCartState(previousCart)
-
+        setCartState(prev)
         set({
           error: err instanceof Error ? err.message : "Unknown error",
         })
       }
     },
-
-    sizeItem: async(size) => {
-      
-    }
   }
 })

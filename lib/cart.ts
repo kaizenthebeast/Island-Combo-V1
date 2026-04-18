@@ -1,56 +1,62 @@
 import { createClient } from '@/lib/supabase/server';
 import type { CartItem, CartItemInput } from '@/types/cart'
 
-export type { CartItem, CartItemInput } from '@/types/cart'
-
 export async function getCart(userId: string): Promise<CartItem[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
+    .from("cart_view")
+    .select("*")
+    .eq("user_id", userId);
+  if (error) throw error;
+
+  return data as CartItem[];
+}
+
+
+export async function addToCart(item: CartItemInput) {
+  const supabase = await createClient()
+
+  // 1. check existing item (variant + size)
+  const { data: existing, error: fetchError } = await supabase
     .from('cart')
-    .select(`
-      id,
-      quantity,
-      added_at,
-      variant:product_variants (
-        id,
-        sku,
-        price,
-        stock,
-        image_url,
-        product:products (
-          id,
-          name,
-          slug,
-          discount,
-          is_active
-        )
-      )
-    `)
-    .eq('user_id', userId);
+    .select('id, quantity')
+    .eq('user_id', item.userId)
+    .eq('variant_id', item.variantId)
+    .eq('size', item.size)
+    .maybeSingle()
 
-  if (error) throw error;
+  if (fetchError) throw fetchError
 
-  return data as unknown as CartItem[];
+  // 2. if exists → update quantity
+  if (existing) {
+    const { data, error } = await supabase
+      .from('cart')
+      .update({
+        quantity: existing.quantity + item.quantity,
+      })
+      .eq('id', existing.id)
+
+    if (error) throw error
+
+    return data
+  }
+
+  // 3. else → insert new item
+  const { data, error } = await supabase
+    .from('cart')
+    .insert({
+      user_id: item.userId,
+      variant_id: item.variantId,
+      quantity: item.quantity,
+      size: item.size,
+    })
+
+  if (error) throw error
+
+  return data
 }
 
-
-export async function addToCart(items: CartItemInput) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.rpc(
-    'add_to_cart_increment',
-    {
-      p_user_id: items.userId,
-      p_variant_id: items.variantId,
-      p_quantity: items.quantity ?? 1,
-    }
-  );
-
-  if (error) throw error;
-
-  return data;
-}
 
 
 export async function updateCartQuantity(items: CartItemInput) {

@@ -6,6 +6,7 @@ import type { ProductDetails } from '@/types/product'
 import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import QuantityButton from './QuantityButton'
+import { useCartStore } from '@/store/cartStore'
 
 
 type Props = {
@@ -15,9 +16,30 @@ type Props = {
 const ProductDetails = ({ product }: Props) => {
     const defaultVariant = product.variants?.[0];
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
-    const [selectedSize, setSelectedSize] = useState('')
+    const [selectedSize, setSelectedSize] = useState<string | null>(null)
+
     const hasDiscount = product.discount !== null && product.discount > 0
-    const [quantity, setQuantity] = useState(0)
+    const [quantity, setQuantity] = useState(1)
+
+    // STORE
+    const { addItem, updateItem, removeItem } = useCartStore();
+
+    async function handleAddToCart() {
+        if (!selectedVariant) return
+
+        if (!selectedSize) {
+            alert("Please select a size")
+            return
+        }
+
+        if (quantity <= 0) return
+        console.log(selectedVariant.variant_id, quantity, selectedSize);
+
+        await addItem(selectedVariant.variant_id, quantity, selectedSize)
+
+        setQuantity(1)
+    }
+
 
     const productDetails = [
         { label: "Material", value: "Polypropylene" },
@@ -137,7 +159,7 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-md font-medium text-gray-700">Quantity</p>
 
                         {/* QUANTITY CONTROL */}
-                        <QuantityButton quantity={quantity} setQuantity={setQuantity}/>
+                        <QuantityButton quantity={quantity} setQuantity={setQuantity} />
 
                         {/* STATUS BADGE */}
                         {product.wholesale && (
@@ -155,7 +177,10 @@ const ProductDetails = ({ product }: Props) => {
 
                     {/* Add To Cart */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <Button className="flex-1 h-11 bg-[#900036] text-white rounded-full">
+                        <Button
+                            type='button'
+                            onClick={handleAddToCart}
+                            className="flex-1 h-11 bg-[#900036] text-white rounded-full">
                             <ShoppingCart />
                             Add to cart
                         </Button>
