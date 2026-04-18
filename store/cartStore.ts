@@ -10,7 +10,10 @@ type CartState = {
   error: string | null
   totalQty: number
   subtotal: number
+  quantityInput: number
 
+  incrementQty: () => void
+  decrementQty: () => void
   fetchCart: () => Promise<void>
   addItem: (variantId: number, qty: number, size: string) => Promise<void>
   updateItem: (variantId: number, qty: number, size: string) => Promise<void>
@@ -37,6 +40,19 @@ export const useCartStore = create<CartState>((set, get) => {
     error: null,
     totalQty: 0,
     subtotal: 0,
+    quantityInput: 1,
+
+    incrementQty: () => {
+      set((state) => ({
+        quantityInput: state.quantityInput + 1
+      }))
+    },
+
+    decrementQty: () => {
+      set((state) => ({
+        quantityInput: Math.max(1, state.quantityInput - 1),
+      }))
+    },
 
     fetchCart: async () => {
       try {

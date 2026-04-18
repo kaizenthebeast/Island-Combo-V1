@@ -4,11 +4,9 @@ import { Suspense } from 'react';
 
 const page = () => {
   return (
-    <div>
       <Suspense>
         <CheckoutContainer />
       </Suspense>
-    </div>
   )
 }
 

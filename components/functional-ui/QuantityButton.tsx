@@ -1,39 +1,34 @@
 'use client'
-import React, { useState, useMemo } from 'react'
 
-type Props = {
-    quantity: number
-    setQuantity: React.Dispatch<React.SetStateAction<number>>
-}
+import React from 'react'
+import { useCartStore } from '@/store/cartStore'
 
-const QuantityButton = ({ quantity, setQuantity }: Props) => {
-     const increment = () =>{
-        setQuantity((q) => q + 1);
-     }
-
-     const decrement = () =>{
-          setQuantity((q) => Math.max(0, q - 1))
-     }
+const QuantityButton = () => {
+    const {
+        quantityInput,
+        incrementQty,
+        decrementQty,
+    } = useCartStore()
 
     return (
         <div className="flex items-center gap-2">
 
             <button
                 type="button"
-                onClick={decrement}
-                disabled={quantity === 0}
+                onClick={decrementQty}
+                disabled={quantityInput <= 1}
                 className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
             >
                 −
             </button>
 
             <span className="min-w-[20px] text-center font-medium">
-                {quantity}
+                {quantityInput}
             </span>
 
             <button
                 type="button"
-                onClick={increment}
+                onClick={incrementQty}
                 className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
             >
                 +

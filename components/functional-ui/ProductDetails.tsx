@@ -19,10 +19,10 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
     const hasDiscount = product.discount !== null && product.discount > 0
-    const [quantity, setQuantity] = useState(1)
+
 
     // STORE
-    const { addItem} = useCartStore();
+    const { addItem , quantityInput} = useCartStore();
 
     async function handleAddToCart() {
         if (!selectedVariant) return
@@ -32,12 +32,10 @@ const ProductDetails = ({ product }: Props) => {
             return
         }
 
-        if (quantity <= 0) return
-        console.log(selectedVariant.variant_id, quantity, selectedSize);
+        if (quantityInput <= 0) return
+        console.log(selectedVariant.variant_id, quantityInput, selectedSize);
 
-        await addItem(selectedVariant.variant_id, quantity, selectedSize)
-
-        setQuantity(1)
+        await addItem(selectedVariant.variant_id, quantityInput, selectedSize)
     }
 
 
@@ -167,7 +165,7 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-md font-medium text-gray-700">Quantity</p>
 
                         {/* QUANTITY CONTROL */}
-                        <QuantityButton quantity={quantity} setQuantity={setQuantity} />
+                        <QuantityButton/>
 
                         {/* STATUS BADGE */}
                         {product.wholesale && (
