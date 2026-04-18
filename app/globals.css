@@ -76,6 +76,9 @@
   .title-header{
     @apply text-3xl font-bold tracking-tight;
   }
+  .section-container{
+    @apply flex min-h-svh max-w-7xl mx-auto items-center justify-center md:p-5;
+  }
 
 }
 
