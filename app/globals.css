@@ -69,7 +69,16 @@
 
 @theme inline{
    --primary-color: oklch(0.38 0.19 350);
+   
 }
+
+@layer components{
+  .title-header{
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+}
+
 
 /* Chrome, Safari, Edge */
 .no-spinner::-webkit-outer-spin-button,
