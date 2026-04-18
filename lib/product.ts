@@ -1,57 +1,84 @@
 import { createClient } from './supabase/server'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
-import type {Variant, Product} from '@/types/product'
+import type { ProductCatalogItem, ProductDetails } from '@/types/product'
 
 
 
-function mapProduct(product: Product): Product {
+function mapCatalogProduct(product: ProductCatalogItem): ProductCatalogItem {
     return {
-        id: product.id,
+        product_id: product.product_id,
+        name: product.name,
+        slug: product.slug,
+        wholesale: product.wholesale,
+        discount: product.discount,
+
+        category_id: product.category_id,
+        category_name: product.category_name,
+
+        base_price: product.base_price,
+        final_price: product.final_price,
+        image_url: product.image_url
+            ? getPublicImageUrl(product.image_url)
+            : null,
+    }
+}
+
+
+function mapProductDetails(product: ProductDetails): ProductDetails {
+    return {
+        product_id: product.product_id,
         name: product.name,
         description: product.description,
         slug: product.slug,
         discount: product.discount,
         wholesale: product.wholesale,
         is_active: product.is_active,
-        created_at: product.created_at,
         category: product.category,
 
-        variants: (product.variants || []).map((v: Variant) => ({
-            ...v,
-            image_url: v.image_url
-                ? getPublicImageUrl(v.image_url)
-                : '/images/placeholder.png',
+        variants: (product.variants || []).map((v) => ({
+            variant_id: v.variant_id,
+            sku: v.sku,
+            price: v.price,
+            final_price: v.final_price,
+            stock: v.stock,
 
-            variant_attributes: v.variant_attributes || [],
+            // DB → storage → public URL
+            image_url: v.image_url?.length
+                ? v.image_url.map((img) =>
+                    getPublicImageUrl(img) ?? '/images/placeholder.png'
+                  )
+                : ['/images/placeholder.png'],
+
+            is_active: v.is_active,
+
+            attributes: v.attributes || [],
         })),
-
-        lowest_price: product.lowest_price,
     }
 }
 
 
-export async function getAllProducts(): Promise<Product[]> {
+export async function getAllProducts(): Promise<ProductCatalogItem[]> {
     const supabase = await createClient()
 
     const { data, error } = await supabase
-        .from('product_catalog_view')
+        .from('product_catalog_mv')
         .select('*')
 
     if (error) throw new Error(error.message)
 
-    return (data || []).map(mapProduct)
+    return (data ?? []).map(mapCatalogProduct)
 }
 
-export async function getProductBySlug(slug: string): Promise<Product> {
+
+
+export async function getProductBySlug(slug: string): Promise<ProductDetails> {
     const supabase = await createClient()
 
     const { data, error } = await supabase
-        .from('product_catalog_view')
-        .select('*')
-        .eq('slug', slug)
-        .single()
+        .rpc('get_product_details', { p_slug: slug })
 
     if (error) throw new Error(error.message)
 
-    return mapProduct(data)
+    return mapProductDetails(data)
 }
+

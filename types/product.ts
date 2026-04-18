@@ -1,36 +1,53 @@
-export type Category = {
-    id: string
+export type ProductCatalogItem = {
+  product_id: number
+  name: string
+  slug: string
+  wholesale: boolean
+  discount: number | null
+
+  category_id: number | null
+  category_name: string | null
+
+  base_price: number
+  final_price: number
+
+  // ✅ NEW: catalog preview image
+  image_url: string | null
+}
+
+
+
+
+export type ProductDetails = {
+  product_id: number
+  name: string
+  description: string | null
+  slug: string
+  discount: number | null
+  wholesale: boolean
+  is_active: boolean
+
+  category: {
+    category_id: number
     name: string
-}
+  } | null
 
-export type VariantAttribute = {
-    id: string
-    attribute_name: string
-    attribute_value: string
-}
-
-export type Variant = {
-    id: string
+  variants: {
+    variant_id: number
     sku: string
     price: number
-    stock: number
-    image_url: string
     final_price: number
-    variant_attributes: VariantAttribute[]
-}
+    stock: number
 
-export type Product = {
-    id: string
-    name: string
-    description: string | null
-    slug: string
-    discount: number
-    wholesale: boolean
+    // ⚠️ FIX: DB returns string[]
+    image_url: string[]
+
     is_active: boolean
-    created_at: string
-    category: Category
 
-    variants: Variant[]
-
-    lowest_price: number
+    attributes: {
+      name: string
+      value: string
+    }[]
+  }[]
 }
+

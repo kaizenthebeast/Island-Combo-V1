@@ -8,9 +8,9 @@ const ProductContainer = async () => {
     const products = await getAllProducts();
 
     return (
-        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 w-full place-items-center'>
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 w-full place-items-center'>
             {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.product_id} product={product} />
             ))}
      
         </div>
