@@ -5,7 +5,8 @@ import Image from 'next/image'
 import type { ProductDetails } from '@/types/product'
 import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useCartStore } from '@/store/cartStore'
+import QuantityButton from './QuantityButton'
+
 
 type Props = {
     product: ProductDetails
@@ -16,6 +17,7 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState('')
     const hasDiscount = product.discount !== null && product.discount > 0
+    const [quantity, setQuantity] = useState(0)
 
     const productDetails = [
         { label: "Material", value: "Polypropylene" },
@@ -135,27 +137,8 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-md font-medium text-gray-700">Quantity</p>
 
                         {/* QUANTITY CONTROL */}
-                        <div className="flex items-center gap-2">
+                        <QuantityButton quantity={quantity} setQuantity={setQuantity}/>
 
-                            <button
-                                type="button"
-                                className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
-                            >
-                                −
-                            </button>
-
-                            <span className="min-w-[20px] text-center font-medium">
-                                0
-                            </span>
-
-                            <button
-                                type="button"
-                                className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
-                            >
-                                +
-                            </button>
-
-                        </div>
                         {/* STATUS BADGE */}
                         {product.wholesale && (
                             <div className="flex items-center gap-2 text-white bg-green-500 px-4 py-2 rounded-md w-fit ">
@@ -170,7 +153,7 @@ const ProductDetails = ({ product }: Props) => {
                     </div>
 
 
-                    {/* ACTIONS */}
+                    {/* Add To Cart */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <Button className="flex-1 h-11 bg-[#900036] text-white rounded-full">
                             <ShoppingCart />
@@ -192,7 +175,7 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
             </div>
             {/* Product Details */}
-            <div className='flex flex-col w-1/3 lg:mt-12 md:mt-8 mt-6 space-y-3'>
+            <div className='flex flex-col md:w-1/3 w-full lg:mt-12 md:mt-8 mt-6 space-y-3'>
                 <h2 className='title-header'>Product Details</h2>
                 {productDetails.map((item, index) => (
                     <div key={index} className='flex flex-wrap items-center justify-between'>
