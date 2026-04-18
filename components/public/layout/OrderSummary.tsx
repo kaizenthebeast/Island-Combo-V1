@@ -1,19 +1,20 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import QuantityButton from '../../functional-ui/QuantityButton'
-import { X } from 'lucide-react';
+import { X, CircleCheckBig } from 'lucide-react';
 
 const OrderSummary = () => {
+    const [update, setUpdate] = useState(false);
     return (
         <div className="flex flex-col space-y-4 w-full">
             <h2 className="title-header">Order Summary</h2>
 
             {/* Product Card */}
-            <div className="grid grid-cols-[160px_1fr] gap-4 h-36">
+            <div className="grid grid-cols-[180px_1fr] gap-5 h-38">
 
                 {/* Image (fixed size) */}
-                <div className="relative w-[120px] h-[120px] bg-gray-100 rounded-md overflow-hidden">
+                <div className="relative w-full h-full bg-gray-100 rounded-md overflow-hidden">
                     <Image
                         src="/images/placeholder.png"
                         alt="product"
@@ -28,7 +29,7 @@ const OrderSummary = () => {
 
                     {/* Top row: title + remove */}
                     <div className="flex justify-between items-start">
-                        <h4 className="text-base font-medium line-clamp-2">
+                        <h4 className="text-1xl font-medium line-clamp-2">
                             Gamma 24 Medium Hard Case Zipperclass
                         </h4>
                         <button
@@ -39,10 +40,23 @@ const OrderSummary = () => {
                         </button>
                     </div>
                     <div>
-                        <p className='text-sm text-slate-100'>Size: M</p>
+                        <p className='text-sm'>Size: M</p>
                     </div>
+                    {/* QUANTITY AND PRICING */}
                     <div className='flex items-center justify-between flex-wrap'>
-                        <QuantityButton />
+                        <div className='flex gap-2'>
+                            <button type='button' onClick={() => setUpdate(prev => !prev)}>
+                                {update ? 'Cancel' : 'Update'}
+                            </button>
+                            {update && (
+                                <QuantityButton />
+                            )}
+                            {/* Only shows if the quantity change */}
+                            {update && (
+                                <button type='button'>Save</button>
+                            )}
+
+                        </div>
                         {/* Pricing */}
                         <div className='flex items-center gap-2'>
                             <p className="text-2xl font-bold text-[#900036]">$400</p>
@@ -57,7 +71,11 @@ const OrderSummary = () => {
                         </div>
                     </div>
 
-
+                    {/* WHOLESALE */}
+                    <div className='py-2 px-2 bg-green-200 flex items-center gap-2 rounded-md'>
+                        <CircleCheckBig />
+                            <p>Wholesale pricing applied to your order!</p>
+                    </div>
                 </div>
             </div>
         </div>
