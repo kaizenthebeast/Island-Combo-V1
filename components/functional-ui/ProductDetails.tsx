@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import type { ProductDetails } from '@/types/product'
 import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
@@ -17,12 +17,9 @@ const ProductDetails = ({ product }: Props) => {
     const defaultVariant = product.variants?.[0];
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
-
-    const hasDiscount = product.discount !== null && product.discount > 0
-
-
+    const hasDiscount = product.discount !== null && product.discount > 0;
     // STORE
-    const { addItem , quantityInput} = useCartStore();
+    const { addItem, quantityInput, resetQuantity } = useCartStore();
 
     async function handleAddToCart() {
         if (!selectedVariant) return
@@ -37,6 +34,10 @@ const ProductDetails = ({ product }: Props) => {
 
         await addItem(selectedVariant.variant_id, quantityInput, selectedSize)
     }
+
+    useEffect(() => {
+        resetQuantity(); // 👈 resets to 1 when component loads
+    }, []); 
 
 
     const productDetails = [
@@ -165,7 +166,7 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-md font-medium text-gray-700">Quantity</p>
 
                         {/* QUANTITY CONTROL */}
-                        <QuantityButton/>
+                        <QuantityButton />
 
                         {/* STATUS BADGE */}
                         {product.wholesale && (
