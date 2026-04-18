@@ -61,6 +61,7 @@ const ProductDetails = ({ product }: Props) => {
                         src={selectedVariant.image_url[0] ?? 'images/placeholder.png'}
                         alt={product.name}
                         fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover rounded-xl"
                         priority
                     />
@@ -115,7 +116,14 @@ const ProductDetails = ({ product }: Props) => {
                                         onClick={() => setSelectedVariant(variant)}
                                         className={`w-20 h-20 relative overflow-hidden border rounded-md
                                   ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}>
-                                        <Image src={variant.image_url?.[0]} fill className='object-cover' alt='variant-image' />
+                                        <Image
+                                            src={variant.image_url?.[0] ?? '/images/placeholder.png'}
+                                            fill
+                                            sizes="80px"
+                                            className="object-cover"
+                                            alt="variant-image"
+                                            loading="eager"
+                                        />
                                     </button>
                                 )
                             })}
