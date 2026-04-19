@@ -104,7 +104,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
 
             {/* CHECKOUT */}
             <Link
-                href="/protected/address"
+                href="/checkout/address"
                 className="w-full bg-[#900036] text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
             >
                 Checkout
