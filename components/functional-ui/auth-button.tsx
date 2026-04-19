@@ -4,6 +4,8 @@ import { LogoutButton } from "./logout-button";
 import CartCount from "../functional-ui/CartCount";
 import { ShoppingCart, Heart, User } from "lucide-react";
 
+
+
 export async function AuthButton() {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();

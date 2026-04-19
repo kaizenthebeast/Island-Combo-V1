@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { CircleDollarSign } from "lucide-react";
 import PromoCodeForm from '../forms/PromoCodeForm';
+import { Switch } from '@/components/ui/switch';
 
 import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { calculateTotals } from '@/helper/pricing/calculateTotals';
@@ -50,16 +51,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
                     </div>
                 </div>
 
-                <button
-                    onClick={toggleLoyalty}
-                    className={`w-11 h-6 flex items-center rounded-full p-1 transition 
-                        ${loyaltyEnabled ? "bg-[#900036]" : "bg-gray-300"}`}
-                >
-                    <div
-                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition 
-                            ${loyaltyEnabled ? "translate-x-5" : ""}`}
-                    />
-                </button>
+                <Switch checked={loyaltyEnabled} onCheckedChange={toggleLoyalty} />
             </div>
 
             <hr />
