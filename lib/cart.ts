@@ -18,6 +18,7 @@ export async function getCart(userId: string): Promise<CartItem[]> {
     .from('cart_view')
     .select('*')
     .eq('user_id', userId)
+    .order('created_at', {ascending: false})
 
   if (error) throw new Error(error.message)
 
