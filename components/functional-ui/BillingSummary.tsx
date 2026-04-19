@@ -13,7 +13,7 @@ type Props = {
 };
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
-    const { promo, loyaltyEnabled, setPromo, toggleLoyalty} = useCheckoutStore();
+    const { promo, loyaltyEnabled, setPromo, toggleLoyalty } = useCheckoutStore();
     const loyaltyDiscount = loyaltyEnabled ? 3 : 0;
     const { discount, total } = useMemo(() => {
         return calculateTotals({
@@ -103,10 +103,13 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
 
             {/* CHECKOUT */}
             <button
+
                 type="button"
                 className="w-full bg-[#900036] text-white py-3 rounded-full font-medium hover:opacity-90 transition"
             >
-                Checkout
+                <a href="protected/address">
+                    Checkout
+                </a>
             </button>
 
         </div>
