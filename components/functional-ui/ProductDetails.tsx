@@ -36,7 +36,7 @@ const ProductDetails = ({ product }: Props) => {
     }
 
     useEffect(() => {
-        resetQuantity(); // 👈 resets to 1 when component loads
+        resetQuantity();
     }, []); 
 
 

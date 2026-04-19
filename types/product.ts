@@ -32,7 +32,7 @@ export type ProductDetails = {
     final_price: number
     stock: number
     image_url: string[]
-    is_active: boolean
+    
     attributes: {
       name: string
       value: string
