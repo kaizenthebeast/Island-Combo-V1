@@ -11,9 +11,6 @@ export type ProductCatalogItem = {
   image_url: string | null
 }
 
-
-
-
 export type ProductDetails = {
   product_id: number
   name: string
@@ -42,4 +39,3 @@ export type ProductDetails = {
     }[]
   }[]
 }
-
