@@ -6,6 +6,7 @@ import PromoCodeForm from '../forms/PromoCodeForm';
 
 import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { calculateTotals } from '@/helper/pricing/calculateTotals';
+import Link from 'next/link';
 
 type Props = {
     totalQty: number;
@@ -102,15 +103,12 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
             </div>
 
             {/* CHECKOUT */}
-            <button
-
-                type="button"
-                className="w-full bg-[#900036] text-white py-3 rounded-full font-medium hover:opacity-90 transition"
+            <Link
+                href="/protected/address"
+                className="w-full bg-[#900036] text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
             >
-                <a href="protected/address">
-                    Checkout
-                </a>
-            </button>
+                Checkout
+            </Link>
 
         </div>
     );
