@@ -131,10 +131,20 @@ const OrderSummary = ({ cartItems }: Props) => {
                                                 </button>
                                             )}
                                         </div>
+                                        <div className='flex items-center gap-3 flex-wrap'>
+                                            <p className="text-xl font-bold text-[#900036]">
+                                                ${item.final_price}
+                                            </p>
+                                            {item.discount && (
+                                                <>
+                                                    <p className='text-sm text-gray-400 line-through'>{item.price}</p>
+                                                    <p className='text-sm bg-pink-100 text-pink-600 px-2 py-0.5 rounded'>
+                                                        -{item.discount}%
+                                                    </p>
+                                                </>
+                                            )}
+                                        </div>
 
-                                        <p className="text-xl font-bold text-[#900036]">
-                                            ${item.final_price.toFixed(2)}
-                                        </p>
                                     </div>
                                 </div>
 

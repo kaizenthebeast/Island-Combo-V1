@@ -11,16 +11,18 @@ type CartState = {
 
   incrementQty: () => void
   decrementQty: () => void
+
   fetchCart: () => Promise<void>
+
   addItem: (variantId: number, qty: number, size: string) => Promise<void>
   updateItem: (variantId: number, qty: number, size: string) => Promise<void>
   removeItem: (variantId: number, size: string) => Promise<void>
+
   resetQuantity: () => void
   clearCart: () => void
 }
 
 export const useCartStore = create<CartState>((set, get) => {
-
   const recalc = (cart: CartItem[]) => calculateCartTotals(cart)
 
   const setCartState = (cart: CartItem[]) => {
@@ -33,6 +35,13 @@ export const useCartStore = create<CartState>((set, get) => {
     })
   }
 
+  const applyOptimistic = (updater: (cart: CartItem[]) => CartItem[]) => {
+    const current = get().cart
+    const updated = updater(current)
+    setCartState(updated)
+    return current
+  }
+
   return {
     cart: [],
     error: null,
@@ -40,17 +49,15 @@ export const useCartStore = create<CartState>((set, get) => {
     subtotal: 0,
     quantityInput: 1,
 
-    incrementQty: () => {
+    incrementQty: () =>
       set((state) => ({
-        quantityInput: state.quantityInput + 1
-      }))
-    },
+        quantityInput: state.quantityInput + 1,
+      })),
 
-    decrementQty: () => {
+    decrementQty: () =>
       set((state) => ({
         quantityInput: Math.max(1, state.quantityInput - 1),
-      }))
-    },
+      })),
 
     fetchCart: async () => {
       try {
@@ -59,10 +66,9 @@ export const useCartStore = create<CartState>((set, get) => {
         const res = await fetch("/api/cart")
         const data = await res.json()
 
-        if (!res.ok) throw new Error(data.error)
+        if (!res.ok) throw new Error(data.error || "Fetch failed")
 
         setCartState(data)
-
       } catch (err: unknown) {
         set({
           error: err instanceof Error ? err.message : "Unknown error",
@@ -72,22 +78,28 @@ export const useCartStore = create<CartState>((set, get) => {
 
     // ADD ITEM
     addItem: async (variantId, qty, size) => {
-      const prev = get().cart
+      const prev = applyOptimistic((cart) => {
+        const exists = cart.find(
+          (i) => i.variant_id === variantId && i.size === size
+        )
 
-      const existing = prev.find(
-        i => i.variant_id === variantId && i.size === size
-      )
+        if (!exists) {
+          return [
+            ...cart,
+            {
+              variant_id: variantId,
+              quantity: qty,
+              size,
+            } as CartItem,
+          ]
+        }
 
-      // only optimistic if exists
-      if (existing) {
-        const updated = prev.map(i =>
+        return cart.map((i) =>
           i.variant_id === variantId && i.size === size
             ? { ...i, quantity: i.quantity + qty }
             : i
         )
-
-        setCartState(updated)
-      }
+      })
 
       try {
         const res = await fetch("/api/cart", {
@@ -98,7 +110,8 @@ export const useCartStore = create<CartState>((set, get) => {
 
         if (!res.ok) throw new Error("Failed to add item")
 
-        await get().fetchCart()
+        // Optional: silent sync (non-blocking UX)
+        // get().fetchCart()
 
       } catch (err) {
         setCartState(prev)
@@ -110,15 +123,13 @@ export const useCartStore = create<CartState>((set, get) => {
 
     // UPDATE ITEM
     updateItem: async (variantId, qty, size) => {
-      const prev = get().cart
-
-      const updated = prev.map(i =>
-        i.variant_id === variantId && i.size === size
-          ? { ...i, quantity: qty }
-          : i
+      const prev = applyOptimistic((cart) =>
+        cart.map((i) =>
+          i.variant_id === variantId && i.size === size
+            ? { ...i, quantity: qty }
+            : i
+        )
       )
-
-      setCartState(updated)
 
       try {
         const res = await fetch("/api/cart", {
@@ -129,8 +140,8 @@ export const useCartStore = create<CartState>((set, get) => {
 
         if (!res.ok) throw new Error("Update failed")
 
-        await get().fetchCart()
-
+        // optional background sync
+        // get().fetchCart()
       } catch (err) {
         setCartState(prev)
         set({
@@ -141,13 +152,11 @@ export const useCartStore = create<CartState>((set, get) => {
 
     // REMOVE ITEM
     removeItem: async (variantId, size) => {
-      const prev = get().cart
-
-      const updated = prev.filter(
-        i => !(i.variant_id === variantId && i.size === size)
+      const prev = applyOptimistic((cart) =>
+        cart.filter(
+          (i) => !(i.variant_id === variantId && i.size === size)
+        )
       )
-
-      setCartState(updated)
 
       try {
         const res = await fetch("/api/cart", {
@@ -158,8 +167,8 @@ export const useCartStore = create<CartState>((set, get) => {
 
         if (!res.ok) throw new Error("Remove failed")
 
-        await get().fetchCart()
-
+        // optional background sync
+        // get().fetchCart()
       } catch (err) {
         setCartState(prev)
         set({
@@ -169,14 +178,14 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     resetQuantity: () => set({ quantityInput: 1 }),
-    clearCart: () => {
+
+    clearCart: () =>
       set({
         cart: [],
         error: null,
         totalQty: 0,
         subtotal: 0,
         quantityInput: 1,
-      })
-    },
+      }),
   }
 })
