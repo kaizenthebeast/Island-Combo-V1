@@ -27,9 +27,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith(route)
   );
 
-  // 🚨 BLOCK BOTH:
-  // 1. NO USER
-  // 2. ANONYMOUS USER
+  // BLOCK BOTH: 1. NO USER 2. ANONYMOUS USER
   const isBlocked = !user || user.is_anonymous;
 
   if (isProtected && isBlocked) {

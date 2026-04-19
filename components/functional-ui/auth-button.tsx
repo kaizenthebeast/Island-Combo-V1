@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
 import CartCount from "../functional-ui/CartCount";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, User } from "lucide-react";
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -25,15 +25,16 @@ export async function AuthButton() {
       <Link href="/">
         <Heart size={22} />
       </Link>
+      {isAuthenticated && (
+        <Link href="/protected/user_details">
+          <User size={22} />
+        </Link>
+      )}
     </div>
   );
 
   return isAuthenticated ? (
     <div className="flex items-center gap-9">
-      <span className="hidden md:block text-sm">
-        Hey, {user.email}
-      </span>
-
       <Actions />
 
       <LogoutButton />
