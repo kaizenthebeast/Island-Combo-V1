@@ -1,23 +1,33 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server'
+import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 import type { CartItem, CartItemInput } from '@/types/cart'
 
+
+function mapCartItem(item: CartItem): CartItem {
+  return {
+    ...item,
+    image_url: getPublicImageUrl(item.image_url),
+  }
+}
+
+
 export async function getCart(userId: string): Promise<CartItem[]> {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from("cart_view")
-    .select("*")
-    .eq("user_id", userId);
-  if (error) throw error;
+    .from('cart_view')
+    .select('*')
+    .eq('user_id', userId)
 
-  return data as CartItem[];
+  if (error) throw new Error(error.message)
+
+  return (data ?? []).map(mapCartItem)
 }
 
 
 export async function addToCart(item: CartItemInput) {
   const supabase = await createClient()
 
-  // 1. check existing item (variant + size)
   const { data: existing, error: fetchError } = await supabase
     .from('cart')
     .select('id, quantity')
@@ -28,7 +38,6 @@ export async function addToCart(item: CartItemInput) {
 
   if (fetchError) throw fetchError
 
-  // 2. if exists → update quantity
   if (existing) {
     const { data, error } = await supabase
       .from('cart')
@@ -38,11 +47,9 @@ export async function addToCart(item: CartItemInput) {
       .eq('id', existing.id)
 
     if (error) throw error
-
     return data
   }
 
-  // 3. else → insert new item
   const { data, error } = await supabase
     .from('cart')
     .insert({
@@ -52,44 +59,33 @@ export async function addToCart(item: CartItemInput) {
       size: item.size,
     })
 
-  if (error) {
-    console.error("INSERT ERROR:", error)
-    throw error
-  }
-
+  if (error) throw error
   return data
 }
 
 
-
 export async function updateCartQuantity(items: CartItemInput) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('cart')
     .update({ quantity: items.quantity ?? 1 })
     .eq('user_id', items.userId)
-    .eq('variant_id', items.variantId);
+    .eq('variant_id', items.variantId)
 
-  if (error) {
-    console.error("UPDATE ERROR:", error)
-    throw error
-  }
-  return data;
+  if (error) throw error
+  return data
 }
 
 
 export async function removeFromCart(items: CartItemInput) {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
   const { error } = await supabase
     .from('cart')
     .delete()
     .eq('user_id', items.userId)
-    .eq('variant_id', items.variantId);
+    .eq('variant_id', items.variantId)
 
-  if (error) {
-    console.error("INSERT ERROR:", error)
-    throw error
-  }
+  if (error) throw error
 }

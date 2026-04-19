@@ -46,13 +46,14 @@ const OrderSummary = ({ cartItems }: Props) => {
                             </h4>
                             <button
                                 type="button"
+                                onClick={() => removeItem(item.variant_id, item.size)}
                                 className="text-red-500 hover:text-red-700 shrink-0"
                             >
                                 <X size={18} />
                             </button>
                         </div>
 
-                        <p className="text-sm mt-1">{item.sku}</p>
+                        <p className="text-sm mt-1">Size: {item.size}</p>
 
                         {/* Controls + Pricing */}
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">

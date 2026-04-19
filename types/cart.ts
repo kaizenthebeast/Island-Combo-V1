@@ -3,7 +3,7 @@ export type CartItem = {
   user_id: string
   variant_id: number
   quantity: number
-  size: string | null
+  size: string
 
   // product fields (from view)
   product_id: number
