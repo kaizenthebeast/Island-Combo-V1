@@ -1,32 +1,20 @@
 'use client'
 import React, { useState } from 'react'
 import { CircleDollarSign } from "lucide-react"
+import PromoCodeForm from '../forms/PromoCodeForm'
 
-const BillingSummary = () => {
-      const [loyalty, setLoyalty] = useState(true)
+type Props = {
+    totalQty: number
+    subtotal: number
+}
+
+const BillingSummary = ({ totalQty, subtotal }: Props) => {
+    const [loyalty, setLoyalty] = useState(true)
     return (
         <div className="bg-gray-50 rounded-2xl p-5 space-y-6">
 
             {/* PROMO */}
-            <div className="space-y-3">
-                <h3 className="text-base font-semibold">
-                    Apply Promo Code
-                </h3>
-
-                <div className="flex items-center gap-3">
-                    <input
-                        type="text"
-                        placeholder="Promo code"
-                        className="flex-1 bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#900036]"
-                    />
-                    <button
-                        type="button"
-                        className="text-[#900036] font-medium text-sm"
-                    >
-                        Apply
-                    </button>
-                </div>
-            </div>
+            <PromoCodeForm />
 
             {/* LOYALTY */}
             <div className="flex items-center justify-between">
@@ -49,13 +37,10 @@ const BillingSummary = () => {
                 {/* Toggle */}
                 <button
                     onClick={() => setLoyalty(!loyalty)}
-                    className={`w-11 h-6 flex items-center rounded-full p-1 transition ${loyalty ? "bg-[#900036]" : "bg-gray-300"
-                        }`}
-                >
-                    <div
-                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${loyalty ? "translate-x-5" : ""
-                            }`}
-                    />
+                    className={`w-11 h-6 flex items-center rounded-full p-1 transition 
+                        ${loyalty ? "bg-[#900036]" : "bg-gray-300"
+                        }`}>
+                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition${loyalty ? "translate-x-5" : ""}`} />
                 </button>
             </div>
 
@@ -65,14 +50,14 @@ const BillingSummary = () => {
             <div className="space-y-4">
 
                 <h3 className="text-lg font-semibold">
-                    Order Summary
+                    Billing Summary
                 </h3>
 
                 <div className="space-y-3 text-sm">
 
                     <div className="flex justify-between text-gray-700">
-                        <span>Subtotal (14 items)</span>
-                        <span>$81,589.00</span>
+                        <span>Subtotal ({totalQty} items)</span>
+                        <span>${subtotal.toFixed(2)}</span>
                     </div>
 
                     <div className="flex justify-between text-green-600">

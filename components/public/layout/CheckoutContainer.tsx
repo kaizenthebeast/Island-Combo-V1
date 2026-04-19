@@ -6,7 +6,7 @@ import OrderSummary from "@/components/functional-ui/OrderSummary"
 import { useCartStore } from "@/store/cartStore"
 
 const CheckoutContainer = () => {
-  const { cart, fetchCart} = useCartStore()
+  const { cart, fetchCart, totalQty, subtotal} = useCartStore()
 
   useEffect(() => {
     fetchCart()
@@ -21,7 +21,7 @@ const CheckoutContainer = () => {
       </div>
 
       <div className="w-full md:w-1/3">
-        <BillingSummary />
+        <BillingSummary totalQty={totalQty} subtotal={subtotal}/>
       </div>
 
     </div>
