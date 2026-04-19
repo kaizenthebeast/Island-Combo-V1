@@ -5,7 +5,7 @@ import Image from 'next/image'
 import type { ProductDetails } from '@/types/product'
 import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import QuantityButton from './QuantityButton'
+import ProductQuantityButton from './ProductQuantityButton'
 import { useCartStore } from '@/store/cartStore'
 
 
@@ -166,7 +166,7 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-md font-medium text-gray-700">Quantity</p>
 
                         {/* QUANTITY CONTROL */}
-                        <QuantityButton />
+                        <ProductQuantityButton />
 
                         {/* STATUS BADGE */}
                         {product.wholesale && (

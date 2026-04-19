@@ -3,7 +3,7 @@
 import React from 'react'
 import { useCartStore } from '@/store/cartStore'
 
-const QuantityButton = () => {
+const ProductQuantityButton = () => {
     const {
         quantityInput,
         incrementQty,
@@ -38,4 +38,4 @@ const QuantityButton = () => {
     )
 }
 
-export default QuantityButton
+export default ProductQuantityButton

@@ -6,7 +6,6 @@ import { calculateCartTotals } from "@/helper/cartUtils"
 
 type CartState = {
   cart: CartItem[]
-  loading: boolean
   error: string | null
   totalQty: number
   subtotal: number
@@ -37,7 +36,6 @@ export const useCartStore = create<CartState>((set, get) => {
 
   return {
     cart: [],
-    loading: false,
     error: null,
     totalQty: 0,
     subtotal: 0,
@@ -57,7 +55,7 @@ export const useCartStore = create<CartState>((set, get) => {
 
     fetchCart: async () => {
       try {
-        set({ loading: true, error: null })
+        set({ error: null })
 
         const res = await fetch("/api/cart")
         const data = await res.json()
@@ -70,8 +68,6 @@ export const useCartStore = create<CartState>((set, get) => {
         set({
           error: err instanceof Error ? err.message : "Unknown error",
         })
-      } finally {
-        set({ loading: false })
       }
     },
 
