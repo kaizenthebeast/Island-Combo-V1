@@ -35,13 +35,11 @@ export function SignUpForm() {
   const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
     setMessage("");
     setIsLoading(true);
+
     const supabase = createClient();
 
     try {
-      //Get the anonymous user
-      const { data: sessionData } = await supabase.auth.getSession();
-      const guestId = sessionData?.session?.user?.id ?? null;
-
+      const guestId = localStorage.getItem("guest_id");
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -49,18 +47,21 @@ export function SignUpForm() {
           emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
         },
       });
-      if (error) throw error;
-      const newUserId = signUpData.user?.id
 
-      //Merge cart if there was an anonymous session
-      if (guestId && signUpData && guestId !== newUserId) {
+      if (error) throw error;
+
+      const newUserId = signUpData.user?.id;
+      if (guestId && newUserId && guestId !== newUserId) {
         try {
           await supabase.rpc("merge_cart", {
             p_old_user_id: guestId,
             p_new_user_id: newUserId,
           });
+
+          // cleanup
+          localStorage.removeItem("guest_id");
         } catch (mergeError) {
-          console.error("Cart merge error:", mergeError)
+          console.error("Cart merge error:", mergeError);
         }
       }
 
@@ -76,11 +77,24 @@ export function SignUpForm() {
 
   const googleSignUp = async () => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
-    if (error) console.error("Google OAuth error:", error.message);
+
+    try {
+      const guestId = localStorage.getItem("guest_id");
+      if (guestId) {
+        document.cookie = `guest_id=${guestId}; path=/; max-age=600`;
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (err) {
+      console.error("Google OAuth error:", err);
+    }
   };
 
   return (
@@ -94,7 +108,7 @@ export function SignUpForm() {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        
+
             {/* Email */}
             <div>
               <Label>Email</Label>

@@ -29,35 +29,38 @@ export function LoginForm() {
   const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     setMessage("");
     setIsLoading(true);
+
     const supabase = createClient();
 
     try {
-      //Get the anonymous user
-      const { data: sessionData } = await supabase.auth.getSession();
-      const guestId = sessionData?.session?.user?.id;
+      const guestId = localStorage.getItem("guest_id");
 
-      //Sign in with password
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password
-      })
-      if (error) {
-        throw error
-      }
+      // Sign in
+      const { data: signInData, error } =
+        await supabase.auth.signInWithPassword({
+          email: data.email,
+          password: data.password,
+        });
+
+      if (error) throw error;
 
       const authUserId = signInData.session?.user.id;
 
-      //Merge cart if anonymous session existed
+      //merge cart
       if (guestId && authUserId && guestId !== authUserId) {
         try {
           await supabase.rpc("merge_cart", {
             p_old_user_id: guestId,
             p_new_user_id: authUserId,
           });
+
+          // cleanup after successful merge
+          localStorage.removeItem("guest_id");
         } catch (mergeError) {
-          console.error("Cart merge error:", mergeError)
+          console.error("Cart merge error:", mergeError);
         }
       }
+
       router.push("/");
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
@@ -68,11 +71,17 @@ export function LoginForm() {
 
   const googleLogin = async () => {
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+    const guestId = localStorage.getItem("guest_id");
+    if (guestId) {
+      document.cookie = `guest_id=${guestId}; path=/`;
+    }
+
+    await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${location.origin}/auth/callback`,
+      },
     });
-    if (error) console.error("Google OAuth error:", error.message);
   };
 
   return (

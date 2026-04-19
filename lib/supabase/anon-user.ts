@@ -1,21 +1,26 @@
+// lib/supabase/anon-user.ts
 import { createClient } from "@/lib/supabase/client";
 
 export async function ensureAnonymousUser() {
   const supabase = createClient();
 
-  const {data: { user },} = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (user) return user;
-
-  const { data, error } = await supabase.auth.signInAnonymously();
-
-  if (error) {
-    throw new Error(`Anonymous sign-in failed: ${error.message}`);
+  if (user && user.is_anonymous) {
+    localStorage.setItem("guest_id", user.id);
+    return user;
   }
 
-  if (!data.user) {
-    throw new Error("Anonymous sign-in succeeded but no user was returned.");
+  if (!user) {
+    const { data, error } = await supabase.auth.signInAnonymously();
+
+    if (error) throw error;
+
+    const anonId = data.user?.id;
+    if (anonId) localStorage.setItem("guest_id", anonId);
+
+    return data.user;
   }
 
-  return data.user;
+  return user;
 }
