@@ -1,22 +1,16 @@
-"use client";
+'use client';
 
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import type { Promo } from "@/types/promo";
 
 type FormValues = {
     promoCode: string;
 };
 
-type Promo = {
-    code: string;
-    value: number;
-    min_quantity: number | null;
-    expires_at: string | null;
-};
-
 type Props = {
-    setPromo: (promo: Promo | null) => void;
-    activePromo: Promo | null;
+    setPromo: (promo: Promo) => void;
+    activePromo: Promo;
 };
 
 const PromoCodeForm = ({ setPromo, activePromo }: Props) => {
@@ -47,7 +41,15 @@ const PromoCodeForm = ({ setPromo, activePromo }: Props) => {
         }
 
         clearErrors("promoCode");
-        setPromo(result.promo);
+        setPromo(
+            result.promo
+                ? {
+                      code: result.promo.code,
+                      value: result.promo.value,
+                  }
+                : null
+        );
+
         reset();
     };
 
@@ -101,7 +103,6 @@ const PromoCodeForm = ({ setPromo, activePromo }: Props) => {
                         <p>{activePromo.value}% discount applied</p>
                     </div>
 
-                    {/* REMOVE PROMO */}
                     <button
                         type="button"
                         onClick={removePromo}

@@ -1,10 +1,4 @@
-export type PromoType = {
-    code: string;
-    value: number;
-    min_quantity: number | null;
-    expires_at: string | null;
-};
-
-export type PromoInput = {
-    promoCode: string;
-}
+export type Promo = {
+  code: string;
+  value: number;
+} | null

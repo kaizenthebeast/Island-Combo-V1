@@ -1,15 +1,11 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { CircleDollarSign } from "lucide-react";
 import PromoCodeForm from '../forms/PromoCodeForm';
 
-type Promo = {
-    code: string;
-    value: number;
-    min_quantity: number | null;
-    expires_at: string | null;
-};
+import { useCheckoutStore } from '@/store/useCheckoutStore';
+import { calculateTotals } from '@/helper/pricing/calculateTotals';
 
 type Props = {
     totalQty: number;
@@ -17,29 +13,22 @@ type Props = {
 };
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
-    const [promo, setPromo] = useState<Promo | null>(null);
-    const [loyalty, setLoyalty] = useState(true);
-    const handleSetPromo = (newPromo: Promo | null) => {
-        setPromo(newPromo);
-    };
-
-    const discount = useMemo(() => {
-        if (!promo) return 0;
-        return (subtotal * promo.value) / 100;
-    }, [promo, subtotal]);
-
-    const loyaltyDiscount = loyalty ? 3 : 0;
-
-    const total = useMemo(() => {
-        return subtotal - discount - loyaltyDiscount;
-    }, [subtotal, discount, loyaltyDiscount]);
+    const { promo, loyaltyEnabled, setPromo, toggleLoyalty} = useCheckoutStore();
+    const loyaltyDiscount = loyaltyEnabled ? 3 : 0;
+    const { discount, total } = useMemo(() => {
+        return calculateTotals({
+            subtotal,
+            promo,
+            loyaltyDiscount,
+        });
+    }, [subtotal, promo, loyaltyDiscount]);
 
     return (
         <div className="bg-gray-50 rounded-2xl p-5 space-y-6">
 
             {/* PROMO */}
             <PromoCodeForm
-                setPromo={handleSetPromo}
+                setPromo={setPromo}
                 activePromo={promo}
             />
 
@@ -61,13 +50,13 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
                 </div>
 
                 <button
-                    onClick={() => setLoyalty(!loyalty)}
+                    onClick={toggleLoyalty}
                     className={`w-11 h-6 flex items-center rounded-full p-1 transition 
-            ${loyalty ? "bg-[#900036]" : "bg-gray-300"}`}
+                        ${loyaltyEnabled ? "bg-[#900036]" : "bg-gray-300"}`}
                 >
                     <div
-                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition ${loyalty ? "translate-x-5" : ""
-                            }`}
+                        className={`bg-white w-4 h-4 rounded-full shadow-md transform transition 
+                            ${loyaltyEnabled ? "translate-x-5" : ""}`}
                     />
                 </button>
             </div>
@@ -99,7 +88,6 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
                         <span>Shipping fee</span>
                         <span>Calculated at checkout</span>
                     </div>
-
                 </div>
 
                 <hr />
