@@ -16,6 +16,7 @@ type CartState = {
   updateItem: (variantId: number, qty: number, size: string) => Promise<void>
   removeItem: (variantId: number, size: string) => Promise<void>
   resetQuantity: () => void
+  clearCart: () => void
 }
 
 export const useCartStore = create<CartState>((set, get) => {
@@ -168,5 +169,14 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     resetQuantity: () => set({ quantityInput: 1 }),
+    clearCart: () => {
+      set({
+        cart: [],
+        error: null,
+        totalQty: 0,
+        subtotal: 0,
+        quantityInput: 1,
+      })
+    },
   }
 })
