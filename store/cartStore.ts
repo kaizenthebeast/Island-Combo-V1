@@ -1,5 +1,3 @@
-// store/cartStore.ts
-
 import { create } from "zustand"
 import { CartItem } from "@/types/cart"
 import { calculateCartTotals } from "@/helper/cartUtils"
