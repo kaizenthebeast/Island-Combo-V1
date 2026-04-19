@@ -70,8 +70,9 @@ export async function updateCartQuantity(items: CartItemInput) {
   const { data, error } = await supabase
     .from('cart')
     .update({ quantity: items.quantity ?? 1 })
-    .eq('user_id', items.userId)
-    .eq('variant_id', items.variantId)
+    .eq("variant_id", items.variantId)
+    .eq("size", items.size)
+    .eq("user_id", items.userId)
 
   if (error) throw error
   return data
@@ -84,8 +85,8 @@ export async function removeFromCart(items: CartItemInput) {
   const { error } = await supabase
     .from('cart')
     .delete()
-    .eq('user_id', items.userId)
-    .eq('variant_id', items.variantId)
-
+    .eq("variant_id", items.variantId)
+    .eq("size", items.size)
+    .eq("user_id", items.userId)
   if (error) throw error
 }
