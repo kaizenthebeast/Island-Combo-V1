@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
-import EnsureAnonSession from "@/helper/EnsureAnonSession";
+import AnonAuthProvider from "@/helper/AnonAuthProvider"
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -28,12 +28,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        
-        {/* GLOBAL LOGIC*/}
-        <EnsureAnonSession />
-        {/* PAGE CONTENT ONLY */}
-        {children}
-
+        <AnonAuthProvider>
+          {/* PAGE CONTENT ONLY */}
+          {children}
+        </AnonAuthProvider>
       </body>
     </html>
   );

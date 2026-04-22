@@ -2,16 +2,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-function getGuestIdFromCookies(cookieHeader: string | null): string | null {
-  if (!cookieHeader) return null;
-
-  const match = cookieHeader
-    .split("; ")
-    .find((row) => row.startsWith("guest_id="));
-
-  return match ? match.split("=")[1] : null;
-}
-
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
@@ -22,38 +12,35 @@ export async function GET(request: Request) {
 
   const supabase = await createClient();
 
-  // 🔥 CRITICAL: read guest_id from cookies (not session)
-  const cookieHeader = request.headers.get("cookie");
-  const guestId = getGuestIdFromCookies(cookieHeader);
+  // Capture the anon user ID BEFORE the OAuth exchange overwrites the session
+  const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
+  if (anonError) {
+    throw new Error(`Failed to get anonymouse session: ${anonError.message}`);
+  }
+
+  const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
 
   // Exchange OAuth code for session
-  const { data: authData, error } =
-    await supabase.auth.exchangeCodeForSession(code);
+  const { data: authData, error: authError } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error || !authData?.session) {
-    console.error("OAuth error:", error?.message);
-    return NextResponse.redirect(
-      `${requestUrl.origin}/login?error=auth_failed`
-    );
+  if (authError || !authData.session) {
+    console.error("OAuth error:", authError?.message);
+    return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
   }
 
   const authUserId = authData.session.user.id;
 
-  // Merge cart
-  if (guestId && authUserId && guestId !== authUserId) {
-    try {
-      await supabase.rpc("merge_cart", {
-        p_old_user_id: guestId,
-        p_new_user_id: authUserId,
-      });
-    } catch (mergeError) {
-      console.error("Cart merge error:", mergeError);
+  // Merge anonymous cart into the authenticated account
+  if (guestUserId && guestUserId !== authUserId) {
+    const { error: mergeError } = await supabase.rpc("merge_cart", {
+      p_old_user_id: guestUserId,
+      p_new_user_id: authUserId,
+    });
+
+    if (mergeError) {
+      throw new Error(`Failed to merge cart: ${mergeError.message}`);
     }
   }
 
-  // 🔥 cleanup cookie
-  const response = NextResponse.redirect(`${requestUrl.origin}/`);
-  response.cookies.set("guest_id", "", { maxAge: 0 });
-
-  return response;
+  return NextResponse.redirect(`${requestUrl.origin}/`);
 }

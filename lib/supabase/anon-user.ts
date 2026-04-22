@@ -1,27 +1,25 @@
-// lib/supabase/anon-user.ts
 import { createClient } from "@/lib/supabase/client";
+
 
 export async function ensureAnonymousUser() {
   const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-  if (user && user.is_anonymous) {
-    localStorage.setItem("guest_id", user.id);
-    return user;
+  if (sessionError) {
+    throw new Error(`Failed to get session: ${sessionError.message}`);
+  }
+  // Already has a session - return existing user ID
+  if (session?.user) {
+    return session.user.id;
   }
 
-  if (!user) {
-    const { data, error } = await supabase.auth.signInAnonymously();
+  // No session — create an anonymous one
+  const { data, error: anonError } = await supabase.auth.signInAnonymously();
 
-    if (error) throw error;
-
-    const anonId = data.user?.id;
-    if (anonId) localStorage.setItem("guest_id", anonId);
-
-    return data.user;
+  if (anonError || !data.user) {
+    throw new Error(`Failed to create anonymous session: ${anonError?.message ?? "Unknown error"}`);
   }
 
-  retr
-
+  return data.user.id;
 }
