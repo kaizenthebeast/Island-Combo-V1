@@ -22,5 +22,6 @@ export async function ensureAnonymousUser() {
     return data.user;
   }
 
-  return user;
+  retr
+
 }
