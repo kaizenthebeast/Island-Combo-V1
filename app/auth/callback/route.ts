@@ -33,8 +33,8 @@ export async function GET(request: Request) {
   // Merge anonymous cart into the authenticated account
   if (guestUserId && guestUserId !== authUserId) {
     const { error: mergeError } = await supabase.rpc("merge_cart", {
-      p_old_user_id: guestUserId,
-      p_new_user_id: authUserId,
+      p_guest_user_id: guestUserId,
+      p_auth_user_id: authUserId,
     });
 
     if (mergeError) {
