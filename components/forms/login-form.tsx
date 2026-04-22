@@ -33,8 +33,12 @@ export function LoginForm() {
     const supabase = createClient();
 
     try {
-      const guestId = localStorage.getItem("guest_id");
-
+      //Capture the anon user ID BEFORE the OAuth exchange overwrites the session
+      const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
+      if (anonError) {
+        throw new Error(`Failed to get anonymous session: ${anonError.message}`);
+      }
+      const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
       // Sign in
       const { data: signInData, error } =
         await supabase.auth.signInWithPassword({
@@ -42,25 +46,21 @@ export function LoginForm() {
           password: data.password,
         });
 
-      if (error) throw error;
-
-      const authUserId = signInData.session?.user.id;
-
-      //merge cart
-      if (guestId && authUserId && guestId !== authUserId) {
-        try {
-          await supabase.rpc("merge_cart", {
-            p_old_user_id: guestId,
-            p_new_user_id: authUserId,
-          });
-
-          // cleanup after successful merge
-          localStorage.removeItem("guest_id");
-        } catch (mergeError) {
-          console.error("Cart merge error:", mergeError);
-        }
+      if (error || !signInData.session) {
+        throw new Error(error?.message || "Login failed");
       }
 
+      const authUserId = signInData.session.user.id;
+
+      if (guestUserId && guestUserId !== authUserId) {
+        const { error: mergeError } = await supabase.rpc('merge_cart', {
+          p_old_user_id: guestUserId,
+          p_new_user_id: authUserId,
+        });
+        if (mergeError) {
+          throw new Error(`Failed to merge cart: ${mergeError.message}`);
+        }
+      }
       router.push("/");
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
