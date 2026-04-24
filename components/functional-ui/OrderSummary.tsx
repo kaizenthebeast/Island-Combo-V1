@@ -67,6 +67,8 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     alt="product"
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 160px"
+                                    loading='eager'
                                 />
                             </div>
 
