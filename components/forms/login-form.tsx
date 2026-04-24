@@ -71,15 +71,15 @@ export function LoginForm() {
 
   const googleLogin = async () => {
     const supabase = createClient();
-    const guestId = localStorage.getItem("guest_id");
-    if (guestId) {
-      document.cookie = `guest_id=${guestId}; path=/`;
+    const {data: {user: anonUser}, error: anonError} = await supabase.auth.getUser();
+    if (anonError) {
+      throw new Error(`Failed to get anonymous session: ${anonError.message}`);
     }
-
+    const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/auth/callback`,
+        redirectTo: `${location.origin}/auth/callback?guest_id=${guestUserId}`,
       },
     });
   };

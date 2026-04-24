@@ -10,16 +10,9 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${requestUrl.origin}/login`);
   }
 
+  // Capture guest user ID from query params
+  const guestUserId = requestUrl.searchParams.get("guest_id");
   const supabase = await createClient();
-
-  // Capture the anon user ID BEFORE the OAuth exchange overwrites the session
-  const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
-  if (anonError) {
-    throw new Error(`Failed to get anonymouse session: ${anonError.message}`);
-  }
-
-  const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
-
   // Exchange OAuth code for session
   const { data: authData, error: authError } = await supabase.auth.exchangeCodeForSession(code);
 

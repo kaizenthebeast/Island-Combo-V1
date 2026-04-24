@@ -65,29 +65,25 @@ export async function addToCart(item: CartItemInput) {
 }
 
 
-export async function updateCartQuantity(items: CartItemInput) {
+export async function updateCartQuantity(cartId: number, quantity: number) {
   const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('cart')
-    .update({ quantity: items.quantity ?? 1 })
-    .eq("variant_id", items.variantId)
-    .eq("size", items.size)
-    .eq("user_id", items.userId)
+    .update({ quantity })
+    .eq('id', cartId)
 
   if (error) throw error
   return data
-}
+}                           // ← clean closing brace
 
-
-export async function removeFromCart(items: CartItemInput) {
+export async function removeFromCart(cartId: number) {
   const supabase = await createClient()
 
   const { error } = await supabase
     .from('cart')
     .delete()
-    .eq("variant_id", items.variantId)
-    .eq("size", items.size)
-    .eq("user_id", items.userId)
+    .eq('id', cartId)
+
   if (error) throw error
-}
+}   
