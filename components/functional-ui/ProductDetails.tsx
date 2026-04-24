@@ -3,10 +3,17 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import type { ProductDetails } from '@/types/product'
+import { useCartStore } from '@/store/cartStore'
+
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    type CarouselApi,
+} from "@/components/ui/carousel";
 import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
-import { useCartStore } from '@/store/cartStore'
 
 
 type Props = {
@@ -18,6 +25,11 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
     const hasDiscount = product.discount !== null && product.discount > 0;
+
+    //Carousel 
+    const [api, setApi] = useState<CarouselApi>()
+    const [current, setCurrent] = useState(0)
+    const [count, setCount] = useState(0)
     // STORE
     const { addItem, quantityInput, resetQuantity } = useCartStore();
 
@@ -37,7 +49,19 @@ const ProductDetails = ({ product }: Props) => {
 
     useEffect(() => {
         resetQuantity();
-    }, []); 
+    }, []);
+
+    useEffect(() => {
+        if (!api) {
+            return  
+        }
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap() + 1)
+
+        api.on("select", () => {
+            setCurrent(api.selectedScrollSnap() + 1)
+        })
+    }, [api])
 
 
     const productDetails = [
@@ -54,16 +78,32 @@ const ProductDetails = ({ product }: Props) => {
     return (
         <div className='w-full h-full'>
             <div className="grid md:grid-cols-2  grid-cols-1 w-full gap-5" >
-                {/* IMAGE */}
-                <div className="relative w-full  min-h-[500px]">
-                    <Image
-                        src={selectedVariant.image_url[0] ?? 'images/placeholder.png'}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover rounded-xl"
-                        priority
-                    />
+                {/* IMAGE CAROUSEL */}
+                <div className="relative w-full">
+                    <Carousel className="w-full" setApi={setApi}>
+                        <CarouselContent>
+                            {(selectedVariant.image_url.length > 0
+                                ? selectedVariant.image_url
+                                : ["/images/placeholder.png"]
+                            ).map((url: string, index: number) => (
+                                <CarouselItem key={index}>
+                                    <div className="relative w-full min-h-[500px]">
+                                        <Image
+                                            src={url}
+                                            alt={`${product.name} image ${index + 1}`}
+                                            fill
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                            className="object-cover rounded-xl"
+                                            priority={index === 0}
+                                        />
+                                        <div className='absolute bottom-0 right-0 text-black'>{current} / {count}</div>
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                            
+                        </CarouselContent>
+                    </Carousel>
+
                 </div>
 
                 {/* PRICING DETAILS */}
