@@ -1,4 +1,6 @@
-import React from "react";
+'use client'
+
+import React, { useState } from "react";
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button'
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +25,12 @@ const addresses = [
 
 
 const AddressContainer = () => {
+const [method, setMethod] = useState("deliver");
+
+const handleMethodChange = (newMethod: string) => {
+  setMethod(newMethod)
+}
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
       <h2 className="title-header">How would you like to get your order?</h2>
@@ -30,10 +38,16 @@ const AddressContainer = () => {
       <div className="grid md:grid-cols-4 grid-cols-1 gap-10">
         <div className="md:col-span-3">
           <div className="grid grid-cols-2 gap-2">
-            <button className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-200 text-pink-600">
+            <button
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${method === "deliver" ? "bg-gray-200 text-pink-600" : "bg-gray-100 text-gray-500"}`}
+              onClick={() => handleMethodChange("deliver")}
+            >
               Deliver it
             </button>
-            <button className="px-4 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-500">
+            <button
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${method === "pickup" ? "bg-gray-200 text-pink-600" : "bg-gray-100 text-gray-500"}`}
+              onClick={() => handleMethodChange("pickup")}
+            >
               Pick it up
             </button>
           </div>
@@ -54,7 +68,12 @@ const AddressContainer = () => {
                   <div>
                     <p>{address.address}</p>
                     <p>{address.phone}</p>
-                    <button type="button" className="mt-3 text-[#900036] font-bold">Edit</button>
+
+                    <CheckoutAddress title="Edit Address">
+                      <button type="button" className="mt-3 text-[#900036] font-bold" data-id={address.id}>
+                        Edit
+                      </button>
+                    </CheckoutAddress>
                   </div>
                 </div>
 
@@ -68,7 +87,7 @@ const AddressContainer = () => {
 
             ))}
           </div>
-          <CheckoutAddress>
+          <CheckoutAddress title="Add New Address">
             <Button className="mt-4 rounded-full" variant="default">
               Add New Address
             </Button>

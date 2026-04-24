@@ -18,6 +18,7 @@ import {
 
 type Props = {
     children: React.ReactNode;
+    title?: string
 };
 
 type AddressFormValues = {
@@ -32,7 +33,7 @@ type AddressFormValues = {
     makeDefault: boolean;
 };
 
-const CheckoutAddress = ({ children }: Props) => {
+const CheckoutAddress = ({ children, title = "Address" }: Props) => {
     const {
         register,
         handleSubmit,
@@ -76,7 +77,7 @@ const CheckoutAddress = ({ children }: Props) => {
                             <ArrowLeft className="h-4 w-4" />
                         </button>
                     </SheetClose>
-                    <SheetTitle className="text-lg font-semibold">Address</SheetTitle>
+                    <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -87,6 +88,7 @@ const CheckoutAddress = ({ children }: Props) => {
                                 id="firstName"
                                 placeholder="Jane"
                                 maxLength={15}
+                                required
                                 {...register("firstName", { required: "First name is required" })}
                                 aria-invalid={errors.firstName ? "true" : "false"}
                             />
@@ -101,6 +103,7 @@ const CheckoutAddress = ({ children }: Props) => {
                                 id="lastName"
                                 placeholder="Smith"
                                 maxLength={15}
+                                required
                                 {...register("lastName", { required: "Last name is required" })}
                                 aria-invalid={errors.lastName ? "true" : "false"}
                             />
@@ -117,6 +120,7 @@ const CheckoutAddress = ({ children }: Props) => {
                             type="tel"
                             placeholder="091234545454"
                             maxLength={16}
+                            required
                             {...register("phone", { required: "Mobile number is required" })}
                             aria-invalid={errors.phone ? "true" : "false"}
                         />
@@ -128,6 +132,7 @@ const CheckoutAddress = ({ children }: Props) => {
                         <Input
                             id="address2"
                             placeholder="Apartment, suite, etc."
+                            required
                             {...register("address2")}
                         />
                     </div>
@@ -138,6 +143,7 @@ const CheckoutAddress = ({ children }: Props) => {
                             <Input
                                 id="postalCode"
                                 placeholder="96941"
+                                required
                                 {...register("postalCode", { required: "Postal code is required" })}
                                 aria-invalid={errors.postalCode ? "true" : "false"}
                             />
@@ -151,6 +157,7 @@ const CheckoutAddress = ({ children }: Props) => {
                             <Input
                                 id="locality"
                                 placeholder="Kolonia"
+                                required
                                 {...register("locality", { required: "Locality is required" })}
                                 aria-invalid={errors.locality ? "true" : "false"}
                             />
@@ -167,6 +174,7 @@ const CheckoutAddress = ({ children }: Props) => {
                             placeholder="Micronesia, Federated States of"
                             {...register("country", { required: "Country is required" })}
                             aria-invalid={errors.country ? "true" : "false"}
+                            required
                         />
                         {errors.country && <p className="text-sm text-red-500">{errors.country.message}</p>}
                     </div>
