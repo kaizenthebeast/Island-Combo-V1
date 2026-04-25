@@ -12,7 +12,7 @@ const FavoriteContainer = async () => {
 
   if (favoriteList.length === 0) {
     return (
-      <section className="max-w-7xl mx-auto p-4 md:p-6 flex items-center justify-center min-h-[60vh]">
+      <section className="section-container">
         <div className="flex flex-col items-center text-center gap-4">
 
           <div className="p-4 rounded-full bg-[#900036]">
@@ -40,10 +40,10 @@ const FavoriteContainer = async () => {
       <h2 className="title-header text-lg sm:text-xl md:text-2xl">
         Favorites
       </h2>
-        {/* Display all products */}
-        {favoriteList.map((favorite) => (
-            <FavoriteCard  key={favorite.product_id} product={favorite}/>
-        ))}
+      {/* Display all products */}
+      {favoriteList.map((favorite) => (
+        <FavoriteCard key={favorite.product_id} product={favorite} />
+      ))}
 
     </section>
   )

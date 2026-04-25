@@ -3,6 +3,8 @@
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { ProductCatalogItem } from '@/types/product'
+import {getPublicImageUrl} from '@/helper/getPublicImageUrl';
+
 import Image from 'next/image'
 import Link from 'next/link'
 
@@ -27,7 +29,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         {/* Image */}
         <div className="relative w-full h-[70%] flex items-center justify-center">
           <Image
-            src={product.image_url ?? 'images/placeholder.png'}
+            src={getPublicImageUrl(product.image_url) ?? 'images/placeholder.png'}
             alt={product.name}
             fill
             className="object-fill"

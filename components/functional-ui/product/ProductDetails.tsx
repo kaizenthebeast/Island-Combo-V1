@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useFavoriteStore } from "@/store/favoriteStore";
+import { getPublicImageUrl } from '@/helper/getPublicImageUrl';
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -30,7 +31,6 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
     const hasDiscount = product.discount !== null && product.discount > 0;
     const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite);
-    const favoriteError = useFavoriteStore((state) => state.error);
 
     async function handleAddFavorite(productId: number) {
         await addFavoriteToStore(productId);
@@ -39,7 +39,7 @@ const ProductDetails = ({ product }: Props) => {
         if (error) {
             customToast.error({
                 title: 'Failed to add favorite',
-                description: error, 
+                description: error,
             })
             return;
         }
@@ -50,24 +50,18 @@ const ProductDetails = ({ product }: Props) => {
         })
     }
 
-    //Carousel 
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
     const [count, setCount] = useState(0)
-    // STORE
     const { addItem, quantityInput, resetQuantity } = useCartStore();
 
     async function handleAddToCart() {
         if (!selectedVariant) return
-
         if (!selectedSize) {
             alert("Please select a size")
             return
         }
-
         if (quantityInput <= 0) return
-        console.log(selectedVariant.variant_id, quantityInput, selectedSize);
-
         await addItem(selectedVariant.variant_id, quantityInput, selectedSize)
     }
 
@@ -76,32 +70,27 @@ const ProductDetails = ({ product }: Props) => {
     }, []);
 
     useEffect(() => {
-        if (!api) {
-            return
-        }
+        if (!api) return
         setCount(api.scrollSnapList().length)
         setCurrent(api.selectedScrollSnap() + 1)
-
         api.on("select", () => {
             setCurrent(api.selectedScrollSnap() + 1)
         })
     }, [api])
-
 
     const productDetails = [
         { label: "Material", value: "Polypropylene" },
         { label: "Dimension", value: "44cm x 24cm x 65cm" },
         { label: "Wheel style", value: "Spinner wheels" },
     ];
-    // Sizes
+
     const sizes = Array.from(
         new Set(product.variants.flatMap((v) => v.attributes?.filter((att) => att.name === 'size').map((a) => a.value)))
     )
 
-
     return (
         <div className='w-full h-full'>
-            <div className="grid md:grid-cols-2  grid-cols-1 w-full gap-5" >
+            <div className="grid md:grid-cols-2 grid-cols-1 w-full gap-5">
                 {/* IMAGE CAROUSEL */}
                 <div className="relative w-full">
                     <Carousel className="w-full" setApi={setApi}>
@@ -113,7 +102,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <CarouselItem key={index}>
                                     <div className="relative w-full min-h-[500px]">
                                         <Image
-                                            src={url}
+                                            src={getPublicImageUrl(url)}  // ✅ already applied
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
@@ -124,15 +113,12 @@ const ProductDetails = ({ product }: Props) => {
                                     </div>
                                 </CarouselItem>
                             ))}
-
                         </CarouselContent>
                     </Carousel>
-
                 </div>
 
                 {/* PRICING DETAILS */}
                 <div className="flex flex-col gap-4">
-
                     {product.wholesale && (
                         <div className="flex items-center gap-2 bg-[#900036] text-white text-xs text-center p-2 w-[165px] rounded-md">
                             <Package />
@@ -152,7 +138,6 @@ const ProductDetails = ({ product }: Props) => {
                         <p className="text-4xl font-bold text-[#900036]">
                             ${selectedVariant.final_price.toFixed(2)}
                         </p>
-
                         {hasDiscount && (
                             <div className='flex gap-3 text-[#900036] items-center'>
                                 <p className="text-lg line-through">
@@ -165,22 +150,26 @@ const ProductDetails = ({ product }: Props) => {
                         )}
                     </div>
 
-                    {/* Variant Image */}
+                    {/* VARIANT THUMBNAILS */}
                     <div className='flex flex-col space-y-3'>
                         <p className="text-sm font-medium text-gray-700">Variants</p>
                         <div className='flex flex-wrap gap-2'>
-                            {/* Loop through variants */}
                             {product.variants.map((variant) => {
                                 const isActive = selectedVariant.variant_id === variant.variant_id
-
+                                const thumbnailUrl = variant.image_url?.[0]
+                                    ? getPublicImageUrl(variant.image_url[0])  // ✅ added
+                                    : '/images/placeholder.png'
 
                                 return (
-                                    <button type='button' key={variant.variant_id}
+                                    <button
+                                        type='button'
+                                        key={variant.variant_id}
                                         onClick={() => setSelectedVariant(variant)}
                                         className={`w-20 h-20 relative overflow-hidden border rounded-md
-                                  ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}>
+                                            ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}
+                                    >
                                         <Image
-                                            src={variant.image_url?.[0] ?? '/images/placeholder.png'}
+                                            src={thumbnailUrl}  // ✅ now uses helper
                                             fill
                                             sizes="80px"
                                             className="object-cover"
@@ -191,9 +180,7 @@ const ProductDetails = ({ product }: Props) => {
                                 )
                             })}
                         </div>
-
                     </div>
-
 
                     {/* SIZES */}
                     <div className='flex flex-col space-y-3'>
@@ -201,8 +188,6 @@ const ProductDetails = ({ product }: Props) => {
                         <div className='flex flex-wrap gap-2'>
                             {sizes.map((size) => {
                                 const isActive = selectedSize === size
-
-
                                 return (
                                     <button
                                         key={size}
@@ -211,7 +196,7 @@ const ProductDetails = ({ product }: Props) => {
                                         className={`px-4 py-2 border rounded-md ${isActive
                                             ? "bg-[#900036] text-white"
                                             : "border-gray-300"
-                                            }`}
+                                        }`}
                                     >
                                         {size}
                                     </button>
@@ -223,30 +208,21 @@ const ProductDetails = ({ product }: Props) => {
                     {/* STOCK */}
                     <p className="text-md font-medium text-gray-700">Stocks: {selectedVariant.stock}</p>
 
-
-                    {/* QUANTITY CONTROL*/}
-
+                    {/* QUANTITY CONTROL */}
                     <div className="flex items-center gap-3">
                         <p className="text-md font-medium text-gray-700">Quantity</p>
-
-                        {/* QUANTITY CONTROL */}
                         <ProductQuantityButton />
-
-                        {/* STATUS BADGE */}
                         {product.wholesale && (
-                            <div className="flex items-center gap-2 text-white bg-green-500 px-4 py-2 rounded-md w-fit ">
+                            <div className="flex items-center gap-2 text-white bg-green-500 px-4 py-2 rounded-md w-fit">
                                 <CircleCheckBig />
                                 <p className="text-sm font-medium">
                                     Wholesale pricing applied to your order!
                                 </p>
-
                             </div>
                         )}
-
                     </div>
 
-
-                    {/* Add To Cart */}
+                    {/* ADD TO CART / BUY NOW */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <Button
                             type='button'
@@ -268,15 +244,14 @@ const ProductDetails = ({ product }: Props) => {
                                 Buy Now
                             </button>
                         </Link>
-
                         <Button type='button' variant="ghost" size="icon" onClick={() => handleAddFavorite(product.product_id)}>
                             <Heart />
                         </Button>
                     </div>
-
                 </div>
             </div>
-            {/* Product Details */}
+
+            {/* PRODUCT DETAILS */}
             <div className='flex flex-col md:w-1/3 w-full lg:mt-12 md:mt-8 mt-6 space-y-3'>
                 <h2 className='title-header'>Product Details</h2>
                 {productDetails.map((item, index) => (
@@ -285,13 +260,10 @@ const ProductDetails = ({ product }: Props) => {
                         <span>{item.value}</span>
                     </div>
                 ))}
-
             </div>
 
             <div className='bg-black h-1 my-5 rounded-md' />
-            {/* Review Content */}
         </div>
-
     )
 }
 
