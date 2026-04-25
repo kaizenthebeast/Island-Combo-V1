@@ -1,8 +1,11 @@
 import React from 'react'
 import { getFavorite } from '@/lib/favorite'
+
 import Link from 'next/link';
 
 import { Heart } from 'lucide-react'
+import ProductCard from '@/components/card/ProductCard';
+import FavoriteCard from '@/components/card/FavoriteCard';
 const FavoriteContainer = async () => {
   const favoriteList = await getFavorite();
 
@@ -33,17 +36,15 @@ const FavoriteContainer = async () => {
     )
   }
   return (
-    <section className='max-w-7xl mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6'>
+    <section className='max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6'>
       <h2 className="title-header text-lg sm:text-xl md:text-2xl">
         Favorites
-
+      </h2>
         {/* Display all products */}
         {favoriteList.map((favorite) => (
-          <div key={favorite.favorite_id}>
-            test 1
-          </div>
+            <FavoriteCard  key={favorite.product_id} product={favorite}/>
         ))}
-      </h2>
+
     </section>
   )
 }

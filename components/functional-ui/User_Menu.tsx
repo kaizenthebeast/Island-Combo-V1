@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Star, Ticket, PackageSearch, CreditCard } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +39,34 @@ export function UserMenu() {
           <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
             <Settings size={15} />
             Account
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
+            <Star size={15} />
+            Loyalty Points
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
+            <Ticket size={15} />
+            Buy Cash Voucher
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
+            <PackageSearch size={15} />
+            Order & Tracking
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
+            <CreditCard size={15} />
+            Payment Method
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

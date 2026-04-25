@@ -34,14 +34,12 @@ const ProductDetails = ({ product }: Props) => {
 
     async function handleAddFavorite(productId: number) {
         await addFavoriteToStore(productId);
-
-        // Read error AFTER the action settles
         const error = useFavoriteStore.getState().error;
 
         if (error) {
             customToast.error({
                 title: 'Failed to add favorite',
-                description: error, // e.g. "Product is already in favorites"
+                description: error, 
             })
             return;
         }
