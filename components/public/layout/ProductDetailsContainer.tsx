@@ -1,6 +1,6 @@
 import { getProductBySlug } from '@/lib/product'
 import { Suspense } from 'react'
-import ProductDetails from '../../functional-ui/product/ProductDetails'
+import ProductDetails from '@/components/functional-ui/product/ProductDetails'
 import { notFound } from 'next/navigation'
 type Props = {
     slug: string
