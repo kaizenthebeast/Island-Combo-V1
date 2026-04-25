@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import type { ProductDetails } from '@/types/product'
 import { useCartStore } from '@/store/cartStore'
 
@@ -53,7 +54,7 @@ const ProductDetails = ({ product }: Props) => {
 
     useEffect(() => {
         if (!api) {
-            return  
+            return
         }
         setCount(api.scrollSnapList().length)
         setCurrent(api.selectedScrollSnap() + 1)
@@ -100,7 +101,7 @@ const ProductDetails = ({ product }: Props) => {
                                     </div>
                                 </CarouselItem>
                             ))}
-                            
+
                         </CarouselContent>
                     </Carousel>
 
@@ -227,17 +228,23 @@ const ProductDetails = ({ product }: Props) => {
                         <Button
                             type='button'
                             onClick={handleAddToCart}
+                            disabled={!selectedSize || quantityInput <= 0}
                             className="flex-1 h-11 bg-[#900036] text-white rounded-full">
                             <ShoppingCart />
                             Add to cart
                         </Button>
-
-                        <Button
-                            variant="outline"
-                            className="flex-1 h-11 border-[#900036] text-[#900036] rounded-full"
+                        <Link
+                            href="/checkout"
+                            className={`flex-1 h-11 ${!selectedSize || quantityInput <= 0 ? 'pointer-events-none' : ''}`}
                         >
-                            Buy now
-                        </Button>
+                            <button
+                                type='button'
+                                className="w-full h-full border border-[#900036] text-[#900036] rounded-full flex items-center justify-center hover:bg-[#900036] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400"
+                                disabled={!selectedSize || quantityInput <= 0}
+                            >
+                                Buy Now
+                            </button>
+                        </Link>
 
                         <Button variant="ghost" size="icon">
                             <Heart />
