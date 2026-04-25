@@ -16,6 +16,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { customToast } from "@/components/popup/ToastCustom"
 
 type Props = {
     children: React.ReactNode;
@@ -101,8 +102,25 @@ const CheckoutAddress = ({
             }
             setOpen(false);
             if (onSuccess) onSuccess();
+            if (action === "add") {
+                customToast.success({
+                    title: "Successfully added address",
+                    description: "Your new address has been added to your account.",
+                })
+            } else {
+                customToast.success({
+                    title: "Successfully updated address",
+                    description: "Your address has been updated.",
+                })
+            }
+
+
         } catch (error) {
             console.error("Error saving address:", error);
+            customToast.error({
+                title: "Payment failed",
+                description: "Your card was declined. Please try again."
+            })
         }
     };
 
@@ -129,6 +147,8 @@ const CheckoutAddress = ({
                                 required
                                 {...register("firstName", { required: "First name is required" })}
                                 aria-invalid={errors.firstName ? "true" : "false"}
+                                readOnly={!!firstName}
+                                className={!!firstName ? "bg-gray-100 cursor-not-allowed" : ""}
                             />
                             {errors.firstName && (
                                 <p className="text-sm text-red-500">{errors.firstName.message}</p>
@@ -144,6 +164,8 @@ const CheckoutAddress = ({
                                 required
                                 {...register("lastName", { required: "Last name is required" })}
                                 aria-invalid={errors.lastName ? "true" : "false"}
+                                readOnly={!!lastName}
+                                className={!!lastName ? "bg-gray-100 cursor-not-allowed" : ""}
                             />
                             {errors.lastName && (
                                 <p className="text-sm text-red-500">{errors.lastName.message}</p>

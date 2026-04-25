@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner"
 
 import AnonAuthProvider from "@/helper/AnonAuthProvider"
 
@@ -31,6 +32,7 @@ export default function RootLayout({
         <AnonAuthProvider>
           {/* PAGE CONTENT ONLY */}
           {children}
+          <Toaster />
         </AnonAuthProvider>
       </body>
     </html>

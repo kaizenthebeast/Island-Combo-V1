@@ -4,6 +4,7 @@ import { Address } from "@/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
 import { deleteAddress } from "@/lib/users";
+import DeleteModal from "../../popup/DeleteModal";
 
 const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSuccess, }: {
     address: Address;
@@ -20,7 +21,6 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
 
     return (
         <>
-            {/* Details */}
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                     <MapPin />
@@ -50,9 +50,11 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
                             Edit
                         </button>
                     </CheckoutAddress>
-                    <button type="button" className="mt-3 ms-3 text-[#900036] font-bold" onClick={() => handleDeleteAdd(address.id)}>
-                        Remove
-                    </button>
+                    <DeleteModal subtitle="address" onSuccess={() => handleDeleteAdd(address.id)}>
+                        <button type="button" className="mt-3 ms-3 text-[#900036] font-bold">
+                            Remove
+                        </button>
+                    </DeleteModal>
                 </div>
             </div>
 
