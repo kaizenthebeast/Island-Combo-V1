@@ -1,8 +1,9 @@
 "use client";
-
+import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { AddressFormValues } from "@/types/users";
-import { insertAddressInfo } from "@/lib/users"
+import { insertAddressInfo, updateAddressInfo } from "@/lib/users"
+
 
 
 import { ArrowLeft } from "lucide-react";
@@ -20,14 +21,26 @@ import {
 } from "@/components/ui/sheet";
 
 
+
 type Props = {
     children: React.ReactNode;
     title?: string
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    address?: string;
+    postalCode?: string;
+    locality?: string;
+    country?: string;
+    action: "add" | "edit";
+    addressId?: number;
+    onSuccess?: () => void;
 };
 
 
 
-const CheckoutAddress = ({ children, title = "Address" }: Props) => {
+const CheckoutAddress = ({ children, title = "Address", firstName, lastName, phone, address, postalCode, locality, country, action, addressId, onSuccess }: Props) => {
+    const [open, setOpen] = useState(false)
     const {
         register,
         handleSubmit,
@@ -37,34 +50,47 @@ const CheckoutAddress = ({ children, title = "Address" }: Props) => {
         watch,
     } = useForm<AddressFormValues>({
         defaultValues: {
-            firstName: "",
-            lastName: "",
-            phone: "",
-            address: "",
-            postalCode: "",
-            locality: "",
-            country: "",
+            firstName: firstName || "",
+            lastName: lastName || "",
+            phone: phone || "",
+            address: address || "",
+            postalCode: postalCode || "",
+            locality: locality || "",
+            country: country || "",
             makeDefault: false,
         },
     });
 
     const makeDefault = watch("makeDefault");
 
-    const onSubmit: SubmitHandler<AddressFormValues> = (data) => {
+    const onSubmit: SubmitHandler<AddressFormValues> = async (data) => {
         try {
-            insertAddressInfo({
-                firstName: data.firstName,
-                lastName: data.lastName,
-                address: data.address,
-                phone: data.phone,
-                postalCode: data.postalCode,
-                locality: data.locality,
-                country: data.country,
-                makeDefault: data.makeDefault,
-            })
-            reset();
+            if (action === "add") {
+                await insertAddressInfo({
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    address: data.address,
+                    phone: data.phone,
+                    postalCode: data.postalCode,
+                    locality: data.locality,
+                    country: data.country,
+                    makeDefault: data.makeDefault,
+                })
+                reset();
+            } else if (action === "edit") {
+                await updateAddressInfo(addressId, {
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    address: data.address,
+                    phone: data.phone,
+                    postalCode: data.postalCode,
+                    locality: data.locality,
+                    country: data.country,
+                    makeDefault: data.makeDefault,
+                })
+            }
         } catch (error) {
-            console.error("Error inserting user info:", error);
+            console.error("Error saving address:", error);
         }
     };
 

@@ -11,12 +11,28 @@ export type UserInfo = {
 }
 
 export type AddressFormValues = {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    address: string;
-    postalCode: string;
-    locality: string;
-    country: string;
-    makeDefault: boolean;
+    addressId?: number
+    firstName: string
+    lastName: string
+    phone: string
+    address: string
+    postalCode: string
+    locality: string
+    country: string
+    makeDefault: boolean
+};
+
+
+export type Address = {
+  id: number
+  address: string
+  postal_code: string
+  locality: string
+  country: string
+  make_default: boolean
+  profile: {
+    first_name: string
+    last_name: string
+    phone_text: string
+  } | null;  
 };

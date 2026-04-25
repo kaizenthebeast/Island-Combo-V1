@@ -1,40 +1,28 @@
 'use client'
 
 import React, { useState } from "react";
-import { MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button'
-import { Separator } from "@/components/ui/separator";
+import { Address } from "@/types/users";
 import CheckoutAddress from "@/components/forms/CheckoutAddressForm";
 
-const addresses = [
-  {
-    id: 1,
-    name: "Jane Smith",
-    isDefault: true,
-    address: "123 Ocean Road, Kolonia, FM 96941, Federated States of Micronesia",
-    phone: "0912345678",
-  },
-  {
-    id: 2,
-    name: "John Smith",
-    isDefault: false,
-    address: "17 Ocean Road, Kolonia, FM 96941, Federated States of Micronesia",
-    phone: "0912345678",
-  },
-];
+import AddressDetails from "@/components/functional-ui/AddressDetails";
+
+
+import { Button } from '@/components/ui/button'
+import { Separator } from "@/components/ui/separator";
 
 
 const AddressContainer = () => {
-const [method, setMethod] = useState("deliver");
+  const [method, setMethod] = useState("deliver");
+  const [addresses, setAddresses] = useState<Address[]>([]);
 
-const handleMethodChange = (newMethod: string) => {
-  setMethod(newMethod)
-}
+  const handleMethodChange = (newMethod: string) => {
+    setMethod(newMethod)
+  }
+
 
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
       <h2 className="title-header">How would you like to get your order?</h2>
-
       <div className="grid md:grid-cols-4 grid-cols-1 gap-10">
         <div className="md:col-span-3">
           <div className="grid grid-cols-2 gap-2">
@@ -53,41 +41,18 @@ const handleMethodChange = (newMethod: string) => {
           </div>
           <div className="border rounded-md p-4 mt-6 shadow-md flex flex-col space-y-3">
             <h2 className="text-baseline font-bold">Saved Address</h2>
+
+            {addresses.length === 0 && (
+              <p className="text-sm text-gray-500">No saved addresses found. Please add one.</p>
+            )}
             {/* Address Selection */}
             {addresses.map((address) => (
               <div key={address.id} className="flex items-center justify-between" >
-                {/* Details */}
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <MapPin />
-                    <span>{address.name}</span>
-                    {address.isDefault && (
-                      <span className="bg-yellow-200 px-2 text-sm">Default</span>
-                    )}
-                  </div>
-                  <div>
-                    <p>{address.address}</p>
-                    <p>{address.phone}</p>
-
-                    <CheckoutAddress title="Edit Address">
-                      <button type="button" className="mt-3 text-[#900036] font-bold" data-id={address.id}>
-                        Edit
-                      </button>
-                    </CheckoutAddress>
-                  </div>
-                </div>
-
-                {/* Radio Input */}
-                <input
-                  type="radio"
-                  className="w-5 h-5 accent-pink-600"
-                />
+                <AddressDetails address={address} />
               </div>
-
-
             ))}
           </div>
-          <CheckoutAddress title="Add New Address">
+          <CheckoutAddress title="Add New Address" action="add">
             <Button className="mt-4 rounded-full" variant="default">
               Add New Address
             </Button>
