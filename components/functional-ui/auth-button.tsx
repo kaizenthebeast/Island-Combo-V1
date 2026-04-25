@@ -22,7 +22,7 @@ export async function AuthButton() {
       </Link>
 
       {/* FAVORITES */}
-      <Link href="/">
+      <Link href="/product/favorites">
         <Heart size={22} />
       </Link>
 

@@ -1,7 +1,7 @@
 import { getProductBySlug } from '@/lib/product'
 import { Suspense } from 'react'
 import ProductDetails from '../../functional-ui/product/ProductDetails'
-
+import { notFound } from 'next/navigation'
 type Props = {
     slug: string
 }
@@ -9,7 +9,9 @@ type Props = {
 const ProductDetailsContainer = async ({ slug }: Props) => {
     const product = await getProductBySlug(slug)
 
-    if (!product) return <section>Product not found</section>
+    if (!product){
+        notFound()
+    }
 
     return (
         <section className="min-h-svh max-w-7xl mx-auto flex items-center justify-center p-5">
