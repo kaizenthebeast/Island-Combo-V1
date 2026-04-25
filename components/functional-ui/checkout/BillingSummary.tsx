@@ -15,9 +15,9 @@ type Props = {
 };
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
-    const { promo, loyaltyEnabled, setPromo, toggleLoyalty } = useCheckoutStore();
-    const loyaltyDiscount = loyaltyEnabled ? 3 : 0;
-    const { discount, total } = useMemo(() => {
+    const { promo, loyaltyEnabled, setPromo, toggleLoyalty, loyaltyPoints } = useCheckoutStore();
+    const loyaltyDiscount = loyaltyEnabled ? loyaltyPoints : 0;
+    const { promoDiscount, total } = useMemo(() => {
         return calculateTotals({
             subtotal,
             promo,
@@ -69,7 +69,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
 
                     <div className="flex justify-between text-green-600">
                         <span>Discount</span>
-                        <span>- ${discount.toFixed(2)}</span>
+                        <span>- ${promoDiscount.toFixed(2)}</span>
                     </div>
 
                     <div className="flex justify-between text-green-600">

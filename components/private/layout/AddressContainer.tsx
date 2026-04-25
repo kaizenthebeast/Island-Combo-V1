@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Address } from "@/types/users";
 import CheckoutAddress from "@/components/forms/CheckoutAddressForm";
-import AddressDetails from "@/components/functional-ui/checkout_address/AddressDetails";
+import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails";
 import { getUserAddress } from "@/lib/users";
 
 import { Button } from '@/components/ui/button'
 import { Separator } from "@/components/ui/separator";
+import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary";
 
 const AddressContainer = () => {
   const [method, setMethod] = useState("deliver");
@@ -85,36 +86,7 @@ const AddressContainer = () => {
           <Separator className="my-12 bg-black" />
         </div>
 
-        <div className="">
-          <div className="w-full md:w-[350px]">
-            <div className="bg-white p-5 rounded-xl border space-y-4 sticky top-4">
-              <h2 className="font-semibold">Order Summary</h2>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Subtotal (14 items)</span>
-                <span>$81,589.00</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Discount</span>
-                <span className="text-green-600">-$31,500.00</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Loyalty points</span>
-                <span>-$3.00</span>
-              </div>
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Shipping fee</span>
-                <span>$50.00</span>
-              </div>
-              <div className="border-t pt-3 flex justify-between font-semibold">
-                <span>Total</span>
-                <span className="text-pink-600">$61,009.00</span>
-              </div>
-              <button className="w-full bg-pink-700 text-white py-3 rounded-full mt-2">
-                Place Order
-              </button>
-            </div>
-          </div>
-        </div>
+       <AddressBillingSummary />
       </div>
     </div>
   );
