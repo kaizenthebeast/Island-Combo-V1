@@ -2,9 +2,7 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { AddressFormValues } from "@/types/users";
-import { insertAddressInfo, updateAddressInfo } from "@/lib/users"
-
-
+import { insertAddressInfo, updateAddressInfo } from "@/lib/users";
 
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,17 +12,14 @@ import { Switch } from "@/components/ui/switch";
 
 import {
     Sheet,
-    SheetClose,
     SheetContent,
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
 
-
-
 type Props = {
     children: React.ReactNode;
-    title?: string
+    title?: string;
     firstName?: string;
     lastName?: string;
     phone?: string;
@@ -34,13 +29,27 @@ type Props = {
     country?: string;
     action: "add" | "edit";
     addressId?: number;
+    makeDefault?: boolean;
     onSuccess?: () => void;
 };
 
+const CheckoutAddress = ({
+    children,
+    title = "Address",
+    firstName,
+    lastName,
+    phone,
+    address,
+    postalCode,
+    locality,
+    country,
+    action,
+    addressId,
+    makeDefault = false,
+    onSuccess,
+}: Props) => {
+    const [open, setOpen] = useState(false);
 
-
-const CheckoutAddress = ({ children, title = "Address", firstName, lastName, phone, address, postalCode, locality, country, action, addressId, onSuccess }: Props) => {
-    const [open, setOpen] = useState(false)
     const {
         register,
         handleSubmit,
@@ -57,11 +66,12 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
             postalCode: postalCode || "",
             locality: locality || "",
             country: country || "",
-            makeDefault: false,
+            makeDefault: makeDefault,
         },
     });
 
-    const makeDefault = watch("makeDefault");
+    // watch the form value, not the prop
+    const makeDefaultValue = watch("makeDefault");
 
     const onSubmit: SubmitHandler<AddressFormValues> = async (data) => {
         try {
@@ -75,7 +85,7 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                     locality: data.locality,
                     country: data.country,
                     makeDefault: data.makeDefault,
-                })
+                });
                 reset();
             } else if (action === "edit") {
                 await updateAddressInfo(addressId, {
@@ -87,15 +97,17 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                     locality: data.locality,
                     country: data.country,
                     makeDefault: data.makeDefault,
-                })
+                });
             }
+            setOpen(false);
+            if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Error saving address:", error);
         }
     };
 
     return (
-        <Sheet>
+        <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>{children}</SheetTrigger>
 
             <SheetContent
@@ -103,14 +115,6 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                 className="w-full sm:w-[420px] h-screen overflow-y-auto bg-white p-5"
             >
                 <div className="flex items-center gap-3 mb-6">
-                    <SheetClose asChild>
-                        <button
-                            type="button"
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                        </button>
-                    </SheetClose>
                     <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
                 </div>
 
@@ -158,7 +162,9 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                             {...register("phone", { required: "Mobile number is required" })}
                             aria-invalid={errors.phone ? "true" : "false"}
                         />
-                        {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+                        {errors.phone && (
+                            <p className="text-sm text-red-500">{errors.phone.message}</p>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -210,7 +216,9 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                             aria-invalid={errors.country ? "true" : "false"}
                             required
                         />
-                        {errors.country && <p className="text-sm text-red-500">{errors.country.message}</p>}
+                        {errors.country && (
+                            <p className="text-sm text-red-500">{errors.country.message}</p>
+                        )}
                     </div>
 
                     <div className="flex items-center justify-between rounded-3xl border border-gray-200 bg-gray-50 px-4 py-4">
@@ -219,12 +227,15 @@ const CheckoutAddress = ({ children, title = "Address", firstName, lastName, pho
                             <p className="text-xs text-gray-500">Use this address for future orders.</p>
                         </div>
                         <Switch
-                            checked={makeDefault}
+                            checked={makeDefaultValue}  // use watched form value, not prop
                             onCheckedChange={(checked) => setValue("makeDefault", Boolean(checked))}
                         />
                     </div>
 
-                    <Button type="submit" className="w-full bg-[#900036] hover:bg-[#77002d] rounded-full">
+                    <Button
+                        type="submit"
+                        className="w-full bg-[#900036] hover:bg-[#77002d] rounded-full"
+                    >
                         Save
                     </Button>
                 </form>
