@@ -11,6 +11,7 @@ export type ProductCatalogItem = {
   image_url: string | null
 }
 
+
 export type ProductDetails = {
   product_id: number
   name: string
@@ -25,6 +26,11 @@ export type ProductDetails = {
     name: string
   } | null
 
+  product_details: {         // ← add this
+    attribute_name: string
+    attribute_value: string
+  }[]
+
   variants: {
     variant_id: number
     sku: string
@@ -32,7 +38,6 @@ export type ProductDetails = {
     final_price: number
     stock: number
     image_url: string[]
-    
     attributes: {
       name: string
       value: string

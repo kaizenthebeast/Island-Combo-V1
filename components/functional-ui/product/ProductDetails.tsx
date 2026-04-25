@@ -67,15 +67,10 @@ const ProductDetails = ({ product }: Props) => {
     const resolvedVariant = selectedSize
         ? product.variants.find((v) =>
             v.attributes?.some((a) => a.name === 'flavor' && a.value === selectedFlavor) &&
-            v.attributes?.some((a) => a.name === 'size'   && a.value === selectedSize)
-          )
+            v.attributes?.some((a) => a.name === 'size' && a.value === selectedSize)
+        )
         : null
 
-    const productDetails = [
-        { label: "Material",    value: "Polypropylene"      },
-        { label: "Dimension",   value: "44cm x 24cm x 65cm" },
-        { label: "Wheel style", value: "Spinner wheels"      },
-    ]
 
     // ─── Effects ──────────────────────────────────────────────
     useEffect(() => {
@@ -238,7 +233,7 @@ const ProductDetails = ({ product }: Props) => {
                                         className={`px-4 py-2 border rounded-md ${isActive
                                             ? "bg-[#900036] text-white"
                                             : "border-gray-300"
-                                        }`}
+                                            }`}
                                     >
                                         {size}
                                     </button>
@@ -299,15 +294,17 @@ const ProductDetails = ({ product }: Props) => {
             </div>
 
             {/* PRODUCT DETAILS */}
-            <div className='flex flex-col md:w-1/3 w-full lg:mt-12 md:mt-8 mt-6 space-y-3'>
-                <h2 className='title-header'>Product Details</h2>
-                {productDetails.map((item, index) => (
-                    <div key={index} className='flex flex-wrap items-center justify-between'>
-                        <span>{item.label}</span>
-                        <span>{item.value}</span>
-                    </div>
-                ))}
-            </div>
+            {product.product_details?.length > 0 && (
+                <div className='flex flex-col md:w-1/3 w-full lg:mt-12 md:mt-8 mt-6 space-y-3'>
+                    <h2 className='title-header'>Product Details</h2>
+                    {product.product_details.map((item, index) => (
+                        <div key={index} className='flex flex-wrap items-center justify-between'>
+                            <span>{item.attribute_name}</span>
+                            <span>{item.attribute_value}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <div className='bg-black h-1 my-5 rounded-md' />
         </div>

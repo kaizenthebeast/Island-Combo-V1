@@ -13,8 +13,17 @@ export const getAllProducts = async (): Promise<ProductCatalogItem[]> => {
 
 export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {
     const supabase = await createClient()
-    const { data, error } = await supabase.rpc('get_product_details', { p_slug })
+    const { data, error } = await supabase.rpc('get_product_by_slug', { p_slug })
     if (error) throw new Error(error.message)
     return data
+}
+
+export const getProductDetails = async (productId: number) => {
+    const supabase = await createClient()
+    const { data, error } = await supabase.from('product_details').select('*').eq('product_id', productId)
+    if (error) {
+        throw new Error(error.message)
+    }
+    return data;
 }
 
