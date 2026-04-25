@@ -20,12 +20,12 @@ import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
 
-
 type Props = {
     product: ProductDetails
 }
 
 const ProductDetails = ({ product }: Props) => {
+
     // ─── Cart store ───────────────────────────────────────────
     const { addItem, quantityInput, resetQuantity } = useCartStore()
 
@@ -64,10 +64,17 @@ const ProductDetails = ({ product }: Props) => {
         )
     )
 
+    const resolvedVariant = selectedSize
+        ? product.variants.find((v) =>
+            v.attributes?.some((a) => a.name === 'flavor' && a.value === selectedFlavor) &&
+            v.attributes?.some((a) => a.name === 'size'   && a.value === selectedSize)
+          )
+        : null
+
     const productDetails = [
-        { label: "Material", value: "Polypropylene" },
-        { label: "Dimension", value: "44cm x 24cm x 65cm" },
-        { label: "Wheel style", value: "Spinner wheels" },
+        { label: "Material",    value: "Polypropylene"      },
+        { label: "Dimension",   value: "44cm x 24cm x 65cm" },
+        { label: "Wheel style", value: "Spinner wheels"      },
     ]
 
     // ─── Effects ──────────────────────────────────────────────
@@ -95,18 +102,12 @@ const ProductDetails = ({ product }: Props) => {
             return
         }
         if (quantityInput <= 0) return
-
-        const variantForSelection = product.variants.find((v) =>
-            v.attributes?.some((a) => a.name === 'flavor' && a.value === selectedFlavor) &&
-            v.attributes?.some((a) => a.name === 'size' && a.value === selectedSize)
-        )
-
-        if (!variantForSelection) {
+        if (!resolvedVariant) {
             alert("This size is not available for the selected flavor")
             return
         }
 
-        await addItem(variantForSelection.variant_id, quantityInput, selectedSize)
+        await addItem(resolvedVariant.variant_id, quantityInput, selectedSize)
     }
 
     async function handleAddFavorite(productId: number) {
@@ -126,9 +127,11 @@ const ProductDetails = ({ product }: Props) => {
             description: 'Success adding the product on favorite lists.',
         })
     }
+
     return (
         <div className='w-full h-full'>
             <div className="grid md:grid-cols-2 grid-cols-1 w-full gap-5">
+
                 {/* IMAGE CAROUSEL */}
                 <div className="relative w-full">
                     <Carousel className="w-full" setApi={setApi}>
@@ -140,14 +143,16 @@ const ProductDetails = ({ product }: Props) => {
                                 <CarouselItem key={index}>
                                     <div className="relative w-full min-h-[500px]">
                                         <Image
-                                            src={getPublicImageUrl(url)}  
+                                            src={getPublicImageUrl(url)}
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
                                             className="object-cover rounded-xl"
                                             priority={index === 0}
                                         />
-                                        <div className='absolute bottom-0 right-0 text-black'>{current} / {count}</div>
+                                        <div className='absolute bottom-0 right-0 text-black'>
+                                            {current} / {count}
+                                        </div>
                                     </div>
                                 </CarouselItem>
                             ))}
@@ -168,7 +173,6 @@ const ProductDetails = ({ product }: Props) => {
 
                     <p className="text-gray-600 leading-relaxed">
                         {product.description}
-                        {product.wholesale}
                     </p>
 
                     {/* PRICE */}
@@ -195,7 +199,7 @@ const ProductDetails = ({ product }: Props) => {
                             {product.variants.map((variant) => {
                                 const isActive = selectedVariant.variant_id === variant.variant_id
                                 const thumbnailUrl = variant.image_url?.[0]
-                                    ? getPublicImageUrl(variant.image_url[0])  
+                                    ? getPublicImageUrl(variant.image_url[0])
                                     : '/images/placeholder.png'
 
                                 return (
@@ -207,7 +211,7 @@ const ProductDetails = ({ product }: Props) => {
                                             ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}
                                     >
                                         <Image
-                                            src={thumbnailUrl}  
+                                            src={thumbnailUrl}
                                             fill
                                             sizes="80px"
                                             className="object-cover"
@@ -234,7 +238,7 @@ const ProductDetails = ({ product }: Props) => {
                                         className={`px-4 py-2 border rounded-md ${isActive
                                             ? "bg-[#900036] text-white"
                                             : "border-gray-300"
-                                            }`}
+                                        }`}
                                     >
                                         {size}
                                     </button>
@@ -244,7 +248,12 @@ const ProductDetails = ({ product }: Props) => {
                     </div>
 
                     {/* STOCK */}
-                    <p className="text-md font-medium text-gray-700">Stocks: {selectedVariant.stock}</p>
+                    <p className="text-md font-medium text-gray-700">
+                        {resolvedVariant
+                            ? `Stocks: ${resolvedVariant.stock}`
+                            : 'Select a size to see stock'
+                        }
+                    </p>
 
                     {/* QUANTITY CONTROL */}
                     <div className="flex items-center gap-3">
@@ -265,19 +274,19 @@ const ProductDetails = ({ product }: Props) => {
                         <Button
                             type='button'
                             onClick={handleAddToCart}
-                            disabled={!selectedSize || quantityInput <= 0}
+                            disabled={!resolvedVariant || quantityInput <= 0}
                             className="flex-1 h-11 bg-[#900036] text-white rounded-full">
                             <ShoppingCart />
                             Add to cart
                         </Button>
                         <Link
                             href="/checkout"
-                            className={`flex-1 h-11 ${!selectedSize || quantityInput <= 0 ? 'pointer-events-none' : ''}`}
+                            className={`flex-1 h-11 ${!resolvedVariant || quantityInput <= 0 ? 'pointer-events-none' : ''}`}
                         >
                             <button
                                 type='button'
                                 className="w-full h-full border border-[#900036] text-[#900036] rounded-full flex items-center justify-center hover:bg-[#900036] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400"
-                                disabled={!selectedSize || quantityInput <= 0}
+                                disabled={!resolvedVariant || quantityInput <= 0}
                             >
                                 Buy Now
                             </button>
