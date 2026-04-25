@@ -3,18 +3,21 @@ import React from "react";
 import { Address } from "@/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
+import { deleteAddress } from "@/lib/users";
 
-const AddressDetails = ({
-    address,
-    selectedAddressId,
-    setSelectedAddressId,
-    onSuccess,
-}: {
+const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSuccess, }: {
     address: Address;
     selectedAddressId: number | null;
     setSelectedAddressId: (id: number | null) => void;
     onSuccess?: () => void;
 }) => {
+
+    async function handleDeleteAdd(id: number) {
+        await deleteAddress(id);
+        if (onSuccess) onSuccess();
+    }
+
+
     return (
         <>
             {/* Details */}
@@ -47,13 +50,16 @@ const AddressDetails = ({
                             Edit
                         </button>
                     </CheckoutAddress>
+                    <button type="button" className="mt-3 ms-3 text-[#900036] font-bold" onClick={() => handleDeleteAdd(address.id)}>
+                        Remove
+                    </button>
                 </div>
             </div>
 
             {/* Radio Input */}
             <input
                 type="radio"
-                name="selectedAddress"     
+                name="selectedAddress"
                 value={address.id}
                 checked={selectedAddressId === address.id}
                 onChange={() => setSelectedAddressId(address.id)}
