@@ -26,34 +26,67 @@ type Props = {
 }
 
 const ProductDetails = ({ product }: Props) => {
-    const defaultVariant = product.variants?.[0];
+    // ─── Cart store ───────────────────────────────────────────
+    const { addItem, quantityInput, resetQuantity } = useCartStore()
+
+    // ─── Favorite store ───────────────────────────────────────
+    const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite)
+
+    // ─── Variant & size state ─────────────────────────────────
+    const defaultVariant = product.variants?.[0]
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
-    const hasDiscount = product.discount !== null && product.discount > 0;
-    const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite);
 
-    async function handleAddFavorite(productId: number) {
-        await addFavoriteToStore(productId);
-        const error = useFavoriteStore.getState().error;
-
-        if (error) {
-            customToast.error({
-                title: 'Failed to add favorite',
-                description: error,
-            })
-            return;
-        }
-
-        customToast.success({
-            title: 'Successfully adding product to favorites',
-            description: 'Success adding the product on favorite lists.'
-        })
-    }
-
+    // ─── Carousel state ───────────────────────────────────────
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
     const [count, setCount] = useState(0)
-    const { addItem, quantityInput, resetQuantity } = useCartStore();
+
+    // ─── Derived values ───────────────────────────────────────
+    const hasDiscount = product.discount !== null && product.discount > 0
+
+    const selectedFlavor = selectedVariant.attributes
+        ?.find((att) => att.name === 'flavor')?.value
+
+    const sizes = Array.from(
+        new Set(
+            product.variants
+                .filter((v) =>
+                    v.attributes?.some(
+                        (att) => att.name === 'flavor' && att.value === selectedFlavor
+                    )
+                )
+                .flatMap((v) =>
+                    v.attributes
+                        ?.filter((att) => att.name === 'size')
+                        .map((a) => a.value)
+                )
+        )
+    )
+
+    const productDetails = [
+        { label: "Material", value: "Polypropylene" },
+        { label: "Dimension", value: "44cm x 24cm x 65cm" },
+        { label: "Wheel style", value: "Spinner wheels" },
+    ]
+
+    // ─── Effects ──────────────────────────────────────────────
+    useEffect(() => {
+        resetQuantity()
+    }, [])
+
+    useEffect(() => {
+        if (!api) return
+        setCount(api.scrollSnapList().length)
+        setCurrent(api.selectedScrollSnap() + 1)
+        api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
+    }, [api])
+
+    // ─── Handlers ─────────────────────────────────────────────
+    function handleVariantChange(variant: typeof defaultVariant) {
+        setSelectedVariant(variant)
+        setSelectedSize(null)
+    }
 
     async function handleAddToCart() {
         if (!selectedVariant) return
@@ -62,32 +95,37 @@ const ProductDetails = ({ product }: Props) => {
             return
         }
         if (quantityInput <= 0) return
-        await addItem(selectedVariant.variant_id, quantityInput, selectedSize)
+
+        const variantForSelection = product.variants.find((v) =>
+            v.attributes?.some((a) => a.name === 'flavor' && a.value === selectedFlavor) &&
+            v.attributes?.some((a) => a.name === 'size' && a.value === selectedSize)
+        )
+
+        if (!variantForSelection) {
+            alert("This size is not available for the selected flavor")
+            return
+        }
+
+        await addItem(variantForSelection.variant_id, quantityInput, selectedSize)
     }
 
-    useEffect(() => {
-        resetQuantity();
-    }, []);
+    async function handleAddFavorite(productId: number) {
+        await addFavoriteToStore(productId)
+        const error = useFavoriteStore.getState().error
 
-    useEffect(() => {
-        if (!api) return
-        setCount(api.scrollSnapList().length)
-        setCurrent(api.selectedScrollSnap() + 1)
-        api.on("select", () => {
-            setCurrent(api.selectedScrollSnap() + 1)
+        if (error) {
+            customToast.error({
+                title: 'Failed to add favorite',
+                description: error,
+            })
+            return
+        }
+
+        customToast.success({
+            title: 'Successfully adding product to favorites',
+            description: 'Success adding the product on favorite lists.',
         })
-    }, [api])
-
-    const productDetails = [
-        { label: "Material", value: "Polypropylene" },
-        { label: "Dimension", value: "44cm x 24cm x 65cm" },
-        { label: "Wheel style", value: "Spinner wheels" },
-    ];
-
-    const sizes = Array.from(
-        new Set(product.variants.flatMap((v) => v.attributes?.filter((att) => att.name === 'size').map((a) => a.value)))
-    )
-
+    }
     return (
         <div className='w-full h-full'>
             <div className="grid md:grid-cols-2 grid-cols-1 w-full gap-5">
@@ -102,7 +140,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <CarouselItem key={index}>
                                     <div className="relative w-full min-h-[500px]">
                                         <Image
-                                            src={getPublicImageUrl(url)}  // ✅ already applied
+                                            src={getPublicImageUrl(url)}  
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
@@ -157,19 +195,19 @@ const ProductDetails = ({ product }: Props) => {
                             {product.variants.map((variant) => {
                                 const isActive = selectedVariant.variant_id === variant.variant_id
                                 const thumbnailUrl = variant.image_url?.[0]
-                                    ? getPublicImageUrl(variant.image_url[0])  // ✅ added
+                                    ? getPublicImageUrl(variant.image_url[0])  
                                     : '/images/placeholder.png'
 
                                 return (
                                     <button
                                         type='button'
                                         key={variant.variant_id}
-                                        onClick={() => setSelectedVariant(variant)}
+                                        onClick={() => handleVariantChange(variant)}
                                         className={`w-20 h-20 relative overflow-hidden border rounded-md
                                             ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}
                                     >
                                         <Image
-                                            src={thumbnailUrl}  // ✅ now uses helper
+                                            src={thumbnailUrl}  
                                             fill
                                             sizes="80px"
                                             className="object-cover"
@@ -196,7 +234,7 @@ const ProductDetails = ({ product }: Props) => {
                                         className={`px-4 py-2 border rounded-md ${isActive
                                             ? "bg-[#900036] text-white"
                                             : "border-gray-300"
-                                        }`}
+                                            }`}
                                     >
                                         {size}
                                     </button>
