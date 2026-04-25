@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Address } from "@/types/users";
 import CheckoutAddress from "@/components/forms/CheckoutAddressForm";
-import AddressDetails from "@/components/functional-ui/AddressDetails";
+import AddressDetails from "@/components/functional-ui/checkout_address/AddressDetails";
 import { getUserAddress } from "@/lib/users";
 
 import { Button } from '@/components/ui/button'

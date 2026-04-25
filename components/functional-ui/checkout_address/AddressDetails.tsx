@@ -2,7 +2,7 @@
 import React from "react";
 import { Address } from "@/types/users";
 import { MapPin } from 'lucide-react';
-import CheckoutAddress from "../forms/CheckoutAddressForm";
+import CheckoutAddress from "../../forms/CheckoutAddressForm";
 
 const AddressDetails = ({
     address,

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
-import CartCount from "../functional-ui/CartCount";
+import CartCount from "./cart/CartCount";
 import { ShoppingCart, Heart, User } from "lucide-react";
 
 

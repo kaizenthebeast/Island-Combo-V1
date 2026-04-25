@@ -5,7 +5,7 @@ import { CartItem } from '@/types/cart'
 import { useCartStore } from '@/store/cartStore'
 
 import Image from 'next/image'
-import CartQuantityButton from './CartQuantityButton'
+import CartQuantityButton from '../cart/CartQuantityButton'
 import { X, CircleCheckBig } from 'lucide-react'
 
 type Props = {

@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { CircleDollarSign } from "lucide-react";
-import PromoCodeForm from '../forms/PromoCodeForm';
+import PromoCodeForm from '../../forms/PromoCodeForm';
 import { Switch } from '@/components/ui/switch';
 
 import { useCheckoutStore } from '@/store/useCheckoutStore';

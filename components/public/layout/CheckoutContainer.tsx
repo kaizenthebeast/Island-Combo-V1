@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from "react"
-import BillingSummary from "@/components/functional-ui/BillingSummary"
-import OrderSummary from "@/components/functional-ui/OrderSummary"
+import BillingSummary from "@/components/functional-ui/checkout/BillingSummary"
+import OrderSummary from "@/components/functional-ui/checkout/OrderSummary"
 import { useCartStore } from "@/store/cartStore"
 import { ShoppingCart } from "lucide-react"
 import Link from "next/link"
