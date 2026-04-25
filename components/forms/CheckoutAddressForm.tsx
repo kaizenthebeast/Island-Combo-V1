@@ -1,6 +1,10 @@
 "use client";
 
 import { useForm, SubmitHandler } from "react-hook-form";
+import { AddressFormValues } from "@/types/users";
+import { insertAddressInfo } from "@/lib/users"
+
+
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,17 +25,7 @@ type Props = {
     title?: string
 };
 
-type AddressFormValues = {
-    firstName: string;
-    lastName: string;
-    phone: string;
-    address1: string;
-    address2?: string;
-    postalCode: string;
-    locality: string;
-    country: string;
-    makeDefault: boolean;
-};
+
 
 const CheckoutAddress = ({ children, title = "Address" }: Props) => {
     const {
@@ -39,14 +33,14 @@ const CheckoutAddress = ({ children, title = "Address" }: Props) => {
         handleSubmit,
         formState: { errors },
         setValue,
+        reset,
         watch,
     } = useForm<AddressFormValues>({
         defaultValues: {
             firstName: "",
             lastName: "",
             phone: "",
-            address1: "",
-            address2: "",
+            address: "",
             postalCode: "",
             locality: "",
             country: "",
@@ -57,7 +51,21 @@ const CheckoutAddress = ({ children, title = "Address" }: Props) => {
     const makeDefault = watch("makeDefault");
 
     const onSubmit: SubmitHandler<AddressFormValues> = (data) => {
-        console.log("ADDRESS:", data);
+        try {
+            insertAddressInfo({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                address: data.address,
+                phone: data.phone,
+                postalCode: data.postalCode,
+                locality: data.locality,
+                country: data.country,
+                makeDefault: data.makeDefault,
+            })
+            reset();
+        } catch (error) {
+            console.error("Error inserting user info:", error);
+        }
     };
 
     return (
@@ -128,12 +136,12 @@ const CheckoutAddress = ({ children, title = "Address" }: Props) => {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="address2">Address</Label>
+                        <Label htmlFor="address">Address</Label>
                         <Input
-                            id="address2"
+                            id="address"
                             placeholder="Apartment, suite, etc."
                             required
-                            {...register("address2")}
+                            {...register("address")}
                         />
                     </div>
 
