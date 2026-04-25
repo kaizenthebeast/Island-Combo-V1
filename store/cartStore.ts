@@ -27,19 +27,18 @@ export const useCartStore = create<CartState>((set, get) => {
 
   const setCartState = (cart: CartItem[]) => {
     const { totalQty, subtotal } = recalc(cart)
-
-    set({
-      cart,
-      totalQty,
-      subtotal,
-    })
+    set({ cart, totalQty, subtotal })
   }
 
   const applyOptimistic = (updater: (cart: CartItem[]) => CartItem[]) => {
-    const current = get().cart
-    const updated = updater(current)
-    setCartState(updated)
-    return current
+    const prev = get().cart           // 1. snapshot
+    setCartState(updater(prev))       // 2. optimistic update
+    return prev                       // 3. return prev for rollback
+  }
+
+  const rollback = (prev: CartItem[], err: unknown) => {
+    setCartState(prev)
+    set({ error: err instanceof Error ? err.message : "Unknown error" })
   }
 
   return {
@@ -49,51 +48,28 @@ export const useCartStore = create<CartState>((set, get) => {
     subtotal: 0,
     quantityInput: 1,
 
-    incrementQty: () =>
-      set((state) => ({
-        quantityInput: state.quantityInput + 1,
-      })),
-
-    decrementQty: () =>
-      set((state) => ({
-        quantityInput: Math.max(1, state.quantityInput - 1),
-      })),
+    incrementQty: () => set((state) => ({ quantityInput: state.quantityInput + 1 })),
+    decrementQty: () => set((state) => ({ quantityInput: Math.max(1, state.quantityInput - 1) })),
 
     fetchCart: async () => {
       try {
         set({ error: null })
-
         const res = await fetch("/api/cart")
         const data = await res.json()
-
         if (!res.ok) throw new Error(data.error || "Fetch failed")
-
         setCartState(data)
-      } catch (err: unknown) {
-        set({
-          error: err instanceof Error ? err.message : "Unknown error",
-        })
+      } catch (err) {
+        set({ error: err instanceof Error ? err.message : "Unknown error" })
       }
     },
 
     // ADD ITEM
     addItem: async (variantId, qty, size) => {
       const prev = applyOptimistic((cart) => {
-        const exists = cart.find(
-          (i) => i.variant_id === variantId && i.size === size
-        )
-
+        const exists = cart.find((i) => i.variant_id === variantId && i.size === size)
         if (!exists) {
-          return [
-            ...cart,
-            {
-              variant_id: variantId,
-              quantity: qty,
-              size,
-            } as CartItem,
-          ]
+          return [...cart, { variant_id: variantId, quantity: qty, size } as CartItem]
         }
-
         return cart.map((i) =>
           i.variant_id === variantId && i.size === size
             ? { ...i, quantity: i.quantity + qty }
@@ -107,14 +83,9 @@ export const useCartStore = create<CartState>((set, get) => {
           body: JSON.stringify({ variantId, quantity: qty, size }),
           headers: { "Content-Type": "application/json" },
         })
-
         if (!res.ok) throw new Error("Failed to add item")
-
       } catch (err) {
-        setCartState(prev)
-        set({
-          error: err instanceof Error ? err.message : "Unknown error",
-        })
+        rollback(prev, err)   // ✅ rolls back to before the add
       }
     },
 
@@ -122,9 +93,7 @@ export const useCartStore = create<CartState>((set, get) => {
     updateItem: async (variantId, qty, size) => {
       const prev = applyOptimistic((cart) =>
         cart.map((i) =>
-          i.variant_id === variantId && i.size === size
-            ? { ...i, quantity: qty }
-            : i
+          i.variant_id === variantId && i.size === size ? { ...i, quantity: qty } : i
         )
       )
 
@@ -134,22 +103,16 @@ export const useCartStore = create<CartState>((set, get) => {
           body: JSON.stringify({ variantId, quantity: qty, size }),
           headers: { "Content-Type": "application/json" },
         })
-
         if (!res.ok) throw new Error("Update failed")
       } catch (err) {
-        setCartState(prev)
-        set({
-          error: err instanceof Error ? err.message : "Unknown error",
-        })
+        rollback(prev, err)
       }
     },
 
     // REMOVE ITEM
     removeItem: async (variantId, size) => {
       const prev = applyOptimistic((cart) =>
-        cart.filter(
-          (i) => !(i.variant_id === variantId && i.size === size)
-        )
+        cart.filter((i) => !(i.variant_id === variantId && i.size === size))
       )
 
       try {
@@ -158,25 +121,14 @@ export const useCartStore = create<CartState>((set, get) => {
           body: JSON.stringify({ variantId, size, quantity: 0 }),
           headers: { "Content-Type": "application/json" },
         })
-
         if (!res.ok) throw new Error("Remove failed")
       } catch (err) {
-        setCartState(prev)
-        set({
-          error: err instanceof Error ? err.message : "Unknown error",
-        })
+        rollback(prev, err)
       }
     },
 
     resetQuantity: () => set({ quantityInput: 1 }),
 
-    clearCart: () =>
-      set({
-        cart: [],
-        error: null,
-        totalQty: 0,
-        subtotal: 0,
-        quantityInput: 1,
-      }),
+    clearCart: () => set({ cart: [], error: null, totalQty: 0, subtotal: 0, quantityInput: 1 }),
   }
 })

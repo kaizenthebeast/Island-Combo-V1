@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { addFavorite } from '@/lib/favorite'
+import { useFavoriteStore } from "@/store/favoriteStore";
+
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ProductDetails } from '@/types/product'
@@ -28,14 +29,27 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
     const hasDiscount = product.discount !== null && product.discount > 0;
+    const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite);
+    const favoriteError = useFavoriteStore((state) => state.error);
 
     async function handleAddFavorite(productId: number) {
-        await addFavorite(productId);
+        await addFavoriteToStore(productId);
+
+        // Read error AFTER the action settles
+        const error = useFavoriteStore.getState().error;
+
+        if (error) {
+            customToast.error({
+                title: 'Failed to add favorite',
+                description: error, // e.g. "Product is already in favorites"
+            })
+            return;
+        }
+
         customToast.success({
             title: 'Successfully adding product to favorites',
             description: 'Success adding the product on favorite lists.'
         })
-
     }
 
     //Carousel 

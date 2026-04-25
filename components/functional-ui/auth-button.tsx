@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import CartCount from "./cart/CartCount";
 import { ShoppingCart, Heart } from "lucide-react";
 import { UserMenu } from "./User_Menu";
+import FavoriteCount from "./favorite/FavoriteCount";
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -22,8 +23,11 @@ export async function AuthButton() {
       </Link>
 
       {/* FAVORITES */}
-      <Link href="/product/favorites">
+      <Link href="/product/favorites" className="relative flex items-center">
         <Heart size={22} />
+        <span className="absolute -top-2 -right-2 text-xs bg-[#900036] text-white rounded-full px-1.5">
+          <FavoriteCount />
+        </span>
       </Link>
 
       {/* USER */}
