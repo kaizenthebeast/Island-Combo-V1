@@ -32,7 +32,7 @@ export const addFavorite = async (productId: number) => {
     }
     const userId = userData.user.id
     const { error } = await supabase.from('favorites')
-        .insert({ 'userId': userId, 'product_id': productId })
+        .insert({ 'user_id': userId, 'product_id': productId })
         .select()
         .eq('user_id', userId).single()
 

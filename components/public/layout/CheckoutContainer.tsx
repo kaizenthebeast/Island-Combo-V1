@@ -19,8 +19,8 @@ const CheckoutContainer = () => {
       <section className="max-w-7xl mx-auto p-4 md:p-6 flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center text-center gap-4">
 
-          <div className="p-4 rounded-full bg-gray-100">
-            <ShoppingCart className="w-10 h-10 text-gray-500" />
+          <div className="p-4 rounded-full bg-[#900036]">
+            <ShoppingCart className="w-10 h-10 text-white" />
           </div>
 
           <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
