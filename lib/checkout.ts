@@ -1,13 +1,13 @@
 import { createClient } from "./supabase/server";
 
-export async function findPromoCode(promoCode: string) {
+export const findPromoCode = async (promoCode: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("promo")
     .select("code, value, min_quantity, expires_at")
     .eq("code", promoCode.toUpperCase())
-    .single(); 
+    .single();
 
   if (error || !data) return null;
 

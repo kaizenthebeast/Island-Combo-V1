@@ -30,7 +30,7 @@ function mapProductDetails(product: ProductDetails): ProductDetails {
 }
 
 
-export async function getAllProducts(): Promise<ProductCatalogItem[]> {
+export const getAllProducts = async (): Promise<ProductCatalogItem[]> => {
     const supabase = await createClient()
 
     const { data, error } = await supabase.from('product_catalog_mv').select('*')
@@ -42,7 +42,7 @@ export async function getAllProducts(): Promise<ProductCatalogItem[]> {
 
 
 
-export async function getProductBySlug(p_slug: string): Promise<ProductDetails> {
+export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {
     const supabase = await createClient()
 
     const { data, error } = await supabase.rpc('get_product_details', { p_slug })

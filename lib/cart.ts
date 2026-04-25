@@ -11,7 +11,7 @@ function mapCartItem(item: CartItem): CartItem {
 }
 
 
-export async function getCart(userId: string): Promise<CartItem[]> {
+export const getCart = async (userId: string): Promise<CartItem[]> => {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -26,7 +26,7 @@ export async function getCart(userId: string): Promise<CartItem[]> {
 }
 
 
-export async function addToCart(item: CartItemInput) {
+export const addToCart = async (item: CartItemInput) => {
   const supabase = await createClient()
 
   const { data: existing, error: fetchError } = await supabase
@@ -65,12 +65,12 @@ export async function addToCart(item: CartItemInput) {
 }
 
 
-export async function updateCartQuantity({ userId, variantId, size, quantity, }: {
+export const updateCartQuantity = async ({ userId, variantId, size, quantity, }: {
   userId: string
   variantId: number
   size: string
   quantity: number
-}) {
+}) => {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -84,11 +84,11 @@ export async function updateCartQuantity({ userId, variantId, size, quantity, }:
   return data
 }
 
-export async function removeFromCart({ userId, variantId, size }: {
+export const removeFromCart = async ({ userId, variantId, size }: {
   userId: string
   variantId: number
   size: string
-}) {
+}) => {
   const supabase = await createClient()
 
   const { error } = await supabase

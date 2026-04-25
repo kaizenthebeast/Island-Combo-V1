@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { addFavorite } from '@/lib/favorite'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ProductDetails } from '@/types/product'
 import { useCartStore } from '@/store/cartStore'
+import { customToast } from '@/components/popup/ToastCustom'
 
 import {
     Carousel,
@@ -26,6 +28,15 @@ const ProductDetails = ({ product }: Props) => {
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
     const hasDiscount = product.discount !== null && product.discount > 0;
+
+    async function handleAddFavorite(productId: number) {
+        await addFavorite(productId);
+        customToast.success({
+            title: 'Successfully adding product to favorites',
+            description: 'Success adding the product on favorite lists.'
+        })
+
+    }
 
     //Carousel 
     const [api, setApi] = useState<CarouselApi>()
@@ -246,7 +257,7 @@ const ProductDetails = ({ product }: Props) => {
                             </button>
                         </Link>
 
-                        <Button variant="ghost" size="icon">
+                        <Button type='button' variant="ghost" size="icon" onClick={() => handleAddFavorite(product.product_id)}>
                             <Heart />
                         </Button>
                     </div>
