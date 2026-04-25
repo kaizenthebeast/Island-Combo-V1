@@ -5,6 +5,7 @@ import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
 import { deleteAddress } from "@/lib/users";
 import DeleteModal from "../../popup/DeleteModal";
+import { customToast } from '@/components/popup/ToastCustom'
 
 const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSuccess, }: {
     address: Address;
@@ -16,6 +17,10 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
     async function handleDeleteAdd(id: number) {
         await deleteAddress(id);
         if (onSuccess) onSuccess();
+        customToast.success({
+            title: "Address sucessfully deleted!",
+            description: "The address has been removed from your account.",
+        })
     }
 
 

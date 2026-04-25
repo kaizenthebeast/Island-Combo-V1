@@ -76,11 +76,18 @@ export async function PATCH(req: NextRequest) {
       )
     }
 
+    if (!quantity || quantity < 1) {
+      return NextResponse.json(
+        { error: 'Quantity must be at least 1' },
+        { status: 400 }
+      )
+    }
+
     const data = await updateCartQuantity({
       userId: user.id,
       variantId,
-      quantity,
       size,
+      quantity,
     })
 
     return NextResponse.json(data)
@@ -112,7 +119,6 @@ export async function DELETE(req: NextRequest) {
       userId: user.id,
       variantId,
       size,
-      quantity: 0, // not needed but satisfies type
     })
 
     return NextResponse.json({ success: true })

@@ -18,7 +18,7 @@ export async function getCart(userId: string): Promise<CartItem[]> {
     .from('cart_view')
     .select('*')
     .eq('user_id', userId)
-    .order('created_at', {ascending: false})
+    .order('created_at', { ascending: false })
 
   if (error) throw new Error(error.message)
 
@@ -65,25 +65,38 @@ export async function addToCart(item: CartItemInput) {
 }
 
 
-export async function updateCartQuantity(cartId: number, quantity: number) {
+export async function updateCartQuantity({ userId, variantId, size, quantity, }: {
+  userId: string
+  variantId: number
+  size: string
+  quantity: number
+}) {
   const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('cart')
     .update({ quantity })
-    .eq('id', cartId)
+    .eq('user_id', userId)
+    .eq('variant_id', variantId)
+    .eq('size', size)
 
   if (error) throw error
   return data
-}                           // ← clean closing brace
+}
 
-export async function removeFromCart(cartId: number) {
+export async function removeFromCart({ userId, variantId, size }: {
+  userId: string
+  variantId: number
+  size: string
+}) {
   const supabase = await createClient()
 
   const { error } = await supabase
     .from('cart')
     .delete()
-    .eq('id', cartId)
+    .eq('user_id', userId)
+    .eq('variant_id', variantId)
+    .eq('size', size)
 
   if (error) throw error
 }   

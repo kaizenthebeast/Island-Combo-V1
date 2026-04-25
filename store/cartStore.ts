@@ -17,9 +17,6 @@ type CartState = {
   addItem: (variantId: number, qty: number, size: string) => Promise<void>
   updateItem: (variantId: number, qty: number, size: string) => Promise<void>
   removeItem: (variantId: number, size: string) => Promise<void>
-
-  resetQuantity: () => void
-  clearCart: () => void
 }
 
 export const useCartStore = create<CartState>((set, get) => {
@@ -110,9 +107,6 @@ export const useCartStore = create<CartState>((set, get) => {
 
         if (!res.ok) throw new Error("Failed to add item")
 
-        // Optional: silent sync (non-blocking UX)
-        // get().fetchCart()
-
       } catch (err) {
         setCartState(prev)
         set({
@@ -139,9 +133,6 @@ export const useCartStore = create<CartState>((set, get) => {
         })
 
         if (!res.ok) throw new Error("Update failed")
-
-        // optional background sync
-        // get().fetchCart()
       } catch (err) {
         setCartState(prev)
         set({
@@ -161,14 +152,11 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const res = await fetch("/api/cart", {
           method: "DELETE",
-          body: JSON.stringify({ variantId, size }),
+          body: JSON.stringify({ variantId, size, quantity: 0 }),
           headers: { "Content-Type": "application/json" },
         })
 
         if (!res.ok) throw new Error("Remove failed")
-
-        // optional background sync
-        // get().fetchCart()
       } catch (err) {
         setCartState(prev)
         set({
@@ -176,16 +164,5 @@ export const useCartStore = create<CartState>((set, get) => {
         })
       }
     },
-
-    resetQuantity: () => set({ quantityInput: 1 }),
-
-    clearCart: () =>
-      set({
-        cart: [],
-        error: null,
-        totalQty: 0,
-        subtotal: 0,
-        quantityInput: 1,
-      }),
   }
 })

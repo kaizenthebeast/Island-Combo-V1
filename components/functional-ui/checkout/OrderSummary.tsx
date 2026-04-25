@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { CartItem } from '@/types/cart'
 import { useCartStore } from '@/store/cartStore'
-
+import { customToast } from '@/components/popup/ToastCustom'
 import Image from 'next/image'
 import CartQuantityButton from '../cart/CartQuantityButton'
 import { X, CircleCheckBig } from 'lucide-react'
@@ -14,11 +14,31 @@ type Props = {
 
 const OrderSummary = ({ cartItems }: Props) => {
     const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
-
     // store temporary quantities
     const [editQuantities, setEditQuantities] = useState<Record<string, number>>({})
 
     const { removeItem, updateItem } = useCartStore()
+
+    function handleActions(actions: string, variantId: number, qty: number, size: string,) {
+        switch (actions) {
+            case 'remove':
+                removeItem(variantId, size);
+                customToast.success({
+                    title: "Item removed from cart!",
+                    description: "The item has been removed from your cart.",
+                })
+                break;
+            case 'update':
+                updateItem(variantId, qty, size);
+                customToast.success({
+                    title: "Cart Item updated!",
+                    description: "The item has been updated in your cart.",
+                })
+                break;
+            default:
+                break;
+        }
+    }
 
     const handleEditToggle = (key: string, currentQty: number) => {
         setActiveItemKey(prev => {
@@ -82,7 +102,7 @@ const OrderSummary = ({ cartItems }: Props) => {
 
                                         <button
                                             onClick={() =>
-                                                removeItem(item.variant_id, item.size)
+                                                handleActions('remove', item.variant_id, item.quantity, item.size,)
                                             }
                                             className="text-red-500"
                                         >
@@ -120,10 +140,11 @@ const OrderSummary = ({ cartItems }: Props) => {
                                             {isActive && (
                                                 <button
                                                     onClick={() => {
-                                                        updateItem(
+                                                        handleActions(
+                                                            'update',
                                                             item.variant_id,
                                                             quantity,
-                                                            item.size
+                                                            item.size,
                                                         )
                                                         setActiveItemKey(null)
                                                     }}
