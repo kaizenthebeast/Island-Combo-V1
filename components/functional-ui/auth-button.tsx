@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "./logout-button";
 import CartCount from "./cart/CartCount";
-import { ShoppingCart, Heart, User } from "lucide-react";
-
-
+import { ShoppingCart, Heart } from "lucide-react";
+import { UserMenu } from "./User_Menu";
 
 export async function AuthButton() {
   const supabase = await createClient();
@@ -13,7 +11,7 @@ export async function AuthButton() {
   const user = data?.claims;
   const isAuthenticated = !!user?.email;
 
-  const Actions = () => (
+  return (
     <div className="flex items-center gap-6">
       {/* CART */}
       <Link href="/checkout" className="relative flex items-center">
@@ -27,28 +25,16 @@ export async function AuthButton() {
       <Link href="/">
         <Heart size={22} />
       </Link>
-      {isAuthenticated && (
-        <Link href="/protected/user_details">
-          <User size={22} />
-        </Link>
+
+      {/* USER */}
+      {isAuthenticated ? (
+        <UserMenu />
+      ) : (
+        <div className="flex gap-4 font-semibold text-sm">
+          <Link href="/auth/login">Sign in</Link>
+          <Link href="/auth/sign-up">Sign up</Link>
+        </div>
       )}
-    </div>
-  );
-
-  return isAuthenticated ? (
-    <div className="flex items-center gap-9">
-      <Actions />
-
-      <LogoutButton />
-    </div>
-  ) : (
-    <div className="flex items-center gap-6">
-      <Actions />
-
-      <div className="flex gap-4 font-semibold text-sm">
-        <Link href="/auth/login">Sign in</Link>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </div>
     </div>
   );
 }

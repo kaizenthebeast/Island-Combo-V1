@@ -34,7 +34,7 @@ const AddressBillingSummary = () => {
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Shipping fee</span>
-          <span>Calculated upon delivery</span>
+          <span>Pending</span>
         </div>
         <div className="border-t pt-3 flex justify-between font-semibold">
           <span>Total</span>
