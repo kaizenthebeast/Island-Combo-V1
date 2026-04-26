@@ -26,8 +26,8 @@ export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
     phone_text: addressInfo.phone,
   }).eq("user_id", userId);
 
-  if (profileError) {
-    throw new Error(`Error inserting profile info: ${profileError.message}`);
+   if (profileError) {
+    return { success: false, error: profileError.message }
   }
 
   const { error: addressError } = await supabase.from("addresses").insert({

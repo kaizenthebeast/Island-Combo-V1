@@ -113,13 +113,11 @@ const CheckoutAddress = ({
                     description: "Your address has been updated.",
                 })
             }
-
-
         } catch (error) {
             console.error("Error saving address:", error);
             customToast.error({
-                title: "Payment failed",
-                description: "Your card was declined. Please try again."
+                title: "An Error Occured",
+                description: "There's an error occured during the process."
             })
         }
     };
