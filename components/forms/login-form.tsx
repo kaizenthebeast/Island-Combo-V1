@@ -86,7 +86,7 @@ export function LoginForm() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/auth/callback?guest_id=${guestUserId}`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?guest_id=${guestUserId}`,
       },
     });
   };

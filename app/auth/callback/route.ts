@@ -4,9 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
 
   if (!code) {
-    return NextResponse.redirect(`${requestUrl.origin}/login`);
+    return NextResponse.redirect(`${siteUrl}/login`);
   }
 
   const guestUserId = requestUrl.searchParams.get("guest_id");
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
 
   if (authError || !authData.session) {
     console.error("OAuth error:", authError?.message);
-    return NextResponse.redirect(`${requestUrl.origin}/login?error=auth_failed`);
+    return NextResponse.redirect(`${siteUrl}/login?error=auth_failed`);
   }
 
   const authUserId = authData.session.user.id;
@@ -32,13 +33,12 @@ export async function GET(request: Request) {
     }
   }
 
-  // Check role and redirect accordingly
   const { data: profile } = await supabase
     .from("profile")
     .select("role")
     .eq("user_id", authUserId)
     .single();
 
-  const redirectTo = profile?.role === "admin" ? "/admin" : "/";
-  return NextResponse.redirect(`${requestUrl.origin}${redirectTo}`);
+  const redirectTo = profile?.role === "admin" ? "/admin/products" : "/";
+  return NextResponse.redirect(`${siteUrl}${redirectTo}`);
 }

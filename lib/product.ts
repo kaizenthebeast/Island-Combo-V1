@@ -70,7 +70,6 @@ export const addAdminProduct = async (data: AddProductPayload) => {
   const supabase = await createClient()
 
   // No upload logic here — images are already in Supabase Storage
-  // Just build the variants array directly from the pre-uploaded data
   const variants = data.variants.map((v) => ({
     price: v.price,
     stock: v.stock,
