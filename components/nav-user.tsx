@@ -1,12 +1,11 @@
 "use client"
-
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -40,6 +39,16 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter();
+  const logout = async () => {
+    const supabase = createClient();
+    try {
+      await supabase.auth.signOut();
+      router.push("/auth/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -81,7 +90,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-          
+
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -96,8 +105,13 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
-              Log out
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 w-full cursor-pointer"
+              >
+                <LogOut size={15} />
+                Logout
+              </button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -93,7 +93,11 @@ export const addAdminProduct = async (data: AddProductPayload) => {
 
 export const getAllCategories = async () => {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('category').select('category_id, name')
+  const { data, error } = await supabase
+    .from('category')
+    .select('category_id, name')
+    .not('parent_id', 'is', null)   
+
   if (error) {
     throw new Error(error.message)
   }
