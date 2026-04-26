@@ -6,8 +6,8 @@ export const getFavorite = async () => {
     const supabase = await createClient()
 
     const { data: userData, error: errorData } = await supabase.auth.getUser();
-    if (errorData || !userData) {
-        throw new Error(`Error User not found: ${errorData?.message ?? "Unathorized"} `)
+    if (errorData || !userData?.user) {
+        return [];
     }
     const userId = userData.user.id;
     const { data, error } = await supabase
