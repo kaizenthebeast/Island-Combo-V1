@@ -1,18 +1,22 @@
+'use server'
+
 import { createClient } from './supabase/server'
 import type { ProductCatalogItem, ProductDetails, AdminProduct } from '@/types/product'
+import type { VariantWithUploadedImages } from './product-upload'
+import { AddProductFormValues } from '@/form-schema/addProductSchema'
 
 export const getAllProducts = async (): Promise<ProductCatalogItem[]> => {
-    const supabase = await createClient()
-    const { data, error } = await supabase.from('product_catalog_mv').select('*')
-    if (error) throw new Error(error.message)
-    return data
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('product_catalog_mv').select('*')
+  if (error) throw new Error(error.message)
+  return data
 }
 
 export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {
-    const supabase = await createClient()
-    const { data, error } = await supabase.rpc('get_product_by_slug', { p_slug })
-    if (error) throw new Error(error.message)
-    return data
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('get_product_by_slug', { p_slug })
+  if (error) throw new Error(error.message)
+  return data
 }
 
 
@@ -56,4 +60,43 @@ export const getAdminProductById = async (
     product_details: data.product_details ?? [],
     variants: data.variants ?? [],
   }
+}
+
+export type AddProductPayload = Omit<AddProductFormValues, 'variants'> & {
+  variants: VariantWithUploadedImages[]
+}
+
+export const addAdminProduct = async (data: AddProductPayload) => {
+  const supabase = await createClient()
+
+  // No upload logic here — images are already in Supabase Storage
+  // Just build the variants array directly from the pre-uploaded data
+  const variants = data.variants.map((v) => ({
+    price: v.price,
+    stock: v.stock,
+    is_active: v.is_active,
+    attributes: v.attributes,
+    images: v.images, // already { url, is_primary, sort_order }
+  }))
+
+  const payload = {
+    ...data,
+    variants,
+  }
+
+  const { data: result, error } = await supabase.rpc('add_admin_product', { payload })
+
+  if (error) throw error
+
+  return result
+}
+
+export const getAllCategories = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('category').select('category_id, name')
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data;
 }

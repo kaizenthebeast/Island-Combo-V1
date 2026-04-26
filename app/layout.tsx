@@ -23,7 +23,7 @@ const geistSans = Geist({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased flex min-h-svh w-full`}>
+      <body className={`${geistSans.className} antialiased`}>
         <AnonAuthProvider>
           {children}
           <Toaster />
