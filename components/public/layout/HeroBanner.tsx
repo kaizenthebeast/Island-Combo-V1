@@ -11,7 +11,6 @@ const slides = [
     highlight: "Big Sale",
     offer: "UP TO 60% OFF",
     bg: "bg-red-600",
-   image: "/images/bug.png",
   },
   {
     id: 2,
@@ -20,7 +19,7 @@ const slides = [
     highlight: "Mega Deals",
     offer: "UP TO 50% OFF",
     bg: "bg-red-700",
-   image: "/images/bug.png",
+  
   },
   {
     id: 3,
@@ -29,7 +28,7 @@ const slides = [
     highlight: "Sale Event",
     offer: "UP TO 70% OFF",
     bg: "bg-rose-700",
-    image: "/images/bug.png",
+  
   },
 ];
 
@@ -40,13 +39,7 @@ export default function HeroBanner() {
   return (
     <div className="w-full rounded-xl overflow-hidden relative">
       <div className={`relative w-full h-[220px] md:h-[320px] ${slide.bg} transition-colors duration-500`}>
-        <Image
-          src={slide.image}
-          alt={`${slide.title} ${slide.highlight}`}
-          fill
-          className="object-cover"
-          priority
-        />
+        
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-10">
           <p className="text-yellow-300 text-xs tracking-[0.25em] uppercase font-medium mb-2">
             {slide.tag}
