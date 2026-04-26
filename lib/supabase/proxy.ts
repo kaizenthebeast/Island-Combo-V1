@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 
 const PROTECTED_ROUTES = ["/protected", "/checkout/address"];
+const ADMIN_ROUTES = ["/admin"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -22,16 +23,34 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {data: { user }, } = await supabase.auth.getUser();
+  const { data: { user }, } = await supabase.auth.getUser();
   const path = request.nextUrl.pathname;
-  const isProtected = PROTECTED_ROUTES.some((route) => path.startsWith(route));
+  const isProtectedRoute = PROTECTED_ROUTES.some((route) => path.startsWith(route));
+  const isAdminRoute = ADMIN_ROUTES.some((route) => path.startsWith(route));
 
   // BLOCK BOTH: 1. NO USER 2. ANONYMOUS USER
-  if (isProtected && (!user || user.is_anonymous)) {
+  if (isProtectedRoute && (!user || user.is_anonymous)) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
   }
 
-  return response;
+  //  if the user access the admin route, check if the user is admin or not
+  if (isAdminRoute) {
+    if (!user || user.is_anonymous) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+
+    // Validate thru query
+    const { data: profile, error } = await supabase.from('profile').select('role').eq('user_id', user.id).single()
+    if (error || profile?.role !== 'admin') {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return response;  
 }
