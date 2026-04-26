@@ -4,9 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AnonAuthProvider from "@/helper/AnonAuthProvider";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
 
 const siteName = "Island Combo";
 
@@ -15,8 +13,6 @@ const defaultDescription =
   `Shop ${siteName} for clothing, electronics, beauty products, household essentials, kids' toys, jewelry, and more. Fast delivery across FSM.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-
   title: {
     default: defaultTitle,
     template: `%s | ${siteName}`,
@@ -25,7 +21,7 @@ export const metadata: Metadata = {
   keywords: [
     // broad
     "online shop FSM",
-    "Micronesia online store",
+    "Micronesia online store",  
     // top-level categories
     "clothing FSM",
     "electronics Micronesia",

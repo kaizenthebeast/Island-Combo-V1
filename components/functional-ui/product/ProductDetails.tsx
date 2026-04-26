@@ -45,6 +45,19 @@ const ProductDetails = ({ product }: Props) => {
     // ─── Derived values ───────────────────────────────────────
     const hasDiscount = product.discount !== null && product.discount > 0
 
+    // Collect all unique images across every variant
+    const allProductImages = product.variants
+        .flatMap((v) => v.image_url)
+        .filter(Boolean)
+        .reduce<string[]>((acc, url) => {
+            if (!acc.includes(url)) acc.push(url)
+            return acc
+        }, [])
+
+    const carouselImages = allProductImages.length > 0
+        ? allProductImages
+        : ["/images/placeholder.png"]
+
     const selectedFlavor = selectedVariant.attributes
         ?.find((att) => att.name === 'flavor')?.value
 
@@ -127,14 +140,11 @@ const ProductDetails = ({ product }: Props) => {
         <div className='w-full h-full'>
             <div className="grid md:grid-cols-2 grid-cols-1 w-full gap-5">
 
-                {/* IMAGE CAROUSEL */}
+                {/* IMAGE CAROUSEL — shows all images from all variants */}
                 <div className="relative w-full">
                     <Carousel className="w-full" setApi={setApi}>
                         <CarouselContent>
-                            {(selectedVariant.image_url.length > 0
-                                ? selectedVariant.image_url
-                                : ["/images/placeholder.png"]
-                            ).map((url: string, index: number) => (
+                            {carouselImages.map((url: string, index: number) => (
                                 <CarouselItem key={index}>
                                     <div className="relative w-full min-h-[500px]">
                                         <Image

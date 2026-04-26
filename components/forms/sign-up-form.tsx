@@ -35,16 +35,17 @@ export function SignUpForm() {
   const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
     setMessage("");
     setIsLoading(true);
-
     const supabase = createClient();
 
     try {
-      //Capture the anon user ID BEFORE the OAuth exchange overwrites the session
-      const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
-      if (anonError) {
-        throw new Error(`Failed to get anonymous session: ${anonError.message}`);
-      }
+      // Get anon user BEFORE signup
+      const { data: { user: anonUser } } = await supabase.auth.getUser();
       const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
+
+      // Store guest ID in cookie so we can merge AFTER email confirmation
+      if (guestUserId) {
+        document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
+      }
 
       const { data: signUpData, error } = await supabase.auth.signUp({
         email: data.email,
@@ -53,21 +54,8 @@ export function SignUpForm() {
           emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
         },
       });
-
-      if (error || !signUpData.session) {
+      if (error) {
         throw new Error(error?.message || "Signup failed");
-      }
-
-      const authUserId = signUpData.session.user.id;
-
-      if (guestUserId && guestUserId !== authUserId) {
-        const { error: mergeError } = await supabase.rpc('merge_cart', {
-          p_guest_user_id: guestUserId,
-          p_auth_user_id: authUserId
-        })
-        if (mergeError) {
-          throw new Error(`Failed to merge cart: ${mergeError.message}`);
-        }
       }
 
       reset();

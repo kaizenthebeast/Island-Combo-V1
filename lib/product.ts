@@ -87,7 +87,7 @@ export const addAdminProduct = async (data: AddProductPayload) => {
   const { data: result, error } = await supabase.rpc('add_admin_product', { payload })
 
   if (error) throw error
-
+  await supabase.rpc('refresh_admin_products')
   return result
 }
 
@@ -96,7 +96,7 @@ export const getAllCategories = async () => {
   const { data, error } = await supabase
     .from('category')
     .select('category_id, name')
-    .not('parent_id', 'is', null)   
+    .not('parent_id', 'is', null)
 
   if (error) {
     throw new Error(error.message)

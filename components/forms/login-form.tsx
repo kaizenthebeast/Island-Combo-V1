@@ -67,7 +67,7 @@ export function LoginForm() {
         .eq("user_id", authUserId)
         .single();
 
-      router.push(profile?.role === "admin" ? "/admin" : "/");
+      router.push(profile?.role === "admin" ? "/admin/products" : "/");
 
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
