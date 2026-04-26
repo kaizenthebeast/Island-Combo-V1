@@ -33,18 +33,16 @@ export function LoginForm() {
     const supabase = createClient();
 
     try {
-      //Capture the anon user ID BEFORE the OAuth exchange overwrites the session
       const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
       if (anonError) {
         throw new Error(`Failed to get anonymous session: ${anonError.message}`);
       }
       const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
-      // Sign in
-      const { data: signInData, error } =
-        await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        });
+
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
 
       if (error || !signInData.session) {
         throw new Error(error?.message || "Login failed");
@@ -53,7 +51,7 @@ export function LoginForm() {
       const authUserId = signInData.session.user.id;
 
       if (guestUserId && guestUserId !== authUserId) {
-        const { error: mergeError } = await supabase.rpc('merge_cart', {
+        const { error: mergeError } = await supabase.rpc("merge_cart", {
           p_guest_user_id: guestUserId,
           p_auth_user_id: authUserId,
         });
@@ -61,7 +59,16 @@ export function LoginForm() {
           throw new Error(`Failed to merge cart: ${mergeError.message}`);
         }
       }
-      router.push("/");
+
+      // Check role and redirect accordingly
+      const { data: profile } = await supabase
+        .from("profile")
+        .select("role")
+        .eq("user_id", authUserId)
+        .single();
+
+      router.push(profile?.role === "admin" ? "/admin" : "/");
+
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -71,7 +78,7 @@ export function LoginForm() {
 
   const googleLogin = async () => {
     const supabase = createClient();
-    const {data: {user: anonUser}, error: anonError} = await supabase.auth.getUser();
+    const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
     if (anonError) {
       throw new Error(`Failed to get anonymous session: ${anonError.message}`);
     }

@@ -9,10 +9,9 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${requestUrl.origin}/login`);
   }
 
-  // Capture guest user ID from query params
   const guestUserId = requestUrl.searchParams.get("guest_id");
   const supabase = await createClient();
-  // Exchange OAuth code for session
+
   const { data: authData, error: authError } = await supabase.auth.exchangeCodeForSession(code);
 
   if (authError || !authData.session) {
@@ -22,7 +21,6 @@ export async function GET(request: Request) {
 
   const authUserId = authData.session.user.id;
 
-  // Merge anonymous cart into the authenticated account
   if (guestUserId && guestUserId !== authUserId) {
     const { error: mergeError } = await supabase.rpc("merge_cart", {
       p_guest_user_id: guestUserId,
@@ -30,9 +28,17 @@ export async function GET(request: Request) {
     });
 
     if (mergeError) {
-      throw new Error(`Failed to merge cart: ${mergeError.message}`);
+      console.error("Failed to merge cart:", mergeError.message);
     }
   }
 
-  return NextResponse.redirect(`${requestUrl.origin}/`);
+  // Check role and redirect accordingly
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("role")
+    .eq("user_id", authUserId)
+    .single();
+
+  const redirectTo = profile?.role === "admin" ? "/admin" : "/";
+  return NextResponse.redirect(`${requestUrl.origin}${redirectTo}`);
 }
