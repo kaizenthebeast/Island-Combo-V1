@@ -1,18 +1,13 @@
-export default function AdminLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    return (
-        <>
-            {/* MAIN ECOMMERCE NAVBAR */}
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
-
-            {/* PAGE CONTENT */}
-            <main className="min-h-screen">
-                {children}
-            </main>
-
-        </>
-    );
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider className="flex min-h-svh w-full">
+      <AppSidebar />
+      <SidebarInset>
+        {children}
+      </SidebarInset>
+    </SidebarProvider>
+  )
 }

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner"
-
 import AnonAuthProvider from "@/helper/AnonAuthProvider"
 
 const defaultUrl = process.env.VERCEL_URL
