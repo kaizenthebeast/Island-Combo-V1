@@ -1,5 +1,3 @@
-// file: app/admin/products/ProductsClient.tsx
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -16,7 +14,7 @@ type Row = {
     variants: number
     stock: number
     status: string
-    raw: AdminProduct 
+    raw: AdminProduct
 }
 
 const getStatusVariant = (status: string): BadgeVariant => {

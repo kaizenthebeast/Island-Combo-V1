@@ -22,16 +22,13 @@ export default function AddProductDialog({ open, onClose }: Props) {
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) return
-      }}
-    >
+    <Dialog open={open} onOpenChange={(nextOpen) => {
+      if (!nextOpen) onClose()
+    }}>
       <DialogContent
         className="max-w-2xl"
-        onInteractOutside={(e) => e.preventDefault()}
-        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()} 
+        onEscapeKeyDown={(e) => e.preventDefault()}  
       >
         <DialogHeader>
           <DialogTitle>Add Product</DialogTitle>
