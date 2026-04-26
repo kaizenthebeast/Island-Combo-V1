@@ -40,13 +40,18 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter();
+
+
   const logout = async () => {
     const supabase = createClient();
     try {
+      sessionStorage.setItem("logging_out", "true"); // suppress AnonAuthProvider
       await supabase.auth.signOut();
       router.push("/auth/login");
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      sessionStorage.removeItem("logging_out"); // always clean up
     }
   };
 
