@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from 'react'
 // DataTable.tsx
 // A generic, sortable, searchable, filterable data table.
 // Fully driven by props — no internal data or dummy state.
@@ -47,9 +48,6 @@
 //     defaultSortKey="name"
 //     onDelete={(row) => handleDelete(row.id)}
 //   />
-
-import React, { useState, useMemo } from 'react'
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ColumnDef<T> {
@@ -93,6 +91,12 @@ interface DataTableProps<T extends Record<string, unknown>> {
   footer?: React.ReactNode
 
   className?: string
+
+  // ── EXPANDABLE ROW SUPPORT ──
+  /** Unique row id (required for expand feature) */
+  getRowId?: (row: T) => string | number
+  /** Render extra expandable content below row */
+  expandedRowRender?: (row: T) => React.ReactNode
 }
 
 // ─── Internal sub-components ─────────────────────────────────────────────────
@@ -141,39 +145,41 @@ export function DataTable<T extends Record<string, unknown>>({
   onDelete,
   footer,
   className = '',
+  getRowId,
+  expandedRowRender,
 }: DataTableProps<T>) {
 
-  const [search,      setSearch]      = useState('')
+  const [search, setSearch] = useState('')
   const [filterValue, setFilterValue] = useState(filterOptions[0] ?? '')
-  const [sortKey,     setSortKey]     = useState<keyof T | undefined>(defaultSortKey ?? columns[0]?.key)
-  const [sortDir,     setSortDir]     = useState<'asc' | 'desc'>(defaultSortDir)
+  const [sortKey, setSortKey] = useState<keyof T | undefined>(defaultSortKey ?? columns[0]?.key)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultSortDir)
 
-  // Keys used for text search — defaults to all columns if not specified
+  // EXPAND STATE
+  const [expandedRowId, setExpandedRowId] = useState<string | number | null>(null)
+
   const effectiveSearchKeys = searchKeys ?? columns.map(c => c.key)
 
-  // ── Sort handler ──────────────────────────────────────────────────────────
   const handleSort = (key: keyof T) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortKey(key); setSortDir('asc') }
   }
 
-  // ── Filtered + sorted rows ────────────────────────────────────────────────
   const rows = useMemo(() => {
     const q = search.trim().toLowerCase()
 
     return data
       .filter(row => {
-        // Category / dropdown filter
         const passesFilter =
           !filterKey ||
           !filterValue ||
-          filterValue === filterOptions[0] ||   // first option = "show all"
+          filterValue === filterOptions[0] ||
           String(row[filterKey]) === filterValue
 
-        // Text search across searchKeys
         const passesSearch =
           !q ||
-          effectiveSearchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q))
+          effectiveSearchKeys.some(k =>
+            String(row[k] ?? '').toLowerCase().includes(q)
+          )
 
         return passesFilter && passesSearch
       })
@@ -183,16 +189,13 @@ export function DataTable<T extends Record<string, unknown>>({
         const cmp = va < vb ? -1 : va > vb ? 1 : 0
         return sortDir === 'asc' ? cmp : -cmp
       })
-  }, [data, search, filterValue, sortKey, sortDir, filterKey, filterOptions, effectiveSearchKeys])
+  }, [data, search, filterValue, sortKey, sortDir])
 
-  // ── Sort icon helper ──────────────────────────────────────────────────────
   const SortArrow = ({ col }: { col: keyof T }) => (
-    <span className={`ml-1 text-xs transition-colors ${sortKey === col ? 'text-slate-700' : 'text-slate-300'}`}>
+    <span className={`ml-1 text-xs ${sortKey === col ? 'text-slate-700' : 'text-slate-300'}`}>
       {sortKey === col ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
     </span>
   )
-
-  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${className}`}>
@@ -200,7 +203,6 @@ export function DataTable<T extends Record<string, unknown>>({
       {/* ── Toolbar ── */}
       <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
 
-        {/* Search input */}
         <div className="relative flex-1 min-w-[180px]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             <SearchIcon />
@@ -209,103 +211,119 @@ export function DataTable<T extends Record<string, unknown>>({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 text-slate-700 placeholder-slate-300 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200"
           />
         </div>
 
-        {/* Filter dropdown — only shown if filterOptions are provided */}
         {filterOptions.length > 1 && (
           <select
             value={filterValue}
             onChange={e => setFilterValue(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200 text-slate-600 bg-white outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-100 cursor-pointer appearance-none transition-all"
+            className="px-3 py-2 text-sm rounded-xl border border-slate-200"
           >
             {filterOptions.map(opt => <option key={opt}>{opt}</option>)}
           </select>
         )}
 
         <span className="ml-auto text-xs text-slate-400">
-          {rows.length} result{rows.length !== 1 ? 's' : ''}
+          {rows.length} results
         </span>
       </div>
 
       {/* ── Table ── */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
+
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-100">
+            <tr className="bg-slate-50 border-b">
               {columns.map(col => (
                 <th
                   key={String(col.key)}
                   onClick={() => handleSort(col.key)}
-                  style={{ width: col.width, textAlign: col.align ?? 'left' }}
-                  className="px-5 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider cursor-pointer hover:text-slate-700 transition-colors select-none whitespace-nowrap"
+                  className="px-5 py-3 cursor-pointer text-xs font-semibold"
                 >
                   {col.label}
                   <SortArrow col={col.key} />
                 </th>
               ))}
 
-              {/* Action column header — only rendered when onDelete is provided */}
               {onDelete && (
-                <th className="px-5 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                  Action
-                </th>
+                <th className="px-5 py-3 text-right text-xs">Action</th>
               )}
             </tr>
           </thead>
 
           <tbody>
-            {rows.length === 0
-              ? <EmptyState />
-              : rows.map((row, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors group"
-                  >
-                    {columns.map(col => (
-                      <td
-                        key={String(col.key)}
-                        style={{ textAlign: col.align ?? 'left' }}
-                        className="px-5 py-3.5 text-slate-700"
-                      >
-                        {col.render
-                          ? col.render(row[col.key], row)
-                          : String(row[col.key] ?? '')}
-                      </td>
-                    ))}
+            {rows.length === 0 ? (
+              <EmptyState />
+            ) : (
+              rows.map((row, i) => {
+                const rowId = getRowId ? getRowId(row) : i
+                const isExpanded = expandedRowId === rowId
 
-                    {/* Delete button — hidden until row is hovered */}
-                    {onDelete && (
-                      <td className="px-5 py-3.5 text-right">
-                        <button
-                          onClick={() => onDelete(row)}
-                          className="
-                            opacity-0 group-hover:opacity-100
-                            inline-flex items-center gap-1.5 px-3 py-1.5
-                            text-xs font-medium text-red-500
-                            rounded-lg border border-transparent
-                            hover:bg-red-50 hover:border-red-100
-                            transition-all
-                          "
+                return (
+                  <React.Fragment key={rowId}>
+
+                    {/* MAIN ROW */}
+                    <tr
+                      onClick={() => {
+                        if (!expandedRowRender) return
+                        setExpandedRowId(prev =>
+                          prev === rowId ? null : rowId
+                        )
+                      }}
+                      className={`border-b  text-center hover:bg-slate-50 ${expandedRowRender ? 'cursor-pointer' : ''
+                        }`}
+                    >
+                      {columns.map(col => (
+                        <td key={String(col.key)} className="px-5 py-3.5">
+                          {col.render
+                            ? col.render(row[col.key], row)
+                            : String(row[col.key] ?? '')}
+                        </td>
+                      ))}
+
+                      {onDelete && (
+                        <td className="px-5 py-3.5 text-right">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onDelete(row)
+                            }}
+                            className="text-red-500 text-xs"
+                          >
+                            <TrashIcon />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+
+                    {/* EXPANDED ROW */}
+                    {isExpanded && expandedRowRender && (
+                      <tr className="bg-slate-50">
+                        <td
+                          colSpan={columns.length + (onDelete ? 1 : 0)}
+                          className="px-5 py-4"
                         >
-                          <TrashIcon />
-                          Delete
-                        </button>
-                      </td>
+                          {expandedRowRender(row)}
+                        </td>
+                      </tr>
                     )}
-                  </tr>
-                ))
-            }
+
+                  </React.Fragment>
+                )
+              })
+            )}
           </tbody>
+
         </table>
       </div>
 
-      {/* ── Footer bar ── */}
+      {/* ── Footer ── */}
       {rows.length > 0 && (
-        <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="px-5 py-3 border-t bg-slate-50 flex justify-between">
           <span className="text-xs text-slate-400">
-            Showing {rows.length} of {data.length} rows
+            Showing {rows.length} of {data.length}
           </span>
           {footer}
         </div>
