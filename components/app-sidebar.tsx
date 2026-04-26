@@ -56,11 +56,11 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Active",
+          title: "Discount",
           url: "#",
         },
         {
-          title: "Promo and Discount",
+          title: "Event",
           url: "#",
         },
         {

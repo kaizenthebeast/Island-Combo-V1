@@ -1,9 +1,7 @@
 import React from 'react'
-
-const ProductPage = () => {
-  return (
-    <div>ProductPage</div>
-  )
+import ProductsClient from './ProductsClient'
+const AdminProductPage = () => {
+  return <ProductsClient products={products} />
 }
 
-export default ProductPage
+export default AdminProductPage
