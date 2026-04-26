@@ -1,9 +1,9 @@
-import React from 'react'
-
-const page = () => {
+// app/(admin)/dashboard/page.tsx
+export default function DashboardPage() {
   return (
-    <div>page</div>
+    <div>
+      <h1 className="text-xl font-semibold">Dashboard</h1>
+      {/* your content */}
+    </div>
   )
 }
-
-export default page

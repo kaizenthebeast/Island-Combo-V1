@@ -1,9 +1,11 @@
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+// app/(admin)/layout.tsx
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { Separator } from "@/components/ui/separator"
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider className="flex min-h-svh w-full">
+    <SidebarProvider >
       <AppSidebar />
       <SidebarInset>
         {children}

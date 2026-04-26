@@ -109,9 +109,9 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="none" className="bg-[#900036] text-white"{...props}>
       <SidebarHeader>
-        <h1 >ISLAND COMBO</h1>
+        <h1 className="ms-3 font-bold">ISLAND COMBO</h1>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
