@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Menu, Search } from "lucide-react";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AuthButtonClient } from "./AuthButtonClient";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
@@ -21,6 +21,7 @@ export function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
       <SheetContent side="right" className="w-72 p-0 flex flex-col">
         <VisuallyHidden>
           <SheetTitle>Navigation Menu</SheetTitle>
+          <SheetDescription>Site navigation and search</SheetDescription>
         </VisuallyHidden>
 
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">

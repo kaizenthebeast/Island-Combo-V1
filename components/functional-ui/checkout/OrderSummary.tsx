@@ -98,12 +98,13 @@ const OrderSummary = ({ cartItems }: Props) => {
                                         <X size={16} />
                                     </button>
                                 </div>
-                                {item.selected_option && (
+                                {item.attributes && item.attributes.length > 0 && (
                                     <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                        {item.selected_option}
+                                        {item.attributes
+                                            .map(attr => `${attr.name.charAt(0).toUpperCase() + attr.name.slice(1)}: ${attr.value}`)
+                                            .join(' - ')}
                                     </p>
                                 )}
-
                                 {/* Price */}
                                 <div className="flex items-center gap-2 flex-wrap mt-2">
                                     <p className="text-base sm:text-lg font-bold text-[#900036]">

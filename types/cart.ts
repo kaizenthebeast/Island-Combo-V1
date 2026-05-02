@@ -1,12 +1,17 @@
+export type CartAttribute = {
+  name: string
+  value: string
+}
+
 export type CartItem = {
   id: number
   user_id: string
   variant_id: number
   quantity: number
-  selected_option: string | null  // nullable — null for no-attribute products
+  selected_option: string | null
   created_at: string
 
-  // product fields (from view)
+  // product fields 
   product_id: number
   name: string
   slug: string
@@ -21,11 +26,14 @@ export type CartItem = {
   is_active: boolean
 
   image_url: string | null
+
+  // variant attributes 
+  attributes: CartAttribute[]
 }
 
 export type CartItemInput = {
   userId: string
   variantId: number
   quantity: number
-  selectedOption?: string | null  // nullable — null for no-attribute products
+  selectedOption?: string | null
 }
