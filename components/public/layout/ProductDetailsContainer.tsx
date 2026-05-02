@@ -14,7 +14,7 @@ const ProductDetailsContainer = async ({ slug }: Props) => {
     }
 
     return (
-        <section className="min-h-svh max-w-7xl mx-auto flex items-center justify-center p-5">
+        <section className="min-h-svh max-w-7xl mx-auto flex items-center justify-center p-5 mt-5">
             <div className="flex flex-col md:flex-row gap-10 w-full">
                 <Suspense fallback={<div>Loading...</div>}>
                   <ProductDetails product={product}/>

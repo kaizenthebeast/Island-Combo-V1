@@ -1,4 +1,3 @@
-// components/ui/sonner.tsx
 "use client"
 
 import { useTheme } from "next-themes"
@@ -10,7 +9,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      position="top-left"
+      position="top-right"
       className="toaster group"
       toastOptions={{ unstyled: true }} 
       {...props}

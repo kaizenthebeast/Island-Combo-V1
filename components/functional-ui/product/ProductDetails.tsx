@@ -26,26 +26,19 @@ type Props = {
 
 const ProductDetails = ({ product }: Props) => {
 
-    // ─── Cart store ───────────────────────────────────────────
     const { addItem, quantityInput, resetQuantity } = useCartStore()
-
-    // ─── Favorite store ───────────────────────────────────────
     const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite)
 
-    // ─── Variant & size state ─────────────────────────────────
     const defaultVariant = product.variants?.[0]
     const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
     const [selectedSize, setSelectedSize] = useState<string | null>(null)
 
-    // ─── Carousel state ───────────────────────────────────────
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
     const [count, setCount] = useState(0)
 
-    // ─── Derived values ───────────────────────────────────────
     const hasDiscount = product.discount !== null && product.discount > 0
 
-    // Collect all unique images across every variant
     const allProductImages = product.variants
         .flatMap((v) => v.image_url)
         .filter(Boolean)
@@ -84,11 +77,7 @@ const ProductDetails = ({ product }: Props) => {
         )
         : null
 
-
-    // ─── Effects ──────────────────────────────────────────────
-    useEffect(() => {
-        resetQuantity()
-    }, [])
+    useEffect(() => { resetQuantity() }, [])
 
     useEffect(() => {
         if (!api) return
@@ -97,65 +86,61 @@ const ProductDetails = ({ product }: Props) => {
         api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
     }, [api])
 
-    // ─── Handlers ─────────────────────────────────────────────
     function handleVariantChange(variant: typeof defaultVariant) {
         setSelectedVariant(variant)
         setSelectedSize(null)
+
+        // Find the first image of this variant in the carousel and scroll to it
+        const firstImage = variant.image_url?.[0]
+        if (firstImage && api) {
+            const index = carouselImages.indexOf(firstImage)
+            if (index !== -1) api.scrollTo(index)
+        }
     }
 
     async function handleAddToCart() {
         if (!selectedVariant) return
-        if (!selectedSize) {
-            alert("Please select a size")
-            return
-        }
+        if (!selectedSize) { alert("Please select a size"); return }
         if (quantityInput <= 0) return
-        if (!resolvedVariant) {
-            alert("This size is not available for the selected flavor")
-            return
-        }
-
+        if (!resolvedVariant) { alert("This size is not available for the selected flavor"); return }
         await addItem(resolvedVariant.variant_id, quantityInput, selectedSize)
     }
 
     async function handleAddFavorite(productId: number) {
         await addFavoriteToStore(productId)
         const error = useFavoriteStore.getState().error
-
         if (error) {
-            customToast.error({
-                title: 'Failed to add favorite',
-                description: error,
-            })
+            customToast.error({ title: 'Failed to add favorite', description: error })
             return
         }
-
         customToast.success({
             title: 'Successfully adding product to favorites',
             description: 'Success adding the product on favorite lists.',
         })
     }
 
+    const canProceed = !!resolvedVariant && quantityInput > 0
+
     return (
-        <div className='w-full h-full'>
+        <div className="w-full h-full">
             <div className="grid md:grid-cols-2 grid-cols-1 w-full gap-5">
 
-                {/* IMAGE CAROUSEL — shows all images from all variants */}
+                {/* IMAGE CAROUSEL */}
                 <div className="relative w-full">
                     <Carousel className="w-full" setApi={setApi}>
                         <CarouselContent>
                             {carouselImages.map((url: string, index: number) => (
                                 <CarouselItem key={index}>
-                                    <div className="relative w-full min-h-[500px]">
+                                    <div className="relative w-full aspect-square sm:aspect-[12/13]">
                                         <Image
-                                            src={getPublicImageUrl(url)}
+                                            src={getPublicImageUrl(url) || selectedVariant.image_url[0]}
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
                                             className="object-cover rounded-xl"
                                             priority={index === 0}
                                         />
-                                        <div className='absolute bottom-0 right-0 text-black'>
+                                        <div className="absolute bottom-2 right-3 text-xs text-white bg-black/40 px-2 py-0.5 rounded-full">
                                             {current} / {count}
                                         </div>
                                     </div>
@@ -165,32 +150,33 @@ const ProductDetails = ({ product }: Props) => {
                     </Carousel>
                 </div>
 
-                {/* PRICING DETAILS */}
+                {/* PRODUCT INFO */}
                 <div className="flex flex-col gap-4">
+
                     {product.wholesale && (
-                        <div className="flex items-center gap-2 bg-[#900036] text-white text-xs text-center p-2 w-[165px] rounded-md">
-                            <Package />
-                            Wholesale available
+                        <div className="inline-flex items-center gap-2 bg-[#900036] text-white text-xs px-3 py-2 w-fit rounded-md">
+                            <Package className="shrink-0 w-4 h-4" />
+                            <span>Wholesale available</span>
                         </div>
                     )}
 
                     <h1 className="title-header">{product.name}</h1>
 
-                    <p className="text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                         {product.description}
                     </p>
 
                     {/* PRICE */}
-                    <div className="flex items-center gap-3">
-                        <p className="text-4xl font-bold text-[#900036]">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-3xl sm:text-4xl font-bold text-[#900036]">
                             ${selectedVariant.final_price.toFixed(2)}
                         </p>
                         {hasDiscount && (
-                            <div className='flex gap-3 text-[#900036] items-center'>
-                                <p className="text-lg line-through">
+                            <div className="flex gap-2 items-center">
+                                <p className="text-base sm:text-lg line-through text-gray-400">
                                     ${selectedVariant.price.toFixed(2)}
                                 </p>
-                                <p className="text-sm bg-[#900036] text-white p-2 rounded-md">
+                                <p className="text-xs sm:text-sm bg-[#900036] text-white px-2 py-1 rounded-md">
                                     -{product.discount}%
                                 </p>
                             </div>
@@ -198,9 +184,9 @@ const ProductDetails = ({ product }: Props) => {
                     </div>
 
                     {/* VARIANT THUMBNAILS */}
-                    <div className='flex flex-col space-y-3'>
+                    <div className="flex flex-col space-y-2">
                         <p className="text-sm font-medium text-gray-700">Variants</p>
-                        <div className='flex flex-wrap gap-2'>
+                        <div className="flex flex-wrap gap-2">
                             {product.variants.map((variant) => {
                                 const isActive = selectedVariant.variant_id === variant.variant_id
                                 const thumbnailUrl = variant.image_url?.[0]
@@ -209,18 +195,18 @@ const ProductDetails = ({ product }: Props) => {
 
                                 return (
                                     <button
-                                        type='button'
+                                        type="button"
                                         key={variant.variant_id}
                                         onClick={() => handleVariantChange(variant)}
-                                        className={`w-20 h-20 relative overflow-hidden border rounded-md
-                                            ${isActive ? 'border-[#900036]' : 'border-gray-200'}`}
+                                        className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors
+                                            ${isActive ? 'border-[#900036]' : 'border-gray-200 hover:border-gray-400'}`}
                                     >
                                         <Image
                                             src={thumbnailUrl}
                                             fill
                                             sizes="80px"
                                             className="object-cover"
-                                            alt="variant-image"
+                                            alt="variant thumbnail"
                                             loading="eager"
                                         />
                                     </button>
@@ -230,93 +216,103 @@ const ProductDetails = ({ product }: Props) => {
                     </div>
 
                     {/* SIZES */}
-                    <div className='flex flex-col space-y-3'>
+                    <div className="flex flex-col space-y-2">
                         <p className="text-sm font-medium text-gray-700">Sizes</p>
-                        <div className='flex flex-wrap gap-2'>
-                            {sizes.map((size) => {
-                                const isActive = selectedSize === size
-                                return (
-                                    <button
-                                        key={size}
-                                        type="button"
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`px-4 py-2 border rounded-md ${isActive
-                                            ? "bg-[#900036] text-white"
-                                            : "border-gray-300"
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                )
-                            })}
+                        <div className="flex flex-wrap gap-2">
+                            {sizes.map((size) => (
+                                <button
+                                    key={size}
+                                    type="button"
+                                    onClick={() => setSelectedSize(size)}
+                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${selectedSize === size
+                                        ? "bg-[#900036] text-white border-[#900036]"
+                                        : "border-gray-300 hover:border-gray-500"
+                                        }`}
+                                >
+                                    {size}
+                                </button>
+                            ))}
                         </div>
                     </div>
 
                     {/* STOCK */}
-                    <p className="text-md font-medium text-gray-700">
+                    <p className="text-sm font-medium text-gray-700">
                         {resolvedVariant
                             ? `Stocks: ${resolvedVariant.stock}`
                             : 'Select a size to see stock'
                         }
                     </p>
 
-                    {/* QUANTITY CONTROL */}
-                    <div className="flex items-center gap-3">
-                        <p className="text-md font-medium text-gray-700">Quantity</p>
-                        <ProductQuantityButton />
+                    {/* QUANTITY + WHOLESALE NOTICE */}
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-3">
+                            <p className="text-sm font-medium text-gray-700">Quantity</p>
+                            <ProductQuantityButton />
+                        </div>
                         {product.wholesale && (
-                            <div className="flex items-center gap-2 text-white bg-green-500 px-4 py-2 rounded-md w-fit">
-                                <CircleCheckBig />
-                                <p className="text-sm font-medium">
-                                    Wholesale pricing applied to your order!
-                                </p>
+                            <div className="inline-flex items-center gap-2 text-[#0F5132] mt-3 bg-[#EAF7F1] px-3 py-2 rounded-md w-fit text-sm">
+                                <CircleCheckBig className="shrink-0 w-4 h-4" />
+                                <p className="font-medium">Wholesale pricing applied!</p>
                             </div>
                         )}
                     </div>
 
-                    {/* ADD TO CART / BUY NOW */}
+                    {/* ADD TO CART / BUY NOW / FAVORITE */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <Button
-                            type='button'
-                            onClick={handleAddToCart}
-                            disabled={!resolvedVariant || quantityInput <= 0}
-                            className="flex-1 h-11 bg-[#900036] text-white rounded-full">
-                            <ShoppingCart />
-                            Add to cart
-                        </Button>
-                        <Link
-                            href="/checkout"
-                            className={`flex-1 h-11 ${!resolvedVariant || quantityInput <= 0 ? 'pointer-events-none' : ''}`}
-                        >
-                            <button
-                                type='button'
-                                className="w-full h-full border border-[#900036] text-[#900036] rounded-full flex items-center justify-center hover:bg-[#900036] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:border-gray-400 disabled:text-gray-400"
-                                disabled={!resolvedVariant || quantityInput <= 0}
+                        <div className="flex gap-3 sm:contents">
+                            {/* Add to Cart — full width on mobile, flex-1 on sm+ */}
+                            <Button
+                                type="button"
+                                onClick={handleAddToCart}
+                                disabled={!canProceed}
+                                className=" sm:flex-1 h-11 bg-[#900036] hover:bg-[#700028] text-white rounded-full"
                             >
-                                Buy Now
-                            </button>
-                        </Link>
-                        <Button type='button' variant="ghost" size="icon" onClick={() => handleAddFavorite(product.product_id)}>
-                            <Heart />
-                        </Button>
+                                <ShoppingCart className="mr-2 w-4 h-4" />
+                                Add to cart
+                            </Button>
+
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={!canProceed}
+                                className="sm:flex-1 h-11 border-[#900036] text-[#900036] rounded-full hover:bg-[#900036] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                asChild={canProceed}
+                            >
+                                {canProceed ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleAddFavorite(product.product_id)}
+                                className="shrink-0"
+                            >
+                                <Heart className="w-5 h-5" />
+                            </Button>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
-            {/* PRODUCT DETAILS */}
+            {/* PRODUCT DETAILS TABLE */}
             {product.product_details?.length > 0 && (
-                <div className='flex flex-col md:w-1/3 w-full lg:mt-12 md:mt-8 mt-6 space-y-3'>
-                    <h2 className='title-header'>Product Details</h2>
-                    {product.product_details.map((item, index) => (
-                        <div key={index} className='flex flex-wrap items-center justify-between'>
-                            <span>{item.attribute_name}</span>
-                            <span>{item.attribute_value}</span>
-                        </div>
-                    ))}
+                <div className="w-full sm:w-2/3 md:w-1/2 lg:w-2/5 mt-6 md:mt-10 space-y-2">
+                    <h2 className="title-header">Product Details</h2>
+                    <div className="divide-y divide-gray-100">
+                        {product.product_details.map((item, index) => (
+                            <div key={index} className="flex items-start justify-between gap-4 py-2">
+                                <span className="text-sm text-gray-500 shrink-0">{item.attribute_name}</span>
+                                <span className="text-sm font-medium text-right">{item.attribute_value}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
-            <div className='bg-black h-1 my-5 rounded-md' />
+            <div className="bg-[#F5F5F5] h-[8px] my-7 rounded-md" />
         </div>
     )
 }

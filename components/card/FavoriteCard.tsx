@@ -30,7 +30,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
             src={getPublicImageUrl(product.primary_image) ?? 'images/placeholder.png'}
             alt={product.product_name}
             fill
-            className="object-fill"
+            className="object-fill rounded-md"
             priority
             sizes='235'
           />

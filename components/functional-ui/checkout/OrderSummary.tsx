@@ -68,112 +68,103 @@ const OrderSummary = ({ cartItems }: Props) => {
                 Order Summary
             </h2>
 
-            <div className="grid grid-cols-1 gap-4 lg:auto-rows-fr">
+            <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
                     const key = `${item.variant_id}-${item.size}`
                     const isActive = activeItemKey === key
-
                     const quantity = editQuantities[key] ?? item.quantity
 
                     return (
                         <div
                             key={key}
-                            className="grid grid-cols-1 md:grid-cols-[160px_1fr] md:gap-5 lg:items-stretch h-full  rounded-md p-3"
+                            className="grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5"
                         >
                             {/* Image */}
-                            <div className="relative w-full h-32 md:h-full bg-gray-100 rounded-md overflow-hidden">
+                            <div className="relative w-full aspect-square sm:aspect-[3/4] bg-gray-100 rounded-md overflow-hidden">
                                 <Image
                                     src={item.image_url ?? '/images/placeholder.png'}
                                     alt="product"
                                     fill
                                     className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, 160px"
-                                    loading='eager'
+                                    sizes="(max-width: 640px) 96px, (max-width: 768px) 140px, 160px"
+                                    loading="eager"
                                 />
                             </div>
 
                             {/* Details */}
-                            <div className="flex flex-col justify-between h-full min-w-0">
-                                <div>
-                                    <div className="flex justify-between items-start gap-2">
-                                        <h4 className="text-base sm:text-lg font-medium line-clamp-2">
-                                            {item.name}
-                                        </h4>
+                            <div className="flex flex-col justify-between min-w-0 py-1">
 
-                                        <button
-                                            onClick={() =>
-                                                handleActions('remove', item.variant_id, item.quantity, item.size,)
-                                            }
-                                            className="text-red-500"
-                                        >
-                                            <X size={18} />
-                                        </button>
-                                    </div>
-
-                                    <p className="text-sm mt-1">Size: {item.size}</p>
-
-                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <p className="text-md font-bold">
-                                                Quantity: {item.quantity}
-                                            </p>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleEditToggle(key, item.quantity)
-                                                }
-                                                className="text-sm"
-                                            >
-                                                {isActive ? 'Cancel' : 'Update'}
-                                            </button>
-
-                                            {isActive && (
-                                                <CartQuantityButton
-                                                    value={quantity}
-                                                    onChange={(val) =>
-                                                        handleQuantityChange(key, val)
-                                                    }
-                                                />
-                                            )}
-
-                                            {isActive && (
-                                                <button
-                                                    onClick={() => {
-                                                        handleActions(
-                                                            'update',
-                                                            item.variant_id,
-                                                            quantity,
-                                                            item.size,
-                                                        )
-                                                        setActiveItemKey(null)
-                                                    }}
-                                                    className="text-sm bg-[#900036] text-white px-2 py-1 rounded"
-                                                >
-                                                    Save
-                                                </button>
-                                            )}
-                                        </div>
-                                        <div className='flex items-center gap-3 flex-wrap'>
-                                            <p className="text-xl font-bold text-[#900036]">
-                                                ${item.final_price}
-                                            </p>
-                                            {item.discount && (
-                                                <>
-                                                    <p className='text-sm text-gray-400 line-through'>{item.price}</p>
-                                                    <p className='text-sm bg-pink-100 text-pink-600 px-2 py-0.5 rounded'>
-                                                        -{item.discount}%
-                                                    </p>
-                                                </>
-                                            )}
-                                        </div>
-
-                                    </div>
+                                {/* Name + Remove */}
+                                <div className="flex justify-between items-start gap-2">
+                                    <h4 className="text-sm sm:text-base md:text-lg font-medium line-clamp-2 leading-snug">
+                                        {item.name}
+                                    </h4>
+                                    <button
+                                        onClick={() => handleActions('remove', item.variant_id, item.quantity, item.size)}
+                                        className="text-red-400 hover:text-red-600 shrink-0 mt-0.5"
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
 
+                                {/* Size */}
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    Size: {item.size}
+                                </p>
+
+                                {/* Price */}
+                                <div className="flex items-center gap-2 flex-wrap mt-2">
+                                    <p className="text-base sm:text-lg font-bold text-[#900036]">
+                                        ${item.final_price}
+                                    </p>
+                                    {item.discount && (
+                                        <>
+                                            <p className="text-xs text-gray-400 line-through">
+                                                {item.price}
+                                            </p>
+                                            <p className="text-xs bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">
+                                                -{item.discount}%
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Quantity row */}
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
+                                    <p className="text-xs sm:text-sm font-semibold">
+                                        Qty: {item.quantity}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEditToggle(key, item.quantity)}
+                                        className="text-xs text-[#900036] underline underline-offset-2"
+                                    >
+                                        {isActive ? 'Cancel' : 'Update'}
+                                    </button>
+
+                                    {isActive && (
+                                        <>
+                                            <CartQuantityButton
+                                                value={quantity}
+                                                onChange={(val) => handleQuantityChange(key, val)}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    handleActions('update', item.variant_id, quantity, item.size)
+                                                    setActiveItemKey(null)
+                                                }}
+                                                className="text-xs bg-[#900036] text-white px-3 py-1 rounded-full"
+                                            >
+                                                Save
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Wholesale badge */}
                                 {item.wholesale && (
-                                    <div className="py-2 px-2 bg-green-200 flex items-center gap-2 rounded-md mt-4 text-sm">
-                                        <CircleCheckBig size={18} />
+                                    <div className="flex items-center gap-1.5 bg-[#EAF7F1] text-[#0F5132] px-2 py-1.5 rounded-md mt-3 text-xs">
+                                        <CircleCheckBig size={14} className="shrink-0" />
                                         <p>Wholesale pricing applied!</p>
                                     </div>
                                 )}
