@@ -5,6 +5,26 @@ export type Favorite = {
   created_at: string;
 };
 
+export type FavoriteVariantAttribute = {
+  name: string;
+  value: string;
+};
+
+export type FavoriteVariant = {
+  variant_id: number;
+  sku: string | null;
+  price: number;
+  final_price: number;
+  stock: number;
+  image_url: string[];
+  attributes: FavoriteVariantAttribute[];
+};
+
+export type FavoriteCategory = {
+  category_id: number | null;
+  name: string | null;
+};
+
 export type FavoriteView = {
   favorite_id: number;
   user_id: string;
@@ -20,15 +40,11 @@ export type FavoriteView = {
   is_active: boolean;
   type: string | null;
 
-  // Category
-  category_id: number | null;
-  category_name: string | null;
+  // Category 
+  category: FavoriteCategory | null;
 
-  // Variant
-  variant_id: number | null;
-  sku: string | null;
-  price: number | null;
-  stock: number | null;
+  // Variants
+  variants: FavoriteVariant[];
 
   // Image
   primary_image: string | null;

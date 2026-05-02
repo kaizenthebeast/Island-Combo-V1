@@ -6,7 +6,7 @@ import { getPublicImageUrl } from '@/helper/getPublicImageUrl';
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductDetails } from '@/types/product'
+import type { ProductDetails } from '@/types/product'   
 import { useCartStore } from '@/store/cartStore'
 import { customToast } from '@/components/popup/ToastCustom'
 

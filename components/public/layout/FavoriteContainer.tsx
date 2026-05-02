@@ -3,8 +3,6 @@ import { getFavorite } from '@/lib/favorite'
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { Heart } from 'lucide-react'
-import ProductCard from '@/components/card/ProductCard';
 import FavoriteCard from '@/components/card/FavoriteCard';
 const FavoriteContainer = async () => {
   const favoriteList = await getFavorite();

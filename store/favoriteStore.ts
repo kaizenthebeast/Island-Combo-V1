@@ -32,14 +32,11 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
 
     addFavorite: async (productId) => {
         const prevQty = get().totalFavQty;
-
-
         try {
             await addFavorite(productId);
             set({ totalFavQty: prevQty + 1, error: null });
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to add favorite';
-            // Rollback + surface error
             set({ totalFavQty: prevQty, error: message });
         }
     },
