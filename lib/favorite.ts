@@ -45,3 +45,15 @@ export const addFavorite = async (productId: number) => {
     }
 
 }
+
+
+export async function removeFavorite(productId: number): Promise<void> {
+    const supabase = await createClient()
+
+    const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('product_id', productId)
+
+    if (error) throw new Error(error.message)
+}

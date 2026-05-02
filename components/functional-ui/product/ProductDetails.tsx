@@ -6,7 +6,7 @@ import { getPublicImageUrl } from '@/helper/getPublicImageUrl';
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductDetails } from '@/types/product'   
+import type { ProductDetails } from '@/types/product'
 import { useCartStore } from '@/store/cartStore'
 import { customToast } from '@/components/popup/ToastCustom'
 
@@ -27,7 +27,10 @@ type Props = {
 const ProductDetails = ({ product }: Props) => {
 
     const { addItem, quantityInput, resetQuantity } = useCartStore()
-    const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite)
+    const { addFavorite, removeFavorite, isFavorite } = useFavoriteStore();
+
+    // ─── Check if this product is already favorited ──────────────────────────
+    const favorited = isFavorite(product.product_id)
 
     const defaultVariant = product.variants?.[0]
 
@@ -162,17 +165,31 @@ const ProductDetails = ({ product }: Props) => {
         await addItem(resolvedVariant.variant_id, quantityInput, sizeValue)
     }
 
-    async function handleAddFavorite(productId: number) {
-        await addFavoriteToStore(productId)
-        const error = useFavoriteStore.getState().error
-        if (error) {
-            customToast.error({ title: 'Failed to add favorite', description: error })
-            return
+    // ─── Toggle favorite — adds if not favorited, removes if already favorited ──
+    async function handleFavoriteToggle(productId: number) {
+        if (favorited) {
+            await removeFavorite(productId)
+            const error = useFavoriteStore.getState().error
+            if (error) {
+                customToast.error({ title: 'Failed to remove favorite', description: error })
+                return
+            }
+            customToast.success({
+                title: 'Removed from favorites',
+                description: 'Product has been removed from your favorites.',
+            })
+        } else {
+            await addFavorite(productId)
+            const error = useFavoriteStore.getState().error
+            if (error) {
+                customToast.error({ title: 'Failed to add favorite', description: error })
+                return
+            }
+            customToast.success({
+                title: 'Added to favorites',
+                description: 'Product has been added to your favorites.',
+            })
         }
-        customToast.success({
-            title: 'Successfully adding product to favorites',
-            description: 'Success adding the product on favorite lists.',
-        })
     }
 
     const canProceed = !!resolvedVariant && quantityInput > 0
@@ -294,11 +311,10 @@ const ProductDetails = ({ product }: Props) => {
                                                 key={value}
                                                 type="button"
                                                 onClick={() => handleAttributeSelect(key, value)}
-                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${
-                                                    isSelected
-                                                        ? 'bg-[#900036] text-white border-[#900036]'
-                                                        : 'border-gray-300 hover:border-gray-500'
-                                                }`}
+                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${isSelected
+                                                    ? 'bg-[#900036] text-white border-[#900036]'
+                                                    : 'border-gray-300 hover:border-gray-500'
+                                                    }`}
                                             >
                                                 {value}
                                             </button>
@@ -356,14 +372,21 @@ const ProductDetails = ({ product }: Props) => {
                                 {canProceed ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
                             </Button>
 
+                            {/* Heart button — filled if product is already in favorites */}
                             <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleAddFavorite(product.product_id)}
+                                onClick={() => handleFavoriteToggle(product.product_id)}
                                 className="shrink-0"
                             >
-                                <Heart className="w-5 h-5" />
+                                <Heart
+                                    className={`w-5 h-5 transition-colors ${
+                                        favorited
+                                            ? 'fill-[#900036] text-[#900036]'
+                                            : 'text-gray-500'
+                                    }`}
+                                />
                             </Button>
                         </div>
                     </div>
