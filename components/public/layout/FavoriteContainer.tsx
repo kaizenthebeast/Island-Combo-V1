@@ -1,6 +1,6 @@
 import React from 'react'
 import { getFavorite } from '@/lib/favorite'
-
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { Heart } from 'lucide-react'
@@ -15,9 +15,13 @@ const FavoriteContainer = async () => {
       <section className="w-full min-h-svh flex items-center justify-center">
         <div className="flex flex-col items-center text-center gap-4 max-w-xs w-full">
 
-          <div className="p-4 rounded-full bg-[#900036]">
-            <Heart className="w-10 h-10 text-white" />
-          </div>
+          <Image
+            src="/images/favoriteIcon.png"
+            width={48}
+            height={48}
+            className="object-contain"
+            alt="favorite-icon"
+          />
 
           <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
             Your Favorite is empty.
@@ -27,7 +31,7 @@ const FavoriteContainer = async () => {
             Start shopping and find your next favourites look
           </p>
 
-          <Link href='/' className="mt-2 px-6 py-2 rounded-full border border-[#900036] text-red-500 hover:bg-[#900036] hover:text-white transition">
+          <Link href='/' className="w-full mt-2 px-6 py-2 rounded-full border border-[#900036] text-[#900036] hover:bg-[#900036] hover:text-white transition text-center text-sm md:text-base">
             Let’s Go Shopping!
           </Link>
 
@@ -42,9 +46,9 @@ const FavoriteContainer = async () => {
       </h2>
       {/* Display all products */}
       <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 w-full place-items-center'>
-      {favoriteList.map((favorite) => (
-        <FavoriteCard key={favorite.product_id} product={favorite} />
-      ))}
+        {favoriteList.map((favorite) => (
+          <FavoriteCard key={favorite.product_id} product={favorite} />
+        ))}
       </div>
 
     </section>
