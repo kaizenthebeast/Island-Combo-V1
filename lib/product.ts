@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from './supabase/server'
+import { revalidatePath } from 'next/cache'
 import type { ProductCatalogItem, ProductDetails, AdminProduct } from '@/types/product'
 import type { VariantWithUploadedImages } from './product-upload'
 import { AddProductFormValues } from '@/form-schema/addProductSchema'
@@ -87,6 +88,7 @@ export const addAdminProduct = async (data: AddProductPayload) => {
 
   if (error) throw error
   await supabase.rpc('refresh_admin_products')
+  revalidatePath('/admin/products')
   return result
 }
 

@@ -14,52 +14,44 @@ type Props = {
 
 const OrderSummary = ({ cartItems }: Props) => {
     const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
-    // store temporary quantities
     const [editQuantities, setEditQuantities] = useState<Record<string, number>>({})
 
     const { removeItem, updateItem } = useCartStore()
 
-    function handleActions(actions: string, variantId: number, qty: number, size: string,) {
-        switch (actions) {
+    function handleActions(action: string, variantId: number, qty: number) {
+        switch (action) {
             case 'remove':
-                removeItem(variantId, size);
+                removeItem(variantId)
                 customToast.success({
                     title: "Item removed from cart!",
                     description: "The item has been removed from your cart.",
                 })
-                break;
+                break
             case 'update':
-                updateItem(variantId, qty, size);
+                updateItem(variantId, qty)
                 customToast.success({
-                    title: "Cart Item updated!",
+                    title: "Cart item updated!",
                     description: "The item has been updated in your cart.",
                 })
-                break;
+                break
             default:
-                break;
+                break
         }
     }
+
 
     const handleEditToggle = (key: string, currentQty: number) => {
         setActiveItemKey(prev => {
             const isSame = prev === key
-
             if (!isSame) {
-                setEditQuantities(prev => ({
-                    ...prev,
-                    [key]: currentQty
-                }))
+                setEditQuantities(prev => ({ ...prev, [key]: currentQty }))
             }
-
             return isSame ? null : key
         })
     }
 
     const handleQuantityChange = (key: string, value: number) => {
-        setEditQuantities(prev => ({
-            ...prev,
-            [key]: value
-        }))
+        setEditQuantities(prev => ({ ...prev, [key]: value }))
     }
 
     return (
@@ -70,7 +62,7 @@ const OrderSummary = ({ cartItems }: Props) => {
 
             <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
-                    const key = `${item.variant_id}-${item.size}`
+                    const key = `${item.variant_id}`
                     const isActive = activeItemKey === key
                     const quantity = editQuantities[key] ?? item.quantity
 
@@ -96,21 +88,21 @@ const OrderSummary = ({ cartItems }: Props) => {
 
                                 {/* Name + Remove */}
                                 <div className="flex justify-between items-start gap-2">
-                                    <h4 className="text-sm sm:text-base md:text-lg font-medium line-clamp-2 leading-snug">
+                                    <h4 className="text-md sm:text-base md:text-2xl font-medium line-clamp-2 leading-snug">
                                         {item.name}
                                     </h4>
                                     <button
-                                        onClick={() => handleActions('remove', item.variant_id, item.quantity, item.size)}
+                                        onClick={() => handleActions('remove', item.variant_id, item.quantity)}
                                         className="text-red-400 hover:text-red-600 shrink-0 mt-0.5"
                                     >
                                         <X size={16} />
                                     </button>
                                 </div>
-
-                                {/* Size */}
-                                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                                    Size: {item.size}
-                                </p>
+                                {item.selected_option && (
+                                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                        {item.selected_option}
+                                    </p>
+                                )}
 
                                 {/* Price */}
                                 <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -150,7 +142,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                             />
                                             <button
                                                 onClick={() => {
-                                                    handleActions('update', item.variant_id, quantity, item.size)
+                                                    handleActions('update', item.variant_id, quantity)
                                                     setActiveItemKey(null)
                                                 }}
                                                 className="text-xs bg-[#900036] text-white px-3 py-1 rounded-full"
@@ -175,7 +167,6 @@ const OrderSummary = ({ cartItems }: Props) => {
             </div>
         </div>
     )
-
 }
 
 export default OrderSummary

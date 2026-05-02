@@ -29,35 +29,35 @@ export const getCart = async (userId: string): Promise<CartItem[]> => {
 export const addToCart = async (item: CartItemInput) => {
   const supabase = await createClient()
 
+  // variant_id alone uniquely identifies the SKU — selected_option is display-only
   const { data: existing, error: fetchError } = await supabase
     .from('cart')
     .select('id, quantity')
     .eq('user_id', item.userId)
     .eq('variant_id', item.variantId)
-    .eq('size', item.size)
     .maybeSingle()
 
   if (fetchError) throw fetchError
 
   if (existing) {
+    // Item already in cart — just bump the quantity
     const { data, error } = await supabase
       .from('cart')
-      .update({
-        quantity: existing.quantity + item.quantity,
-      })
+      .update({ quantity: existing.quantity + item.quantity })
       .eq('id', existing.id)
 
     if (error) throw error
     return data
   }
 
+  // New cart row — selected_option is nullable, null for no-attribute products
   const { data, error } = await supabase
     .from('cart')
     .insert({
       user_id: item.userId,
       variant_id: item.variantId,
       quantity: item.quantity,
-      size: item.size,
+      selected_option: item.selectedOption ?? null,
     })
 
   if (error) throw error
@@ -65,10 +65,13 @@ export const addToCart = async (item: CartItemInput) => {
 }
 
 
-export const updateCartQuantity = async ({ userId, variantId, size, quantity, }: {
+export const updateCartQuantity = async ({
+  userId,
+  variantId,
+  quantity,
+}: {
   userId: string
   variantId: number
-  size: string
   quantity: number
 }) => {
   const supabase = await createClient()
@@ -78,16 +81,18 @@ export const updateCartQuantity = async ({ userId, variantId, size, quantity, }:
     .update({ quantity })
     .eq('user_id', userId)
     .eq('variant_id', variantId)
-    .eq('size', size)
 
   if (error) throw error
   return data
 }
 
-export const removeFromCart = async ({ userId, variantId, size }: {
+
+export const removeFromCart = async ({
+  userId,
+  variantId,
+}: {
   userId: string
   variantId: number
-  size: string
 }) => {
   const supabase = await createClient()
 
@@ -96,7 +101,6 @@ export const removeFromCart = async ({ userId, variantId, size }: {
     .delete()
     .eq('user_id', userId)
     .eq('variant_id', variantId)
-    .eq('size', size)
 
   if (error) throw error
-}   
+}

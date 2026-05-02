@@ -30,8 +30,20 @@ const ProductDetails = ({ product }: Props) => {
     const addFavoriteToStore = useFavoriteStore((state) => state.addFavorite)
 
     const defaultVariant = product.variants?.[0]
-    const [selectedVariant, setSelectedVariant] = useState(defaultVariant)
-    const [selectedSize, setSelectedSize] = useState<string | null>(null)
+
+    // ─── Derive all attribute dimensions from the variants ──────────────────
+    // e.g. ['flavor', 'size'] or ['color', 'size'] or ['model'] — whatever exists
+    const attributeKeys: string[] = Array.from(
+        new Set(
+            product.variants.flatMap(v => v.attributes?.map(a => a.name) ?? [])
+        )
+    )
+
+    // ─── State: one selected value per attribute key ────────────────────────
+    // e.g. { flavor: null, size: null } or { color: null, size: null }
+    const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string | null>>(
+        () => Object.fromEntries(attributeKeys.map(k => [k, null]))
+    )
 
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
@@ -51,31 +63,51 @@ const ProductDetails = ({ product }: Props) => {
         ? allProductImages
         : ["/images/placeholder.png"]
 
-    const selectedFlavor = selectedVariant.attributes
-        ?.find((att) => att.name === 'flavor')?.value
-
-    const sizes = Array.from(
-        new Set(
-            product.variants
-                .filter((v) =>
-                    v.attributes?.some(
-                        (att) => att.name === 'flavor' && att.value === selectedFlavor
+    // ─── Available options per attribute key ────────────────────────────────
+    // Only shows values reachable given what's already selected in prior keys.
+    // e.g. if Lime is selected, size only shows sizes Lime actually comes in.
+    function getOptionsForKey(key: string): string[] {
+        return Array.from(
+            new Set(
+                product.variants
+                    .filter(v =>
+                        // variant must match all OTHER already-selected attributes
+                        attributeKeys
+                            .filter(k => k !== key && selectedAttributes[k] !== null)
+                            .every(k =>
+                                v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
+                            )
                     )
-                )
-                .flatMap((v) =>
-                    v.attributes
-                        ?.filter((att) => att.name === 'size')
-                        .map((a) => a.value)
-                )
+                    .flatMap(v =>
+                        v.attributes?.filter(a => a.name === key).map(a => a.value) ?? []
+                    )
+            )
         )
-    )
+    }
 
-    const resolvedVariant = selectedSize
-        ? product.variants.find((v) =>
-            v.attributes?.some((a) => a.name === 'flavor' && a.value === selectedFlavor) &&
-            v.attributes?.some((a) => a.name === 'size' && a.value === selectedSize)
-        )
+    // ─── Resolved variant ───────────────────────────────────────────────────
+    // The single SKU that matches ALL selected attributes.
+    // null if any attribute is still unselected.
+    const resolvedVariant = attributeKeys.every(k => selectedAttributes[k] !== null)
+        ? product.variants.find(v =>
+            attributeKeys.every(k =>
+                v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
+            )
+        ) ?? null
         : null
+
+    // ─── Display variant for price ──────────────────────────────────────────
+    // Best-effort partial match so price updates as user selects, even before
+    // all attributes are chosen. Falls back to the first variant.
+    const displayVariant = resolvedVariant
+        ?? product.variants.find(v =>
+            attributeKeys
+                .filter(k => selectedAttributes[k] !== null)
+                .every(k =>
+                    v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
+                )
+        )
+        ?? defaultVariant
 
     useEffect(() => { resetQuantity() }, [])
 
@@ -86,24 +118,48 @@ const ProductDetails = ({ product }: Props) => {
         api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
     }, [api])
 
-    function handleVariantChange(variant: typeof defaultVariant) {
-        setSelectedVariant(variant)
-        setSelectedSize(null)
+    // ─── Select an attribute value ──────────────────────────────────────────
+    // Resets all attributes that come AFTER the changed key so stale
+    // downstream selections don't carry over (e.g. changing flavor clears size).
+    function handleAttributeSelect(key: string, value: string) {
+        const keyIndex = attributeKeys.indexOf(key)
 
-        // Find the first image of this variant in the carousel and scroll to it
-        const firstImage = variant.image_url?.[0]
-        if (firstImage && api) {
-            const index = carouselImages.indexOf(firstImage)
-            if (index !== -1) api.scrollTo(index)
+        setSelectedAttributes(prev => {
+            const next = { ...prev, [key]: value }
+            // Clear downstream keys
+            attributeKeys.slice(keyIndex + 1).forEach(k => { next[k] = null })
+            return next
+        })
+
+        // Scroll carousel to first image of the representative variant
+        // when the FIRST attribute key changes (i.e. the "primary" dimension)
+        if (keyIndex === 0 && api) {
+            const repVariant = product.variants.find(v =>
+                v.attributes?.some(a => a.name === key && a.value === value)
+            )
+            const firstImage = repVariant?.image_url?.[0]
+            if (firstImage) {
+                const index = carouselImages.indexOf(firstImage)
+                if (index !== -1) api.scrollTo(index)
+            }
         }
     }
 
     async function handleAddToCart() {
-        if (!selectedVariant) return
-        if (!selectedSize) { alert("Please select a size"); return }
+        // Guard: make sure every attribute has a selection
+        const firstUnselected = attributeKeys.find(k => !selectedAttributes[k])
+        if (firstUnselected) {
+            alert(`Please select a ${firstUnselected}`)
+            return
+        }
+        if (!resolvedVariant) { alert('This combination is not available'); return }
         if (quantityInput <= 0) return
-        if (!resolvedVariant) { alert("This size is not available for the selected flavor"); return }
-        await addItem(resolvedVariant.variant_id, quantityInput, selectedSize)
+        const sizeValue =
+            selectedAttributes['size'] ??
+            Object.values(selectedAttributes)[0] ??
+            ''
+
+        await addItem(resolvedVariant.variant_id, quantityInput, sizeValue)
     }
 
     async function handleAddFavorite(productId: number) {
@@ -133,7 +189,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <CarouselItem key={index}>
                                     <div className="relative w-full aspect-square sm:aspect-[12/13]">
                                         <Image
-                                            src={getPublicImageUrl(url) || selectedVariant.image_url[0]}
+                                            src={getPublicImageUrl(url) || defaultVariant.image_url[0]}
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
@@ -169,12 +225,12 @@ const ProductDetails = ({ product }: Props) => {
                     {/* PRICE */}
                     <div className="flex flex-wrap items-center gap-3">
                         <p className="text-3xl sm:text-4xl font-bold text-[#900036]">
-                            ${selectedVariant.final_price.toFixed(2)}
+                            ${displayVariant.final_price.toFixed(2)}
                         </p>
                         {hasDiscount && (
                             <div className="flex gap-2 items-center">
                                 <p className="text-base sm:text-lg line-through text-gray-400">
-                                    ${selectedVariant.price.toFixed(2)}
+                                    ${displayVariant.price.toFixed(2)}
                                 </p>
                                 <p className="text-xs sm:text-sm bg-[#900036] text-white px-2 py-1 rounded-md">
                                     -{product.discount}%
@@ -183,63 +239,83 @@ const ProductDetails = ({ product }: Props) => {
                         )}
                     </div>
 
-                    {/* VARIANT THUMBNAILS */}
-                    <div className="flex flex-col space-y-2">
-                        <p className="text-sm font-medium text-gray-700">Variants</p>
-                        <div className="flex flex-wrap gap-2">
-                            {product.variants.map((variant) => {
-                                const isActive = selectedVariant.variant_id === variant.variant_id
-                                const thumbnailUrl = variant.image_url?.[0]
-                                    ? getPublicImageUrl(variant.image_url[0])
-                                    : '/images/placeholder.png'
+                    {/* GENERIC ATTRIBUTE PICKERS */}
+                    {attributeKeys.map((key, keyIndex) => {
+                        const options = getOptionsForKey(key)
+                        const isFirstKey = keyIndex === 0
 
-                                return (
-                                    <button
-                                        type="button"
-                                        key={variant.variant_id}
-                                        onClick={() => handleVariantChange(variant)}
-                                        className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors
-                                            ${isActive ? 'border-[#900036]' : 'border-gray-200 hover:border-gray-400'}`}
-                                    >
-                                        <Image
-                                            src={thumbnailUrl}
-                                            fill
-                                            sizes="80px"
-                                            className="object-cover"
-                                            alt="variant thumbnail"
-                                            loading="eager"
-                                        />
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </div>
+                        return (
+                            <div key={key} className="flex flex-col space-y-2">
+                                <p className="text-sm font-medium text-gray-700 capitalize">{key}</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {options.map((value) => {
+                                        const isSelected = selectedAttributes[key] === value
 
-                    {/* SIZES */}
-                    <div className="flex flex-col space-y-2">
-                        <p className="text-sm font-medium text-gray-700">Sizes</p>
-                        <div className="flex flex-wrap gap-2">
-                            {sizes.map((size) => (
-                                <button
-                                    key={size}
-                                    type="button"
-                                    onClick={() => setSelectedSize(size)}
-                                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${selectedSize === size
-                                        ? "bg-[#900036] text-white border-[#900036]"
-                                        : "border-gray-300 hover:border-gray-500"
-                                        }`}
-                                >
-                                    {size}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                                        // First attribute key gets image thumbnails
+                                        if (isFirstKey) {
+                                            const repVariant = product.variants.find(v =>
+                                                v.attributes?.some(a => a.name === key && a.value === value)
+                                            )
+                                            const thumbnailUrl = repVariant?.image_url?.[0]
+                                                ? getPublicImageUrl(repVariant.image_url[0])
+                                                : '/images/placeholder.png'
+
+                                            return (
+                                                <button
+                                                    type="button"
+                                                    key={value}
+                                                    onClick={() => handleAttributeSelect(key, value)}
+                                                    className="flex flex-col items-center gap-1"
+                                                >
+                                                    <div
+                                                        className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors
+                                                            ${isSelected
+                                                                ? 'border-[#900036]'
+                                                                : 'border-gray-200 hover:border-gray-400'
+                                                            }`}
+                                                    >
+                                                        <Image
+                                                            src={thumbnailUrl}
+                                                            fill
+                                                            sizes="80px"
+                                                            className="object-cover"
+                                                            alt={value}
+                                                            loading="eager"
+                                                        />
+                                                    </div>
+                                                    <span className="text-xs text-gray-600">{value}</span>
+                                                </button>
+                                            )
+                                        }
+
+                                        // All subsequent attribute keys get pill buttons
+                                        return (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => handleAttributeSelect(key, value)}
+                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${
+                                                    isSelected
+                                                        ? 'bg-[#900036] text-white border-[#900036]'
+                                                        : 'border-gray-300 hover:border-gray-500'
+                                                }`}
+                                            >
+                                                {value}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        )
+                    })}
 
                     {/* STOCK */}
                     <p className="text-sm font-medium text-gray-700">
                         {resolvedVariant
                             ? `Stocks: ${resolvedVariant.stock}`
-                            : 'Select a size to see stock'
+                            : attributeKeys.length > 0
+                                ? `Select ${attributeKeys.filter(k => !selectedAttributes[k])[0] ?? 'an option'} to see stock`
+                                : `Stocks: ${defaultVariant.stock}`
                         }
                     </p>
 
@@ -260,17 +336,15 @@ const ProductDetails = ({ product }: Props) => {
                     {/* ADD TO CART / BUY NOW / FAVORITE */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <div className="flex gap-3 sm:contents">
-                            {/* Add to Cart — full width on mobile, flex-1 on sm+ */}
                             <Button
                                 type="button"
                                 onClick={handleAddToCart}
                                 disabled={!canProceed}
-                                className=" sm:flex-1 h-11 bg-[#900036] hover:bg-[#700028] text-white rounded-full"
+                                className="sm:flex-1 h-11 bg-[#900036] hover:bg-[#700028] text-white rounded-full"
                             >
                                 <ShoppingCart className="mr-2 w-4 h-4" />
                                 Add to cart
                             </Button>
-
 
                             <Button
                                 type="button"
@@ -292,7 +366,6 @@ const ProductDetails = ({ product }: Props) => {
                                 <Heart className="w-5 h-5" />
                             </Button>
                         </div>
-
                     </div>
                 </div>
             </div>

@@ -65,6 +65,19 @@ const UploadIcon = () => (
   </svg>
 )
 
+const XIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+const TagIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+    <line x1="7" y1="7" x2="7.01" y2="7" />
+  </svg>
+)
+
 // ─── Base UI ─────────────────────────────────────────────────────────────────────
 const FieldErrorCtx = React.createContext(false)
 
@@ -173,18 +186,33 @@ const SIZE_OPTIONS = [
   '2L', '1L', '500ml', '300ml', 'One Size',
 ]
 
-const FLAVOR_OPTIONS = ['Lime', 'Orange', 'Coke']
+const FLAVOR_OPTIONS = ['Lime', 'Orange', 'Coke', 'Lemon', 'Strawberry', 'Mango', 'Watermelon']
 
-const BLANK_VARIANT = {
+const COLOR_OPTIONS = [
+  'Black', 'White', 'Red', 'Blue', 'Green', 'Yellow',
+  'Pink', 'Purple', 'Gray', 'Navy', 'Beige', 'Brown', 'Orange',
+]
+
+// Predefined attribute types with their dropdown options.
+// If options is undefined/empty, the field renders as a free-text input.
+const PREDEFINED_ATTRIBUTE_TYPES: { name: string; options?: string[] }[] = [
+  { name: 'Size',    options: SIZE_OPTIONS },
+  { name: 'Color',   options: COLOR_OPTIONS },
+  { name: 'Flavor',  options: FLAVOR_OPTIONS },
+  { name: 'Material' },
+  { name: 'Weight' },
+  { name: 'Style' },
+]
+
+// ─── BLANK_VARIANT — no pre-populated attributes ─────────────────────────────────
+// Attributes are injected dynamically when the user selects attribute types.
+const makeBlankVariant = (attributeTypes: string[]) => ({
   price: undefined as unknown as number,
   stock: undefined as unknown as number,
   is_active: true,
-  attributes: [
-    { attribute_name: 'Size', attribute_value: '' },
-    { attribute_name: 'Flavor', attribute_value: '' },
-  ],
+  attributes: attributeTypes.map(name => ({ attribute_name: name, attribute_value: '' })),
   images: [],
-}
+})
 
 // ─── Image Upload Zone ────────────────────────────────────────────────────────────
 function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
@@ -335,17 +363,179 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
   )
 }
 
+// ─── Attribute Type Selector ──────────────────────────────────────────────────────
+// Shown once at the top of Step 2.
+// The user picks which attribute dimensions their product has before filling variants.
+function AttributeTypeSelector({
+  selected,
+  onAdd,
+  onRemove,
+}: {
+  selected: string[]
+  onAdd: (name: string) => void
+  onRemove: (name: string) => void
+}) {
+  const [customValue, setCustomValue] = useState('')
+  const [showCustom, setShowCustom] = useState(false)
+  const customInputRef = useRef<HTMLInputElement>(null)
+
+  const handleAddCustom = () => {
+    const trimmed = customValue.trim()
+    if (!trimmed) return
+    // Capitalise first letter for consistency
+    const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
+    onAdd(formatted)
+    setCustomValue('')
+    setShowCustom(false)
+  }
+
+  useEffect(() => {
+    if (showCustom) customInputRef.current?.focus()
+  }, [showCustom])
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+        <span className="text-slate-400"><TagIcon /></span>
+        <div>
+          <p className="text-[12px] font-semibold text-slate-700">Variant attributes</p>
+          <p className="text-[11px] text-slate-400">Choose which attributes define variants of this product (e.g. Size, Color)</p>
+        </div>
+      </div>
+
+      <div className="px-4 py-3 flex flex-col gap-3">
+        {/* Predefined options */}
+        <div className="flex flex-wrap gap-1.5">
+          {PREDEFINED_ATTRIBUTE_TYPES.map(attr => {
+            const isSelected = selected.includes(attr.name)
+            return (
+              <button
+                key={attr.name}
+                type="button"
+                onClick={() => isSelected ? onRemove(attr.name) : onAdd(attr.name)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border transition-all duration-150',
+                  isSelected
+                    ? 'bg-slate-800 border-slate-800 text-white'
+                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700',
+                )}
+              >
+                {isSelected && <CheckIcon />}
+                {attr.name}
+              </button>
+            )
+          })}
+
+          {/* Custom attribute chips already added */}
+          {selected
+            .filter(s => !PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === s))
+            .map(name => (
+              <span
+                key={name}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border bg-slate-800 border-slate-800 text-white"
+              >
+                {name}
+                <button
+                  type="button"
+                  onClick={() => onRemove(name)}
+                  className="opacity-70 hover:opacity-100 transition-opacity ml-0.5"
+                >
+                  <XIcon />
+                </button>
+              </span>
+            ))}
+
+          {/* + Custom */}
+          {showCustom ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                ref={customInputRef}
+                value={customValue}
+                onChange={e => setCustomValue(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { e.preventDefault(); handleAddCustom() }
+                  if (e.key === 'Escape') { setShowCustom(false); setCustomValue('') }
+                }}
+                placeholder="e.g. Style"
+                className="rounded-full border border-slate-300 px-3 py-1 text-[11px] outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-100 w-28 transition-all"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustom}
+                className="rounded-full border border-slate-800 bg-slate-800 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-900 transition-colors"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowCustom(false); setCustomValue('') }}
+                className="rounded-full border border-slate-200 text-slate-400 px-2.5 py-1 text-[11px] hover:border-slate-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowCustom(true)}
+              className="flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold border border-dashed border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-all"
+            >
+              <PlusIcon /> Custom
+            </button>
+          )}
+        </div>
+
+        {/* Selected summary */}
+        {selected.length > 0 && (
+          <p className="text-[11px] text-slate-400">
+            Each variant will have fields for:{' '}
+            <span className="font-medium text-slate-600">{selected.join(', ')}</span>
+          </p>
+        )}
+
+        {selected.length === 0 && (
+          <p className="text-[11px] text-slate-300 italic">
+            No attributes selected — variants will only differ by price and stock.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Variant Card ─────────────────────────────────────────────────────────────────
-function VariantCard({ index, onRemove, isOnly }: { index: number; onRemove: () => void; isOnly: boolean }) {
-  const { register, watch, setValue, formState: { errors } } = useFormContext<AddProductFormValues>()
+function VariantCard({
+  index,
+  onRemove,
+  isOnly,
+  attributeTypes,
+}: {
+  index: number
+  onRemove: () => void
+  isOnly: boolean
+  attributeTypes: string[]
+}) {
+  const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<AddProductFormValues>()
   const variantErrors = errors.variants?.[index]
+
+  // Build a label for the variant header from its filled attribute values
+  const attributes: { attribute_name: string; attribute_value: string }[] =
+    watch(`variants.${index}.attributes`) ?? []
+
+  const filledValues = attributes
+    .filter(a => a.attribute_value)
+    .map(a => a.attribute_value)
+  const variantLabel = filledValues.length > 0 ? filledValues.join(' / ') : `Variant ${index + 1}`
 
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50/40 overflow-hidden">
+      {/* Card header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-white">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-          Variant {index + 1}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-300">#{index + 1}</span>
+          <span className="text-[12px] font-semibold text-slate-600 truncate max-w-[160px]">{variantLabel}</span>
+        </div>
         {!isOnly && (
           <button
             type="button"
@@ -358,6 +548,7 @@ function VariantCard({ index, onRemove, isOnly }: { index: number; onRemove: () 
       </div>
 
       <div className="p-4 flex flex-col gap-4">
+        {/* Price + Stock */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Price" required error={variantErrors?.price?.message}>
             <div className="relative">
@@ -388,36 +579,55 @@ function VariantCard({ index, onRemove, isOnly }: { index: number; onRemove: () 
           description="Make this variant available for purchase"
         />
 
-        <div className="flex flex-col gap-3">
-          <SectionDivider label="Attributes" />
+        {/* Dynamic Attributes */}
+        {attributeTypes.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <SectionDivider label="Attributes" />
 
-          <Field label="Size" error={variantErrors?.attributes?.[0]?.attribute_value?.message}>
-            <Select
-              {...register(`variants.${index}.attributes.0.attribute_value`)}
-              onChange={e => {
-                setValue(`variants.${index}.attributes.0.attribute_name`, 'Size')
-                setValue(`variants.${index}.attributes.0.attribute_value`, e.target.value)
-              }}
-            >
-              <option value="">Select size…</option>
-              {SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-            </Select>
-          </Field>
+            {attributeTypes.map((attrName) => {
+              // Find the index of this attribute in the variant's attributes array
+              const attrs: { attribute_name: string; attribute_value: string }[] =
+                getValues(`variants.${index}.attributes`) ?? []
+              const attrIdx = attrs.findIndex(a => a.attribute_name === attrName)
+              if (attrIdx === -1) return null
 
-          <Field label="Flavor" error={variantErrors?.attributes?.[1]?.attribute_value?.message}>
-            <Select
-              {...register(`variants.${index}.attributes.1.attribute_value`)}
-              onChange={e => {
-                setValue(`variants.${index}.attributes.1.attribute_name`, 'Flavor')
-                setValue(`variants.${index}.attributes.1.attribute_value`, e.target.value)
-              }}
-            >
-              <option value="">Select flavor…</option>
-              {FLAVOR_OPTIONS.map(f => <option key={f} value={f}>{f}</option>)}
-            </Select>
-          </Field>
-        </div>
+              const predefined = PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === attrName)
+              const hasOptions = predefined?.options && predefined.options.length > 0
 
+              const fieldError = (variantErrors?.attributes as any)?.[attrIdx]?.attribute_value?.message
+
+              return (
+                <Field key={attrName} label={attrName} error={fieldError}>
+                  {hasOptions ? (
+                    <Select
+                      {...register(`variants.${index}.attributes.${attrIdx}.attribute_value`)}
+                      onChange={e => {
+                        setValue(`variants.${index}.attributes.${attrIdx}.attribute_name`, attrName)
+                        setValue(`variants.${index}.attributes.${attrIdx}.attribute_value`, e.target.value)
+                      }}
+                    >
+                      <option value="">Select {attrName.toLowerCase()}…</option>
+                      {predefined!.options!.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Input
+                      {...register(`variants.${index}.attributes.${attrIdx}.attribute_value`)}
+                      onChange={e => {
+                        setValue(`variants.${index}.attributes.${attrIdx}.attribute_name`, attrName)
+                        setValue(`variants.${index}.attributes.${attrIdx}.attribute_value`, e.target.value)
+                      }}
+                      placeholder={`Enter ${attrName.toLowerCase()}…`}
+                    />
+                  )}
+                </Field>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Images */}
         <div className="flex flex-col gap-2">
           <SectionDivider label="Images" />
           <ImageUploadZone variantIndex={index} />
@@ -565,11 +775,49 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
 
 // ─── Step 2: Variants ─────────────────────────────────────────────────────────────
 function Step2Variants() {
-  const { control, formState: { errors } } = useFormContext<AddProductFormValues>()
+  const { control, getValues, setValue, formState: { errors } } = useFormContext<AddProductFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: 'variants' })
+
+  // Attribute types live at the step level — they define which attributes ALL variants share.
+  const [attributeTypes, setAttributeTypes] = useState<string[]>([])
+
+  const handleAddAttributeType = (name: string) => {
+    if (attributeTypes.includes(name)) return
+    setAttributeTypes(prev => [...prev, name])
+
+    // Append the new attribute to every existing variant
+    fields.forEach((_, i) => {
+      const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
+      setValue(`variants.${i}.attributes`, [
+        ...currentAttrs,
+        { attribute_name: name, attribute_value: '' },
+      ])
+    })
+  }
+
+  const handleRemoveAttributeType = (name: string) => {
+    setAttributeTypes(prev => prev.filter(t => t !== name))
+
+    // Remove the attribute from every variant
+    fields.forEach((_, i) => {
+      const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
+      setValue(`variants.${i}.attributes`, currentAttrs.filter((a: any) => a.attribute_name !== name))
+    })
+  }
+
+  const handleAppendVariant = () => {
+    append(makeBlankVariant(attributeTypes))
+  }
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Attribute type picker — shown once, above the variants */}
+      <AttributeTypeSelector
+        selected={attributeTypes}
+        onAdd={handleAddAttributeType}
+        onRemove={handleRemoveAttributeType}
+      />
+
       {errors.variants?.root && (
         <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
           <span className="text-rose-500"><AlertIcon /></span>
@@ -583,12 +831,13 @@ function Step2Variants() {
           index={idx}
           isOnly={fields.length === 1}
           onRemove={() => remove(idx)}
+          attributeTypes={attributeTypes}
         />
       ))}
 
       <button
         type="button"
-        onClick={() => append(BLANK_VARIANT)}
+        onClick={handleAppendVariant}
         className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 py-3 text-[12px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all"
       >
         <PlusIcon /> Add variant
@@ -715,7 +964,9 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
       wholesale: false,
       discount: null,
       type: '',
-      variants: [BLANK_VARIANT],
+      // Start with one blank variant — no pre-populated attributes.
+      // Attributes are injected dynamically via AttributeTypeSelector.
+      variants: [makeBlankVariant([])],
       details: [],
     },
     mode: 'onTouched',

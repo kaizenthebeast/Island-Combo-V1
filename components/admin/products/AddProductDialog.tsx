@@ -1,5 +1,5 @@
 'use client'
-
+import { useRouter } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,9 @@ type Props = {
 }
 
 export default function AddProductDialog({ open, onClose }: Props) {
+  const router = useRouter();
   const handleSuccess = (data: AddProductFormValues) => {
-    console.log('Product created:', data)
+    router.refresh();
     onClose()
   }
 

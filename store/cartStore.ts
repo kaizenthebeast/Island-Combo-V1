@@ -14,9 +14,9 @@ type CartState = {
 
   fetchCart: () => Promise<void>
 
-  addItem: (variantId: number, qty: number, size: string) => Promise<void>
-  updateItem: (variantId: number, qty: number, size: string) => Promise<void>
-  removeItem: (variantId: number, size: string) => Promise<void>
+  addItem: (variantId: number, qty: number, selectedOption?: string | null) => Promise<void>
+  updateItem: (variantId: number, qty: number) => Promise<void>
+  removeItem: (variantId: number) => Promise<void>
 
   resetQuantity: () => void
   clearCart: () => void
@@ -31,9 +31,9 @@ export const useCartStore = create<CartState>((set, get) => {
   }
 
   const applyOptimistic = (updater: (cart: CartItem[]) => CartItem[]) => {
-    const prev = get().cart           // 1. snapshot
-    setCartState(updater(prev))       // 2. optimistic update
-    return prev                       // 3. return prev for rollback
+    const prev = get().cart
+    setCartState(updater(prev))
+    return prev
   }
 
   const rollback = (prev: CartItem[], err: unknown) => {
@@ -64,14 +64,17 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     // ADD ITEM
-    addItem: async (variantId, qty, size) => {
+    addItem: async (variantId, qty, selectedOption = null) => {
       const prev = applyOptimistic((cart) => {
-        const exists = cart.find((i) => i.variant_id === variantId && i.size === size)
+        const exists = cart.find((i) => i.variant_id === variantId)
         if (!exists) {
-          return [...cart, { variant_id: variantId, quantity: qty, size } as CartItem]
+          return [
+            ...cart,
+            { variant_id: variantId, quantity: qty, selected_option: selectedOption } as CartItem,
+          ]
         }
         return cart.map((i) =>
-          i.variant_id === variantId && i.size === size
+          i.variant_id === variantId
             ? { ...i, quantity: i.quantity + qty }
             : i
         )
@@ -80,27 +83,27 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const res = await fetch("/api/cart", {
           method: "POST",
-          body: JSON.stringify({ variantId, quantity: qty, size }),
+          body: JSON.stringify({ variantId, quantity: qty, selectedOption }),
           headers: { "Content-Type": "application/json" },
         })
         if (!res.ok) throw new Error("Failed to add item")
       } catch (err) {
-        rollback(prev, err)   // ✅ rolls back to before the add
+        rollback(prev, err)
       }
     },
 
     // UPDATE ITEM
-    updateItem: async (variantId, qty, size) => {
+    updateItem: async (variantId, qty) => {
       const prev = applyOptimistic((cart) =>
         cart.map((i) =>
-          i.variant_id === variantId && i.size === size ? { ...i, quantity: qty } : i
+          i.variant_id === variantId ? { ...i, quantity: qty } : i
         )
       )
 
       try {
         const res = await fetch("/api/cart", {
           method: "PATCH",
-          body: JSON.stringify({ variantId, quantity: qty, size }),
+          body: JSON.stringify({ variantId, quantity: qty }),
           headers: { "Content-Type": "application/json" },
         })
         if (!res.ok) throw new Error("Update failed")
@@ -110,15 +113,15 @@ export const useCartStore = create<CartState>((set, get) => {
     },
 
     // REMOVE ITEM
-    removeItem: async (variantId, size) => {
+    removeItem: async (variantId) => {
       const prev = applyOptimistic((cart) =>
-        cart.filter((i) => !(i.variant_id === variantId && i.size === size))
+        cart.filter((i) => i.variant_id !== variantId)
       )
 
       try {
         const res = await fetch("/api/cart", {
           method: "DELETE",
-          body: JSON.stringify({ variantId, size, quantity: 0 }),
+          body: JSON.stringify({ variantId }),
           headers: { "Content-Type": "application/json" },
         })
         if (!res.ok) throw new Error("Remove failed")
