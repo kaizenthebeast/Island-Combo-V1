@@ -1,7 +1,7 @@
 'use client'
 
 import { addAdminProduct } from '@/lib/product'
-import { getAllCategories } from '@/lib/product'
+import { getAllSubCategories } from '@/lib/product'
 import { uploadVariantImages } from '@/lib/product-upload'
 import { addProductSchema, AddProductFormValues } from '@/form-schema/addProductSchema'
 import { cn } from '@/lib/utils'
@@ -948,7 +948,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
   const [stepErrorCount, setStepErrorCount] = useState(0)
 
   useEffect(() => {
-    getAllCategories()
+    getAllSubCategories()
       .then(data => setCategories(data ?? []))
       .catch(err => setCategoryError(err.message))
       .finally(() => setLoadingCategories(false))
