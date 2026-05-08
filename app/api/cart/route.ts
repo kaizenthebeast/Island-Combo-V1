@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireUser } from '@/lib/auth'
+import { waitUntil } from "@vercel/functions"
+import { ratelimit } from "@/redis/rateLimiter"
 import {
   getCart,
   addToCart,
@@ -7,12 +9,31 @@ import {
   removeFromCart,
 } from "@/lib/cart"
 
+
+async function applyRateLimit(userId: string) {
+  const { success, limit, remaining, pending } = await ratelimit.limit(userId);
+  waitUntil(pending)
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many request", limit, remaining },
+      { status: 429, headers: { "Retry-After": "10" } }
+    )
+  }
+  return null // null means allowed
+
+}
+
 export async function GET() {
   try {
     const user = await requireUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const blocked = await applyRateLimit(user.id)
+    if (blocked) {
+      return blocked
+    }
+
     const cart = await getCart(user.id)
     return NextResponse.json(cart)
   } catch (err: unknown) {
@@ -27,10 +48,12 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+    const blocked = await applyRateLimit(user.id)
+    if (blocked) {
+      return blocked
+    }
 
     const { variantId, quantity, selectedOption } = await req.json()
-
-    // selectedOption is intentionally optional — null for no-attribute products
     if (!variantId || !quantity) {
       return NextResponse.json(
         { error: "variantId and quantity are required" },
@@ -59,6 +82,10 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const blocked = await applyRateLimit(user.id)
+    if (blocked) {
+      return blocked
+    }
     const { variantId, quantity } = await req.json()
 
     if (!variantId) {
@@ -91,6 +118,11 @@ export async function DELETE(req: NextRequest) {
     const user = await requireUser()
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const blocked = await applyRateLimit(user.id)
+    if (blocked) {
+      return blocked
     }
 
     const { variantId } = await req.json()

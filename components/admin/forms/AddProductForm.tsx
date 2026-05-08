@@ -183,7 +183,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 const SIZE_OPTIONS = [
   'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL',
   '28', '29', '30', '31', '32', '33', '34', '36', '38', '40', '42',
-  '2L', '1L', '500ml', '300ml', 'One Size',
+  '2L', '1L', '500ml', '300ml',
 ]
 
 const FLAVOR_OPTIONS = ['Lime', 'Orange', 'Coke', 'Lemon', 'Strawberry', 'Mango', 'Watermelon']
@@ -193,26 +193,125 @@ const COLOR_OPTIONS = [
   'Pink', 'Purple', 'Gray', 'Navy', 'Beige', 'Brown', 'Orange',
 ]
 
-// Predefined attribute types with their dropdown options.
-// If options is undefined/empty, the field renders as a free-text input.
 const PREDEFINED_ATTRIBUTE_TYPES: { name: string; options?: string[] }[] = [
-  { name: 'Size',    options: SIZE_OPTIONS },
-  { name: 'Color',   options: COLOR_OPTIONS },
-  { name: 'Flavor',  options: FLAVOR_OPTIONS },
+  { name: 'Size', options: SIZE_OPTIONS },
+  { name: 'Color', options: COLOR_OPTIONS },
+  { name: 'Flavor', options: FLAVOR_OPTIONS },
   { name: 'Material' },
   { name: 'Weight' },
   { name: 'Style' },
 ]
 
-// ─── BLANK_VARIANT — no pre-populated attributes ─────────────────────────────────
-// Attributes are injected dynamically when the user selects attribute types.
+
+// ─── BLANK_VARIANT ────────────────────────────────────────────────────────────────
 const makeBlankVariant = (attributeTypes: string[]) => ({
   price: undefined as unknown as number,
   stock: undefined as unknown as number,
   is_active: true,
   attributes: attributeTypes.map(name => ({ attribute_name: name, attribute_value: '' })),
   images: [],
+  pricing_tiers: [],
 })
+
+// ─── Pricing Tiers Section ────────────────────────────────────────────────────────
+// Each tier has a label, min_quantity, and discount_percent.
+// Validation: unique labels, unique min_quantities, no leading zeros.
+function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
+  const { control, register, formState: { errors } } = useFormContext<AddProductFormValues>()
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `variants.${variantIndex}.pricing_tiers`,
+  })
+
+  const tierErrors = (errors.variants?.[variantIndex]?.pricing_tiers as any)
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {fields.length > 0 && (
+        <div className="grid grid-cols-[120px_1fr_32px] gap-2 px-0.5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Min qty</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Discount %</span>
+        </div>
+      )}
+
+      {fields.map((field, idx) => (
+        <div key={field.id} className="grid grid-cols-[120px_1fr_32px] gap-2 items-start">
+          <input
+            type="hidden"
+            {...register(`variants.${variantIndex}.pricing_tiers.${idx}.label`)}
+            value="wholesale"
+          />
+
+          {/* Min quantity */}
+          <Field label="" error={tierErrors?.[idx]?.min_quantity?.message}>
+            <Input
+              {...register(`variants.${variantIndex}.pricing_tiers.${idx}.min_quantity`, {
+                setValueAs: v => v === '' ? undefined : parseInt(v, 10),
+              })}
+              type="number"
+              min={1}
+              step={1}
+              placeholder="e.g. 10"
+            />
+          </Field>
+
+          {/* Discount percent */}
+          <Field label="" error={tierErrors?.[idx]?.discount_percent?.message}>
+            <div className="relative">
+              <Input
+                {...register(`variants.${variantIndex}.pricing_tiers.${idx}.discount_percent`, {
+                  setValueAs: v => v === '' ? undefined : parseFloat(v),
+                })}
+                type="number"
+                min={0}
+                max={100}
+                step={0.01}
+                placeholder="e.g. 20"
+                className="pr-7"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 pointer-events-none select-none">%</span>
+            </div>
+          </Field>
+
+          {/* Remove row */}
+          <button
+            type="button"
+            onClick={() => remove(idx)}
+            className="mt-1.5 p-1.5 rounded text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+          >
+            <TrashIcon />
+          </button>
+        </div>
+      ))}
+
+      {tierErrors?.root?.message && (
+        <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+          <AlertIcon />{tierErrors.root.message}
+        </p>
+      )}
+      {typeof tierErrors?.message === 'string' && (
+        <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+          <AlertIcon />{tierErrors.message}
+        </p>
+      )}
+
+      {/* Only allow one wholesale tier per variant */}
+      {fields.length === 0 && (
+        <button
+          type="button"
+          onClick={() => append({
+            label: 'wholesale',
+            min_quantity: undefined as unknown as number,
+            discount_percent: undefined as unknown as number,
+          })}
+          className="flex items-center justify-center gap-2 rounded-md border border-dashed border-slate-200 py-2 text-[11px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all"
+        >
+          <PlusIcon /> Add wholesale pricing
+        </button>
+      )}
+    </div>
+  )
+}
 
 // ─── Image Upload Zone ────────────────────────────────────────────────────────────
 function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
@@ -364,8 +463,6 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
 }
 
 // ─── Attribute Type Selector ──────────────────────────────────────────────────────
-// Shown once at the top of Step 2.
-// The user picks which attribute dimensions their product has before filling variants.
 function AttributeTypeSelector({
   selected,
   onAdd,
@@ -382,7 +479,6 @@ function AttributeTypeSelector({
   const handleAddCustom = () => {
     const trimmed = customValue.trim()
     if (!trimmed) return
-    // Capitalise first letter for consistency
     const formatted = trimmed.charAt(0).toUpperCase() + trimmed.slice(1)
     onAdd(formatted)
     setCustomValue('')
@@ -395,7 +491,6 @@ function AttributeTypeSelector({
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
-      {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
         <span className="text-slate-400"><TagIcon /></span>
         <div>
@@ -405,7 +500,6 @@ function AttributeTypeSelector({
       </div>
 
       <div className="px-4 py-3 flex flex-col gap-3">
-        {/* Predefined options */}
         <div className="flex flex-wrap gap-1.5">
           {PREDEFINED_ATTRIBUTE_TYPES.map(attr => {
             const isSelected = selected.includes(attr.name)
@@ -427,7 +521,6 @@ function AttributeTypeSelector({
             )
           })}
 
-          {/* Custom attribute chips already added */}
           {selected
             .filter(s => !PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === s))
             .map(name => (
@@ -446,7 +539,6 @@ function AttributeTypeSelector({
               </span>
             ))}
 
-          {/* + Custom */}
           {showCustom ? (
             <div className="flex items-center gap-1.5">
               <input
@@ -486,7 +578,6 @@ function AttributeTypeSelector({
           )}
         </div>
 
-        {/* Selected summary */}
         {selected.length > 0 && (
           <p className="text-[11px] text-slate-400">
             Each variant will have fields for:{' '}
@@ -519,7 +610,6 @@ function VariantCard({
   const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<AddProductFormValues>()
   const variantErrors = errors.variants?.[index]
 
-  // Build a label for the variant header from its filled attribute values
   const attributes: { attribute_name: string; attribute_value: string }[] =
     watch(`variants.${index}.attributes`) ?? []
 
@@ -583,9 +673,7 @@ function VariantCard({
         {attributeTypes.length > 0 && (
           <div className="flex flex-col gap-3">
             <SectionDivider label="Attributes" />
-
             {attributeTypes.map((attrName) => {
-              // Find the index of this attribute in the variant's attributes array
               const attrs: { attribute_name: string; attribute_value: string }[] =
                 getValues(`variants.${index}.attributes`) ?? []
               const attrIdx = attrs.findIndex(a => a.attribute_name === attrName)
@@ -593,7 +681,6 @@ function VariantCard({
 
               const predefined = PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === attrName)
               const hasOptions = predefined?.options && predefined.options.length > 0
-
               const fieldError = (variantErrors?.attributes as any)?.[attrIdx]?.attribute_value?.message
 
               return (
@@ -626,6 +713,17 @@ function VariantCard({
             })}
           </div>
         )}
+
+        {/* Pricing Tiers */}
+        <div className="flex flex-col gap-2">
+          <SectionDivider label="Wholesale pricing" />
+          <p className="text-[11px] text-slate-400 leading-relaxed">
+            Optionally set a wholesale discount for this variant. Customers who add{' '}
+            <span className="font-medium text-slate-600">at least the minimum quantity</span>{' '}
+            to their cart will automatically receive the discount.
+          </p>
+          <PricingTiersSection variantIndex={index} />
+        </div>
 
         {/* Images */}
         <div className="flex flex-col gap-2">
@@ -755,20 +853,13 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
 
       <div className="h-px bg-slate-100" />
 
-      <div className="flex flex-col gap-3.5">
-        <Toggle
-          checked={watch('is_active') ?? true}
-          onChange={v => setValue('is_active', v)}
-          label="Active — visible in store"
-          description="Customers will be able to find and purchase this product"
-        />
-        <Toggle
-          checked={watch('wholesale') ?? false}
-          onChange={v => setValue('wholesale', v)}
-          label="Wholesale product"
-          description="This product is available for wholesale orders"
-        />
-      </div>
+      {/* Only is_active toggle remains — wholesale toggle removed */}
+      <Toggle
+        checked={watch('is_active') ?? true}
+        onChange={v => setValue('is_active', v)}
+        label="Active — visible in store"
+        description="Customers will be able to find and purchase this product"
+      />
     </div>
   )
 }
@@ -777,15 +868,11 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
 function Step2Variants() {
   const { control, getValues, setValue, formState: { errors } } = useFormContext<AddProductFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: 'variants' })
-
-  // Attribute types live at the step level — they define which attributes ALL variants share.
   const [attributeTypes, setAttributeTypes] = useState<string[]>([])
 
   const handleAddAttributeType = (name: string) => {
     if (attributeTypes.includes(name)) return
     setAttributeTypes(prev => [...prev, name])
-
-    // Append the new attribute to every existing variant
     fields.forEach((_, i) => {
       const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
       setValue(`variants.${i}.attributes`, [
@@ -797,8 +884,6 @@ function Step2Variants() {
 
   const handleRemoveAttributeType = (name: string) => {
     setAttributeTypes(prev => prev.filter(t => t !== name))
-
-    // Remove the attribute from every variant
     fields.forEach((_, i) => {
       const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
       setValue(`variants.${i}.attributes`, currentAttrs.filter((a: any) => a.attribute_name !== name))
@@ -811,7 +896,6 @@ function Step2Variants() {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Attribute type picker — shown once, above the variants */}
       <AttributeTypeSelector
         selected={attributeTypes}
         onAdd={handleAddAttributeType}
@@ -933,7 +1017,7 @@ interface AddProductFormProps {
 }
 
 const STEP_FIELDS: (keyof AddProductFormValues)[][] = [
-  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active', 'wholesale'],
+  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
   ['variants'],
   ['details'],
 ]
@@ -961,11 +1045,8 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
       slug: '',
       description: '',
       is_active: true,
-      wholesale: false,
       discount: null,
       type: '',
-      // Start with one blank variant — no pre-populated attributes.
-      // Attributes are injected dynamically via AttributeTypeSelector.
       variants: [makeBlankVariant([])],
       details: [],
     },

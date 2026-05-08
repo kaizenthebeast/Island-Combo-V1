@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description: defaultDescription,
   keywords: [
     // broad
-    "online shop FSM",
+    "online shop",
     "Micronesia online store",  
     // top-level categories
     "clothing FSM",
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     url: defaultUrl,
     images: [
       {
-        url: "/og-image.jpg",
+        url: "/logo.png",
         width: 1200,
         height: 630,
         alt: `${siteName} – Online Store`,

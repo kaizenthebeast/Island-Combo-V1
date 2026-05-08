@@ -1,16 +1,25 @@
+export type PricingTier = {
+  label: string
+  min_quantity: number
+  discount_percent: number  // % off base price e.g. 20 = 20% off
+  computed_price?: number   // pre-computed by SQL for convenience
+}
+
 export type ProductCatalogItem = {
   product_id: number
   name: string
   slug: string
-  wholesale: boolean
   discount: number | null
   category_id: number | null
   category_name: string | null
   base_price: number
   final_price: number
   image_url: string | null
+  has_wholesale: boolean
+  wholesale_min_qty: number | null
+  wholesale_discount_percent: number | null  // % off base price
+  wholesale_price: number | null             // pre-computed by SQL
 }
-
 
 export type ProductDetails = {
   product_id: number
@@ -18,7 +27,6 @@ export type ProductDetails = {
   description: string | null
   slug: string
   discount: number | null
-  wholesale: boolean
   is_active: boolean
 
   category: {
@@ -37,6 +45,7 @@ export type ProductDetails = {
     price: number
     final_price: number
     stock: number
+    pricing_tiers: PricingTier[]
     image_url: string[]
     attributes: {
       name: string
@@ -45,7 +54,6 @@ export type ProductDetails = {
   }[]
 }
 
-
 export type AdminProduct = {
   product_id: number
   name: string
@@ -53,7 +61,6 @@ export type AdminProduct = {
   description: string | null
 
   is_active: boolean
-  wholesale: boolean
   discount: number | null
 
   category: {
@@ -85,6 +92,7 @@ export type AdminProduct = {
     low_stock_threshold?: number
 
     is_active: boolean
+    pricing_tiers: PricingTier[]
 
     images: string[]
 

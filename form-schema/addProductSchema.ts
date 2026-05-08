@@ -16,10 +16,21 @@ const variantImageSchema = z.object({
       "Only JPEG, PNG, WebP, or GIF allowed"
     ),
   is_primary: z.boolean(),
-  // FIX: starts at 0 for the first image — was .min(1) which caused silent
-  // validation failure on upload and blocked step navigation.
   sort_order: z.number().int().min(0),
   preview: z.string(),
+});
+
+// ─── Pricing Tier ─────────────────────────────────────────────────────────────
+// Each tier defines a quantity threshold and a percentage discount.
+// label:            identifies the tier e.g. 'retail' | 'wholesale' | 'bulk'
+// min_quantity:     minimum cart quantity to activate this tier (retail = 1)
+// discount_percent: percentage off the base variant price (retail = 0)
+export const pricingTierSchema = z.object({
+  label: z.string().min(1, "Tier label is required"),
+  min_quantity: z.number().int("Minimum quantity must be a whole number").min(1, "Minimum quantity must be at least 1")
+    .refine((v) => !/^0\d/.test(String(v)), "Minimum quantity cannot have a leading zero (e.g. 012)"),
+  discount_percent: z.number().min(0, "Discount cannot be negative").max(100, "Discount cannot exceed 100%")
+  .refine((v) => !/^0\d/.test(String(v)), "Discount cannot have a leading zero (e.g. 025)"),
 });
 
 // ─── Product Variant ──────────────────────────────────────────────────────────
@@ -34,11 +45,28 @@ const productVariantSchema = z.object({
     .nonnegative("Stock must be at least 0")
     .refine((v) => !/^0\d/.test(String(v)), "Stock cannot have a leading zero"),
   is_active: z.boolean(),
-  // FIX: removed .min(1) — attributes are optional. Not all products have
-  // variant dimensions (e.g. a one-size digital product). When attributes ARE
-  // present, each one still requires a non-empty name and value.
   attributes: z.array(variantAttributeSchema),
   images: z.array(variantImageSchema),
+
+  // Pricing tiers for this variant — retail tier (min_qty: 1, discount: 0%)
+  // is always seeded automatically. Admin can add wholesale/bulk tiers here.
+  // Validated: no duplicate labels, no duplicate min_quantities.
+  pricing_tiers: z
+    .array(pricingTierSchema)
+    .refine(
+      (tiers) => {
+        const labels = tiers.map((t) => t.label)
+        return labels.length === new Set(labels).size
+      },
+      { message: "Each tier must have a unique label" }
+    )
+    .refine(
+      (tiers) => {
+        const qtys = tiers.map((t) => t.min_quantity)
+        return qtys.length === new Set(qtys).size
+      },
+      { message: "Each tier must have a unique minimum quantity" }
+    ),
 });
 
 // ─── Product Detail ───────────────────────────────────────────────────────────
@@ -69,7 +97,7 @@ export const addProductSchema = z.object({
     .max(100, "Discount cannot exceed 100%")
     .nullable()
     .optional(),
-  wholesale: z.boolean(),
+  // via pricing_tiers with label='wholesale' and a min_quantity threshold
   is_active: z.boolean(),
   type: z.string().min(1, "Product type is required"),
   variants: z.array(productVariantSchema).min(1, "At least one variant is required"),
@@ -82,3 +110,4 @@ export type ProductVariantValues = z.infer<typeof productVariantSchema>;
 export type VariantImageValues = z.infer<typeof variantImageSchema>;
 export type VariantAttributeValues = z.infer<typeof variantAttributeSchema>;
 export type ProductDetailValues = z.infer<typeof productDetailSchema>;
+export type PricingTierValues = z.infer<typeof pricingTierSchema>;
