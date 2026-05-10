@@ -69,7 +69,6 @@ export async function POST(req: NextRequest) {
     })
     return NextResponse.json(data)
   } catch (err: unknown) {
-    console.error("API CART ERROR:", err)
     const message = err instanceof Error ? err.message : "Unknown error"
     return NextResponse.json({ error: message }, { status: 500 })
   }

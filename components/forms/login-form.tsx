@@ -29,15 +29,11 @@ export function LoginForm() {
   const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     setMessage("");
     setIsLoading(true);
-
     const supabase = createClient();
 
     try {
-      const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
-      if (anonError) {
-        throw new Error(`Failed to get anonymous session: ${anonError.message}`);
-      }
-      const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
+      const { data: { session: anonSession } } = await supabase.auth.getSession();
+      const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
 
       const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email: data.email,
@@ -60,7 +56,6 @@ export function LoginForm() {
         }
       }
 
-      // Check role and redirect accordingly
       const { data: profile } = await supabase
         .from("profile")
         .select("role")

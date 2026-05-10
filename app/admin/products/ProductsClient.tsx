@@ -1,11 +1,13 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useTransition } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddProductDialog from '@/components/admin/products/AddProductDialog'
+import EditProductDialog from '@/components/admin/products/EditProductDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import type { AdminProduct } from '@/types/product'
+import { deleteProduct } from '@/lib/product'
 
 type Row = {
     product_id: number
@@ -30,6 +32,24 @@ const getStatusVariant = (status: string): BadgeVariant => {
 
 export default function ProductsClient({ products }: { products: AdminProduct[] }) {
     const [open, setOpen] = useState(false)
+    const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
+    const [isPending, startTransition] = useTransition()
+    const [deleteError, setDeleteError] = useState<string | null>(null)
+
+
+    const handleDelete = (row: Row) => {
+        startTransition(async () => {
+            const result = await deleteProduct(row.product_id, "product")
+
+            if (!result.success) {
+                setDeleteError(result.message)
+                return
+            }
+
+            setDeleteError(null)
+        })
+    }
+
 
     const rows: Row[] = useMemo(() => {
         return products.map((p) => ({
@@ -83,8 +103,19 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
                     { label: 'Add Product', onClick: () => setOpen(true), variant: 'primary' },
                 ]}
             />
+            {/* Error toast/banner */}
+            {deleteError && (
+                <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
+                    <p className="text-[12px] text-rose-700 font-medium">{deleteError}</p>
+                </div>
+            )}
 
             <AddProductDialog open={open} onClose={() => setOpen(false)} />
+            <EditProductDialog
+                product={editingProduct}
+                open={!!editingProduct}
+                onClose={() => setEditingProduct(null)}
+            />
 
             <DataTable<Row>
                 data={rows}
@@ -95,7 +126,10 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
                 defaultSortKey="name"
                 getRowId={(row) => row.product_id}
                 onDelete={(row) => {
-                    console.log('delete product:', row.product_id)
+                    handleDelete(row)
+                }}
+                onEdit={(row) => {
+                    setEditingProduct(row.raw)
                 }}
                 expandedRowRender={(row) => {
                     const p = row.raw

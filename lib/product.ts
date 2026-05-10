@@ -6,6 +6,9 @@ import type { ProductCatalogItem, ProductDetails, AdminProduct } from '@/types/p
 import type { VariantWithUploadedImages } from './product-upload'
 import { AddProductFormValues } from '@/form-schema/addProductSchema'
 
+
+type ActionType = "product" | "variant"
+
 export const getAllProducts = async (): Promise<ProductCatalogItem[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase.from('product_catalog_mv').select('*')
@@ -67,6 +70,7 @@ export type AddProductPayload = Omit<AddProductFormValues, 'variants'> & {
   variants: VariantWithUploadedImages[]
 }
 
+
 export const addAdminProduct = async (data: AddProductPayload) => {
   const supabase = await createClient()
 
@@ -91,6 +95,79 @@ export const addAdminProduct = async (data: AddProductPayload) => {
   revalidatePath('/admin/products')
   return result
 }
+
+export const updateAdminProduct = async (productId: number, data: AddProductPayload) => {
+  const supabase = await createClient()
+
+  const variants = data.variants.map((v) => ({
+    ...(v.variant_id ? { variant_id: v.variant_id } : {}),
+    price: v.price,
+    stock: v.stock,
+    is_active: v.is_active,
+    attributes: v.attributes,
+    images: v.images,
+    pricing_tiers: v.pricing_tiers,
+  }))
+
+  const payload = {
+    product_id: productId,
+    ...data,
+    variants,
+  }
+
+  const { data: result, error } = await supabase.rpc('update_admin_product', { payload })
+  if (error) throw error
+
+  revalidatePath('/admin/products')
+  return result
+}
+
+
+export const deleteProduct = async (id: number, type: ActionType) => {
+  // create connections
+  const supabase = await createClient();
+
+  // Guard to make sure only admin 
+  // 1. Auth guard — only admins can delete
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, status: 401, message: "Unauthorized" };
+  }
+
+  //check the actions (variant / product)
+  if (type === "product") {
+    const { error, count } = await supabase.from('products').delete({ count: "exact" }).eq("product_id", id)
+
+    if (error) {
+      return { success: false, status: 403, message: error.message };
+    }
+
+    if (count === 0) {
+      return { success: false, status: 404, message: "Product not found" }
+    }
+    revalidatePath("/admin/products")
+    return { sucess: true, status: 200, message: "Product successfully deleted" }
+
+  } else {
+    const { error, count } = await supabase.from('product_variants').delete({ count: "exact" }).eq("variant_id", id)
+
+    if (error) {
+      return { success: false, status: 403, message: error.message };
+    }
+
+    if (count === 0) {
+      return { success: false, status: 404, message: "Variant not found" }
+    }
+    revalidatePath("/admin/products")
+    return { success: true, status: 200, message: "Variant successfully deleted" }
+  }
+
+
+}
+
+
+
 
 export const getAllSubCategories = async () => {
   const supabase = await createClient();

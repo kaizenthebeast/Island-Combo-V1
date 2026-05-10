@@ -36,3 +36,28 @@ export type Address = {
     phone_text: string
   } | null;  
 };
+
+export type PtsTransaction = {
+  id: number
+  order_id: number | null
+  points: number
+  reason: string | null
+  created_at: string
+}
+
+export type AdminUser = {
+  user_id: string
+  first_name: string | null
+  last_name: string | null
+  email: string | null
+  phone_text: string | null
+  sex: string | null
+  age: number | null
+  role: 'customer' | 'staff' | 'admin'
+  created_at: string
+  profile_pts: {
+    total_pts: number
+  } | null
+  addresses: Address[]
+  profile_pts_transaction_records: PtsTransaction[]
+}

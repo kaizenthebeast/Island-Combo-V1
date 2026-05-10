@@ -3,8 +3,10 @@ import { AuthButtonClient } from "./AuthButtonClient";
 
 export async function AuthButton() {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  const isAuthenticated = !!data?.claims?.email;
+
+  // Use getUser() instead of getClaims() — it's safer and won't throw on missing session
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAuthenticated = !!user?.email;
 
   return <AuthButtonClient isAuthenticated={isAuthenticated} />;
 }

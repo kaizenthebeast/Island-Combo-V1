@@ -1,12 +1,11 @@
-// app/(admin)/layout.tsx
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
-import { Separator } from "@/components/ui/separator"
+import { AppSidebarServer } from "@/components/app-sidebar-server"
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider >
-      <AppSidebar />
+      <AppSidebarServer />
       <SidebarInset>
         {children}
       </SidebarInset>

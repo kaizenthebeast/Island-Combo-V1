@@ -103,3 +103,41 @@ export type AdminProduct = {
     }[]
   }[]
 }
+
+
+
+export type UpdateProductPayload = {
+  name?: string
+  description?: string | null
+  slug?: string
+  is_active?: boolean
+  discount?: number | null
+  category_id?: number | null
+  product_details?: {
+    id?: number               // if id exists → upsert, no id → insert
+    attribute_name: string
+    attribute_value: string
+  }[]
+  deleted_detail_ids?: number[] // ids to remove
+}
+
+export type UpdateVariantPayload = {
+  sku?: string
+  price?: number
+  stock?: number
+  is_active?: boolean
+  attributes?: {
+    id?: number
+    name: string
+    value: string
+  }[]
+  pricing_tiers?: {
+    id?: number
+    min_quantity: number
+    label: string
+    discount_percent: number
+    is_active: boolean
+  }[]
+  deleted_tier_ids?: number[]
+  deleted_attribute_ids?: number[]
+}

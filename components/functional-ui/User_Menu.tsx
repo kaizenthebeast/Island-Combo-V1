@@ -15,18 +15,16 @@ import {
 
 export function UserMenu() {
   const router = useRouter();
+  const { clearCart } = useCartStore();
 
   const logout = async () => {
     const supabase = createClient();
     try {
-      sessionStorage.setItem("logging_out", "true"); // suppress AnonAuthProvider
-      await supabase.auth.signOut();
-      useCartStore.getState().clearCart();
-      router.push("/auth/login");
+      clearCart();
+      await supabase.auth.signOut({ scope: "local" });
+      router.push("/auth/login"); 
     } catch (error) {
       console.error("Logout failed:", error);
-    } finally {
-      sessionStorage.removeItem("logging_out"); // always clean up
     }
   };
 

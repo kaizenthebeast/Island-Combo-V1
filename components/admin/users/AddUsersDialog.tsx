@@ -7,17 +7,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { AddProductForm } from '@/components/admin/products/forms/AddProductForm'
-import { AddProductFormValues } from '@/form-schema/addProductSchema'
+import { AddUserForm } from '@/components/admin/users/forms/AddUserForm'
+import { AddUserFormValues } from '@/form-schema/addUserSchema'
 
 type Props = {
   open: boolean
   onClose: () => void
 }
 
-export default function AddProductDialog({ open, onClose }: Props) {
+export default function AddUserDialog({ open, onClose }: Props) {
   const router = useRouter();
-  const handleSuccess = (data: AddProductFormValues) => {
+  const handleSuccess = (data: AddUserFormValues) => {
     router.refresh();
     onClose()
   }
@@ -32,13 +32,13 @@ export default function AddProductDialog({ open, onClose }: Props) {
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create Product</DialogTitle>
+          <DialogTitle>Create User</DialogTitle>
           <DialogDescription>
             Fill in the details below.
           </DialogDescription>
         </DialogHeader>
 
-        <AddProductForm onSuccess={handleSuccess} onCancel={onClose} />
+        <AddUserForm onSuccess={handleSuccess} onCancel={onClose} />
       </DialogContent>
     </Dialog>
   )

@@ -32,40 +32,39 @@ export function SignUpForm() {
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
-    setMessage("");
-    setIsLoading(true);
-    const supabase = createClient();
+ const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
+  setMessage("");
+  setIsLoading(true);
+  const supabase = createClient();
 
-    try {
-      // Get anon user BEFORE signup
-      const { data: { user: anonUser } } = await supabase.auth.getUser();
-      const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
+  try {
+    const { data: { session: anonSession } } = await supabase.auth.getSession();
+    const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
 
-      // Store guest ID in cookie so we can merge AFTER email confirmation
-      if (guestUserId) {
-        document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
-      }
-
-      const { data: signUpData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
-        },
-      });
-      if (error) {
-        throw new Error(error?.message || "Signup failed");
-      }
-
-      reset();
-      router.push("/auth/sign-up-success");
-    } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
+    if (guestUserId) {
+      document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
     }
-  };
+
+    const { data: signUpData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
+      },
+    });
+
+    if (error) {
+      throw new Error(error?.message || "Signup failed");
+    }
+
+    reset();
+    router.push("/auth/sign-up-success");
+  } catch (err: unknown) {
+    setMessage(err instanceof Error ? err.message : "An error occurred");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const googleSignUp = async () => {
     const supabase = createClient();

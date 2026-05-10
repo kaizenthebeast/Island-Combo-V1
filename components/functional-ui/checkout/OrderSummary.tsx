@@ -39,7 +39,6 @@ const OrderSummary = ({ cartItems }: Props) => {
         }
     }
 
-
     const handleEditToggle = (key: string, currentQty: number) => {
         setActiveItemKey(prev => {
             const isSame = prev === key
@@ -65,6 +64,21 @@ const OrderSummary = ({ cartItems }: Props) => {
                     const key = `${item.variant_id}`
                     const isActive = activeItemKey === key
                     const quantity = editQuantities[key] ?? item.quantity
+
+                    // Wholesale is now derived from applied_tier_label resolved
+                    // by cart_view in SQL — true when the active tier is 'wholesale'
+                    const isWholesale = item.applied_tier_label === 'wholesale'
+
+                    // Use applied_price (tier-resolved) as the displayed price.
+                    // Falls back to final_price (sale discount only) then base price
+                    // to guard against the optimistic stub case where applied_price
+                    // hasn't been backfilled by fetchCart yet.
+                    const displayPrice = item.applied_price || item.final_price || item.price
+
+                    // Show the original base price struck through only when a
+                    // discount is actually reducing the price from retail
+                    const hasDiscount = item.discount !== null && item.discount > 0
+                    const priceIsReduced = displayPrice < item.price
 
                     return (
                         <div
@@ -98,6 +112,8 @@ const OrderSummary = ({ cartItems }: Props) => {
                                         <X size={16} />
                                     </button>
                                 </div>
+
+                                {/* Variant attributes e.g. Flavor: Coke - Size: 500ml */}
                                 {item.attributes && item.attributes.length > 0 && (
                                     <p className="text-xs sm:text-sm text-gray-500 mt-1">
                                         {item.attributes
@@ -105,19 +121,30 @@ const OrderSummary = ({ cartItems }: Props) => {
                                             .join(' - ')}
                                     </p>
                                 )}
-                                {/* Price */}
+
+                                {/* Price — shows applied_price (tier-resolved) as the main price.
+                                    Strikes through the base price when any discount is active
+                                    (either a product-level sale discount or wholesale tier). */}
                                 <div className="flex items-center gap-2 flex-wrap mt-2">
                                     <p className="text-base sm:text-lg font-bold text-[#900036]">
-                                        ${item.final_price}
+                                        ${displayPrice.toFixed(2)}
                                     </p>
-                                    {item.discount && (
+                                    {priceIsReduced && (
                                         <>
                                             <p className="text-xs text-gray-400 line-through">
-                                                {item.price}
+                                                ${item.price.toFixed(2)}
                                             </p>
-                                            <p className="text-xs bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">
-                                                -{item.discount}%
-                                            </p>
+                                            {isWholesale ? (
+                                                // Show the wholesale discount percent from the matched tier
+                                                <p className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                                    -{item.pricing_tiers.find(t => t.label === 'wholesale')?.discount_percent}% wholesale discount
+                                                </p>
+                                            ) : hasDiscount && (
+                                                // Show the product-level sale discount percent
+                                                <p className="text-xs bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">
+                                                    -{item.discount}%
+                                                </p>
+                                            )}
                                         </>
                                     )}
                                 </div>
@@ -154,8 +181,10 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     )}
                                 </div>
 
-                                {/* Wholesale badge */}
-                                {item.wholesale && (
+                                {/* Wholesale badge — shown when applied_tier_label is 'wholesale',
+                                    meaning the current quantity meets the wholesale threshold.
+                                    Replaces the old item.wholesale boolean check. */}
+                                {isWholesale && (
                                     <div className="flex items-center gap-1.5 bg-[#EAF7F1] text-[#0F5132] px-2 py-1.5 rounded-md mt-3 text-xs">
                                         <CircleCheckBig size={14} className="shrink-0" />
                                         <p>Wholesale pricing applied!</p>

@@ -208,6 +208,7 @@ export const useCartStore = create<CartState>((set, get) => {
           headers: { "Content-Type": "application/json" },
         })
         if (!res.ok) throw new Error("Update failed")
+          await get().fetchCart()
       } catch (err) {
         rollback(prev, err)
       }

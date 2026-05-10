@@ -142,3 +142,34 @@ export const getUserAddress = async (): Promise<Address[]> => {
     profile: Array.isArray(a.profile) ? a.profile[0] ?? null : a.profile,
   })) as Address[];
 };
+
+
+
+// ADMIN SIDE
+
+export const getUsers = async () => {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("profile")
+    .select(`
+      user_id,
+      first_name,
+      last_name,
+      email,
+      phone_text,
+      sex,
+      age,
+      role,
+      profile_url,
+      created_at,
+      profile_pts (
+        total_pts
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return data;
+};

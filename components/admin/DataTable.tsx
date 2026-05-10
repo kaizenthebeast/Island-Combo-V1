@@ -6,7 +6,8 @@ import React, { useState, useMemo } from 'react'
 // Core props:
 //   data          — array of row objects (any shape)
 //   columns       — column definitions (what to show and how to render each cell)
-//   onDelete      — if provided, a "Delete" button appears on row hover
+//   onDelete      — if provided, a "Delete" button appears in the Actions column
+//   onEdit        — if provided, an "Edit" button appears in the Actions column
 //
 // Optional toolbar props:
 //   searchKeys       — which object keys to search across
@@ -46,6 +47,7 @@ import React, { useState, useMemo } from 'react'
 //     filterKey="category"
 //     filterOptions={['All', 'Electronics', 'Furniture']}
 //     defaultSortKey="name"
+//     onEdit={(row) => handleEdit(row.id)}
 //     onDelete={(row) => handleDelete(row.id)}
 //   />
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -84,7 +86,9 @@ interface DataTableProps<T extends Record<string, unknown>> {
   defaultSortDir?: 'asc' | 'desc'
 
   // ── Actions ──
-  /** Renders a Delete button on row hover. Receives the full row object. */
+  /** Renders an Edit button in the Actions column. Receives the full row object. */
+  onEdit?: (row: T) => void
+  /** Renders a Delete button in the Actions column. Receives the full row object. */
   onDelete?: (row: T) => void
 
   // ── Footer slot (rendered in the bottom bar) ──
@@ -110,6 +114,12 @@ const SearchIcon = () => (
 const TrashIcon = () => (
   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+)
+
+const EditIcon = () => (
+  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 3.487a2.25 2.25 0 113.182 3.182L7.5 19.213l-4.5 1 1-4.5L16.862 3.487z" />
   </svg>
 )
 
@@ -142,6 +152,7 @@ export function DataTable<T extends Record<string, unknown>>({
   filterOptions = [],
   defaultSortKey,
   defaultSortDir = 'asc',
+  onEdit,
   onDelete,
   footer,
   className = '',
@@ -158,6 +169,8 @@ export function DataTable<T extends Record<string, unknown>>({
   const [expandedRowId, setExpandedRowId] = useState<string | number | null>(null)
 
   const effectiveSearchKeys = searchKeys ?? columns.map(c => c.key)
+
+  const hasActions = Boolean(onEdit || onDelete)
 
   const handleSort = (key: keyof T) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
@@ -247,8 +260,8 @@ export function DataTable<T extends Record<string, unknown>>({
                 </th>
               ))}
 
-              {onDelete && (
-                <th className="px-5 py-3 text-right text-xs">Action</th>
+              {hasActions && (
+                <th className="px-5 py-3 text-right text-xs">Actions</th>
               )}
             </tr>
           </thead>
@@ -272,7 +285,7 @@ export function DataTable<T extends Record<string, unknown>>({
                           prev === rowId ? null : rowId
                         )
                       }}
-                      className={`border-b  text-center hover:bg-slate-50 ${expandedRowRender ? 'cursor-pointer' : ''
+                      className={`border-b text-center hover:bg-slate-50 ${expandedRowRender ? 'cursor-pointer' : ''
                         }`}
                     >
                       {columns.map(col => (
@@ -283,17 +296,34 @@ export function DataTable<T extends Record<string, unknown>>({
                         </td>
                       ))}
 
-                      {onDelete && (
+                      {hasActions && (
                         <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onDelete(row)
-                            }}
-                            className="text-red-500 text-xs"
-                          >
-                            <TrashIcon />
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            {onEdit && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  onEdit(row)
+                                }}
+                                className="text-blue-500 text-xs hover:text-blue-700 transition-colors"
+                                title="Edit"
+                              >
+                                <EditIcon />
+                              </button>
+                            )}
+                            {onDelete && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  onDelete(row)
+                                }}
+                                className="text-red-500 text-xs hover:text-red-700 transition-colors"
+                                title="Delete"
+                              >
+                                <TrashIcon />
+                              </button>
+                            )}
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -302,7 +332,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     {isExpanded && expandedRowRender && (
                       <tr className="bg-slate-50">
                         <td
-                          colSpan={columns.length + (onDelete ? 1 : 0)}
+                          colSpan={columns.length + (hasActions ? 1 : 0)}
                           className="px-5 py-4"
                         >
                           {expandedRowRender(row)}

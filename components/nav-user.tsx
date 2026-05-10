@@ -45,13 +45,13 @@ export function NavUser({
   const logout = async () => {
     const supabase = createClient();
     try {
-      sessionStorage.setItem("logging_out", "true"); // suppress AnonAuthProvider
+      sessionStorage.setItem("logging_out", "true"); 
       await supabase.auth.signOut();
       router.push("/auth/login");
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
-      sessionStorage.removeItem("logging_out"); // always clean up
+      sessionStorage.removeItem("logging_out");
     }
   };
 
@@ -65,7 +65,6 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">

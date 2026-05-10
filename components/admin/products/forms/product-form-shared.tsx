@@ -1,87 +1,123 @@
 'use client'
 
-import { addAdminProduct } from '@/lib/product'
-import { getAllSubCategories } from '@/lib/product'
-import { uploadVariantImages } from '@/lib/product-upload'
-import { addProductSchema, AddProductFormValues } from '@/form-schema/addProductSchema'
-import { cn } from '@/lib/utils'
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { useForm, useFieldArray, FormProvider, useFormContext } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useFormContext, useFieldArray } from 'react-hook-form'
+import { cn } from '@/lib/utils'
 
-// ─── Types ──────────────────────────────────────────────────────────────────────
-type Category = {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type Category = {
   category_id: number
   name: string
 }
 
-// ─── Icons ──────────────────────────────────────────────────────────────────────
-const PlusIcon = () => (
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+export const PlusIcon = () => (
   <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
     <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
   </svg>
 )
 
-const TrashIcon = () => (
+export const TrashIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
   </svg>
 )
 
-const ChevronRight = () => (
+export const ChevronRight = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="9 18 15 12 9 6" />
   </svg>
 )
 
-const ChevronLeft = () => (
+export const ChevronLeft = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 18 9 12 15 6" />
   </svg>
 )
 
-const CheckIcon = () => (
+export const CheckIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
   </svg>
 )
 
-const StarIcon = ({ filled }: { filled: boolean }) => (
+export const StarIcon = ({ filled }: { filled: boolean }) => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
   </svg>
 )
 
-const AlertIcon = () => (
+export const AlertIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 )
 
-const UploadIcon = () => (
+export const UploadIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="16 16 12 12 8 16" /><line x1="12" y1="12" x2="12" y2="21" />
     <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" />
   </svg>
 )
 
-const XIcon = () => (
+export const XIcon = () => (
   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 )
 
-const TagIcon = () => (
+export const TagIcon = () => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
     <line x1="7" y1="7" x2="7.01" y2="7" />
   </svg>
 )
 
-// ─── Base UI ─────────────────────────────────────────────────────────────────────
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+export const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+export const SIZE_OPTIONS = [
+  'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL',
+  '28', '29', '30', '31', '32', '33', '34', '36', '38', '40', '42',
+  '2L', '1L', '500ml', '300ml',
+]
+
+export const FLAVOR_OPTIONS = ['Lime', 'Orange', 'Coke', 'Lemon', 'Strawberry', 'Mango', 'Watermelon']
+
+export const COLOR_OPTIONS = [
+  'Black', 'White', 'Red', 'Blue', 'Green', 'Yellow',
+  'Pink', 'Purple', 'Gray', 'Navy', 'Beige', 'Brown', 'Orange',
+]
+
+export const PREDEFINED_ATTRIBUTE_TYPES: { name: string; options?: string[] }[] = [
+  { name: 'Size', options: SIZE_OPTIONS },
+  { name: 'Color', options: COLOR_OPTIONS },
+  { name: 'Flavor', options: FLAVOR_OPTIONS },
+  { name: 'Material' },
+  { name: 'Weight' },
+  { name: 'Style' },
+]
+
+// ─── makeBlankVariant ─────────────────────────────────────────────────────────
+
+export const makeBlankVariant = (attributeTypes: string[]) => ({
+  price: undefined as unknown as number,
+  stock: undefined as unknown as number,
+  is_active: true,
+  attributes: attributeTypes.map(name => ({ attribute_name: name, attribute_value: '' })),
+  images: [] as any[],
+  pricing_tiers: [] as any[],
+})
+
+// ─── Base UI ──────────────────────────────────────────────────────────────────
+
 const FieldErrorCtx = React.createContext(false)
 
-function Field({
+export function Field({
   label, error, children, required, hint, className,
 }: {
   label: string
@@ -123,17 +159,23 @@ const inputBase = [
 
 const inputError = 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
 
-function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   const hasError = React.useContext(FieldErrorCtx)
   return <input className={cn(inputBase, hasError && inputError, className)} {...props} />
 }
 
-function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const hasError = React.useContext(FieldErrorCtx)
-  return <textarea rows={3} className={cn(inputBase, 'resize-none', hasError && inputError, className)} {...props} />
+  return (
+    <textarea
+      rows={3}
+      className={cn(inputBase, 'resize-none', hasError && inputError, className)}
+      {...props}
+    />
+  )
 }
 
-function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
   const hasError = React.useContext(FieldErrorCtx)
   return (
     <select className={cn(inputBase, 'cursor-pointer', hasError && inputError, className)} {...props}>
@@ -142,7 +184,9 @@ function Select({ className, children, ...props }: React.SelectHTMLAttributes<HT
   )
 }
 
-function Toggle({ checked, onChange, label, description }: {
+export function Toggle({
+  checked, onChange, label, description,
+}: {
   checked: boolean
   onChange: (v: boolean) => void
   label: string
@@ -167,7 +211,7 @@ function Toggle({ checked, onChange, label, description }: {
   )
 }
 
-function SectionDivider({ label }: { label: string }) {
+export function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 my-1">
       <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-300 whitespace-nowrap">{label}</span>
@@ -176,48 +220,10 @@ function SectionDivider({ label }: { label: string }) {
   )
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────────
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+// ─── PricingTiersSection ──────────────────────────────────────────────────────
 
-const SIZE_OPTIONS = [
-  'XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL',
-  '28', '29', '30', '31', '32', '33', '34', '36', '38', '40', '42',
-  '2L', '1L', '500ml', '300ml',
-]
-
-const FLAVOR_OPTIONS = ['Lime', 'Orange', 'Coke', 'Lemon', 'Strawberry', 'Mango', 'Watermelon']
-
-const COLOR_OPTIONS = [
-  'Black', 'White', 'Red', 'Blue', 'Green', 'Yellow',
-  'Pink', 'Purple', 'Gray', 'Navy', 'Beige', 'Brown', 'Orange',
-]
-
-const PREDEFINED_ATTRIBUTE_TYPES: { name: string; options?: string[] }[] = [
-  { name: 'Size', options: SIZE_OPTIONS },
-  { name: 'Color', options: COLOR_OPTIONS },
-  { name: 'Flavor', options: FLAVOR_OPTIONS },
-  { name: 'Material' },
-  { name: 'Weight' },
-  { name: 'Style' },
-]
-
-
-// ─── BLANK_VARIANT ────────────────────────────────────────────────────────────────
-const makeBlankVariant = (attributeTypes: string[]) => ({
-  price: undefined as unknown as number,
-  stock: undefined as unknown as number,
-  is_active: true,
-  attributes: attributeTypes.map(name => ({ attribute_name: name, attribute_value: '' })),
-  images: [],
-  pricing_tiers: [],
-})
-
-// ─── Pricing Tiers Section ────────────────────────────────────────────────────────
-// Each tier has a label, min_quantity, and discount_percent.
-// Validation: unique labels, unique min_quantities, no leading zeros.
-function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
-  const { control, register, formState: { errors } } = useFormContext<AddProductFormValues>()
+export function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
+  const { control, register, formState: { errors } } = useFormContext<any>()
   const { fields, append, remove } = useFieldArray({
     control,
     name: `variants.${variantIndex}.pricing_tiers`,
@@ -242,38 +248,28 @@ function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
             value="wholesale"
           />
 
-          {/* Min quantity */}
           <Field label="" error={tierErrors?.[idx]?.min_quantity?.message}>
             <Input
               {...register(`variants.${variantIndex}.pricing_tiers.${idx}.min_quantity`, {
-                setValueAs: v => v === '' ? undefined : parseInt(v, 10),
+                setValueAs: (v) => v === '' ? undefined : parseInt(v, 10),
               })}
-              type="number"
-              min={1}
-              step={1}
-              placeholder="e.g. 10"
+              type="number" min={1} step={1} placeholder="e.g. 10"
             />
           </Field>
 
-          {/* Discount percent */}
           <Field label="" error={tierErrors?.[idx]?.discount_percent?.message}>
             <div className="relative">
               <Input
                 {...register(`variants.${variantIndex}.pricing_tiers.${idx}.discount_percent`, {
-                  setValueAs: v => v === '' ? undefined : parseFloat(v),
+                  setValueAs: (v) => v === '' ? undefined : parseFloat(v),
                 })}
-                type="number"
-                min={0}
-                max={100}
-                step={0.01}
-                placeholder="e.g. 20"
+                type="number" min={0} max={100} step={0.01} placeholder="e.g. 20"
                 className="pr-7"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 pointer-events-none select-none">%</span>
             </div>
           </Field>
 
-          {/* Remove row */}
           <button
             type="button"
             onClick={() => remove(idx)}
@@ -295,7 +291,6 @@ function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
         </p>
       )}
 
-      {/* Only allow one wholesale tier per variant */}
       {fields.length === 0 && (
         <button
           type="button"
@@ -313,9 +308,10 @@ function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
   )
 }
 
-// ─── Image Upload Zone ────────────────────────────────────────────────────────────
-function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
-  const { control, setValue, watch } = useFormContext<AddProductFormValues>()
+// ─── ImageUploadZone ──────────────────────────────────────────────────────────
+
+export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
+  const { control, setValue, watch } = useFormContext<any>()
   const { fields, append, remove } = useFieldArray({
     control,
     name: `variants.${variantIndex}.images`,
@@ -344,11 +340,12 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
           preview: URL.createObjectURL(file),
           is_primary: currentCount === 0 && i === 0,
           sort_order: currentCount + i,
+          // url is absent for new uploads — only present for existing images
         })
       })
 
       if (rejected.length > 0) {
-        setRejectedFiles(rejected.map(r => `${r.name} — ${r.reason}`))
+        setRejectedFiles(rejected.map((r) => `${r.name} — ${r.reason}`))
         setTimeout(() => setRejectedFiles([]), 4000)
       }
     },
@@ -370,13 +367,15 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
   return (
     <div className="flex flex-col gap-2.5">
       <div
-        onDragOver={e => { e.preventDefault(); setDragging(true) }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={cn(
           'flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-6 cursor-pointer transition-all duration-150',
-          dragging ? 'border-slate-400 bg-slate-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60',
+          dragging
+            ? 'border-slate-400 bg-slate-50'
+            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60',
         )}
       >
         <div className="text-slate-300"><UploadIcon /></div>
@@ -392,7 +391,7 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
           accept="image/jpeg,image/png,image/webp,image/gif"
           multiple
           className="hidden"
-          onChange={e => { addFiles(e.target.files); e.target.value = '' }}
+          onChange={(e) => { addFiles(e.target.files); e.target.value = '' }}
         />
       </div>
 
@@ -408,6 +407,9 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
           {fields.map((field, idx) => {
             const img = watch(`variants.${variantIndex}.images.${idx}`)
             const isPrimary = img?.is_primary
+            // Existing image: has a url (Storage path) and no File object
+            const isExisting = !img?.file && !!img?.url
+
             return (
               <div
                 key={field.id}
@@ -417,11 +419,22 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img?.preview} alt="" className="w-full h-full object-cover" />
+                <img
+                  src={img?.preview}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
 
                 {isPrimary && (
                   <div className="absolute top-1 left-1 bg-slate-800 text-white text-[8px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
                     Cover
+                  </div>
+                )}
+
+                {/* Badge for existing Storage images — visually distinct from new uploads */}
+                {isExisting && !isPrimary && (
+                  <div className="absolute top-1 left-1 bg-blue-600 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
+                    Saved
                   </div>
                 )}
 
@@ -462,11 +475,10 @@ function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
   )
 }
 
-// ─── Attribute Type Selector ──────────────────────────────────────────────────────
-function AttributeTypeSelector({
-  selected,
-  onAdd,
-  onRemove,
+// ─── AttributeTypeSelector ────────────────────────────────────────────────────
+
+export function AttributeTypeSelector({
+  selected, onAdd, onRemove,
 }: {
   selected: string[]
   onAdd: (name: string) => void
@@ -501,7 +513,7 @@ function AttributeTypeSelector({
 
       <div className="px-4 py-3 flex flex-col gap-3">
         <div className="flex flex-wrap gap-1.5">
-          {PREDEFINED_ATTRIBUTE_TYPES.map(attr => {
+          {PREDEFINED_ATTRIBUTE_TYPES.map((attr) => {
             const isSelected = selected.includes(attr.name)
             return (
               <button
@@ -522,8 +534,8 @@ function AttributeTypeSelector({
           })}
 
           {selected
-            .filter(s => !PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === s))
-            .map(name => (
+            .filter((s) => !PREDEFINED_ATTRIBUTE_TYPES.find((p) => p.name === s))
+            .map((name) => (
               <span
                 key={name}
                 className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border bg-slate-800 border-slate-800 text-white"
@@ -544,8 +556,8 @@ function AttributeTypeSelector({
               <input
                 ref={customInputRef}
                 value={customValue}
-                onChange={e => setCustomValue(e.target.value)}
-                onKeyDown={e => {
+                onChange={(e) => setCustomValue(e.target.value)}
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') { e.preventDefault(); handleAddCustom() }
                   if (e.key === 'Escape') { setShowCustom(false); setCustomValue('') }
                 }}
@@ -595,36 +607,48 @@ function AttributeTypeSelector({
   )
 }
 
-// ─── Variant Card ─────────────────────────────────────────────────────────────────
-function VariantCard({
-  index,
-  onRemove,
-  isOnly,
-  attributeTypes,
+// ─── VariantCard ──────────────────────────────────────────────────────────────
+
+export function VariantCard({
+  index, onRemove, isOnly, attributeTypes, showVariantBadge = false,
 }: {
   index: number
   onRemove: () => void
   isOnly: boolean
   attributeTypes: string[]
+  // showVariantBadge: true in EditProductForm to show Existing/New chip
+  showVariantBadge?: boolean
 }) {
-  const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<AddProductFormValues>()
+  const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<any>()
   const variantErrors = errors.variants?.[index]
 
   const attributes: { attribute_name: string; attribute_value: string }[] =
     watch(`variants.${index}.attributes`) ?? []
 
-  const filledValues = attributes
-    .filter(a => a.attribute_value)
-    .map(a => a.attribute_value)
+  const filledValues = attributes.filter((a) => a.attribute_value).map((a) => a.attribute_value)
   const variantLabel = filledValues.length > 0 ? filledValues.join(' / ') : `Variant ${index + 1}`
+
+  // variant_id present = existing variant being updated, absent = newly added
+  const isExistingVariant = !!(watch(`variants.${index}`) as any)?.variant_id
 
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50/40 overflow-hidden">
-      {/* Card header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-white">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-300">#{index + 1}</span>
           <span className="text-[12px] font-semibold text-slate-600 truncate max-w-[160px]">{variantLabel}</span>
+          {/* Only shown in edit context — indicates UPDATE vs INSERT to admin */}
+          {showVariantBadge && (
+            isExistingVariant ? (
+              <span className="text-[9px] font-semibold uppercase tracking-wide bg-blue-50 text-blue-500 border border-blue-100 px-1.5 py-0.5 rounded-full">
+                Existing
+              </span>
+            ) : (
+              <span className="text-[9px] font-semibold uppercase tracking-wide bg-green-50 text-green-500 border border-green-100 px-1.5 py-0.5 rounded-full">
+                New
+              </span>
+            )
+          )}
         </div>
         {!isOnly && (
           <button
@@ -638,24 +662,22 @@ function VariantCard({
       </div>
 
       <div className="p-4 flex flex-col gap-4">
-        {/* Price + Stock */}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Price" required error={variantErrors?.price?.message}>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 pointer-events-none font-medium select-none">₱</span>
               <Input
                 {...register(`variants.${index}.price`, {
-                  setValueAs: v => v === '' ? undefined : parseFloat(v),
+                  setValueAs: (v) => v === '' ? undefined : parseFloat(v),
                 })}
-                type="number" min={0} step={0.01} placeholder="0.00"
-                className="pl-7"
+                type="number" min={0} step={0.01} placeholder="0.00" className="pl-7"
               />
             </div>
           </Field>
           <Field label="Stock" error={variantErrors?.stock?.message}>
             <Input
               {...register(`variants.${index}.stock`, {
-                setValueAs: v => v === '' ? undefined : parseInt(v, 10),
+                setValueAs: (v) => v === '' ? undefined : parseInt(v, 10),
               })}
               type="number" min={0} step={1} placeholder="0"
             />
@@ -664,22 +686,21 @@ function VariantCard({
 
         <Toggle
           checked={watch(`variants.${index}.is_active`) ?? true}
-          onChange={v => setValue(`variants.${index}.is_active`, v)}
+          onChange={(v) => setValue(`variants.${index}.is_active`, v)}
           label="Active"
           description="Make this variant available for purchase"
         />
 
-        {/* Dynamic Attributes */}
         {attributeTypes.length > 0 && (
           <div className="flex flex-col gap-3">
             <SectionDivider label="Attributes" />
             {attributeTypes.map((attrName) => {
               const attrs: { attribute_name: string; attribute_value: string }[] =
                 getValues(`variants.${index}.attributes`) ?? []
-              const attrIdx = attrs.findIndex(a => a.attribute_name === attrName)
+              const attrIdx = attrs.findIndex((a) => a.attribute_name === attrName)
               if (attrIdx === -1) return null
 
-              const predefined = PREDEFINED_ATTRIBUTE_TYPES.find(p => p.name === attrName)
+              const predefined = PREDEFINED_ATTRIBUTE_TYPES.find((p) => p.name === attrName)
               const hasOptions = predefined?.options && predefined.options.length > 0
               const fieldError = (variantErrors?.attributes as any)?.[attrIdx]?.attribute_value?.message
 
@@ -688,20 +709,20 @@ function VariantCard({
                   {hasOptions ? (
                     <Select
                       {...register(`variants.${index}.attributes.${attrIdx}.attribute_value`)}
-                      onChange={e => {
+                      onChange={(e) => {
                         setValue(`variants.${index}.attributes.${attrIdx}.attribute_name`, attrName)
                         setValue(`variants.${index}.attributes.${attrIdx}.attribute_value`, e.target.value)
                       }}
                     >
                       <option value="">Select {attrName.toLowerCase()}…</option>
-                      {predefined!.options!.map(opt => (
+                      {predefined!.options!.map((opt) => (
                         <option key={opt} value={opt}>{opt}</option>
                       ))}
                     </Select>
                   ) : (
                     <Input
                       {...register(`variants.${index}.attributes.${attrIdx}.attribute_value`)}
-                      onChange={e => {
+                      onChange={(e) => {
                         setValue(`variants.${index}.attributes.${attrIdx}.attribute_name`, attrName)
                         setValue(`variants.${index}.attributes.${attrIdx}.attribute_value`, e.target.value)
                       }}
@@ -714,7 +735,6 @@ function VariantCard({
           </div>
         )}
 
-        {/* Pricing Tiers */}
         <div className="flex flex-col gap-2">
           <SectionDivider label="Wholesale pricing" />
           <p className="text-[11px] text-slate-400 leading-relaxed">
@@ -725,7 +745,6 @@ function VariantCard({
           <PricingTiersSection variantIndex={index} />
         </div>
 
-        {/* Images */}
         <div className="flex flex-col gap-2">
           <SectionDivider label="Images" />
           <ImageUploadZone variantIndex={index} />
@@ -735,14 +754,15 @@ function VariantCard({
   )
 }
 
-// ─── Step Indicator ───────────────────────────────────────────────────────────────
-const STEPS = [
+// ─── StepIndicator ────────────────────────────────────────────────────────────
+
+export const STEPS = [
   { label: 'Basic info', description: 'Name, category, pricing' },
   { label: 'Variants', description: 'Stock, attributes, images' },
   { label: 'Details', description: 'Extra attributes' },
 ]
 
-function StepIndicator({ current }: { current: number }) {
+export function StepIndicator({ current }: { current: number }) {
   return (
     <div className="flex items-start gap-0 mb-6">
       {STEPS.map((step, i) => (
@@ -785,13 +805,34 @@ function StepIndicator({ current }: { current: number }) {
   )
 }
 
-// ─── Step 1: Basic Info ───────────────────────────────────────────────────────────
-function Step1BasicInfo({ categories }: { categories: Category[] }) {
-  const { register, setValue, watch, formState: { errors } } = useFormContext<AddProductFormValues>()
+// ─── StepErrorBanner ──────────────────────────────────────────────────────────
+
+export function StepErrorBanner({ errorCount }: { errorCount: number }) {
+  if (errorCount === 0) return null
+  return (
+    <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+      <span className="text-rose-500 shrink-0"><AlertIcon /></span>
+      <p className="text-[12px] text-rose-700 font-medium leading-snug">
+        {errorCount === 1
+          ? '1 field needs attention before continuing.'
+          : `${errorCount} fields need attention before continuing.`}
+      </p>
+    </div>
+  )
+}
+
+// ─── Step1BasicInfo ───────────────────────────────────────────────────────────
+
+export function Step1BasicInfo({ categories }: { categories: Category[] }) {
+  const { register, setValue, watch, formState: { errors } } = useFormContext<any>()
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     register('name').onChange(e)
-    setValue('slug', e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), { shouldValidate: true })
+    setValue(
+      'slug',
+      e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+      { shouldValidate: true },
+    )
   }
 
   return (
@@ -826,7 +867,9 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
           <Field label="Category" required error={errors.category_id?.message}>
             <Select {...register('category_id', { valueAsNumber: true })}>
               <option value="">Select…</option>
-              {categories.map(c => <option key={c.category_id} value={c.category_id}>{c.name}</option>)}
+              {categories.map((c) => (
+                <option key={c.category_id} value={c.category_id}>{c.name}</option>
+              ))}
             </Select>
           </Field>
 
@@ -842,7 +885,7 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
         <Field label="Discount" error={errors.discount?.message} hint="Leave blank for no discount" className="max-w-[180px]">
           <div className="relative">
             <Input
-              {...register('discount', { setValueAs: v => v === '' ? null : parseFloat(v) })}
+              {...register('discount', { setValueAs: (v) => v === '' ? null : parseFloat(v) })}
               type="number" min={0} max={100} step={0.01} placeholder="0"
               className="pr-8"
             />
@@ -853,10 +896,9 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
 
       <div className="h-px bg-slate-100" />
 
-      {/* Only is_active toggle remains — wholesale toggle removed */}
       <Toggle
         checked={watch('is_active') ?? true}
-        onChange={v => setValue('is_active', v)}
+        onChange={(v) => setValue('is_active', v)}
         label="Active — visible in store"
         description="Customers will be able to find and purchase this product"
       />
@@ -864,15 +906,27 @@ function Step1BasicInfo({ categories }: { categories: Category[] }) {
   )
 }
 
-// ─── Step 2: Variants ─────────────────────────────────────────────────────────────
-function Step2Variants() {
-  const { control, getValues, setValue, formState: { errors } } = useFormContext<AddProductFormValues>()
+// ─── Step2Variants ────────────────────────────────────────────────────────────
+
+export function Step2Variants({ showVariantBadge = false }: { showVariantBadge?: boolean }) {
+  const { control, getValues, setValue, formState: { errors } } = useFormContext<any>()
   const { fields, append, remove } = useFieldArray({ control, name: 'variants' })
   const [attributeTypes, setAttributeTypes] = useState<string[]>([])
 
+  useEffect(() => {
+    const existingVariants: any[] = getValues('variants') ?? []
+    if (existingVariants.length > 0) {
+      const names = (existingVariants[0].attributes ?? [])
+        .map((a: any) => a.attribute_name)
+        .filter(Boolean)
+      if (names.length > 0) setAttributeTypes(names)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleAddAttributeType = (name: string) => {
     if (attributeTypes.includes(name)) return
-    setAttributeTypes(prev => [...prev, name])
+    setAttributeTypes((prev) => [...prev, name])
     fields.forEach((_, i) => {
       const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
       setValue(`variants.${i}.attributes`, [
@@ -883,15 +937,11 @@ function Step2Variants() {
   }
 
   const handleRemoveAttributeType = (name: string) => {
-    setAttributeTypes(prev => prev.filter(t => t !== name))
+    setAttributeTypes((prev) => prev.filter((t) => t !== name))
     fields.forEach((_, i) => {
       const currentAttrs: any[] = getValues(`variants.${i}.attributes`) ?? []
       setValue(`variants.${i}.attributes`, currentAttrs.filter((a: any) => a.attribute_name !== name))
     })
-  }
-
-  const handleAppendVariant = () => {
-    append(makeBlankVariant(attributeTypes))
   }
 
   return (
@@ -905,7 +955,7 @@ function Step2Variants() {
       {errors.variants?.root && (
         <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
           <span className="text-rose-500"><AlertIcon /></span>
-          <p className="text-[12px] text-rose-700 font-medium">{errors.variants.root.message}</p>
+          <p className="text-[12px] text-rose-700 font-medium">{(errors.variants.root as any).message}</p>
         </div>
       )}
 
@@ -916,12 +966,13 @@ function Step2Variants() {
           isOnly={fields.length === 1}
           onRemove={() => remove(idx)}
           attributeTypes={attributeTypes}
+          showVariantBadge={showVariantBadge}
         />
       ))}
 
       <button
         type="button"
-        onClick={handleAppendVariant}
+        onClick={() => append(makeBlankVariant(attributeTypes))}
         className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 py-3 text-[12px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all"
       >
         <PlusIcon /> Add variant
@@ -930,10 +981,14 @@ function Step2Variants() {
   )
 }
 
-// ─── Step 3: Details ──────────────────────────────────────────────────────────────
-function Step3Details() {
-  const { register, control, formState: { errors } } = useFormContext<AddProductFormValues>()
-  const { fields, append, remove } = useFieldArray({ control, name: 'details' })
+// ─── Step3Details ─────────────────────────────────────────────────────────────
+// Supports both `details` (AddProductForm) and `product_details` (EditProductForm)
+// by reading whichever key is present in the form.
+
+export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' | 'product_details' }) {
+  const { register, control, formState: { errors } } = useFormContext<any>()
+  const { fields, append, remove } = useFieldArray({ control, name: fieldName })
+  const fieldErrors = (errors as any)[fieldName]
 
   return (
     <div className="flex flex-col gap-4">
@@ -964,14 +1019,14 @@ function Step3Details() {
 
           {fields.map((field, idx) => (
             <div key={field.id} className="grid grid-cols-[1fr_1fr_80px_32px] gap-2 items-start">
-              <Field label="" error={errors.details?.[idx]?.attribute_name?.message}>
-                <Input {...register(`details.${idx}.attribute_name`)} placeholder="Material" />
+              <Field label="" error={fieldErrors?.[idx]?.attribute_name?.message}>
+                <Input {...register(`${fieldName}.${idx}.attribute_name`)} placeholder="Material" />
               </Field>
-              <Field label="" error={errors.details?.[idx]?.attribute_value?.message}>
-                <Input {...register(`details.${idx}.attribute_value`)} placeholder="100% Cotton" />
+              <Field label="" error={fieldErrors?.[idx]?.attribute_value?.message}>
+                <Input {...register(`${fieldName}.${idx}.attribute_value`)} placeholder="100% Cotton" />
               </Field>
               <Input
-                {...register(`details.${idx}.sort_order`, { valueAsNumber: true })}
+                {...register(`${fieldName}.${idx}.sort_order`, { valueAsNumber: true })}
                 type="number" min={0} placeholder="0"
               />
               <button
@@ -996,168 +1051,3 @@ function Step3Details() {
     </div>
   )
 }
-
-// ─── Step Error Banner ────────────────────────────────────────────────────────────
-function StepErrorBanner({ errorCount }: { errorCount: number }) {
-  if (errorCount === 0) return null
-  return (
-    <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4 animate-in fade-in slide-in-from-top-1 duration-200">
-      <span className="text-rose-500 shrink-0"><AlertIcon /></span>
-      <p className="text-[12px] text-rose-700 font-medium leading-snug">
-        {errorCount === 1 ? '1 field needs attention before continuing.' : `${errorCount} fields need attention before continuing.`}
-      </p>
-    </div>
-  )
-}
-
-// ─── Main Form ────────────────────────────────────────────────────────────────────
-interface AddProductFormProps {
-  onSuccess?: (data: AddProductFormValues) => void
-  onCancel?: () => void
-}
-
-const STEP_FIELDS: (keyof AddProductFormValues)[][] = [
-  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
-  ['variants'],
-  ['details'],
-]
-
-export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => {
-  const [step, setStep] = useState(0)
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loadingCategories, setLoadingCategories] = useState(true)
-  const [categoryError, setCategoryError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-  const [stepErrorCount, setStepErrorCount] = useState(0)
-
-  useEffect(() => {
-    getAllSubCategories()
-      .then(data => setCategories(data ?? []))
-      .catch(err => setCategoryError(err.message))
-      .finally(() => setLoadingCategories(false))
-  }, [])
-
-  const methods = useForm<AddProductFormValues>({
-    resolver: zodResolver(addProductSchema),
-    defaultValues: {
-      name: '',
-      slug: '',
-      description: '',
-      is_active: true,
-      discount: null,
-      type: '',
-      variants: [makeBlankVariant([])],
-      details: [],
-    },
-    mode: 'onTouched',
-  })
-
-  const { trigger, formState: { errors } } = methods
-
-  useEffect(() => {
-    const count = STEP_FIELDS[step].filter(k => !!errors[k]).length
-    setStepErrorCount(count)
-  }, [errors, step])
-
-  const goNext = async () => {
-    const valid = await trigger(STEP_FIELDS[step] as any)
-    if (valid) {
-      setStep(s => s + 1)
-      setStepErrorCount(0)
-    }
-  }
-
-  const goBack = () => {
-    setStep(s => s - 1)
-    setStepErrorCount(0)
-    setSaveError(null)
-  }
-
-  const handleSave = async () => {
-    setSaving(true)
-    setSaveError(null)
-    try {
-      const data = methods.getValues()
-      const variantsWithPaths = await uploadVariantImages(data.variants)
-      await addAdminProduct({ ...data, variants: variantsWithPaths })
-      onSuccess?.(data)
-    } catch (err: any) {
-      setSaveError(err.message ?? 'Something went wrong. Please try again.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <FormProvider {...methods}>
-      <form className="flex flex-col" noValidate>
-        <StepIndicator current={step} />
-
-        <StepErrorBanner errorCount={stepErrorCount} />
-
-        {saveError && (
-          <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4">
-            <span className="text-rose-500 shrink-0"><AlertIcon /></span>
-            <p className="text-[12px] text-rose-700 font-medium">{saveError}</p>
-          </div>
-        )}
-
-        {categoryError && (
-          <div className="flex items-center gap-2.5 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 mb-4">
-            <span className="text-amber-500 shrink-0"><AlertIcon /></span>
-            <p className="text-[12px] text-amber-700">Could not load categories: {categoryError}</p>
-          </div>
-        )}
-
-        <div className="max-h-[54vh] overflow-y-auto pr-1 -mr-1">
-          {step === 0 && <Step1BasicInfo categories={loadingCategories ? [] : categories} />}
-          {step === 1 && <Step2Variants />}
-          {step === 2 && <Step3Details />}
-        </div>
-
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={step === 0 ? onCancel : goBack}
-            className="flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
-          >
-            {step === 0 ? 'Cancel' : <><ChevronLeft /> Back</>}
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-300 mr-1 select-none">{step + 1} / {STEPS.length}</span>
-
-            {step < STEPS.length - 1 ? (
-              <button
-                type="button"
-                onClick={goNext}
-                className="flex items-center gap-1.5 rounded-md bg-slate-800 px-5 py-2 text-[13px] font-semibold text-white hover:bg-slate-900 active:scale-[0.97] transition-all"
-              >
-                Continue <ChevronRight />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="flex items-center gap-2 rounded-md bg-slate-800 px-5 py-2 text-[13px] font-semibold text-white hover:bg-slate-900 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
-              >
-                {saving ? (
-                  <>
-                    <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Saving…
-                  </>
-                ) : (
-                  <><CheckIcon /> Save product</>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </form>
-    </FormProvider>
-  )
-}
-
-export default AddProductForm
