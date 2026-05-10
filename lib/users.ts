@@ -6,32 +6,25 @@ import { revalidatePath } from "next/cache";
 export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
   const supabase = await createClient();
 
-  const { data, error: userError } = await supabase.auth.getUser();
-  if (userError || !data?.user) {
-    throw new Error(`Error fetching user: ${userError?.message ?? "User not found"}`);
-  }
-
-  const userId = data.user.id;
-  const email = data.user.email;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
   if (addressInfo.makeDefault) {
-    await supabase.from("addresses").update({ make_default: false }).eq("user_id", userId);
+    await supabase.from("addresses").update({ make_default: false }).eq("user_id", user.id);
   }
 
   const { error: profileError } = await supabase.from("profile").upsert({
-    user_id: userId,
-    email: email,
+    user_id: user.id,
+    email: user.email,
     first_name: addressInfo.firstName,
     last_name: addressInfo.lastName,
     phone_text: addressInfo.phone,
-  }).eq("user_id", userId);
+  }).eq("user_id", user.id);
 
-   if (profileError) {
-    return { success: false, error: profileError.message }
-  }
+  if (profileError) return { success: false, status: 403, message: profileError.message };
 
   const { error: addressError } = await supabase.from("addresses").insert({
-    user_id: userId,
+    user_id: user.id,
     address: addressInfo.address,
     postal_code: addressInfo.postalCode,
     locality: addressInfo.locality,
@@ -39,40 +32,31 @@ export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
     make_default: addressInfo.makeDefault,
   });
 
-  if (addressError) {
-    throw new Error(`Error inserting address info: ${addressError.message}`);
-  }
+  if (addressError) return { success: false, status: 403, message: addressError.message };
 
   revalidatePath("/checkout/address");
+  return { success: true, status: 201, message: 'Address successfully added' };
 };
 
 export const updateAddressInfo = async (addressId: number | undefined, addressInfo: AddressFormValues) => {
-  if (!addressId) throw new Error("Address ID is required"); 
+  if (!addressId) return { success: false, status: 400, message: 'Address ID is required' };
 
   const supabase = await createClient();
 
-  const { data, error: userError } = await supabase.auth.getUser();
-  if (userError || !data?.user) {  
-    throw new Error(`Error fetching user: ${userError?.message ?? "User not found"}`);
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
-  const userId = data.user.id;
-
-  // Reset other defaults if this is being set as default
   if (addressInfo.makeDefault) {
-    await supabase.from("addresses").update({ make_default: false }).eq("user_id", userId);
+    await supabase.from("addresses").update({ make_default: false }).eq("user_id", user.id);
   }
 
-  // Update profile too since name/phone may have changed
   const { error: profileError } = await supabase.from("profile").update({
     first_name: addressInfo.firstName,
     last_name: addressInfo.lastName,
     phone_text: addressInfo.phone,
-  }).eq("user_id", userId);
+  }).eq("user_id", user.id);
 
-  if (profileError) {
-    throw new Error(`Error updating profile info: ${profileError.message}`);
-  }
+  if (profileError) return { success: false, status: 403, message: profileError.message };
 
   const { error: updateError } = await supabase
     .from("addresses")
@@ -85,57 +69,45 @@ export const updateAddressInfo = async (addressId: number | undefined, addressIn
       updated_at: new Date().toISOString(),
     })
     .eq("id", addressId)
-    .eq("user_id", userId); 
+    .eq("user_id", user.id);
 
-  if (updateError) {
-    throw new Error(`Error updating address info: ${updateError.message}`);
-  }
+  if (updateError) return { success: false, status: 403, message: updateError.message };
 
   revalidatePath("/checkout/address");
+  return { success: true, status: 200, message: 'Address successfully updated' };
 };
 
 export const deleteAddress = async (addressId: number) => {
   const supabase = await createClient();
 
-  const { data, error: userError } = await supabase.auth.getUser();
-  if (userError || !data?.user) {  
-    throw new Error(`Error fetching user: ${userError?.message ?? "User not found"}`);
-  }
-
-  const userId = data.user.id;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
   const { error: deleteError } = await supabase
     .from("addresses")
     .delete()
     .eq("id", addressId)
-    .eq("user_id", userId);
+    .eq("user_id", user.id);
 
-  if (deleteError) {
-    throw new Error(`Error deleting address: ${deleteError.message}`);
-  }
+  if (deleteError) return { success: false, status: 403, message: deleteError.message };
 
   revalidatePath("/checkout/address");
+  return { success: true, status: 200, message: 'Address successfully deleted' };
 };
 
-export const getUserAddress = async (): Promise<Address[]> => {
+export const getUserAddress = async (): Promise<Address[] | { success: false; status: number; message: string }> => {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data?.user) {
-    throw new Error(`Error fetching user: ${error?.message ?? "User not found"}`);
-  }
-
-  const userId = data.user.id;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
   const { data: addresses, error: addressError } = await supabase
     .from("addresses")
     .select("id, address, postal_code, locality, country, make_default, profile(first_name, last_name, phone_text)")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .order("make_default", { ascending: false });
 
-  if (addressError) {
-    throw new Error(`Error fetching addresses: ${addressError.message}`);
-  }
+  if (addressError) return { success: false, status: 403, message: addressError.message };
 
   return (addresses ?? []).map((a) => ({
     ...a,
@@ -144,11 +116,13 @@ export const getUserAddress = async (): Promise<Address[]> => {
 };
 
 
-
 // ADMIN SIDE
 
 export const getUsers = async () => {
   const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
   const { data, error } = await supabase
     .from("profile")
@@ -169,7 +143,7 @@ export const getUsers = async () => {
     `)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) return { success: false, status: 403, message: error.message };
 
-  return data;
+  return { success: true, status: 200, data };
 };

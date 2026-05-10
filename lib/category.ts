@@ -25,25 +25,16 @@ export const getCategories = async (): Promise<Category[]> => {
 
 export const createCategory = async (data: AddCategoryFormValues) => {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { success: false, status: 401, message: 'Unauthorized' }
-    }
+    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_create_category', {
         p_name: data.name,
         p_sub_categories: data.subCategories?.map((s) => s.name) ?? [],
     })
 
-    if (error) {
-        return { success: false, status: 403, message: error.message }
-    }
-
-    if (!result.success) {
-        return { success: false, status: 403, message: result.message }
-    }
+    if (error) return { success: false, status: 403, message: error.message }
+    if (!result.success) return { success: false, status: 403, message: result.message }
 
     revalidatePath('/admin/categories')
     return { success: true, status: 201, message: 'Category successfully created' }
@@ -51,12 +42,8 @@ export const createCategory = async (data: AddCategoryFormValues) => {
 
 export const updateCategory = async (id: number, data: EditCategoryFormValues) => {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { success: false, status: 401, message: 'Unauthorized' }
-    }
+    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_update_category', {
         p_id: id,
@@ -74,12 +61,8 @@ export const updateCategory = async (id: number, data: EditCategoryFormValues) =
 
 export const deleteCategory = async (id: number, type: 'category') => {
     const supabase = await createClient()
-
     const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { success: false, status: 401, message: 'Unauthorized' }
-    }
+    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_delete_category', {
         p_id: id,
