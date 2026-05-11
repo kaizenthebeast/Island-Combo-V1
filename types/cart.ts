@@ -30,13 +30,9 @@ export type CartItem = {
   final_price: number  // price after product-level sale discount
   stock: number
   is_active: boolean
-
   image_url: string | null
-
-  // all tiers for this variant (retail, wholesale, bulk, etc.)
   // used client-side to re-resolve price when quantity changes
   pricing_tiers: CartPricingTier[]
-
   // applied_price  = price * (1 - matched_tier.discount_percent / 100)
   // applied_tier_label = e.g. "retail" | "wholesale" | "bulk"
   applied_price: number

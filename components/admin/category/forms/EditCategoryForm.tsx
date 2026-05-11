@@ -4,7 +4,7 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editCategorySchema, EditCategoryFormValues } from '@/form-schema/categorySchema'
 import { updateCategory } from '@/lib/category'
-import { CategoryFields, CategoryOption, Field, Input } from './category-form-shared-UI'
+import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
 import type { Category } from '@/types/category'
 
 type Props = {

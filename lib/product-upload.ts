@@ -7,7 +7,10 @@ export type UploadedImage = {
   sort_order: number
 }
 
-export type VariantWithUploadedImages = Omit<AddProductFormValues['variants'][number], 'images'> & {
+export type VariantWithUploadedImages = Omit<
+  AddProductFormValues['variants'][number],
+  'images'
+> & {
   // variant_id is optional — present when updating an existing variant,
   // absent when inserting a new one. The RPC uses its presence to decide
   // UPDATE vs INSERT per variant.
@@ -22,13 +25,14 @@ function generateFileName(file: File): string {
 
 export const uploadVariantImages = async (
   variants: AddProductFormValues['variants']
-): Promise<VariantWithUploadedImages[] | { success: false; status: number; message: string }> => {
+): Promise<VariantWithUploadedImages[]> => {
   const supabase = createClient()
 
+  // Auth check — throw immediately so the caller's try/catch surfaces it
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  if (!user) throw new Error('Unauthorized: you must be logged in to upload images')
 
-  const results = await Promise.all(
+  return Promise.all(
     variants.map(async (variant) => {
       const uploadedImages = await Promise.all(
         variant.images.map(async ({ file, is_primary, sort_order, url: existingUrl }) => {
@@ -38,34 +42,26 @@ export const uploadVariantImages = async (
             return { url: existingUrl as string, is_primary, sort_order }
           }
 
-          // New image — upload to Storage and return the generated path
+          // New image — upload to Storage and return the generated path.
+          // Throws on failure so Promise.all rejects and the caller catches it.
           const path = `variants/${generateFileName(file)}`
           const { error } = await supabase.storage
             .from('product-images')
             .upload(path, file)
 
-          if (error) return { success: false, status: 403, message: `Image upload failed: ${error.message}` }
+          if (error) throw new Error(`Image upload failed: ${error.message}`)
+
           return { url: path, is_primary, sort_order }
         })
       )
-
-      // Bubble up any upload error from the image map
-      const failedImage = uploadedImages.find((img) => 'success' in img && !img.success)
-      if (failedImage) return failedImage as { success: false; status: number; message: string }
 
       const { images: _images, ...rest } = variant
       return {
         ...rest,
         // Pass variant_id through if present so the RPC knows to UPDATE
         variant_id: (variant as any).variant_id as number | undefined,
-        images: uploadedImages as UploadedImage[],
+        images: uploadedImages,
       }
     })
   )
-
-  // Bubble up any variant-level error from the variant map
-  const failedVariant = results.find((r) => r && 'success' in r && !r.success)
-  if (failedVariant) return failedVariant as { success: false; status: number; message: string }
-
-  return results as VariantWithUploadedImages[]
 }

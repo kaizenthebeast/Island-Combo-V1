@@ -4,7 +4,7 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addCategorySchema, AddCategoryFormValues } from '@/form-schema/categorySchema'
 import { createCategory } from '@/lib/category'
-import { Field, Input } from './category-form-shared-UI'
+import { Field, Input } from './CategoryUIForm'
 
 type Props = {
   onSuccess: (data: AddCategoryFormValues) => void

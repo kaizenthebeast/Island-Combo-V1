@@ -229,7 +229,8 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
     name: `variants.${variantIndex}.pricing_tiers`,
   })
 
-  const tierErrors = (errors.variants?.[variantIndex]?.pricing_tiers as any)
+  // FIX: cast errors.variants as any before numeric indexing
+  const tierErrors = (errors.variants as any)?.[variantIndex]?.pricing_tiers
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -620,7 +621,9 @@ export function VariantCard({
   showVariantBadge?: boolean
 }) {
   const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<any>()
-  const variantErrors = errors.variants?.[index]
+
+  // FIX: cast errors.variants as any before numeric indexing
+  const variantErrors = (errors.variants as any)?.[index]
 
   const attributes: { attribute_name: string; attribute_value: string }[] =
     watch(`variants.${index}.attributes`) ?? []
@@ -663,7 +666,8 @@ export function VariantCard({
 
       <div className="p-4 flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Price" required error={variantErrors?.price?.message}>
+          {/* FIX: cast .message as string | undefined */}
+          <Field label="Price" required error={variantErrors?.price?.message as string | undefined}>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 pointer-events-none font-medium select-none">₱</span>
               <Input
@@ -674,7 +678,7 @@ export function VariantCard({
               />
             </div>
           </Field>
-          <Field label="Stock" error={variantErrors?.stock?.message}>
+          <Field label="Stock" error={variantErrors?.stock?.message as string | undefined}>
             <Input
               {...register(`variants.${index}.stock`, {
                 setValueAs: (v) => v === '' ? undefined : parseInt(v, 10),
@@ -702,7 +706,7 @@ export function VariantCard({
 
               const predefined = PREDEFINED_ATTRIBUTE_TYPES.find((p) => p.name === attrName)
               const hasOptions = predefined?.options && predefined.options.length > 0
-              const fieldError = (variantErrors?.attributes as any)?.[attrIdx]?.attribute_value?.message
+              const fieldError = (variantErrors?.attributes as any)?.[attrIdx]?.attribute_value?.message as string | undefined
 
               return (
                 <Field key={attrName} label={attrName} error={fieldError}>
@@ -838,11 +842,12 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-3">
-        <Field label="Product name" required error={errors.name?.message}>
+        {/* FIX: cast .message as string | undefined throughout Step1BasicInfo */}
+        <Field label="Product name" required error={errors.name?.message as string | undefined}>
           <Input {...register('name')} onChange={handleNameChange} placeholder="e.g. Classic White Tee" />
         </Field>
 
-        <Field label="Slug" required error={errors.slug?.message} hint="Auto-generated from name — editable">
+        <Field label="Slug" required error={errors.slug?.message as string | undefined} hint="Auto-generated from name — editable">
           <div className="relative flex items-center">
             <span className="absolute left-3 text-[11px] text-slate-300 pointer-events-none select-none whitespace-nowrap font-medium">
               /products/
@@ -851,7 +856,7 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
           </div>
         </Field>
 
-        <Field label="Description" error={errors.description?.message}>
+        <Field label="Description" error={errors.description?.message as string | undefined}>
           <Textarea
             {...register('description')}
             placeholder="Describe your product — materials, fit, key features…"
@@ -864,8 +869,12 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
 
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Category" required error={errors.category_id?.message}>
-            <Select {...register('category_id', { valueAsNumber: true })}>
+          <Field label="Category" required error={errors.category_id?.message as string | undefined}>
+            <Select
+              {...register('category_id', { valueAsNumber: true })}
+              value={watch('category_id') ?? ''}
+              onChange={(e) => setValue('category_id', parseInt(e.target.value, 10), { shouldValidate: true })}
+            >
               <option value="">Select…</option>
               {categories.map((c) => (
                 <option key={c.category_id} value={c.category_id}>{c.name}</option>
@@ -873,8 +882,12 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
             </Select>
           </Field>
 
-          <Field label="Type" required error={errors.type?.message}>
-            <Select {...register('type')}>
+          <Field label="Type" required error={errors.type?.message as string | undefined}>
+            <Select
+              {...register('type')}
+              value={watch('type') ?? ''}
+              onChange={(e) => setValue('type', e.target.value, { shouldValidate: true })}
+            >
               <option value="">Select…</option>
               <option value="Physical">Physical</option>
               <option value="Digital">Digital</option>
@@ -882,7 +895,7 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
           </Field>
         </div>
 
-        <Field label="Discount" error={errors.discount?.message} hint="Leave blank for no discount" className="max-w-[180px]">
+        <Field label="Discount" error={errors.discount?.message as string | undefined} hint="Leave blank for no discount" className="max-w-[180px]">
           <div className="relative">
             <Input
               {...register('discount', { setValueAs: (v) => v === '' ? null : parseFloat(v) })}
@@ -1019,10 +1032,11 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
 
           {fields.map((field, idx) => (
             <div key={field.id} className="grid grid-cols-[1fr_1fr_80px_32px] gap-2 items-start">
-              <Field label="" error={fieldErrors?.[idx]?.attribute_name?.message}>
+              {/* FIX: cast indexed fieldErrors access as any */}
+              <Field label="" error={(fieldErrors?.[idx] as any)?.attribute_name?.message as string | undefined}>
                 <Input {...register(`${fieldName}.${idx}.attribute_name`)} placeholder="Material" />
               </Field>
-              <Field label="" error={fieldErrors?.[idx]?.attribute_value?.message}>
+              <Field label="" error={(fieldErrors?.[idx] as any)?.attribute_value?.message as string | undefined}>
                 <Input {...register(`${fieldName}.${idx}.attribute_value`)} placeholder="100% Cotton" />
               </Field>
               <Input

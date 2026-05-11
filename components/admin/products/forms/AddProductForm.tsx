@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addProductSchema, AddProductFormValues } from '@/form-schema/addProductSchema'
 import { addAdminProduct, getAllSubCategories } from '@/lib/product'
@@ -19,7 +19,7 @@ import {
   AlertIcon,
   makeBlankVariant,
   type Category,
-} from './product-form-shared'
+} from './ProductUIForm'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

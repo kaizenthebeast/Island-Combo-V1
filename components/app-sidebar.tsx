@@ -20,8 +20,8 @@ const navMain = [
     icon: Users,
     isActive: true,
     items: [
-      { title: "Active Customer", url: "#", icon: Users },
-      { title: "Staff", url: "#", icon: LayoutDashboard },
+      { title: "Customer", url: "/admin/users", icon: Users },
+      { title: "Staff", url: "/admin/users/staff", icon: LayoutDashboard },
     ],
   },
   {
@@ -31,7 +31,7 @@ const navMain = [
     items: [
       { title: "Products", url: "/admin/products", icon: Package },
       { title: "Category", url: "/admin/products/category", icon: Tag },
-      { title: "Wholesale", url: "#", icon: Layers },
+      { title: "Deleted Products", url: "#", icon: Layers },
     ],
   },
   {

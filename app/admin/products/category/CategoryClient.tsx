@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddCategoryDialog from '@/components/admin/category/AddCategoryDialog'
 import EditCategoryDialog from '@/components/admin/category/EditCategoryDialog'
-import { CategoryOption } from '@/components/admin/category/forms/category-form-shared-UI'
+import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
 import type { Category } from '@/types/category'
 import { deleteCategory } from '@/lib/category'
 

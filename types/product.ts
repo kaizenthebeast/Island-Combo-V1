@@ -59,9 +59,10 @@ export type AdminProduct = {
   name: string
   slug: string
   description: string | null
+  type: string
 
   is_active: boolean
-  discount: number | null
+  discount: number
 
   category: {
     category_id: number

@@ -1,6 +1,7 @@
 'use server'
 import { createClient } from "@/lib/supabase/server";
-import { AddressFormValues, Address } from '@/types/users';
+import { AddressFormValues, Address} from '@/types/users';
+import {AddUserFormValues, EditUserFormValues} from '@/form-schema/userSchema'
 import { revalidatePath } from "next/cache";
 
 export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
@@ -119,31 +120,76 @@ export const getUserAddress = async (): Promise<Address[] | { success: false; st
 // ADMIN SIDE
 
 export const getUsers = async () => {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
   const { data, error } = await supabase
-    .from("profile")
-    .select(`
-      user_id,
-      first_name,
-      last_name,
-      email,
-      phone_text,
-      sex,
-      age,
-      role,
-      profile_url,
-      created_at,
-      profile_pts (
-        total_pts
-      )
-    `)
-    .order("created_at", { ascending: false });
+    .from('admin_user_mv')
+    .select('*')
+    .order('member_since', { ascending: false })
 
-  if (error) return { success: false, status: 403, message: error.message };
+  if (error) return { success: false, status: 403, message: error.message }
 
-  return { success: true, status: 200, data };
-};
+  return { success: true, status: 200, data }
+}
+
+export const getStaff = async () => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+
+  const { data, error } = await supabase
+    .from('admin_staff_mv')
+    .select('*')
+    .order('member_since', { ascending: false })
+
+  if (error) return { success: false, status: 403, message: error.message }
+
+  return { success: true, status: 200, data }
+}
+
+export const updateUser = async (userId: string, data: EditUserFormValues) => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  // ✅ added status
+
+  const { error } = await supabase
+    .from('profile')
+    .update({
+      first_name: data.first_name,
+      last_name: data.last_name,
+      email: data.email,
+      phone_text: data.phone_text ?? null,
+      sex: data.sex ?? null,
+      age: data.age ?? null,
+      role: data.role,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+
+  if (error) return { success: false, status: 403, message: error.message }   // ✅ added status
+
+  revalidatePath('/admin/users')
+  return { success: true, status: 200, message: 'User successfully updated' } // ✅ added status
+}
+
+export const deleteUser = async (userId: string) => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  
+
+  const { error } = await supabase
+    .from('profile')
+    .delete()
+    .eq('user_id', userId)
+
+  if (error) return { success: false, status: 403, message: error.message }   
+
+  revalidatePath('/admin/users')
+  return { success: true, status: 200, message: 'User successfully deleted' } 
+}

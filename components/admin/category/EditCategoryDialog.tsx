@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditCategoryForm } from '@/components/admin/category/forms/EditCategoryForm'
-import { CategoryOption } from '@/components/admin/category/forms/category-form-shared-UI'
+import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
 import type { Category } from '@/types/category'
 
 type Props = {

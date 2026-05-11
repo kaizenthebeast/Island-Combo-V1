@@ -4,9 +4,9 @@ import { useState, useMemo, useTransition } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddUsersDialog from '@/components/admin/users/AddUsersDialog'
+import EditUserDialog from '@/components/admin/users/EditUserDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import type { AdminUser } from '@/types/users'
-
 
 type Row = {
     user_id: string
@@ -32,23 +32,17 @@ const getRoleVariant = (role: string): BadgeVariant => {
 }
 
 export default function UsersClient({ users }: { users: AdminUser[] }) {
-    const [open, setOpen] = useState(false)
+    const [addOpen, setAddOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
     const [isPending, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
 
-    // const handleDelete = (row: Row) => {
-    //     startTransition(async () => {
-    //         const result = await deleteUser(row.user_id)
-
-    //         if (!result.success) {
-    //             setDeleteError(result.message)
-    //             return
-    //         }
-
-    //         setDeleteError(null)
-    //     })
-    // }
+    const handleDelete = (row: Row) => {
+        startTransition(async () => {
+            console.log('deleted')
+            setDeleteError(null)
+        })
+    }
 
     const rows: Row[] = useMemo(() => {
         return users.map((u) => ({
@@ -57,8 +51,8 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
             email: u.email ?? '—',
             phone: u.phone_text ?? '—',
             role: u.role,
-            points: u.profile_pts?.total_pts ?? 0,
-            joined: new Date(u.created_at).toLocaleDateString(),
+            points: u.total_points,                                         
+            joined: new Date(u.member_since).toLocaleDateString(),          
             raw: u,
         }))
     }, [users])
@@ -94,10 +88,10 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
         <section className="min-h-screen bg-slate-50 px-6 py-10">
             <PageHeader
                 eyebrow="People"
-                title="Users"
+                title="Customer"
                 subtitle="Manage your registered customers and staff"
                 actions={[
-                    { label: 'Export', onClick: () => { }, variant: 'secondary' },
+                    { label: 'Create Customer', onClick: () => setAddOpen(true), variant: 'primary' },
                 ]}
             />
 
@@ -106,24 +100,28 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                     <p className="text-[12px] text-rose-700 font-medium">{deleteError}</p>
                 </div>
             )}
-            <AddUsersDialog open={open} onClose={() => setOpen(false)} />
 
-            {/* <EditUserDialog
+            <AddUsersDialog
+                open={addOpen}
+                onClose={() => setAddOpen(false)}
+            />
+
+            <EditUserDialog
                 user={editingUser}
                 open={!!editingUser}
                 onClose={() => setEditingUser(null)}
-            /> */}
+            />
 
             <DataTable<Row>
                 data={rows}
                 columns={columns}
                 searchKeys={['name', 'email', 'phone']}
                 filterKey="role"
-                filterOptions={['All', 'customer', 'staff', 'admin']}
+                filterOptions={['All', 'customer',]}
                 defaultSortKey="name"
                 getRowId={(row) => row.user_id}
                 onEdit={(row) => setEditingUser(row.raw)}
-                onDelete={(row) => console.log('delete')}
+                onDelete={handleDelete}
                 expandedRowRender={(row) => {
                     const u = row.raw
 
@@ -139,43 +137,74 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                                 </ul>
                             </div>
 
-                            {/* ADDRESSES */}
-                            {u.addresses && u.addresses.length > 0 && (
+                            {/* DEFAULT ADDRESS */}
+                            {u.default_address && (                                  
                                 <div>
-                                    <h4 className="font-semibold text-slate-700">Addresses</h4>
-                                    <div className="space-y-2 mt-1">
-                                        {u.addresses.map((a, i) => (
-                                            <div key={i} className="border rounded-lg p-3 text-slate-600">
-                                                <p>{a.address}, {a.locality}, {a.postal_code}, {a.country}</p>
-                                                {a.make_default && (
-                                                    <span className="text-xs text-blue-500 font-medium">Default</span>
-                                                )}
-                                            </div>
-                                        ))}
+                                    <h4 className="font-semibold text-slate-700">Default Address</h4>
+                                    <div className="mt-1 border rounded-lg p-3 text-slate-600">
+                                        <p>
+                                            {u.default_address}, {u.default_locality}, {u.default_postal_code}, {u.default_country}
+                                        </p>
+                                        <p className="text-xs text-slate-400 mt-1">
+                                            {u.total_addresses} address{u.total_addresses !== 1 ? 'es' : ''} total
+                                        </p>
                                     </div>
                                 </div>
                             )}
 
-                            {/* POINTS HISTORY */}
-                            {u.profile_pts_transaction_records && u.profile_pts_transaction_records.length > 0 && (
+                            {/* POINTS SUMMARY */}
+                            {u.total_orders > 0 && (                                    
                                 <div>
-                                    <h4 className="font-semibold text-slate-700">Points History</h4>
+                                    <h4 className="font-semibold text-slate-700">Points Summary</h4>
                                     <ul className="mt-1 space-y-1 text-slate-600">
-                                        {u.profile_pts_transaction_records.map((t, i) => (
-                                            <li key={i} className="flex justify-between">
-                                                <span>{t.reason ?? 'Order #' + t.order_id}</span>
-                                                <span className={t.points >= 0 ? 'text-green-600' : 'text-red-500'}>
-                                                    {t.points >= 0 ? '+' : ''}{t.points} pts
-                                                </span>
+                                        <li className="flex justify-between">
+                                            <span>Lifetime Earned</span>
+                                            <span className="text-green-600">+{u.lifetime_points_earned} pts</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Lifetime Spent</span>
+                                            <span className="text-red-500">-{u.lifetime_points_spent} pts</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Current Balance</span>
+                                            <span className="font-medium">{u.total_points} pts</span>
+                                        </li>
+                                        {u.last_pts_activity && (
+                                            <li className="text-xs text-slate-400">
+                                                Last activity: {new Date(u.last_pts_activity).toLocaleDateString()}
                                             </li>
-                                        ))}
+                                        )}
                                     </ul>
                                 </div>
                             )}
 
+                            {/* ORDER STATS */}
+                            <div>
+                                <h4 className="font-semibold text-slate-700">Order Stats</h4>
+                                <ul className="mt-1 space-y-1 text-slate-600">
+                                    <li className="flex justify-between">
+                                        <span>Total Orders</span>
+                                        <span>{u.total_orders}</span>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Total Spent</span>
+                                        <span>₱{u.total_order_value.toLocaleString()}</span>
+                                    </li>
+                                    <li className="flex justify-between">
+                                        <span>Discounts Received</span>
+                                        <span>₱{u.total_discount_received.toLocaleString()}</span>
+                                    </li>
+                                    {u.last_order_at && (
+                                        <li className="text-xs text-slate-400">
+                                            Last order: {new Date(u.last_order_at).toLocaleDateString()}
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+
                             {/* META */}
                             <div className="text-xs text-slate-400">
-                                User ID: {u.user_id} · Joined: {new Date(u.created_at).toLocaleString()}
+                                User ID: {u.user_id} · Joined: {new Date(u.member_since).toLocaleString()}
                             </div>
 
                         </div>

@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { AddUserForm } from '@/components/admin/users/forms/AddUserForm'
-import { AddUserFormValues } from '@/form-schema/addUserSchema'
+import { AddUserFormValues } from '@/form-schema/userSchema'
 
 type Props = {
   open: boolean

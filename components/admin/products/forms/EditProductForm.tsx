@@ -8,6 +8,7 @@ import { updateAdminProduct } from '@/lib/product'
 import { uploadVariantImages } from '@/lib/product-upload'
 import { getAllSubCategories } from '@/lib/product'
 import type { AdminProduct } from '@/types/product'
+import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 
 import {
   StepIndicator,
@@ -20,7 +21,7 @@ import {
   CheckIcon,
   AlertIcon,
   type Category,
-} from './product-form-shared'
+} from './ProductUIForm'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -30,17 +31,20 @@ const STEP_FIELDS: (keyof EditProductFormValues)[][] = [
   ['product_details'],
 ]
 
+
+
 // ─── Map AdminProduct → form default values ───────────────────────────────────
 
 function toFormValues(product: AdminProduct): EditProductFormValues {
+  console.log(product)
   return {
     name: product.name,
     slug: product.slug,
-    description: product.description ?? '',
+    description: product.description ?? undefined,
     is_active: product.is_active,
-    discount: product.discount ?? null,
-    category_id: product.category?.category_id ?? null,
-    type: '',
+    discount: product.discount,
+    category_id: product.category?.category_id,
+    type: product.type,
 
     product_details: product.product_details.map((d) => ({
       id: d.id,
@@ -58,20 +62,21 @@ function toFormValues(product: AdminProduct): EditProductFormValues {
       price: v.price,
       stock: v.stock,
       is_active: v.is_active,
-      pricing_tiers: v.pricing_tiers.map((t) => ({
-        label: t.label,
-        min_quantity: t.min_quantity,
-        discount_percent: t.discount_percent,
-      })),
+      pricing_tiers: v.pricing_tiers
+        .filter((t) => t.label === 'wholesale')
+        .map((t) => ({
+          label: 'wholesale' as const,
+          min_quantity: t.min_quantity,
+          discount_percent: t.discount_percent,
+        })),
       deleted_tier_ids: [],
       attributes: v.attributes.map((a) => ({
         attribute_name: a.name,
         attribute_value: a.value,
       })),
       deleted_attribute_ids: [],
-      // Existing images → no `file`, just a preview URL
       images: v.images.map((url, i) => ({
-        preview: url,
+        preview: getPublicImageUrl(url) ?? url,
         is_primary: i === 0,
         sort_order: i,
         path: url,
@@ -105,7 +110,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
       .finally(() => setLoadingCategories(false))
   }, [])
 
-  const methods = useForm<EditProductFormValues>({
+  const methods = useForm({
     resolver: zodResolver(editProductSchema),
     defaultValues: toFormValues(product),
     mode: 'onTouched',
@@ -114,7 +119,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   const { trigger, formState: { errors, isDirty } } = methods
 
   useEffect(() => {
-    const count = STEP_FIELDS[step].filter((k) => !!errors[k]).length
+    const count = STEP_FIELDS[step].filter((k) => !!errors[k as keyof typeof errors]).length
     setStepErrorCount(count)
   }, [errors, step])
 
@@ -136,8 +141,42 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
       try {
         const data = methods.getValues()
 
-        // 1. Update core product fields + product_details
-        const productResult = await updateAdminProduct(product.product_id, {
+        // ── STEP 1: Upload new images for all variants ─────────────────────
+        // Build a map of variant index → newly uploaded Storage paths.
+        // Existing images (path already in Storage) are passed through as-is.
+        const variantUploadedPaths: Record<number, string[]> = {}
+
+        for (let i = 0; i < data.variants.length; i++) {
+          const variant = data.variants[i]
+          const images = variant.images ?? []
+          const newImages = images.filter((img: any) => !!img.file)
+
+          if (newImages.length > 0) {
+            const uploaded = await uploadVariantImages([
+              {
+                ...variant,
+                images: newImages as any,
+                stock: variant.stock ?? 0,
+                is_active: variant.is_active ?? true,
+                attributes: variant.attributes ?? [],
+                // Ensure label is always string — fallback to 'wholesale'
+                // since retail is auto-seeded by the RPC and never in the form
+                pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
+                  ...t,
+                  label: t.label ?? 'wholesale',
+                })),
+              }
+            ])
+            variantUploadedPaths[i] = uploaded[0]?.images.map((img) => img.url) ?? []
+          } else {
+            variantUploadedPaths[i] = []
+          }
+        }
+
+        // ── STEP 2: Call the update RPC with the full resolved payload ─────
+        // updateAdminProduct is called ONCE after all uploads complete —
+        // not inside the upload loop above.
+        await updateAdminProduct(product.product_id, {
           name: data.name,
           slug: data.slug,
           description: data.description,
@@ -146,53 +185,40 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
           category_id: data.category_id,
           product_details: data.product_details,
           deleted_detail_ids: data.deleted_detail_ids,
-        })
 
-        if (!productResult.success) {
-          setSaveError(productResult.message)
-          return
-        }
+          variants: data.variants.map((variant, i) => {
+            const images = variant.images ?? []
 
-        // 2. Update each variant
-        for (const variant of data.variants) {
-          // Separate new file uploads from existing stored images
-          const newImages = variant.images.filter((img) => !!img.file)
-          const existingPaths = variant.images
-            .filter((img) => !img.file && img.path)
-            .map((img) => img.path!)
+            // Existing images have a path but no file object
+            const existingPaths = images
+              .filter((img: any) => !img.file && img.path)
+              .map((img: any) => img.path as string)
 
-          // Upload new images if any
-          let uploadedPaths: string[] = []
-          if (newImages.length > 0) {
-            const uploaded = await uploadVariantImages([{ ...variant, images: newImages as any }])
-            uploadedPaths = uploaded[0]?.images ?? []
-          }
+            // Merge existing + newly uploaded paths for this variant
+            const allImagePaths = [...existingPaths, ...variantUploadedPaths[i]]
 
-          if (variant.variant_id) {
-            // Existing variant → update
-            const result = await updateVariant(variant.variant_id, {
+            return {
+              variant_id: variant.variant_id,
               sku: variant.sku,
               price: variant.price,
-              stock: variant.stock,
-              is_active: variant.is_active,
-              pricing_tiers: variant.pricing_tiers,
-              deleted_tier_ids: variant.deleted_tier_ids,
-              attributes: variant.attributes.map((a) => ({
-                id: (a as any).id,
+              stock: variant.stock ?? 0,
+              is_active: variant.is_active ?? true,
+              pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
+                ...t,
+                label: t.label ?? 'wholesale',
+              })),
+              deleted_tier_ids: variant.deleted_tier_ids ?? [],
+              attributes: (variant.attributes ?? []).map((a: any) => ({
+                id: a.id,
                 name: a.attribute_name,
                 value: a.attribute_value,
               })),
-              deleted_attribute_ids: variant.deleted_attribute_ids,
-            })
-
-            if (!result.success) {
-              setSaveError(result.message)
-              return
+              deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
+              images: allImagePaths,
+              deleted_image_paths: variant.deleted_image_paths ?? [],
             }
-          }
-          // variant.variant_id is undefined → new variant added during edit
-          // call addVariant() here when you build that action
-        }
+          }),
+        } as any)
 
         onSuccess()
       } catch (err: any) {
@@ -221,7 +247,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
           {step === 2 && <Step3Details fieldName="product_details" />}
         </div>
 
-        {/* Navigation */}
         <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
           <button
             type="button"
@@ -248,7 +273,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={isPending || !isDirty}  // ← disabled when nothing changed
+                disabled={isPending || !isDirty}
                 className="flex items-center gap-2 rounded-md bg-slate-800 px-5 py-2 text-[13px] font-semibold text-white hover:bg-slate-900 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               >
                 {isPending ? (

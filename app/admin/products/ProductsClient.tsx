@@ -13,6 +13,7 @@ type Row = {
     product_id: number
     name: string
     category: string
+    type: string
     variants: number
     stock: number
     status: string
@@ -56,6 +57,7 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
             product_id: p.product_id,
             name: p.name,
             category: p.category?.name ?? '—',
+            type: p.type,
             variants: p.variants.length,
             stock: p.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0),
             status: p.is_active ? 'Active' : 'Inactive',
@@ -69,6 +71,7 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
         { key: 'product_id', label: 'ID', width: '80px' },
         { key: 'name', label: 'Product' },
         { key: 'category', label: 'Category' },
+        { key: 'type', label: 'Type' },
         {
             key: 'variants',
             label: 'Variants',
@@ -98,9 +101,8 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
                 title="Products"
                 subtitle="Manage your product inventory"
                 actions={[
-                    { label: 'Export', onClick: () => { }, variant: 'secondary' },
                     { label: 'Import', onClick: () => { }, variant: 'secondary' },
-                    { label: 'Add Product', onClick: () => setOpen(true), variant: 'primary' },
+                    { label: 'Create Product', onClick: () => setOpen(true), variant: 'primary' },
                 ]}
             />
             {/* Error toast/banner */}
