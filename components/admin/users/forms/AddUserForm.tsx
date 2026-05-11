@@ -1,80 +1,84 @@
 'use client'
 
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addUserSchema, type AddUserFormValues } from '@/form-schema/userSchema'
-import { Form } from '@/components/ui/form'
-import { Button } from '@/components/ui/button'
 import { UserFields } from './UserUIForm'
 
 type Props = {
-    onSuccess: (data: AddUserFormValues) => void
-    onCancel: () => void
+  onSuccess: (data: AddUserFormValues) => void
+  onCancel: () => void
 }
 
 export function AddUserForm({ onSuccess, onCancel }: Props) {
-    const [serverError, setServerError] = useState<string | null>(null)
+  const methods = useForm<AddUserFormValues>({
+    resolver: zodResolver(addUserSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      first_name: '',
+      last_name: '',
+      phone_text: '',
+      role: 'staff',
+    },
+  })
 
-    const form = useForm<AddUserFormValues>({
-        resolver: zodResolver(addUserSchema),
-        defaultValues: {
-            email:      '',
-            password:   '',
-            first_name: '',
-            last_name:  '',
-            phone_text: '',
-            role:       'customer',
-        },
-    })
+  const { handleSubmit, setError, formState: { isSubmitting, errors } } = methods
 
-    const { formState: { isSubmitting } } = form
+  const onSubmit = async (values: AddUserFormValues) => {
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
 
-    const onSubmit = async (values: AddUserFormValues) => {
-        setServerError(null)
+      const json = await res.json()
 
-        try {
-            const res = await fetch('/api/admin/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(values),
-            })
+      if (!res.ok) {
+        setError('root', { message: json.message ?? 'Something went wrong.' })
+        return
+      }
 
-            const json = await res.json()
-
-            if (!res.ok) {
-                setServerError(json.message ?? 'Something went wrong.')
-                return
-            }
-
-            onSuccess(values)
-        } catch {
-            setServerError('Network error. Please try again.')
-        }
+      onSuccess(values)
+    } catch {
+      setError('root', { message: 'Network error. Please try again.' })
     }
+  }
 
-    return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
-                <UserFields showAccount />
+        {errors.root && (
+          <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
+            <p className="text-[12px] text-rose-700 font-medium">
+              {errors.root.message}
+            </p>
+          </div>
+        )}
 
-                {serverError && (
-                    <div className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-                        <p className="text-[12px] font-medium text-rose-700">{serverError}</p>
-                    </div>
-                )}
+        <UserFields showAccount />
 
-                <div className="flex justify-end gap-2 pt-2">
-                    <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Creating…' : 'Create user'}
-                    </Button>
-                </div>
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={isSubmitting}
+            className="rounded-lg border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
+          >
+            {isSubmitting ? 'Creating…' : 'Create user'}
+          </button>
+        </div>
 
-            </form>
-        </Form>
-    )
+      </form>
+    </FormProvider>
+  )
 }

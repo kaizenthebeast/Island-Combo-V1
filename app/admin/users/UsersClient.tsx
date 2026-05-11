@@ -32,7 +32,6 @@ const getRoleVariant = (role: string): BadgeVariant => {
 }
 
 export default function UsersClient({ users }: { users: AdminUser[] }) {
-    const [addOpen, setAddOpen] = useState(false)
     const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
     const [isPending, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -90,9 +89,6 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                 eyebrow="People"
                 title="Customer"
                 subtitle="Manage your registered customers and staff"
-                actions={[
-                    { label: 'Create Customer', onClick: () => setAddOpen(true), variant: 'primary' },
-                ]}
             />
 
             {deleteError && (
@@ -101,10 +97,7 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                 </div>
             )}
 
-            <AddUsersDialog
-                open={addOpen}
-                onClose={() => setAddOpen(false)}
-            />
+    
 
             <EditUserDialog
                 user={editingUser}

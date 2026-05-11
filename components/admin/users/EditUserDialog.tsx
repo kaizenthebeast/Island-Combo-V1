@@ -9,14 +9,14 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditUserForm } from '@/components/admin/users/forms/EditUserForm'
-import type { AdminUser } from '@/types/users'
+import type { AdminStaff } from '@/types/users'
+
 
 type Props = {
-  user: AdminUser | null
+  user: AdminStaff | null
   open: boolean
-  onClose: () => void
+  onClose: () => void 
 }
-
 export default function EditUserDialog({ user, open, onClose }: Props) {
   const router = useRouter()
 

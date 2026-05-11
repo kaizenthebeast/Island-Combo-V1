@@ -1,243 +1,193 @@
 'use client'
 
+import React from 'react'
 import { useFormContext } from 'react-hook-form'
+import { cn } from '@/lib/utils'
 
-import {
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-// ─── Layout helper ────────────────────────────────────────────────────────────
+const msg = (error: any): string | undefined => error?.message as string | undefined
 
-function FieldRow({ children }: { children: React.ReactNode }) {
-    return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+export const AlertIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+)
+
+// ─── Base UI ──────────────────────────────────────────────────────────────────
+
+const FieldErrorCtx = React.createContext(false)
+
+export function Field({
+  label, error, children, required, hint, className,
+}: {
+  label: string
+  error?: string
+  children: React.ReactNode
+  required?: boolean
+  hint?: string
+  className?: string
+}) {
+  return (
+    <FieldErrorCtx.Provider value={!!error}>
+      <div className={cn('flex flex-col gap-1', className)}>
+        {label && (
+          <label className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+            {label}
+            {required && <span className="text-rose-400 leading-none">*</span>}
+          </label>
+        )}
+        {children}
+        {error ? (
+          <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium mt-0.5">
+            <AlertIcon />{error}
+          </p>
+        ) : hint ? (
+          <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>
+        ) : null}
+      </div>
+    </FieldErrorCtx.Provider>
+  )
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+const inputBase = [
+  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-slate-800 outline-none leading-5',
+  'border-slate-200 placeholder:text-slate-300',
+  'focus:border-slate-400 focus:ring-2 focus:ring-slate-100',
+  'disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed',
+  'transition-colors duration-150',
+].join(' ')
 
-type UserFieldsProps = {
-    /** Show the Account section (email + password). Pass false for edit forms. */
-    showAccount?: boolean
+const inputError = 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+
+export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  const hasError = React.useContext(FieldErrorCtx)
+  return <input className={cn(inputBase, hasError && inputError, className)} {...props} />
+}
+
+export function Select({ className, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  const hasError = React.useContext(FieldErrorCtx)
+  return (
+    <select className={cn(inputBase, 'cursor-pointer', hasError && inputError, className)} {...props}>
+      {children}
+    </select>
+  )
 }
 
 // ─── UserFields ───────────────────────────────────────────────────────────────
-//
-// Shared field groups for AddUserForm and EditUserForm.
-// Must be rendered inside a <FormProvider> (react-hook-form).
-//
-// Usage (add):  <UserFields showAccount />
-// Usage (edit): <UserFields />
+
+type UserFieldsProps = {
+  showAccount?: boolean
+}
 
 export function UserFields({ showAccount = false }: UserFieldsProps) {
-    const { control } = useFormContext()
+  const { register, formState: { errors } } = useFormContext<any>()
 
-    return (
-        <div className="space-y-6">
+  return (
+    <div className="flex flex-col gap-5">
 
-            {/* ── Account (add only) ────────────────────────────────────── */}
-            {showAccount && (
-                <>
-                    <div className="space-y-3">
-                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                            Account
-                        </p>
-                        <FieldRow>
-                            <FormField
-                                control={control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email <span className="text-rose-500">*</span></FormLabel>
-                                        <FormControl>
-                                            <Input type="email" placeholder="user@example.com" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Password <span className="text-rose-500">*</span></FormLabel>
-                                        <FormControl>
-                                            <Input type="password" placeholder="Min. 6 characters" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </FieldRow>
-                    </div>
-                    <Separator />
-                </>
-            )}
+      {/* ── Account (add only) ──────────────────────────────────────── */}
+      {showAccount && (
+        <>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+            Account
+          </p>
 
-            {/* ── Profile ───────────────────────────────────────────────── */}
-            <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                    Profile
-                </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Email" required error={msg(errors.email)}>
+              <Input
+                {...register('email')}
+                type="email"
+                placeholder="user@example.com"
+              />
+            </Field>
+            <Field label="Password" required error={msg(errors.password)}>
+              <Input
+                {...register('password')}
+                type="password"
+                placeholder="Min. 8 characters"
+              />
+            </Field>
+          </div>
 
-                <FieldRow>
-                    <FormField
-                        control={control}
-                        name="first_name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>First name <span className="text-rose-500">*</span></FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Juan" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={control}
-                        name="last_name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Last name <span className="text-rose-500">*</span></FormLabel>
-                                <FormControl>
-                                    <Input placeholder="dela Cruz" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </FieldRow>
+          <div className="h-px bg-slate-100" />
+        </>
+      )}
 
-                <FieldRow>
-                    {/* Email shown here only on edit (no Account section) */}
-                    {!showAccount && (
-                        <FormField
-                            control={control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email <span className="text-rose-500">*</span></FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="user@example.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    )}
-                    <FormField
-                        control={control}
-                        name="phone_text"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Phone</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="+63 912 345 6789" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </FieldRow>
+      {/* ── Profile ─────────────────────────────────────────────────── */}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+        Profile
+      </p>
 
-                <FieldRow>
-                    <FormField
-                        control={control}
-                        name="sex"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Sex</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value ?? ''}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Male">Male</SelectItem>
-                                        <SelectItem value="Female">Female</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={control}
-                        name="age"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Age</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        placeholder="25"
-                                        {...field}
-                                        onChange={(e) =>
-                                            field.onChange(
-                                                e.target.value === '' ? undefined : Number(e.target.value)
-                                            )
-                                        }
-                                        value={field.value ?? ''}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </FieldRow>
-            </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="First name" required error={msg(errors.first_name)}>
+          <Input
+            {...register('first_name')}
+            placeholder="Juan"
+          />
+        </Field>
+        <Field label="Last name" required error={msg(errors.last_name)}>
+          <Input
+            {...register('last_name')}
+            placeholder="dela Cruz"
+          />
+        </Field>
+      </div>
 
-            <Separator />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {!showAccount && (
+          <Field label="Email" required error={msg(errors.email)}>
+            <Input
+              {...register('email')}
+              type="email"
+              placeholder="user@example.com"
+            />
+          </Field>
+        )}
+        <Field label="Phone" error={msg(errors.phone_text)}>
+          <Input
+            {...register('phone_text')}
+            placeholder="+63 912 345 6789"
+          />
+        </Field>
+      </div>
 
-            {/* ── Access ────────────────────────────────────────────────── */}
-            <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-                    Access
-                </p>
-                <FieldRow>
-                    <FormField
-                        control={control}
-                        name="role"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Role <span className="text-rose-500">*</span></FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select role" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="customer">Customer</SelectItem>
-                                        <SelectItem value="staff">Staff</SelectItem>
-                                        <SelectItem value="admin">Admin</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </FieldRow>
-            </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="Sex" error={msg(errors.sex)}>
+          <Select {...register('sex')}>
+            <option value="">Select</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </Select>
+        </Field>
+        <Field label="Age" error={msg(errors.age)}>
+          <Input
+            {...register('age', {
+              setValueAs: (v) => v === '' ? undefined : Number(v),
+            })}
+            type="number"
+            min={0}
+            placeholder="25"
+          />
+        </Field>
+      </div>
 
-        </div>
-    )
+      <div className="h-px bg-slate-100" />
+
+      {/* ── Access ──────────────────────────────────────────────────── */}
+      <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+        Access
+      </p>
+
+      <Field label="Role" required error={msg(errors.role)}>
+        <Select {...register('role')}>
+          <option value="staff">Staff</option>
+          <option value="admin">Admin</option>
+        </Select>
+      </Field>
+
+    </div>
+  )
 }
