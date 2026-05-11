@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useMemo, useTransition } from 'react'
+import { useMemo, useTransition, useState } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import AddUsersDialog from '@/components/admin/users/AddUsersDialog'
-import EditUserDialog from '@/components/admin/users/EditUserDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { deleteUser } from '@/lib/users'
 import type { AdminUser } from '@/types/users'
 
 type Row = {
@@ -32,14 +31,16 @@ const getRoleVariant = (role: string): BadgeVariant => {
 }
 
 export default function UsersClient({ users }: { users: AdminUser[] }) {
-    const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
     const [isPending, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
 
     const handleDelete = (row: Row) => {
         startTransition(async () => {
-            console.log('deleted')
             setDeleteError(null)
+            const result = await deleteUser(row.user_id)
+            if (!result.success) {
+                setDeleteError(result.message ?? 'Failed to delete user.')
+            }
         })
     }
 
@@ -50,8 +51,8 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
             email: u.email ?? '—',
             phone: u.phone_text ?? '—',
             role: u.role,
-            points: u.total_points,                                         
-            joined: new Date(u.member_since).toLocaleDateString(),          
+            points: u.total_points,
+            joined: new Date(u.member_since).toLocaleDateString(),
             raw: u,
         }))
     }, [users])
@@ -87,8 +88,8 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
         <section className="min-h-screen bg-slate-50 px-6 py-10">
             <PageHeader
                 eyebrow="People"
-                title="Customer"
-                subtitle="Manage your registered customers and staff"
+                title="Customers"
+                subtitle="View your registered customers"
             />
 
             {deleteError && (
@@ -97,23 +98,13 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                 </div>
             )}
 
-    
-
-            <EditUserDialog
-                user={editingUser}
-                open={!!editingUser}
-                onClose={() => setEditingUser(null)}
-            />
-
             <DataTable<Row>
                 data={rows}
                 columns={columns}
                 searchKeys={['name', 'email', 'phone']}
                 filterKey="role"
-                filterOptions={['All', 'customer',]}
                 defaultSortKey="name"
                 getRowId={(row) => row.user_id}
-                onEdit={(row) => setEditingUser(row.raw)}
                 onDelete={handleDelete}
                 expandedRowRender={(row) => {
                     const u = row.raw
@@ -131,7 +122,7 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                             </div>
 
                             {/* DEFAULT ADDRESS */}
-                            {u.default_address && (                                  
+                            {u.default_address && (
                                 <div>
                                     <h4 className="font-semibold text-slate-700">Default Address</h4>
                                     <div className="mt-1 border rounded-lg p-3 text-slate-600">
@@ -146,7 +137,7 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                             )}
 
                             {/* POINTS SUMMARY */}
-                            {u.total_orders > 0 && (                                    
+                            {u.total_orders > 0 && (
                                 <div>
                                     <h4 className="font-semibold text-slate-700">Points Summary</h4>
                                     <ul className="mt-1 space-y-1 text-slate-600">
