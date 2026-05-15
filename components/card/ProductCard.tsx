@@ -3,9 +3,10 @@
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import type { ProductCatalogItem } from '@/types/product'
-import { getPublicImageUrl } from '@/helper/getPublicImageUrl';
+import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Package } from 'lucide-react'
 
 type Props = {
   product: ProductCatalogItem
@@ -17,10 +18,10 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   return (
     <Link href={`/product/${product.slug}`} className="w-full">
       <Card className="w-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group">
-        
-        {/* Badge */}
-        {product.wholesale === true && (
-          <div className="absolute top-0 right-0 bg-[#900036] text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10">
+
+        {product.has_wholesale && (
+          <div className="absolute top-0 right-0 bg-[#900036] text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
+            <Package className="w-3 h-3" />
             Wholesale
           </div>
         )}
@@ -47,6 +48,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             ${product.final_price.toFixed(2)}
           </p>
 
+          {/* Sale discount — product-level percentage off */}
           {hasDiscount && (
             <div className="flex items-center justify-between flex-wrap gap-1">
               <span className="text-xs text-gray-400 line-through">
@@ -56,6 +58,13 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                 -{product.discount}%
               </span>
             </div>
+          )}
+
+          {/* Wholesale nudge — shows threshold and discount when has_wholesale is true */}
+          {product.has_wholesale && product.wholesale_min_qty && product.wholesale_discount_percent && (
+            <p className="text-xs text-[#900036] font-medium">
+              Buy {product.wholesale_min_qty}+ for {product.wholesale_discount_percent}% off
+            </p>
           )}
         </CardContent>
 

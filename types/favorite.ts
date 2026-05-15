@@ -10,12 +10,20 @@ export type FavoriteVariantAttribute = {
   value: string;
 };
 
+export type FavoritePricingTier = {
+  label: string;
+  min_quantity: number;
+  discount_percent: number;
+  computed_price: number;
+};
+
 export type FavoriteVariant = {
   variant_id: number;
   sku: string | null;
   price: number;
   final_price: number;
   stock: number;
+  pricing_tiers: FavoritePricingTier[];
   image_url: string[];
   attributes: FavoriteVariantAttribute[];
 };
@@ -36,11 +44,10 @@ export type FavoriteView = {
   description: string | null;
   slug: string;
   discount: number | null;
-  wholesale: boolean;
   is_active: boolean;
   type: string | null;
 
-  // Category 
+  // Category
   category: FavoriteCategory | null;
 
   // Variants

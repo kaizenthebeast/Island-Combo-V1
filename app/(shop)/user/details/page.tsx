@@ -7,3 +7,4 @@ const UserDetailsPage = () => {
 }
 
 export default UserDetailsPage
+
