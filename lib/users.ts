@@ -96,11 +96,11 @@ export const deleteAddress = async (addressId: number) => {
   return { success: true, status: 200, message: 'Address successfully deleted' };
 };
 
-export const getUserAddress = async (): Promise<Address[] | { success: false; status: number; message: string }> => {
+export const getUserAddress = async (): Promise<Address[]> => {
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+  if (!user) throw new Error('Unauthorized');
 
   const { data: addresses, error: addressError } = await supabase
     .from("addresses")
@@ -108,7 +108,7 @@ export const getUserAddress = async (): Promise<Address[] | { success: false; st
     .eq("user_id", user.id)
     .order("make_default", { ascending: false });
 
-  if (addressError) return { success: false, status: 403, message: addressError.message };
+  if (addressError) throw new Error(addressError.message);
 
   return (addresses ?? []).map((a) => ({
     ...a,
