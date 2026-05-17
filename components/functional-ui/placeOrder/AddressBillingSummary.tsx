@@ -1,20 +1,18 @@
 'use client'
-import React, { useEffect } from 'react'
-import { useCartStore } from '@/store/cartStore'
-import { useCheckoutStore } from '@/store/useCheckoutStore';
-import { calculateTotals } from '@/helper/pricing/calculateTotals';
 
+import React from 'react'
+import { useCartStore } from '@/store/cartStore'
+import { useCheckoutStore } from '@/store/useCheckoutStore'
+import { calculateTotals } from '@/helper/pricing/calculateTotals'
 
 const AddressBillingSummary = () => {
-  const { cart, totalQty, subtotal } = useCartStore();
-  const { promo, loyaltyPoints, loyaltyEnabled } = useCheckoutStore();
-  const { promoDiscount, total } = calculateTotals({
+  const { totalQty, subtotal } = useCartStore()
+  const { voucher, loyaltyPoints, loyaltyEnabled } = useCheckoutStore()
+  const { voucherDiscount, total } = calculateTotals({
     subtotal,
-    promo,
+    voucher,
     loyaltyDiscount: loyaltyEnabled ? loyaltyPoints : 0,
-  });
-
-
+  })
 
   return (
     <div className="w-full md:w-[350px]">
@@ -26,7 +24,7 @@ const AddressBillingSummary = () => {
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Discount</span>
-          <span className="text-green-600">-${promoDiscount.toFixed(2)}</span>
+          <span className="text-green-600">-${voucherDiscount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Loyalty points</span>
