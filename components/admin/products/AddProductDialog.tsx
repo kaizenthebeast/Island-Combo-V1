@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { AddProductForm } from '@/components/admin/products/forms/AddProductForm'
-import { AddProductFormValues } from '@/form-schema/addProductSchema'
+import type { ProductFormValues } from '@/form-schema/productSchema'
 
 type Props = {
   open: boolean
@@ -16,9 +16,10 @@ type Props = {
 }
 
 export default function AddProductDialog({ open, onClose }: Props) {
-  const router = useRouter();
-  const handleSuccess = (data: AddProductFormValues) => {
-    router.refresh();
+  const router = useRouter()
+
+  const handleSuccess = (data: ProductFormValues) => {
+    router.refresh()
     onClose()
   }
 

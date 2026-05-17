@@ -3,9 +3,9 @@ import { createClient } from './supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ProductCatalogItem, ProductDetails, AdminProduct } from '@/types/product'
 import type { VariantWithUploadedImages } from './product-upload'
-import { AddProductFormValues } from '@/form-schema/addProductSchema'
+import type { ProductFormValues } from '@/form-schema/productSchema'
 
-export type AddProductPayload = Omit<AddProductFormValues, 'variants'> & {
+export type AddProductPayload = Omit<ProductFormValues, 'variants'> & {
   variants: VariantWithUploadedImages[]
 }
 
@@ -13,7 +13,7 @@ export type UpdateProductPayload = {
   name: string
   slug: string
   description?: string
-  status: 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED'  
+  status: 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED'
   discount?: number | null
   category_id?: number
   type?: string
@@ -127,7 +127,7 @@ export const updateAdminProduct = async (
     name:        data.name,
     slug:        data.slug,
     description: data.description,
-    status:      data.status, 
+    status:      data.status,
     discount:    data.discount,
     category_id: data.category_id,
     type:        data.type,
@@ -158,13 +158,10 @@ export const updateAdminProduct = async (
 }
 
 // ─── ADMIN — SOFT DELETE ──────────────────────────────────────────────────────
-// Sets is_active = false instead of deleting the row so order history
-// referencing this product is preserved (auditable soft delete).
 
 export const softDeleteProduct = async (productId: number) => {
   const supabase = await createClient()
 
-  // First check the product exists
   const { count, error: countError } = await supabase
     .from('products')
     .select('product_id', { count: 'exact', head: true })
@@ -173,7 +170,6 @@ export const softDeleteProduct = async (productId: number) => {
   if (countError) throw new Error(countError.message)
   if (!count || count === 0) throw new Error('Product not found')
 
-  // Then soft delete by setting status to ARCHIVED
   const { error } = await supabase
     .from('products')
     .update({ status: 'ARCHIVED', updated_at: new Date().toISOString() })
@@ -201,4 +197,3 @@ export const deleteVariant = async (variantId: number) => {
   revalidatePath('/admin/products')
   return variantId
 }
-

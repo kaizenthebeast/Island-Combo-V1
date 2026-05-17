@@ -1,5 +1,5 @@
 import { createClient } from './supabase/client'
-import type { AddProductFormValues } from '@/form-schema/addProductSchema'
+import type { ProductFormValues } from '@/form-schema/productSchema'
 
 export type UploadedImage = {
   url: string
@@ -8,7 +8,7 @@ export type UploadedImage = {
 }
 
 export type VariantWithUploadedImages = Omit<
-  AddProductFormValues['variants'][number],
+  ProductFormValues['variants'][number],
   'images'
 > & {
   // variant_id is optional — present when updating an existing variant,
@@ -24,7 +24,7 @@ function generateFileName(file: File): string {
 }
 
 export const uploadVariantImages = async (
-  variants: AddProductFormValues['variants']
+  variants: ProductFormValues['variants']
 ): Promise<VariantWithUploadedImages[]> => {
   const supabase = createClient()
 

@@ -15,7 +15,7 @@ import {
   Step2Variants,
   Step3Details,
   ChevronLeft,
-  ChevronRight,
+  ChevronRight, 
   CheckIcon,
   AlertIcon,
   type Category,
