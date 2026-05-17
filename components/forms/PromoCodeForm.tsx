@@ -2,6 +2,8 @@
 
 import React from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { applyVoucher } from '@/lib/voucher'
+import { useCartStore } from '@/store/cartStore'
 import type { Voucher } from '@/types/voucher'
 
 type FormValues = {
@@ -16,6 +18,8 @@ type Props = {
 }
 
 const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
+  const { totalQty } = useCartStore()
+
   const {
     register,
     handleSubmit,
@@ -26,29 +30,16 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
   } = useForm<FormValues>()
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
+    const result = await applyVoucher(data.voucherCode, totalQty)
 
-    const result = await res.json()
-
-    if (!res.ok) {
+    if (!result.success) {
       setVoucher(null)
-      setError('voucherCode', {
-        message: result.error || 'Invalid voucher code',
-      })
+      setError('voucherCode', { message: result.message ?? 'Invalid voucher code' })
       return
     }
 
     clearErrors('voucherCode')
-    setVoucher(
-      result.voucher
-        ? { code: result.voucher.code, value: result.voucher.value }
-        : null
-    )
-
+    setVoucher(result.voucher ?? null)
     reset()
   }
 
