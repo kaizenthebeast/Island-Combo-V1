@@ -27,38 +27,43 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         )}
 
         {/* Image */}
-        <div className="relative w-full aspect-square overflow-hidden rounded-md bg-gray-50">
+        <div className="relative w-full rounded-md bg-gray-50 overflow-hidden" style={{ paddingBottom: '100%' }}>
           <Image
             src={getPublicImageUrl(product.image_url) ?? 'images/placeholder.png'}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105 bg-gray-100 rounded-md overflow-hidden"
+            className="object-cover transition-transform duration-300 group-hover:scale-105 rounded-md"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             priority
           />
         </div>
 
-        {/* Content */}
-        <CardContent className="px-0 pt-2 pb-0 space-y-1 flex-1">
-          <h3 className="text-xs sm:text-sm font-medium leading-snug line-clamp-2">
+        {/* Content — fixed height so all cards align regardless of discount */}
+        <CardContent className="px-0 pt-2 pb-0 flex flex-col">
+          <h3 className="text-xs sm:text-sm font-medium leading-snug line-clamp-2 mb-1">
             {product.name}
           </h3>
 
-          <p className="text-sm sm:text-base font-semibold">
-            ${product.final_price.toFixed(2)}
-          </p>
+          {/* Price row — always reserves space for both price and discount */}
+          <div className="mt-auto">
+            <p className="text-sm sm:text-base font-semibold">
+              ${product.final_price.toFixed(2)}
+            </p>
 
-          {/* Sale discount — product-level percentage off */}
-          {hasDiscount && (
-            <div className="flex items-center justify-between flex-wrap gap-1">
-              <span className="text-xs text-gray-400 line-through">
-                ${product.base_price.toFixed(2)}
-              </span>
-              <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
-                -{product.discount}%
-              </span>
+            {/* Always render this row to keep height consistent */}
+            <div className="flex items-center justify-between flex-wrap gap-1 h-5">
+              {hasDiscount ? (
+                <>
+                  <span className="text-xs text-gray-400 line-through">
+                    ${product.base_price.toFixed(2)}
+                  </span>
+                  <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
+                    -{product.discount}%
+                  </span>
+                </>
+              ) : null}
             </div>
-          )}
+          </div>
         </CardContent>
 
       </Card>
