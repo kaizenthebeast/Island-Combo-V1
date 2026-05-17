@@ -1,8 +1,10 @@
+export type ProductStatus = 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED'
+
 export type PricingTier = {
   label: string
   min_quantity: number
-  discount_percent: number  // % off base price e.g. 20 = 20% off
-  computed_price?: number   // pre-computed by SQL for convenience
+  discount_percent: number
+  computed_price?: number
 }
 
 export type ProductCatalogItem = {
@@ -17,8 +19,8 @@ export type ProductCatalogItem = {
   image_url: string | null
   has_wholesale: boolean
   wholesale_min_qty: number | null
-  wholesale_discount_percent: number | null  // % off base price
-  wholesale_price: number | null             // pre-computed by SQL
+  wholesale_discount_percent: number | null
+  wholesale_price: number | null
 }
 
 export type ProductDetails = {
@@ -27,7 +29,7 @@ export type ProductDetails = {
   description: string | null
   slug: string
   discount: number | null
-  is_active: boolean
+  status: ProductStatus
 
   category: {
     category_id: number
@@ -60,8 +62,7 @@ export type AdminProduct = {
   slug: string
   description: string | null
   type: string
-
-  is_active: boolean
+  status: ProductStatus   
   discount: number
 
   category: {
@@ -105,21 +106,19 @@ export type AdminProduct = {
   }[]
 }
 
-
-
 export type UpdateProductPayload = {
   name?: string
   description?: string | null
   slug?: string
-  is_active?: boolean
+  status?: ProductStatus
   discount?: number | null
   category_id?: number | null
   product_details?: {
-    id?: number               // if id exists → upsert, no id → insert
+    id?: number
     attribute_name: string
     attribute_value: string
   }[]
-  deleted_detail_ids?: number[] // ids to remove
+  deleted_detail_ids?: number[]
 }
 
 export type UpdateVariantPayload = {
