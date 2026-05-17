@@ -3,7 +3,6 @@
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editCategorySchema, EditCategoryFormValues } from '@/form-schema/categorySchema'
-import { updateCategory } from '@/lib/category'
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
 import type { Category } from '@/types/category'
 
@@ -36,10 +35,16 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
   })
 
   const onSubmit = async (data: EditCategoryFormValues) => {
-    const result = await updateCategory(selectedCategory.id, data)
+    const res = await fetch('/api/category', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selectedCategory.id, ...data }),
+    })
 
-    if (!result.success) {
-      setError('root', { message: result.message })
+    const json = await res.json()
+
+    if (!json.success) {
+      setError('root', { message: json.message })
       return
     }
 
@@ -133,7 +138,7 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
             disabled={isSubmitting}
             className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
           >
-            {isSubmitting ? 'Saving…' : 'Save changes'}
+            {isSubmitting ? 'Saving...' : 'Save changes'}
           </button>
         </div>
 

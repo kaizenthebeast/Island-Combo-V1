@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { getFavorite, addFavorite, removeFavorite } from '@/lib/favorite';
 import { FavoriteView } from '@/types/favorite';
 
 type FavoriteState = {
@@ -20,12 +19,15 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
 
     fetchFavorite: async () => {
         try {
-            const res = await getFavorite();
-            if (!res) {
-                console.error('Error fetching the favorite');
+            const res = await fetch('/api/favorite')
+            const json = await res.json()
+
+            if (!json.success) {
+                set({ error: json.message });
                 return;
             }
-            set({ favorites: res, totalFavQty: res.length, error: null });
+
+            set({ favorites: json.data, totalFavQty: json.data.length, error: null });
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to fetch favorites';
             set({ error: message });
@@ -35,7 +37,19 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
     addFavorite: async (productId) => {
         const prevQty = get().totalFavQty;
         try {
-            await addFavorite(productId);
+            const res = await fetch('/api/favorite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId }),
+            })
+
+            const json = await res.json()
+
+            if (!json.success) {
+                set({ error: json.message });
+                return;
+            }
+
             set({ totalFavQty: prevQty + 1, error: null });
             // Re-fetch to get the full FavoriteView with variants
             await get().fetchFavorite();
@@ -55,10 +69,21 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
             error: null,
         }))
         try {
-            await removeFavorite(productId);
+            const res = await fetch('/api/favorite', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId }),
+            })
+
+            const json = await res.json()
+
+            if (!json.success) {
+                // Rollback on API error
+                set({ favorites: prevFavorites, totalFavQty: prevQty, error: json.message });
+            }
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to remove favorite';
-            // Rollback
+            // Rollback on network error
             set({ favorites: prevFavorites, totalFavQty: prevQty, error: message });
         }
     },

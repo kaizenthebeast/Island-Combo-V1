@@ -3,7 +3,6 @@
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addCategorySchema, AddCategoryFormValues } from '@/form-schema/categorySchema'
-import { createCategory } from '@/lib/category'
 import { Field, Input } from './CategoryUIForm'
 
 type Props = {
@@ -28,10 +27,16 @@ export function AddCategoryForm({ onSuccess, onCancel }: Props) {
   })
 
   const onSubmit = async (data: AddCategoryFormValues) => {
-    const result = await createCategory(data)
+    const res = await fetch('/api/category', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
 
-    if (!result.success) {
-      setError('root', { message: result.message })
+    const json = await res.json()
+
+    if (!json.success) {
+      setError('root', { message: json.message })
       return
     }
 
@@ -124,7 +129,7 @@ export function AddCategoryForm({ onSuccess, onCancel }: Props) {
             disabled={isSubmitting}
             className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
           >
-            {isSubmitting ? 'Creating…' : 'Create category'}
+            {isSubmitting ? 'Creating...' : 'Create category'}
           </button>
         </div>
 

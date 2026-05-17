@@ -1,3 +1,8 @@
+export const REVIEW_CONFIG = {
+  PAGE_SIZE: 10,     // how many reviews per page
+  MAX_PAGE_SIZE: 50, // hard cap to prevent abuse
+} as const
+
 export type ProductReview = {
   id: number;
   user_id: string;
@@ -42,4 +47,25 @@ export type UpdateReviewPayload = {
   rating?: number;
   title?: string;
   body?: string;
+};
+
+// --- Pagination & Stats (added for paginated review system) ---
+
+export type PaginatedReviews = {
+  reviews: ProductReview[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export type RatingCount = {
+  star: number;
+  count: number;
+};
+
+export type ReviewStats = {
+  avgRating: number;
+  ratingCounts: RatingCount[];
+  total: number;
 };

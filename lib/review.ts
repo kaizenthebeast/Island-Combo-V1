@@ -1,9 +1,13 @@
 'use server'
 
 import { createClient } from './supabase/server'
-import type { ProductReview, AddReviewPayload, UpdateReviewPayload } from '@/types/review'
+import type { ProductReview, PaginatedReviews, AddReviewPayload, UpdateReviewPayload, ReviewStats } from '@/types/review'
 
-export const getProductReviews = async (slug: string): Promise<ProductReview[]> => {
+export const getProductReviews = async (
+  slug: string,
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedReviews> => {
   const supabase = await createClient()
 
   // Step 1: Get product_id from slug
@@ -16,10 +20,14 @@ export const getProductReviews = async (slug: string): Promise<ProductReview[]> 
   if (productError) throw new Error(productError.message)
   if (!product) throw new Error('Product not found')
 
-  // Step 2: Fetch reviews using product_id
-  const { data, error } = await supabase
+  const from = (page - 1) * limit
+  const to = from + limit - 1
+
+  // Step 2: Fetch paginated reviews using product_id
+  const { data, error, count } = await supabase
     .from('reviews')
-    .select(`
+    .select(
+      `
       *,
       profile (
         first_name,
@@ -31,14 +39,57 @@ export const getProductReviews = async (slug: string): Promise<ProductReview[]> 
         image_path,
         sort_order
       )
-    `)
+    `,
+      { count: 'exact' }
+    )
     .eq('product_id', product.product_id)
     .order('helpful_count', { ascending: false })
     .order('created_at', { ascending: false })
+    .range(from, to)
 
   if (error) throw new Error(error.message)
 
-  return data ?? []
+  const total = count ?? 0
+
+  return {
+    reviews: (data as ProductReview[]) ?? [],
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  }
+}
+
+export const getReviewStats = async (slug: string): Promise<ReviewStats> => {
+  const supabase = await createClient()
+
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('product_id')
+    .eq('slug', slug)
+    .single()
+
+  if (productError) throw new Error(productError.message)
+  if (!product) throw new Error('Product not found')
+
+  // Only fetch ratings — no joins, very cheap query
+  const { data, error } = await supabase
+    .from('reviews')
+    .select('rating')
+    .eq('product_id', product.product_id)
+
+  if (error) throw new Error(error.message)
+
+  const total = data?.length ?? 0
+  const avgRating = total > 0
+    ? data.reduce((sum, r) => sum + r.rating, 0) / total
+    : 0
+  const ratingCounts = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: data?.filter((r) => r.rating === star).length ?? 0,
+  }))
+
+  return { avgRating, ratingCounts, total }
 }
 
 export const getReviewEligibility = async (product_id: number, order_id: number) => {
