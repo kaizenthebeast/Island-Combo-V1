@@ -3,7 +3,7 @@
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils'
-import type { VoucherFormValues } from '@/form-schema/voucherSchema'
+import type { AddVoucherFormValues } from '@/form-schema/voucherSchema'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -81,7 +81,7 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
 // ─── VoucherFields ────────────────────────────────────────────────────────────
 
 export function VoucherFields() {
-  const { register, formState: { errors } } = useFormContext<VoucherFormValues>()
+  const { register, formState: { errors } } = useFormContext<AddVoucherFormValues>()
 
   return (
     <div className="flex flex-col gap-5">
