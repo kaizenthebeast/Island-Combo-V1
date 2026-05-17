@@ -4,9 +4,7 @@ import React, { useState, useEffect, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editProductSchema, EditProductFormValues } from '@/form-schema/editProductSchema'
-import { updateAdminProduct } from '@/lib/product'
 import { uploadVariantImages } from '@/lib/product-upload'
-import { getAllSubCategories } from '@/lib/product'
 import type { AdminProduct } from '@/types/product'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 
@@ -23,7 +21,7 @@ import {
   type Category,
 } from './ProductUIForm'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ---------------------------------------------------------------
 
 const STEP_FIELDS: (keyof EditProductFormValues)[][] = [
   ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
@@ -31,9 +29,7 @@ const STEP_FIELDS: (keyof EditProductFormValues)[][] = [
   ['product_details'],
 ]
 
-
-
-// ─── Map AdminProduct → form default values ───────────────────────────────────
+// --- Map AdminProduct -> form default values ----------------------------------
 
 function toFormValues(product: AdminProduct): EditProductFormValues {
   console.log(product)
@@ -86,7 +82,7 @@ function toFormValues(product: AdminProduct): EditProductFormValues {
   }
 }
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+// --- Props -------------------------------------------------------------------
 
 interface EditProductFormProps {
   product: AdminProduct
@@ -94,7 +90,7 @@ interface EditProductFormProps {
   onCancel: () => void
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// --- Component ---------------------------------------------------------------
 
 export function EditProductForm({ product, onSuccess, onCancel }: EditProductFormProps) {
   const [step, setStep] = useState(0)
@@ -104,9 +100,18 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   const [saveError, setSaveError] = useState<string | null>(null)
   const [stepErrorCount, setStepErrorCount] = useState(0)
 
+  // Fetch sub-categories from API.
+  // /api/category returns all categories; filter to sub-categories (parent_id != null)
+  // using an inline type so we never conflict with the local Category from ProductUIForm.
   useEffect(() => {
-    getAllSubCategories()
-      .then((data) => setCategories(data ?? []))
+    fetch('/api/category')
+      .then((res) => res.json())
+      .then((json) => {
+        if (!json.success) throw new Error(json.message)
+        const subs = (json.data as { id: number; name: string; parent_id: number | null }[])
+          .filter((c) => c.parent_id !== null) as unknown as Category[]
+        setCategories(subs)
+      })
       .finally(() => setLoadingCategories(false))
   }, [])
 
@@ -141,9 +146,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
       try {
         const data = methods.getValues()
 
-        // ── STEP 1: Upload new images for all variants ─────────────────────
-        // Build a map of variant index → newly uploaded Storage paths.
-        // Existing images (path already in Storage) are passed through as-is.
+        // Step 1: Upload new images for all variants
         const variantUploadedPaths: Record<number, string[]> = {}
 
         for (let i = 0; i < data.variants.length; i++) {
@@ -159,8 +162,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                 stock: variant.stock ?? 0,
                 is_active: variant.is_active ?? true,
                 attributes: variant.attributes ?? [],
-                // Ensure label is always string — fallback to 'wholesale'
-                // since retail is auto-seeded by the RPC and never in the form
                 pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
                   ...t,
                   label: t.label ?? 'wholesale',
@@ -173,52 +174,56 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
           }
         }
 
-        // ── STEP 2: Call the update RPC with the full resolved payload ─────
-        // updateAdminProduct is called ONCE after all uploads complete —
-        // not inside the upload loop above.
-        await updateAdminProduct(product.product_id, {
-          name: data.name,
-          slug: data.slug,
-          description: data.description,
-          is_active: data.is_active,
-          discount: data.discount,
-          category_id: data.category_id,
-          product_details: data.product_details,
-          deleted_detail_ids: data.deleted_detail_ids,
+        // Step 2: PATCH /api/product with the full resolved payload
+        const res = await fetch('/api/product', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: product.product_id,
+            name: data.name,
+            slug: data.slug,
+            description: data.description,
+            is_active: data.is_active,
+            discount: data.discount,
+            category_id: data.category_id,
+            product_details: data.product_details,
+            deleted_detail_ids: data.deleted_detail_ids,
 
-          variants: data.variants.map((variant, i) => {
-            const images = variant.images ?? []
+            variants: data.variants.map((variant, i) => {
+              const images = variant.images ?? []
 
-            // Existing images have a path but no file object
-            const existingPaths = images
-              .filter((img: any) => !img.file && img.path)
-              .map((img: any) => img.path as string)
+              const existingPaths = images
+                .filter((img: any) => !img.file && img.path)
+                .map((img: any) => img.path as string)
 
-            // Merge existing + newly uploaded paths for this variant
-            const allImagePaths = [...existingPaths, ...variantUploadedPaths[i]]
+              const allImagePaths = [...existingPaths, ...variantUploadedPaths[i]]
 
-            return {
-              variant_id: variant.variant_id,
-              sku: variant.sku,
-              price: variant.price,
-              stock: variant.stock ?? 0,
-              is_active: variant.is_active ?? true,
-              pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
-                ...t,
-                label: t.label ?? 'wholesale',
-              })),
-              deleted_tier_ids: variant.deleted_tier_ids ?? [],
-              attributes: (variant.attributes ?? []).map((a: any) => ({
-                id: a.id,
-                name: a.attribute_name,
-                value: a.attribute_value,
-              })),
-              deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
-              images: allImagePaths,
-              deleted_image_paths: variant.deleted_image_paths ?? [],
-            }
+              return {
+                variant_id: variant.variant_id,
+                sku: variant.sku,
+                price: variant.price,
+                stock: variant.stock ?? 0,
+                is_active: variant.is_active ?? true,
+                pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
+                  ...t,
+                  label: t.label ?? 'wholesale',
+                })),
+                deleted_tier_ids: variant.deleted_tier_ids ?? [],
+                attributes: (variant.attributes ?? []).map((a: any) => ({
+                  id: a.id,
+                  name: a.attribute_name,
+                  value: a.attribute_value,
+                })),
+                deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
+                images: allImagePaths,
+                deleted_image_paths: variant.deleted_image_paths ?? [],
+              }
+            }),
           }),
-        } as any)
+        })
+
+        const json = await res.json()
+        if (!json.success) throw new Error(json.message)
 
         onSuccess()
       } catch (err: any) {
@@ -279,7 +284,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                 {isPending ? (
                   <>
                     <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Saving…
+                    Saving...
                   </>
                 ) : (
                   <><CheckIcon /> Save changes</>

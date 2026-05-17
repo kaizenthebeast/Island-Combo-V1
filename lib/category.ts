@@ -1,10 +1,9 @@
-'use server'
-
 import { createClient } from './supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Category } from '@/types/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
 
+// ─── READ ─────────────────────────────────────────────────────────────────────
 
 export const getCategories = async (): Promise<Category[]> => {
     const supabase = await createClient()
@@ -23,10 +22,22 @@ export const getCategories = async (): Promise<Category[]> => {
     }))
 }
 
+export const getAllSubCategories = async () => {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('category')
+        .select('category_id, name')
+        .not('parent_id', 'is', null)
+    if (error) throw new Error(error.message)
+    return data
+}
+
+
+
+// ─── CREATE ───────────────────────────────────────────────────────────────────
+
 export const createCategory = async (data: AddCategoryFormValues) => {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_create_category', {
         p_name: data.name,
@@ -40,10 +51,10 @@ export const createCategory = async (data: AddCategoryFormValues) => {
     return { success: true, status: 201, message: 'Category successfully created' }
 }
 
+// ─── UPDATE ───────────────────────────────────────────────────────────────────
+
 export const updateCategory = async (id: number, data: EditCategoryFormValues) => {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_update_category', {
         p_id: id,
@@ -59,10 +70,10 @@ export const updateCategory = async (id: number, data: EditCategoryFormValues) =
     return { success: true, status: 200, message: 'Category successfully updated' }
 }
 
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+
 export const deleteCategory = async (id: number, type: 'category') => {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
     const { data: result, error } = await supabase.rpc('admin_delete_category', {
         p_id: id,

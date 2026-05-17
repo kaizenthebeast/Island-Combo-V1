@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addProductSchema, AddProductFormValues } from '@/form-schema/addProductSchema'
-import { addAdminProduct, getAllSubCategories } from '@/lib/product'
 import { uploadVariantImages } from '@/lib/product-upload'
 
 import {
@@ -21,7 +20,7 @@ import {
   type Category,
 } from './ProductUIForm'
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// --- Constants ---------------------------------------------------------------
 
 const STEP_FIELDS: (keyof AddProductFormValues)[][] = [
   ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
@@ -29,14 +28,14 @@ const STEP_FIELDS: (keyof AddProductFormValues)[][] = [
   ['details'],
 ]
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+// --- Props -------------------------------------------------------------------
 
 interface AddProductFormProps {
   onSuccess?: (data: AddProductFormValues) => void
   onCancel?: () => void
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// --- Component ---------------------------------------------------------------
 
 export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => {
   const [step, setStep] = useState(0)
@@ -47,13 +46,23 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
   const [saveError, setSaveError] = useState<string | null>(null)
   const [stepErrorCount, setStepErrorCount] = useState(0)
 
+  // Fetch sub-categories from API.
+  // /api/category returns all categories; filter to sub-categories (parent_id != null)
+  // on the raw response before casting, so we never touch the local Category type.
   useEffect(() => {
-    getAllSubCategories()
-      .then((data) => setCategories(data ?? []))
+    fetch('/api/category')
+      .then((res) => res.json())
+      .then((json) => {
+        if (!json.success) throw new Error(json.message)
+        const subs = (json.data as { id: number; name: string; parent_id: number | null }[])
+          .filter((c) => c.parent_id !== null) as unknown as Category[]
+        setCategories(subs)
+      })
       .catch((err) => setCategoryError(err.message))
       .finally(() => setLoadingCategories(false))
   }, [])
 
+  // Form setup
   const methods = useForm<AddProductFormValues>({
     resolver: zodResolver(addProductSchema),
     defaultValues: {
@@ -76,6 +85,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
     setStepErrorCount(count)
   }, [errors, step])
 
+  // Navigation
   const goNext = async () => {
     const valid = await trigger(STEP_FIELDS[step] as any)
     if (valid) { setStep((s) => s + 1); setStepErrorCount(0) }
@@ -87,13 +97,23 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
     setSaveError(null)
   }
 
+  // Submit
   const handleSave = async () => {
     setSaving(true)
     setSaveError(null)
     try {
       const data = methods.getValues()
       const variantsWithPaths = await uploadVariantImages(data.variants)
-      await addAdminProduct({ ...data, variants: variantsWithPaths })
+
+      const res = await fetch('/api/product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, variants: variantsWithPaths }),
+      })
+
+      const json = await res.json()
+      if (!json.success) throw new Error(json.message)
+
       onSuccess?.(data)
     } catch (err: any) {
       setSaveError(err.message ?? 'Something went wrong. Please try again.')
@@ -126,7 +146,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
         <div className="max-h-[54vh] overflow-y-auto pr-1 -mr-1">
           {step === 0 && <Step1BasicInfo categories={loadingCategories ? [] : categories} />}
           {step === 1 && <Step2Variants />}
-          {step === 2 && <Step3Details />}  
+          {step === 2 && <Step3Details />}
         </div>
 
         {/* Navigation */}
@@ -162,7 +182,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
                 {saving ? (
                   <>
                     <span className="inline-block h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Saving…
+                    Saving...
                   </>
                 ) : (
                   <><CheckIcon /> Save product</>
