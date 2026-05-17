@@ -85,7 +85,6 @@ export type AdminUser = {
 }
 
 export type AdminStaff = {
-  // Identity
   user_id: string
   first_name: string | null
   last_name: string | null
@@ -97,18 +96,16 @@ export type AdminStaff = {
   role: 'staff' | 'admin'
   profile_url: string[] | null
   member_since: string
+  is_active: boolean 
 
-  // Default address
   default_address: string | null
   default_locality: string | null
   default_postal_code: string | null
   default_country: string | null
   total_addresses: number
 
-  // Meta
   last_refreshed_at: string
 }
-
 // Convenience type for the admin user list / table view (lighter subset)
 export type AdminUserRow = Pick<
   AdminUser,

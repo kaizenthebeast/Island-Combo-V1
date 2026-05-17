@@ -211,3 +211,41 @@ export const deleteUser = async (userId: string) => {
   revalidatePath('/admin/users')
   return { success: true, status: 200, message: 'User successfully deleted' } 
 }
+
+// ─── SOFT DELETE ──────────────────────────────────────────────────────────────
+
+export const softDeleteUser = async (userId: string) => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('profile')
+    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+
+  if (error) return { success: false, status: 403, message: error.message }
+
+  revalidatePath('/admin/users')
+  return { success: true, status: 200, message: 'User successfully deactivated' }
+}
+
+// ─── RESTORE ─────────────────────────────────────────────────────────────────
+
+export const restoreUser = async (userId: string) => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+
+  const { error } = await supabase
+    .from('profile')
+    .update({ is_active: true, updated_at: new Date().toISOString() })
+    .eq('user_id', userId)
+
+  if (error) return { success: false, status: 403, message: error.message }
+
+  revalidatePath('/admin/users')
+  return { success: true, status: 200, message: 'User successfully restored' }
+}

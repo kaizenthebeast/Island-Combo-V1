@@ -1,10 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editUserSchema, type EditUserFormValues } from '@/form-schema/userSchema'
-import { updateUser } from '@/lib/users'
+import { updateUser, restoreUser } from '@/lib/users' 
 import { UserFields } from './UserUIForm'
+import { ArchiveRestore } from 'lucide-react'          
 import type { AdminStaff } from '@/types/users'
 
 type Props = {
@@ -14,6 +16,8 @@ type Props = {
 }
 
 export function EditUserForm({ user, onSuccess, onCancel }: Props) {
+  const [isRestoring, setIsRestoring] = useState(false) 
+
   const methods = useForm<EditUserFormValues>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
@@ -31,13 +35,27 @@ export function EditUserForm({ user, onSuccess, onCancel }: Props) {
 
   const onSubmit = async (data: EditUserFormValues) => {
     const result = await updateUser(user.user_id, data)
-
     if (!result.success) {
       setError('root', { message: result.message })
       return
     }
-
     onSuccess()
+  }
+
+
+  const handleRestore = async () => {
+    setIsRestoring(true)
+    try {
+      const result = await restoreUser(user.user_id)
+      if (!result.success) throw new Error(result.message)
+      onSuccess()
+    } catch (err) {
+      setError('root', {
+        message: err instanceof Error ? err.message : 'Failed to restore user'
+      })
+    } finally {
+      setIsRestoring(false)
+    }
   }
 
   return (
@@ -49,6 +67,26 @@ export function EditUserForm({ user, onSuccess, onCancel }: Props) {
             <p className="text-[12px] text-rose-700 font-medium">
               {errors.root.message}
             </p>
+          </div>
+        )}
+
+      
+        {!user.is_active && (
+          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
+              <p className="text-[12px] text-amber-700 font-medium">
+                This staff member is deactivated and cannot access the system.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={isRestoring}
+              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+            >
+              {isRestoring ? 'Restoring…' : 'Restore'}
+            </button>
           </div>
         )}
 
