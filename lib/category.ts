@@ -97,3 +97,18 @@ export const softDeleteCategory = async (id: number) => {
   revalidatePath('/admin/categories')
   return id
 }
+
+// ───Restore Category  ───────────────────────────────────────────────────────────────────
+export const restoreCategory = async (id: number) => {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('category')
+    .update({ is_active: true })
+    .or(`category_id.eq.${id},parent_id.eq.${id}`)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/admin/categories')
+  return id
+}

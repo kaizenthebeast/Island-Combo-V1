@@ -1,9 +1,12 @@
 'use client'
 
+import { useState } from 'react'
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editCategorySchema, EditCategoryFormValues } from '@/form-schema/categorySchema'
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
+import { restoreCategory } from '@/lib/category'
+import { ArchiveRestore } from 'lucide-react'     
 import type { Category } from '@/types/category'
 
 type Props = {
@@ -17,6 +20,7 @@ const msg = (error: any): string | undefined => error?.message as string | undef
 
 export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, onCancel }: Props) {
   const isParent = selectedCategory.parent_id === null
+  const [isRestoring, setIsRestoring] = useState(false) 
 
   const methods = useForm<EditCategoryFormValues>({
     resolver: zodResolver(editCategorySchema),
@@ -28,11 +32,7 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
   })
 
   const { handleSubmit, setError, register, control, formState: { isSubmitting, errors } } = methods
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'subCategories',
-  })
+  const { fields, append, remove } = useFieldArray({ control, name: 'subCategories' })
 
   const onSubmit = async (data: EditCategoryFormValues) => {
     const res = await fetch('/api/category', {
@@ -51,6 +51,20 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
     onSuccess()
   }
 
+  const handleRestore = async () => {
+    setIsRestoring(true)
+    try {
+      await restoreCategory(selectedCategory.id)
+      onSuccess()
+    } catch (err) {
+      setError('root', {
+        message: err instanceof Error ? err.message : 'Failed to restore category'
+      })
+    } finally {
+      setIsRestoring(false)
+    }
+  }
+
   const filteredParentOptions = parentOptions.filter(
     (c) => c.category_id !== selectedCategory.id
   )
@@ -67,10 +81,27 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
           </div>
         )}
 
-        {/* Always show name field; show parent dropdown only for sub-categories */}
+        {!selectedCategory.is_active && (
+          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+            <div className="flex items-center gap-2">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
+              <p className="text-[12px] text-amber-700 font-medium">
+                This category is archived and hidden from the storefront.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={isRestoring}
+              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+            >
+              {isRestoring ? 'Restoring…' : 'Restore'}
+            </button>
+          </div>
+        )}
+
         <CategoryFields categories={isParent ? undefined : filteredParentOptions} />
 
-        {/* Sub-category management — only for parent categories */}
         {isParent && (
           <>
             {fields.length > 0 && (
