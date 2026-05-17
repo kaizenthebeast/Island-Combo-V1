@@ -1,4 +1,4 @@
-import { getAllParentCategories } from "@/lib/product"
+import { getAllParentCategories } from "@/lib/category"
 import {
   Carousel,
   CarouselContent,
@@ -11,7 +11,7 @@ import {
   Shirt,
   CalendarDays,
   Sofa,
-  ToyBrick ,
+  ToyBrick,
   Smartphone,
   Leaf,
   Tag,
@@ -29,7 +29,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "Bags & Accessories": ShoppingBag,
   "Events & Seasonal": CalendarDays,
   "Furniture & Home": Sofa,
-  "Kids & Toys": ToyBrick ,
+  "Kids & Toys": ToyBrick,
   "Electronics & Gadgets": Smartphone,
   "Lifestyle & Specialty": Leaf,
   "Promotions & Programs": Tag,

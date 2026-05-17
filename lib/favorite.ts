@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from './supabase/server'
 import type { FavoriteView } from '@/types/favorite'
 

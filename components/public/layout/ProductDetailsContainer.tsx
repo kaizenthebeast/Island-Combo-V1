@@ -26,4 +26,3 @@ const ProductDetailsContainer = async ({ slug }: Props) => {
     )
 }
 export default ProductDetailsContainer
-        

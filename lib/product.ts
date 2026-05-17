@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from './supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { ProductCatalogItem, ProductDetails, AdminProduct } from '@/types/product'
@@ -200,5 +201,4 @@ export const deleteVariant = async (variantId: number) => {
   revalidatePath('/admin/products')
   return variantId
 }
-
 

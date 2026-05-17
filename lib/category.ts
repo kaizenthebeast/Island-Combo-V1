@@ -1,3 +1,4 @@
+'use server'
 import { createClient } from './supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { Category } from '@/types/category'
@@ -30,6 +31,16 @@ export const getAllSubCategories = async () => {
         .not('parent_id', 'is', null)
     if (error) throw new Error(error.message)
     return data
+}
+
+export const getAllParentCategories = async () => {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('category')
+    .select('category_id, name')
+    .is('parent_id', null)
+  if (error) throw new Error(error.message)
+  return data
 }
 
 
