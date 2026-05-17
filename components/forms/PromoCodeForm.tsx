@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import type { Promo } from "@/types/promo";
+import type { Promo } from "@/types/voucher";
 
 type FormValues = {
     promoCode: string;

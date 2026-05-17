@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Promo } from "@/types/promo";
+import type { Promo } from "@/types/voucher";
 
 type CheckoutState = {
   promo: Promo | null;

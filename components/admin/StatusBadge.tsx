@@ -14,7 +14,7 @@
 
 import React from 'react'
 
-export type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'default'
+export type BadgeVariant = 'success' | 'warning' | 'danger' | 'error' | 'info' | 'default'
 
 interface StatusBadgeProps {
   /** Text displayed inside the badge */
@@ -28,10 +28,10 @@ const STYLES: Record<BadgeVariant, { pill: string; dot: string }> = {
   success: { pill: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500' },
   warning: { pill: 'bg-amber-50  text-amber-700  border border-amber-200',    dot: 'bg-amber-500'  },
   danger:  { pill: 'bg-red-50    text-red-600    border border-red-200',       dot: 'bg-red-400'   },
+  error:   { pill: 'bg-red-50    text-red-600    border border-red-200',       dot: 'bg-red-400'   },
   info:    { pill: 'bg-blue-50   text-blue-700   border border-blue-200',      dot: 'bg-blue-500'  },
   default: { pill: 'bg-slate-100 text-slate-600  border border-slate-200',     dot: 'bg-slate-400' },
 }
-
 export function StatusBadge({ status, variant, className = '' }: StatusBadgeProps) {
   const { pill, dot } = STYLES[variant]
 

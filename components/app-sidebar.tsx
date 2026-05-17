@@ -54,7 +54,7 @@ const navMain = [
     url: "#",
     icon: Megaphone,
     items: [
-      { title: "Promotion", url: "/admin/content-management/promotion", icon: Percent },
+      { title: "Voucher", url: "/admin/content-management/voucher", icon: Percent },
       { title: "Exclusion Management", url: "#", icon: ShieldX },
       { title: "Banner Management", url: "#", icon: ImagePlay },
       {

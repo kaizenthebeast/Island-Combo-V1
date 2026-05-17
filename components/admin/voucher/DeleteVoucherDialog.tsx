@@ -1,0 +1,100 @@
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Archive, AlertTriangle } from "lucide-react";
+
+interface DeleteVoucherDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  voucherCode: string;
+  onConfirm: () => void | Promise<void>;
+}
+
+const DeleteVoucherDialog = ({
+  open,
+  onOpenChange,
+  voucherCode,
+  onConfirm,
+}: DeleteVoucherDialogProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm();
+      onOpenChange(false);
+    } catch (error) {
+      // Error handled by parent via actionError banner in VoucherClient
+      console.error("Failed to archive voucher:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleOpenChange = (value: boolean) => {
+    if (!isDeleting) onOpenChange(value);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <div className="flex items-start gap-4">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <DialogTitle className="text-base leading-snug">
+                Archive voucher?
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">
+                  "{voucherCode}"
+                </span>{" "}
+                will be archived and can no longer be used at checkout. It can
+                be restored at any time from the edit panel.
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <DialogFooter className="flex gap-3 mt-2">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirm}
+            disabled={isDeleting}
+            className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+          >
+            {isDeleting ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Archiving…
+              </>
+            ) : (
+              <>
+                <Archive className="h-4 w-4" />
+                Archive voucher
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default DeleteVoucherDialog;

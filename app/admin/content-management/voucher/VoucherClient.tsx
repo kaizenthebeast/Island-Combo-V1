@@ -1,0 +1,170 @@
+'use client'
+
+import { useState, useMemo, useTransition } from 'react'
+import { PageHeader } from '@/components/admin/Pageheader'
+import { DataTable, ColumnDef } from '@/components/admin/DataTable'
+import AddVoucherDialog from '@/components/admin/voucher/AddVoucherDialog'
+import EditVoucherDialog from '@/components/admin/voucher/EditVoucherDialog'
+import DeleteVoucherDialog from '@/components/admin/voucher/DeleteVoucherDialog'
+import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { archiveVoucher, restoreVoucher } from '@/lib/voucher'
+import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/types/voucher'
+
+// ─── table row shape ──────────────────────────────────────────────────────────
+
+type TableRow = {
+  id: number
+  code: string
+  value: string               // formatted: "10%"
+  min_quantity: string        // formatted: "5 items" | "—"
+  expires_at: string          // formatted: "Dec 31, 2025" | "—"
+  effective_status: VoucherEffectiveStatus
+  raw: Voucher
+}
+
+// ─── status badge config — mirrors STATUS_BADGE in CategoryClient ─────────────
+
+const STATUS_BADGE: Record<VoucherEffectiveStatus, { label: string; variant: BadgeVariant }> = {
+  ACTIVE: { label: 'Active', variant: 'success' },
+  DRAFT: { label: 'Draft', variant: 'warning' },
+  EXPIRED: { label: 'Expired', variant: 'error' },
+  ARCHIVED: { label: 'Archived', variant: 'default' },
+}
+
+// ─── formatters ───────────────────────────────────────────────────────────────
+
+const formatDate = (iso: string | null): string => {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('en-PH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+// ─── component ────────────────────────────────────────────────────────────────
+
+export default function VoucherClient({ voucher }: { voucher: VoucherRow[] }) {
+  const [addOpen, setAddOpen] = useState(false)
+  const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null)
+  const [deletingRow, setDeletingRow] = useState<TableRow | null>(null)
+  const [restoringRow, setRestoringRow] = useState<TableRow | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
+
+  // ── archive ────────────────────────────────────────────────────────────────
+
+  const handleArchiveConfirm = (): Promise<void> => {
+    if (!deletingRow) return Promise.resolve()
+
+    return new Promise<void>((resolve, reject) => {
+      startTransition(async () => {
+        try {
+          await archiveVoucher(deletingRow.id)
+          setActionError(null)
+          setDeletingRow(null)
+          resolve()
+        } catch (err) {
+          const message = err instanceof Error ? err.message : 'Failed to archive voucher'
+          setActionError(message)
+          reject(err)
+        }
+      })
+    })
+  }
+
+
+  // ── rows ───────────────────────────────────────────────────────────────────
+
+  const rows: TableRow[] = useMemo(
+    () =>
+      voucher.map((v) => ({
+        id: v.id,
+        code: v.code,
+        value: `${v.value}%`,
+        min_quantity: v.min_quantity != null ? `${v.min_quantity} items` : '—',
+        expires_at: formatDate(v.expires_at),
+        effective_status: v.effective_status,
+        raw: v,
+      })),
+    [voucher],
+  )
+
+  // ── columns ────────────────────────────────────────────────────────────────
+
+  const columns: ColumnDef<TableRow>[] = [
+    { key: 'id', label: 'ID', width: '70px' },
+    { key: 'code', label: 'Code' },
+    { key: 'value', label: 'Discount', align: 'center' },
+    { key: 'min_quantity', label: 'Min. Qty', align: 'center' },
+    { key: 'expires_at', label: 'Expires', align: 'center' },
+    {
+      key: 'effective_status',
+      label: 'Status',
+      render: (v) => {
+        const { label, variant } =
+          STATUS_BADGE[v as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
+        return <StatusBadge status={label} variant={variant} />
+      },
+    },
+  ]
+
+  // ── render ─────────────────────────────────────────────────────────────────
+
+  return (
+    <section className="min-h-screen bg-slate-50 px-6 py-10">
+      <PageHeader
+        eyebrow="Promotions"
+        title="Vouchers"
+        subtitle="Manage discount vouchers and promo codes"
+        actions={[
+          { label: 'Add Voucher', onClick: () => setAddOpen(true), variant: 'primary' },
+        ]}
+      />
+
+      {actionError && (
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
+          <p className="text-[12px] font-medium text-rose-700">{actionError}</p>
+        </div>
+      )}
+
+      <AddVoucherDialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+      />
+
+      <EditVoucherDialog
+        open={!!editingVoucher}
+        onClose={() => setEditingVoucher(null)}
+        selectedVoucher={editingVoucher}
+      />
+
+      <DeleteVoucherDialog
+        open={!!deletingRow}
+        voucherCode={deletingRow?.code ?? ''}
+        onConfirm={handleArchiveConfirm}
+        onOpenChange={(open) => { if (!open) setDeletingRow(null) }}
+      />
+
+
+      <DataTable<TableRow>
+        data={rows}
+        columns={columns}
+        searchKeys={['code']}
+        filterKey="effective_status"
+        filterOptions={['All', 'ACTIVE', 'DRAFT', 'EXPIRED', 'ARCHIVED']}
+        defaultSortKey="code"
+        getRowId={(row) => row.id}
+        onEdit={(row) => setEditingVoucher(row.raw)}
+        onDelete={(row) => {
+          // ARCHIVED rows get restore action instead of archive
+          if (row.effective_status === 'ARCHIVED') {
+            setRestoringRow(row)
+          } else {
+            setDeletingRow(row)
+          }
+        }}
+      />
+    </section>
+  )
+}

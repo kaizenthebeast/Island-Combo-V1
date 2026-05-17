@@ -1,4 +1,4 @@
-import type { Promo } from "@/types/promo";
+import type { Promo } from "@/types/voucher";
 
 export function calculateTotals({subtotal,promo,loyaltyDiscount,}: {
   subtotal: number;
