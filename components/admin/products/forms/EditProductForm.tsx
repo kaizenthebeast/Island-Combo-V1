@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editProductSchema, EditProductFormValues } from '@/form-schema/editProductSchema'
+import { productSchema, type ProductFormValues } from '@/form-schema/ProductSchema'
 import { uploadVariantImages } from '@/lib/product-upload'
 import type { AdminProduct } from '@/types/product'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
@@ -23,21 +23,31 @@ import {
 
 // --- Constants ---------------------------------------------------------------
 
-const STEP_FIELDS: (keyof EditProductFormValues)[][] = [
-  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
+const STEP_FIELDS: (keyof ProductFormValues)[][] = [
+  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'status'],
   ['variants'],
   ['product_details'],
 ]
 
+// --- Helper: derive status from product data ---------------------------------
+// Handles legacy `is_active` boolean shape from AdminProduct until the type
+// is updated to reflect the new DB enum.
+
+function deriveStatus(product: AdminProduct): ProductFormValues['status'] {
+  const valid = ['ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']
+  if (valid.includes(product.status)) return product.status as ProductFormValues['status']
+  return 'ACTIVE'
+}
+
 // --- Map AdminProduct -> form default values ----------------------------------
 
-function toFormValues(product: AdminProduct): EditProductFormValues {
-  console.log(product)
+function toFormValues(product: AdminProduct): ProductFormValues {
   return {
+    product_id: product.product_id,
     name: product.name,
     slug: product.slug,
     description: product.description ?? undefined,
-    is_active: product.is_active,
+    status: deriveStatus(product),
     discount: product.discount,
     category_id: product.category?.category_id,
     type: product.type,
@@ -46,7 +56,7 @@ function toFormValues(product: AdminProduct): EditProductFormValues {
       id: d.id,
       attribute_name: d.attribute_name,
       attribute_value: d.attribute_value,
-      sort_order: 0,
+      sort_order: 0,  // AdminProduct.product_details has no sort_order; default to 0
     })),
 
     deleted_detail_ids: [],
@@ -56,17 +66,19 @@ function toFormValues(product: AdminProduct): EditProductFormValues {
       variant_id: v.variant_id,
       sku: v.sku,
       price: v.price,
-      stock: v.stock,
-      is_active: v.is_active,
+      stock: v.stock ?? 0,
+      is_active: v.is_active ?? true,
       pricing_tiers: v.pricing_tiers
         .filter((t) => t.label === 'wholesale')
         .map((t) => ({
+          // PricingTier has no id; omit so the RPC treats it as a new/replace
           label: 'wholesale' as const,
           min_quantity: t.min_quantity,
           discount_percent: t.discount_percent,
         })),
       deleted_tier_ids: [],
       attributes: v.attributes.map((a) => ({
+        id: a.id,
         attribute_name: a.name,
         attribute_value: a.value,
       })),
@@ -101,8 +113,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   const [stepErrorCount, setStepErrorCount] = useState(0)
 
   // Fetch sub-categories from API.
-  // /api/category returns all categories; filter to sub-categories (parent_id != null)
-  // using an inline type so we never conflict with the local Category from ProductUIForm.
   useEffect(() => {
     fetch('/api/category')
       .then((res) => res.json())
@@ -115,8 +125,8 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
       .finally(() => setLoadingCategories(false))
   }, [])
 
-  const methods = useForm({
-    resolver: zodResolver(editProductSchema),
+  const methods = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
     defaultValues: toFormValues(product),
     mode: 'onTouched',
   })
@@ -152,7 +162,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
         for (let i = 0; i < data.variants.length; i++) {
           const variant = data.variants[i]
           const images = variant.images ?? []
-          const newImages = images.filter((img: any) => !!img.file)
+          const newImages = images.filter((img) => !!img.file)
 
           if (newImages.length > 0) {
             const uploaded = await uploadVariantImages([
@@ -166,7 +176,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                   ...t,
                   label: t.label ?? 'wholesale',
                 })),
-              }
+              },
             ])
             variantUploadedPaths[i] = uploaded[0]?.images.map((img) => img.url) ?? []
           } else {
@@ -183,9 +193,10 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
             name: data.name,
             slug: data.slug,
             description: data.description,
-            is_active: data.is_active,
+            status: data.status,           // ← was is_active; now sends status enum
             discount: data.discount,
             category_id: data.category_id,
+            type: data.type,
             product_details: data.product_details,
             deleted_detail_ids: data.deleted_detail_ids,
 
@@ -193,8 +204,8 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
               const images = variant.images ?? []
 
               const existingPaths = images
-                .filter((img: any) => !img.file && img.path)
-                .map((img: any) => img.path as string)
+                .filter((img) => !img.file && img.path)
+                .map((img) => img.path as string)
 
               const allImagePaths = [...existingPaths, ...variantUploadedPaths[i]]
 
@@ -205,20 +216,24 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                 stock: variant.stock ?? 0,
                 is_active: variant.is_active ?? true,
                 pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
-                  ...t,
+                  id: t.id,
                   label: t.label ?? 'wholesale',
+                  min_quantity: t.min_quantity,
+                  discount_percent: t.discount_percent,
                 })),
                 deleted_tier_ids: variant.deleted_tier_ids ?? [],
-                attributes: (variant.attributes ?? []).map((a: any) => ({
+                attributes: (variant.attributes ?? []).map((a) => ({
                   id: a.id,
-                  name: a.attribute_name,
-                  value: a.attribute_value,
+                  attribute_name: a.attribute_name,
+                  attribute_value: a.attribute_value,
                 })),
                 deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
                 images: allImagePaths,
                 deleted_image_paths: variant.deleted_image_paths ?? [],
               }
             }),
+
+            deleted_variant_ids: data.deleted_variant_ids,
           }),
         })
 

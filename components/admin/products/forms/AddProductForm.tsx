@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addProductSchema, AddProductFormValues } from '@/form-schema/addProductSchema'
+import { productSchema, type ProductFormValues } from '@/form-schema/productSchema'
 import { uploadVariantImages } from '@/lib/product-upload'
 
 import {
@@ -22,16 +23,16 @@ import {
 
 // --- Constants ---------------------------------------------------------------
 
-const STEP_FIELDS: (keyof AddProductFormValues)[][] = [
-  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'is_active'],
+const STEP_FIELDS: (keyof ProductFormValues)[][] = [
+  ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'status'],
   ['variants'],
-  ['details'],
+  ['product_details'],
 ]
 
 // --- Props -------------------------------------------------------------------
 
 interface AddProductFormProps {
-  onSuccess?: (data: AddProductFormValues) => void
+  onSuccess?: (data: ProductFormValues) => void
   onCancel?: () => void
 }
 
@@ -63,18 +64,20 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
   }, [])
 
   // Form setup
-  const methods = useForm<AddProductFormValues>({
-    resolver: zodResolver(addProductSchema) as any,
+  const methods = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema) as Resolver<ProductFormValues>,
     defaultValues: {
       name: '',
       slug: '',
       description: '',
-      is_active: true,
+      status: 'ACTIVE',       // replaces is_active: true
       discount: null,
       type: '',
-      category_id: undefined, 
+      category_id: undefined,
+      product_details: [],    // was `details`
+      deleted_detail_ids: [],
+      deleted_variant_ids: [],
       variants: [makeBlankVariant([])],
-      details: [],
     },
     mode: 'onTouched',
   })
@@ -147,7 +150,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
         <div className="max-h-[54vh] overflow-y-auto pr-1 -mr-1">
           {step === 0 && <Step1BasicInfo categories={loadingCategories ? [] : categories} />}
           {step === 1 && <Step2Variants />}
-          {step === 2 && <Step3Details />}
+          {step === 2 && <Step3Details fieldName="product_details" />}
         </div>
 
         {/* Navigation */}
