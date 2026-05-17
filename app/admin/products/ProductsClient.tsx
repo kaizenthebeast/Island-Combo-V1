@@ -123,7 +123,7 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
                 columns={columns}
                 searchKeys={['name', 'category', 'product_id']}
                 filterKey="status"
-                filterOptions={['All', 'ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']}
+                filterOptions={['All', 'ACTIVE', 'ARCHIVED']}
                 defaultSortKey="name"
                 getRowId={(row) => row.product_id}
                 onDelete={(row) => setDeletingRow(row)}

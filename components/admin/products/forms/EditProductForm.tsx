@@ -6,8 +6,10 @@ import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, type ProductFormValues } from '@/form-schema/productSchema'
 import { uploadVariantImages } from '@/lib/product-upload'
+import { restoreProduct } from '@/lib/product' 
 import type { AdminProduct } from '@/types/product'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
+import { ArchiveRestore } from 'lucide-react' 
 
 import {
   StepIndicator,
@@ -22,23 +24,17 @@ import {
   type Category,
 } from './ProductUIForm'
 
-// --- Constants ---------------------------------------------------------------
-
 const STEP_FIELDS: (keyof ProductFormValues)[][] = [
   ['name', 'slug', 'description', 'category_id', 'type', 'discount', 'status'],
   ['variants'],
   ['product_details'],
 ]
 
-// --- Helper: derive status ---------------------------------------------------
-
 function deriveStatus(product: AdminProduct): ProductFormValues['status'] {
   const valid = ['ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']
   if (valid.includes(product.status)) return product.status as ProductFormValues['status']
   return 'ACTIVE'
 }
-
-// --- Map AdminProduct -> form default values ----------------------------------
 
 function toFormValues(product: AdminProduct): ProductFormValues {
   return {
@@ -50,17 +46,14 @@ function toFormValues(product: AdminProduct): ProductFormValues {
     discount: product.discount,
     category_id: product.category?.category_id,
     type: product.type,
-
     product_details: product.product_details.map((d, i) => ({
       id: d.id,
       attribute_name: d.attribute_name,
       attribute_value: d.attribute_value,
       sort_order: i + 1,
     })),
-
     deleted_detail_ids: [],
     deleted_variant_ids: [],
-
     variants: product.variants.map((v) => ({
       variant_id: v.variant_id,
       sku: v.sku,
@@ -85,22 +78,18 @@ function toFormValues(product: AdminProduct): ProductFormValues {
         preview: getPublicImageUrl(url) ?? url,
         is_primary: i === 0,
         sort_order: i,
-        path: url,   // existing Storage path — picked up by uploadVariantImages
+        path: url,
       })),
       deleted_image_paths: [],
     })),
   }
 }
 
-// --- Props -------------------------------------------------------------------
-
 interface EditProductFormProps {
   product: AdminProduct
   onSuccess: () => void
   onCancel: () => void
 }
-
-// --- Component ---------------------------------------------------------------
 
 export function EditProductForm({ product, onSuccess, onCancel }: EditProductFormProps) {
   const [step, setStep] = useState(0)
@@ -109,6 +98,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   const [isPending, startTransition] = useTransition()
   const [saveError, setSaveError] = useState<string | null>(null)
   const [stepErrorCount, setStepErrorCount] = useState(0)
+  const [isRestoring, setIsRestoring] = useState(false) 
 
   useEffect(() => {
     fetch('/api/category')
@@ -128,7 +118,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
     mode: 'onTouched',
   })
 
-  const { trigger, formState: { errors, isDirty } } = methods
+  const { trigger, formState: { errors, isDirty }, setError } = methods
 
   useEffect(() => {
     const count = STEP_FIELDS[step].filter((k) => !!errors[k as keyof typeof errors]).length
@@ -146,17 +136,24 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
     setSaveError(null)
   }
 
+ 
+  const handleRestore = async () => {
+    setIsRestoring(true)
+    try {
+      await restoreProduct(product.product_id)
+      onSuccess()
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to restore product')
+    } finally {
+      setIsRestoring(false)
+    }
+  }
+
   const handleSave = () => {
     startTransition(async () => {
       setSaveError(null)
-
       try {
         const data = methods.getValues()
-
-        // Upload all variant images in one pass.
-        // uploadVariantImages handles both cases:
-        //   - existing images (no file) → passes `path` through as-is
-        //   - new images (has file)     → uploads to Storage and returns path
         const variantsWithImages = await uploadVariantImages(data.variants)
 
         const res = await fetch('/api/product', {
@@ -174,7 +171,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
             product_details: data.product_details,
             deleted_detail_ids: data.deleted_detail_ids,
             deleted_variant_ids: data.deleted_variant_ids,
-
             variants: variantsWithImages.map((variant) => ({
               variant_id: variant.variant_id,
               sku: variant.sku,
@@ -194,8 +190,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                 attribute_value: a.attribute_value,
               })),
               deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
-              // images is now a flat string[] of Storage paths — both
-              // existing (passed through) and newly uploaded
               images: variant.images.map((img, i) => ({
                 url: img.url,
                 is_primary: img.is_primary ?? i === 0,
@@ -208,7 +202,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
 
         const json = await res.json()
         if (!json.success) throw new Error(json.message)
-
         onSuccess()
       } catch (err: any) {
         setSaveError(err.message ?? 'Something went wrong.')
@@ -220,13 +213,32 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
     <FormProvider {...methods}>
       <form className="flex flex-col" noValidate>
         <StepIndicator current={step} />
-
         <StepErrorBanner errorCount={stepErrorCount} />
 
         {saveError && (
           <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4">
             <span className="text-rose-500 shrink-0"><AlertIcon /></span>
             <p className="text-[12px] text-rose-700 font-medium">{saveError}</p>
+          </div>
+        )}
+
+      
+        {product.status === 'ARCHIVED' && step === 0 && (
+          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 mb-4">
+            <div className="flex items-center gap-2">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
+              <p className="text-[12px] text-amber-700 font-medium">
+                This product is archived and hidden from your storefront.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleRestore}
+              disabled={isRestoring}
+              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+            >
+              {isRestoring ? 'Restoring…' : 'Restore'}
+            </button>
           </div>
         )}
 

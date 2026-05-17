@@ -113,11 +113,11 @@ export const addAdminProduct = async (data: AddProductPayload) => {
   const payload = {
     ...data,
     variants: data.variants.map((v) => ({
-      price:         v.price,
-      stock:         v.stock,
-      is_active:     v.is_active,
-      attributes:    v.attributes,
-      images:        v.images,
+      price: v.price,
+      stock: v.stock,
+      is_active: v.is_active,
+      attributes: v.attributes,
+      images: v.images,
       pricing_tiers: v.pricing_tiers ?? [],
     })),
   }
@@ -138,37 +138,37 @@ export const updateAdminProduct = async (
   const supabase = await createClient()
 
   const payload = {
-    product_id:          productId,
-    name:                data.name,
-    slug:                data.slug,
-    description:         data.description,
-    status:              data.status,
-    discount:            data.discount,
-    category_id:         data.category_id,
-    type:                data.type,
-    details:             data.product_details ?? [],
-    deleted_detail_ids:  data.deleted_detail_ids ?? [],
+    product_id: productId,
+    name: data.name,
+    slug: data.slug,
+    description: data.description,
+    status: data.status,
+    discount: data.discount,
+    category_id: data.category_id,
+    type: data.type,
+    details: data.product_details ?? [],
+    deleted_detail_ids: data.deleted_detail_ids ?? [],
     deleted_variant_ids: data.deleted_variant_ids ?? [],
     variants: data.variants.map((v) => ({
       ...(v.variant_id ? { variant_id: v.variant_id } : {}),
-      price:                 v.price,
-      stock:                 v.stock,
-      is_active:             v.is_active,
-      pricing_tiers:         (v.pricing_tiers ?? []).map((t) => ({
+      price: v.price,
+      stock: v.stock,
+      is_active: v.is_active,
+      pricing_tiers: (v.pricing_tiers ?? []).map((t) => ({
         ...(t.id ? { id: t.id } : {}),
-        label:            t.label,
-        min_quantity:     t.min_quantity,
+        label: t.label,
+        min_quantity: t.min_quantity,
         discount_percent: t.discount_percent,
       })),
-      deleted_tier_ids:      v.deleted_tier_ids ?? [],
-      attributes:            (v.attributes ?? []).map((a) => ({
+      deleted_tier_ids: v.deleted_tier_ids ?? [],
+      attributes: (v.attributes ?? []).map((a) => ({
         ...(a.id ? { id: a.id } : {}),
-        attribute_name:  a.attribute_name,
+        attribute_name: a.attribute_name,
         attribute_value: a.attribute_value,
       })),
       deleted_attribute_ids: v.deleted_attribute_ids ?? [],
-      images:                v.images,
-      deleted_image_paths:   v.deleted_image_paths ?? [],
+      images: v.images,
+      deleted_image_paths: v.deleted_image_paths ?? [],
     })),
   }
 
@@ -177,6 +177,22 @@ export const updateAdminProduct = async (
 
   revalidatePath('/admin/products')
   return result as number
+}
+
+// ─── ADMIN — RESTORE ──────────────────────────────────────────────────────────
+
+export const restoreProduct = async (productId: number) => {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('products')
+    .update({ status: 'ACTIVE', updated_at: new Date().toISOString() })
+    .eq('product_id', productId)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/admin/products')
+  return productId
 }
 
 // ─── ADMIN — SOFT DELETE ──────────────────────────────────────────────────────

@@ -4,19 +4,16 @@ import {
   getCategories,
   createCategory,
   updateCategory,
-  deleteCategory,
+  softDeleteCategory, 
+  restoreCategory,    
 } from '@/lib/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
-
-// ─── Helper ───────────────────────────────────────────────────────────────────
 
 function apiError(message: string, status: number) {
   return NextResponse.json({ success: false, message }, { status })
 }
 
-// ─── GET /api/category — Fetch all categories (public) ───────────────────────
-// Returns a flat list; parent_id = null means top-level category.
-// No auth required — categories are public data.
+// ─── GET /api/category ────────────────────────────────────────────────────────
 
 export async function GET() {
   try {
@@ -28,8 +25,7 @@ export async function GET() {
   }
 }
 
-// ─── POST /api/category — Create a category (admin) ──────────────────────────
-// Body: AddCategoryFormValues — { name: string; subCategories?: { name: string }[] }
+// ─── POST /api/category ───────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,22 +36,16 @@ export async function POST(req: NextRequest) {
     if (!body.name?.trim()) return apiError('Category name is required', 400)
 
     const result = await createCategory(body)
+    if (!result.success) return apiError(result.message, result.status)
 
-    if (!result.success)
-      return apiError(result.message, result.status)
-
-    return NextResponse.json(
-      { success: true, message: result.message },
-      { status: result.status }
-    )
+    return NextResponse.json({ success: true, message: result.message }, { status: result.status })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return apiError(message, 500)
   }
 }
 
-// ─── PATCH /api/category — Update a category (admin) ─────────────────────────
-// Body: { id: number } & EditCategoryFormValues
+// ─── PATCH /api/category ──────────────────────────────────────────────────────
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -63,28 +53,40 @@ export async function PATCH(req: NextRequest) {
     if (!user) return apiError('Unauthorized', 401)
 
     const body: EditCategoryFormValues & { id: number } = await req.json()
-
     if (!body.id)           return apiError('Category id is required', 400)
     if (!body.name?.trim()) return apiError('Category name is required', 400)
 
     const { id, ...rest } = body
     const result = await updateCategory(id, rest)
+    if (!result.success) return apiError(result.message, result.status)
 
-    if (!result.success)
-      return apiError(result.message, result.status)
-
-    return NextResponse.json(
-      { success: true, message: result.message },
-      { status: result.status }
-    )
+    return NextResponse.json({ success: true, message: result.message }, { status: result.status })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return apiError(message, 500)
   }
 }
 
-// ─── DELETE /api/category — Delete a category (admin) ────────────────────────
-// Body: { id: number }
+// ─── PUT /api/category — Restore an archived category (admin) ────────────────
+
+export async function PUT(req: NextRequest) {
+  try {
+    const user = await requireUser()
+    if (!user) return apiError('Unauthorized', 401)
+
+    const body: { id: number } = await req.json()
+    if (!body.id) return apiError('Category id is required', 400)
+
+    await restoreCategory(body.id)
+
+    return NextResponse.json({ success: true, message: 'Category restored' }, { status: 200 })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error'
+    return apiError(message, 500)
+  }
+}
+
+// ─── DELETE /api/category — Soft delete a category (admin) ───────────────────
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -94,15 +96,9 @@ export async function DELETE(req: NextRequest) {
     const body: { id: number } = await req.json()
     if (!body.id) return apiError('Category id is required', 400)
 
-    const result = await deleteCategory(body.id, 'category')
+    await softDeleteCategory(body.id) // throws on error, returns id on success
 
-    if (!result.success)
-      return apiError(result.message, result.status)
-
-    return NextResponse.json(
-      { success: true, message: result.message },
-      { status: result.status }
-    )
+    return NextResponse.json({ success: true, message: 'Category archived' }, { status: 200 })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error'
     return apiError(message, 500)
