@@ -75,7 +75,7 @@ const AddressContainer = () => {
           </div>
 
           {/* ── Saved addresses ────────────────────────────────────────── */}
-          <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-4 bg-white">
+          <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-[#900036]" />
               <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
@@ -91,7 +91,7 @@ const AddressContainer = () => {
 
             {/* Error state */}
             {!loading && fetchError && (
-              <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
+              <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 ">
                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
                   <p className="text-sm text-rose-700 font-medium">{fetchError}</p>
@@ -128,15 +128,25 @@ const AddressContainer = () => {
           </div>
 
           {/* ── Add new address ────────────────────────────────────────── */}
-          <CheckoutAddress
-            title="Add New Address"
-            action="add"
-            onSuccess={fetchAddresses}
-          >
-            <Button className="rounded-full" variant="default">
-              + Add New Address
-            </Button>
-          </CheckoutAddress>
+          {addresses.length < 3 ? (
+            <CheckoutAddress
+              title="Add New Address"
+              action="add"
+              onSuccess={fetchAddresses}
+            >
+              <Button className="rounded-full" variant="default">
+                + Add New Address
+              </Button>
+            </CheckoutAddress>
+          ) : (
+            // Limit reached — show a notice instead of the add button
+            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-700 font-medium">
+                You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+              </p>
+            </div>
+          )}
 
           <Separator className="bg-gray-200" />
         </div>

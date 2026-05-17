@@ -10,6 +10,24 @@ export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, status: 401, message: 'Unauthorized' };
 
+  // ── Check address limit ─────────────────────────────────────────────────
+  // Users are allowed a maximum of 3 saved addresses. If the limit is
+  // reached we return an error before touching the database.
+  const { count, error: countError } = await supabase
+    .from('addresses')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  if (countError) return { success: false, status: 403, message: countError.message };
+
+  if ((count ?? 0) >= 3) {
+    return {
+      success: false,
+      status: 400,
+      message: 'You can only save up to 3 addresses. Please remove one before adding a new one.',
+    };
+  }
+
   if (addressInfo.makeDefault) {
     await supabase.from("addresses").update({ make_default: false }).eq("user_id", user.id);
   }

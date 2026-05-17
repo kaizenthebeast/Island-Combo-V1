@@ -2,23 +2,22 @@
 import { createClient } from './supabase/server';
 import type { FavoriteView } from '@/types/favorite';
 
-export const getFavorite = async (): Promise<FavoriteView[] | { success: false; status: number; message: string }> => {
-    const supabase = await createClient();
+export const getFavorite = async (): Promise<FavoriteView[]> => {
+  const supabase = await createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
 
-    const { data, error } = await supabase
-        .from('favorites_view')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('favorited_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('favorites_view')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('favorited_at', { ascending: false });
 
-    if (error) return { success: false, status: 403, message: error.message };
+  if (error) throw new Error(error.message);
 
-    return data as FavoriteView[];
+  return data as FavoriteView[];
 };
-
 export const addFavorite = async (productId: number) => {
     const supabase = await createClient();
 

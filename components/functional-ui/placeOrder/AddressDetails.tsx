@@ -25,7 +25,7 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
 
 
     return (
-        <>
+        <div className="flex justify-between">
             <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
                     <MapPin />
@@ -72,7 +72,7 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
                 onChange={() => setSelectedAddressId(address.id)}
                 className="w-5 h-5 accent-pink-600 cursor-pointer"
             />
-        </>
+        </div>
     );
 };
 
