@@ -1,31 +1,33 @@
-import { create } from "zustand";
-import type { Promo } from "@/types/voucher";
+import { create } from 'zustand'
+import type { Voucher } from '@/types/voucher'
+
+type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
 
 type CheckoutState = {
-  promo: Promo | null;
-  loyaltyEnabled: boolean;
-  loyaltyPoints: number;
+  voucher: AppliedVoucher | null
+  loyaltyEnabled: boolean
+  loyaltyPoints: number
 
-  setPromo: (promo: Promo | null) => void;
-  setLoyaltyPoints: (pts: number) => void;
-  toggleLoyalty: () => void;
-  resetCheckout: () => void;
-};
+  setVoucher: (voucher: AppliedVoucher | null) => void
+  setLoyaltyPoints: (pts: number) => void
+  toggleLoyalty: () => void
+  resetCheckout: () => void
+}
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({
-  promo: null,
+  voucher: null,
   loyaltyEnabled: true,
   loyaltyPoints: 3,
 
-  setPromo: (promo) => set({ promo }),
+  setVoucher: (voucher) => set({ voucher }),
   setLoyaltyPoints: (pts) => set({ loyaltyPoints: pts }),
 
   toggleLoyalty: () => set((state) => ({ loyaltyEnabled: !state.loyaltyEnabled })),
 
   resetCheckout: () =>
     set({
-      promo: null,
+      voucher: null,
       loyaltyEnabled: true,
       loyaltyPoints: 0,
     }),
-}));
+}))

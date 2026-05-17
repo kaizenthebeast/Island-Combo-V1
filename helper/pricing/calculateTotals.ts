@@ -1,15 +1,17 @@
-import type { Promo } from "@/types/voucher";
+import type { Voucher } from '@/types/voucher'
 
-export function calculateTotals({subtotal,promo,loyaltyDiscount,}: {
-  subtotal: number;
-  promo: Promo | null;
-  loyaltyDiscount: number;
+type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
+
+export function calculateTotals({ subtotal, voucher, loyaltyDiscount }: {
+  subtotal: number
+  voucher: AppliedVoucher | null
+  loyaltyDiscount: number
 }) {
-  const promoDiscount = promo ? (subtotal * promo.value) / 100 : 0;
-  const total = subtotal - promoDiscount - loyaltyDiscount;
+  const voucherDiscount = voucher ? (subtotal * voucher.value) / 100 : 0
+  const total = subtotal - voucherDiscount - loyaltyDiscount
 
   return {
-    promoDiscount,
+    voucherDiscount,
     total,
-  };
+  }
 }
