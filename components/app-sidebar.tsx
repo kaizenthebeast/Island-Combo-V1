@@ -31,7 +31,6 @@ const navMain = [
     items: [
       { title: "Products", url: "/admin/products", icon: Package },
       { title: "Category", url: "/admin/products/category", icon: Tag },
-      { title: "Deleted Products", url: "#", icon: Layers },
     ],
   },
   {
