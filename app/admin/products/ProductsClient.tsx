@@ -121,9 +121,9 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
             <DataTable<Row>
                 data={rows}
                 columns={columns}
-                searchKeys={['name', 'category', 'product_id']}
+                searchKeys={['name', 'category', 'product_id', 'category']}
                 filterKey="status"
-                filterOptions={['All', 'ACTIVE', 'ARCHIVED']}
+                filterOptions={['All', 'ACTIVE', 'ARCHIVED', ]}
                 defaultSortKey="name"
                 getRowId={(row) => row.product_id}
                 onDelete={(row) => setDeletingRow(row)}
