@@ -5,33 +5,51 @@ import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddCategoryDialog from '@/components/admin/category/AddCategoryDialog'
 import EditCategoryDialog from '@/components/admin/category/EditCategoryDialog'
+import DeleteCategoryDialog from '@/components/admin/category/DeleteCategoryDialog'
+import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge' 
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
 import type { Category } from '@/types/category'
-import { deleteCategory } from '@/lib/category'
+import { softDeleteCategory } from '@/lib/category'
+
+type CategoryStatus = 'ACTIVE' | 'ARCHIVED'
 
 type Row = {
     id: number
     name: string
     subcategory_count: number
+    status: CategoryStatus  
     raw: Category
+}
+
+// Mirrors STATUS_BADGE from ProductsClient
+const STATUS_BADGE: Record<CategoryStatus, { label: string; variant: BadgeVariant }> = {
+    ACTIVE:   { label: 'Active',   variant: 'success' },
+    ARCHIVED: { label: 'Archived', variant: 'default' },
 }
 
 export default function CategoryClient({ categories }: { categories: Category[] }) {
     const [open, setOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
-    const [isPending, startTransition] = useTransition()
+    const [deletingRow, setDeletingRow] = useState<Row | null>(null)
+    const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
 
-    const handleDelete = (row: Row) => {
-        startTransition(async () => {
-            const result = await deleteCategory(row.id, 'category')
+    const handleDeleteConfirm = async () => {
+        if (!deletingRow) return
 
-            if (!result.success) {
-                setDeleteError(result.message)
-                return
-            }
-
-            setDeleteError(null)
+        return new Promise<void>((resolve, reject) => {
+            startTransition(async () => {
+                try {
+                    await softDeleteCategory(deletingRow.id)
+                    setDeleteError(null)
+                    setDeletingRow(null)
+                    resolve()
+                } catch (err) {
+                    const message = err instanceof Error ? err.message : 'Failed to archive category'
+                    setDeleteError(message)
+                    reject(err)
+                }
+            })
         })
     }
 
@@ -55,14 +73,23 @@ export default function CategoryClient({ categories }: { categories: Category[] 
             id: c.id,
             name: c.name,
             subcategory_count: childCategories.filter((child) => child.parent_id === c.id).length,
+            status: c.is_active ? 'ACTIVE' : 'ARCHIVED', 
             raw: c,
         }))
     }, [parentCategories, childCategories])
 
     const columns: ColumnDef<Row>[] = [
-        { key: 'id', label: 'ID', width: '80px' },
-        { key: 'name', label: 'Category' },
+        { key: 'id',                label: 'ID',            width: '80px'   },
+        { key: 'name',              label: 'Category'                        },
         { key: 'subcategory_count', label: 'Subcategories', align: 'center' },
+        {
+            key: 'status',
+            label: 'Status',
+            render: (v) => {
+                const { label, variant } = STATUS_BADGE[v as CategoryStatus] ?? STATUS_BADGE.ACTIVE
+                return <StatusBadge status={label} variant={variant} />
+            },
+        },
     ]
 
     return (
@@ -82,10 +109,8 @@ export default function CategoryClient({ categories }: { categories: Category[] 
                 </div>
             )}
 
-            <AddCategoryDialog
-                open={open}
-                onClose={() => setOpen(false)}
-            />
+            <AddCategoryDialog open={open} onClose={() => setOpen(false)} />
+
             <EditCategoryDialog
                 selectedCategory={editingCategory}
                 parentOptions={parentOptions}
@@ -93,13 +118,23 @@ export default function CategoryClient({ categories }: { categories: Category[] 
                 onClose={() => setEditingCategory(null)}
             />
 
+            <DeleteCategoryDialog
+                open={!!deletingRow}
+                categoryName={deletingRow?.name ?? ''}
+                categoryId={deletingRow?.id ?? ''}
+                onConfirm={handleDeleteConfirm}
+                onOpenChange={(isOpen) => { if (!isOpen) setDeletingRow(null) }}
+            />
+
             <DataTable<Row>
                 data={rows}
                 columns={columns}
                 searchKeys={['name']}
+                filterKey="status"                             
+                filterOptions={['All', 'ACTIVE', 'ARCHIVED']}  
                 defaultSortKey="name"
                 getRowId={(row) => row.id}
-                onDelete={(row) => handleDelete(row)}
+                onDelete={(row) => setDeletingRow(row)}
                 onEdit={(row) => setEditingCategory(row.raw)}
                 expandedRowRender={(row) => {
                     const subs = childCategories.filter((c) => c.parent_id === row.id)
@@ -125,6 +160,9 @@ export default function CategoryClient({ categories }: { categories: Category[] 
                                     >
                                         <span className="font-medium">{sub.name}</span>
                                         <span className="text-slate-300">#{sub.id}</span>
+                                        {!sub.is_active && (
+                                            <StatusBadge status="Archived" variant="default" />
+                                        )}
                                         <button
                                             onClick={() => setEditingCategory(sub)}
                                             className="text-blue-400 hover:text-blue-600 transition-colors"
@@ -135,14 +173,15 @@ export default function CategoryClient({ categories }: { categories: Category[] 
                                             </svg>
                                         </button>
                                         <button
-                                            onClick={() => handleDelete({
+                                            onClick={() => setDeletingRow({
                                                 id: sub.id,
                                                 name: sub.name,
                                                 subcategory_count: 0,
+                                                status: sub.is_active ? 'ACTIVE' : 'ARCHIVED',
                                                 raw: sub
                                             })}
                                             className="text-red-400 hover:text-red-600 transition-colors"
-                                            title="Delete"
+                                            title="Archive"
                                         >
                                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                 <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />

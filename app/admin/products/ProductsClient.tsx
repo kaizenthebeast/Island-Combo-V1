@@ -121,7 +121,7 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
             <DataTable<Row>
                 data={rows}
                 columns={columns}
-                searchKeys={['name', 'category']}
+                searchKeys={['name', 'category', 'product_id']}
                 filterKey="status"
                 filterOptions={['All', 'ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']}
                 defaultSortKey="name"

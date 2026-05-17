@@ -11,7 +11,7 @@ export const getCategories = async (): Promise<Category[]> => {
 
     const { data, error } = await supabase
         .from('category')
-        .select('category_id, name, parent_id')
+        .select('category_id, name, parent_id, is_active') // 👈 added
         .order('name', { ascending: true })
 
     if (error) throw new Error(error.message)
@@ -20,6 +20,7 @@ export const getCategories = async (): Promise<Category[]> => {
         id: c.category_id,
         name: c.name,
         parent_id: c.parent_id ?? null,
+        is_active: c.is_active,     
     }))
 }
 
@@ -81,18 +82,18 @@ export const updateCategory = async (id: number, data: EditCategoryFormValues) =
     return { success: true, status: 200, message: 'Category successfully updated' }
 }
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
+// ───SOFT DELETE ───────────────────────────────────────────────────────────────────
 
-export const deleteCategory = async (id: number, type: 'category') => {
-    const supabase = await createClient()
+export const softDeleteCategory = async (id: number) => {
+  const supabase = await createClient()
 
-    const { data: result, error } = await supabase.rpc('admin_delete_category', {
-        p_id: id,
-    })
+  const { error } = await supabase
+    .from('category')
+    .update({ is_active: false })
+    .or(`category_id.eq.${id},parent_id.eq.${id}`) 
 
-    if (error) return { success: false, status: 403, message: error.message }
-    if (!result.success) return { success: false, status: 404, message: result.message }
+  if (error) throw new Error(error.message)
 
-    revalidatePath('/admin/categories')
-    return { success: true, status: 200, message: 'Category successfully deleted' }
+  revalidatePath('/admin/categories')
+  return id
 }
