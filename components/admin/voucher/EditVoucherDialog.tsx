@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditVoucherForm } from '@/components/admin/voucher/forms/EditVoucherForm'
-import type { VoucherFormValues } from '@/form-schema/voucherSchema'
+import type { EditVoucherFormValues } from '@/form-schema/voucherSchema'
 import type { Voucher } from '@/types/voucher'
 
 type Props = {
@@ -21,7 +21,7 @@ type Props = {
 export default function EditVoucherDialog({ open, onClose, selectedVoucher }: Props) {
   const router = useRouter()
 
-  const handleSuccess = (_data: VoucherFormValues) => {
+  const handleSuccess = (_data: EditVoucherFormValues) => {
     router.refresh()
     onClose()
   }

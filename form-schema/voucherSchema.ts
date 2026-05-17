@@ -39,8 +39,6 @@ export const addVoucherSchema = z.object({
   expires_at:   expiresAtField,
   status:       z.enum(['DRAFT', 'ACTIVE']).default('DRAFT'),
 })
-
-// Use z.input for the form (what the user types), z.infer gives the output
 export type AddVoucherFormValues = z.input<typeof addVoucherSchema>
 
 // ─── Edit ─────────────────────────────────────────────────────────────────────
