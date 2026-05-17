@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { productSchema, type ProductFormValues } from '@/form-schema/ProductSchema'
+import { productSchema, type ProductFormValues } from '@/form-schema/productSchema'
 import { uploadVariantImages } from '@/lib/product-upload'
 import type { AdminProduct } from '@/types/product'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
