@@ -59,13 +59,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
               </span>
             </div>
           )}
-
-          {/* Wholesale nudge — shows threshold and discount when has_wholesale is true */}
-          {product.has_wholesale && product.wholesale_min_qty && product.wholesale_discount_percent && (
-            <p className="text-xs text-[#900036] font-medium">
-              Buy {product.wholesale_min_qty}+ for {product.wholesale_discount_percent}% off
-            </p>
-          )}
         </CardContent>
 
       </Card>
