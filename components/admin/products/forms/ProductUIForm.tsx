@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Category = {
-  category_id: number
+  id: number
   name: string
+  parent_id: number | null
 }
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 export const PlusIcon = () => (
@@ -871,13 +871,16 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
         <div className="grid grid-cols-2 gap-3">
           <Field label="Category" required error={errors.category_id?.message as string | undefined}>
             <Select
-              {...register('category_id', { valueAsNumber: true })}
-              value={watch('category_id') ?? ''}
-              onChange={(e) => setValue('category_id', parseInt(e.target.value, 10), { shouldValidate: true })}
+              {...register('category_id', {
+                setValueAs: (v) => (v === '' ? undefined : Number(v)),
+              })}
             >
               <option value="">Select…</option>
+
               {categories.map((c) => (
-                <option key={c.category_id} value={c.category_id}>{c.name}</option>
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
               ))}
             </Select>
           </Field>

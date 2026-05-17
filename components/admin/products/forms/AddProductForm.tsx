@@ -64,7 +64,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
 
   // Form setup
   const methods = useForm<AddProductFormValues>({
-    resolver: zodResolver(addProductSchema),
+    resolver: zodResolver(addProductSchema) as any,
     defaultValues: {
       name: '',
       slug: '',
@@ -72,6 +72,7 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
       is_active: true,
       discount: null,
       type: '',
+      category_id: undefined, 
       variants: [makeBlankVariant([])],
       details: [],
     },

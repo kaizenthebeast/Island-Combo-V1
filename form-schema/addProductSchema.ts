@@ -116,10 +116,10 @@ const productDetailSchema = z.object({
 export const addProductSchema = z.object({
   name: z.string().min(1, "Product name is required").max(255, "Name is too long"),
   description: z.string().optional(),
-  category_id: z
-    .number()
-    .int()
-    .positive("Please select a category"),
+ category_id: z.coerce
+  .number()
+  .int()
+  .positive("Please select a category"),
   slug: z
     .string()
     .min(1, "Slug is required")
