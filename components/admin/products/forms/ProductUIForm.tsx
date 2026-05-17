@@ -874,9 +874,10 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
               {...register('category_id', {
                 setValueAs: (v) => (v === '' ? undefined : Number(v)),
               })}
+              value={watch('category_id') ?? ''}
+              onChange={(e) => setValue('category_id', e.target.value === '' ? undefined : Number(e.target.value), { shouldValidate: true })}
             >
               <option value="">Select…</option>
-
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}

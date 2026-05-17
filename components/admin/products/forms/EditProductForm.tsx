@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useTransition } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
+import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, type ProductFormValues } from '@/form-schema/productSchema'
 import { uploadVariantImages } from '@/lib/product-upload'
@@ -15,7 +16,7 @@ import {
   Step2Variants,
   Step3Details,
   ChevronLeft,
-  ChevronRight, 
+  ChevronRight,
   CheckIcon,
   AlertIcon,
   type Category,
@@ -29,9 +30,7 @@ const STEP_FIELDS: (keyof ProductFormValues)[][] = [
   ['product_details'],
 ]
 
-// --- Helper: derive status from product data ---------------------------------
-// Handles legacy `is_active` boolean shape from AdminProduct until the type
-// is updated to reflect the new DB enum.
+// --- Helper: derive status ---------------------------------------------------
 
 function deriveStatus(product: AdminProduct): ProductFormValues['status'] {
   const valid = ['ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']
@@ -52,11 +51,11 @@ function toFormValues(product: AdminProduct): ProductFormValues {
     category_id: product.category?.category_id,
     type: product.type,
 
-    product_details: product.product_details.map((d) => ({
+    product_details: product.product_details.map((d, i) => ({
       id: d.id,
       attribute_name: d.attribute_name,
       attribute_value: d.attribute_value,
-      sort_order: 0,  // AdminProduct.product_details has no sort_order; default to 0
+      sort_order: i + 1,
     })),
 
     deleted_detail_ids: [],
@@ -71,7 +70,6 @@ function toFormValues(product: AdminProduct): ProductFormValues {
       pricing_tiers: v.pricing_tiers
         .filter((t) => t.label === 'wholesale')
         .map((t) => ({
-          // PricingTier has no id; omit so the RPC treats it as a new/replace
           label: 'wholesale' as const,
           min_quantity: t.min_quantity,
           discount_percent: t.discount_percent,
@@ -87,7 +85,7 @@ function toFormValues(product: AdminProduct): ProductFormValues {
         preview: getPublicImageUrl(url) ?? url,
         is_primary: i === 0,
         sort_order: i,
-        path: url,
+        path: url,   // existing Storage path — picked up by uploadVariantImages
       })),
       deleted_image_paths: [],
     })),
@@ -112,7 +110,6 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   const [saveError, setSaveError] = useState<string | null>(null)
   const [stepErrorCount, setStepErrorCount] = useState(0)
 
-  // Fetch sub-categories from API.
   useEffect(() => {
     fetch('/api/category')
       .then((res) => res.json())
@@ -126,7 +123,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
   }, [])
 
   const methods = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productSchema) as unknown as Resolver<ProductFormValues>,
     defaultValues: toFormValues(product),
     mode: 'onTouched',
   })
@@ -156,35 +153,12 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
       try {
         const data = methods.getValues()
 
-        // Step 1: Upload new images for all variants
-        const variantUploadedPaths: Record<number, string[]> = {}
+        // Upload all variant images in one pass.
+        // uploadVariantImages handles both cases:
+        //   - existing images (no file) → passes `path` through as-is
+        //   - new images (has file)     → uploads to Storage and returns path
+        const variantsWithImages = await uploadVariantImages(data.variants)
 
-        for (let i = 0; i < data.variants.length; i++) {
-          const variant = data.variants[i]
-          const images = variant.images ?? []
-          const newImages = images.filter((img) => !!img.file)
-
-          if (newImages.length > 0) {
-            const uploaded = await uploadVariantImages([
-              {
-                ...variant,
-                images: newImages as any,
-                stock: variant.stock ?? 0,
-                is_active: variant.is_active ?? true,
-                attributes: variant.attributes ?? [],
-                pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
-                  ...t,
-                  label: t.label ?? 'wholesale',
-                })),
-              },
-            ])
-            variantUploadedPaths[i] = uploaded[0]?.images.map((img) => img.url) ?? []
-          } else {
-            variantUploadedPaths[i] = []
-          }
-        }
-
-        // Step 2: PATCH /api/product with the full resolved payload
         const res = await fetch('/api/product', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -193,47 +167,42 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
             name: data.name,
             slug: data.slug,
             description: data.description,
-            status: data.status,           // ← was is_active; now sends status enum
+            status: data.status,
             discount: data.discount,
             category_id: data.category_id,
             type: data.type,
             product_details: data.product_details,
             deleted_detail_ids: data.deleted_detail_ids,
-
-            variants: data.variants.map((variant, i) => {
-              const images = variant.images ?? []
-
-              const existingPaths = images
-                .filter((img) => !img.file && img.path)
-                .map((img) => img.path as string)
-
-              const allImagePaths = [...existingPaths, ...variantUploadedPaths[i]]
-
-              return {
-                variant_id: variant.variant_id,
-                sku: variant.sku,
-                price: variant.price,
-                stock: variant.stock ?? 0,
-                is_active: variant.is_active ?? true,
-                pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
-                  id: t.id,
-                  label: t.label ?? 'wholesale',
-                  min_quantity: t.min_quantity,
-                  discount_percent: t.discount_percent,
-                })),
-                deleted_tier_ids: variant.deleted_tier_ids ?? [],
-                attributes: (variant.attributes ?? []).map((a) => ({
-                  id: a.id,
-                  attribute_name: a.attribute_name,
-                  attribute_value: a.attribute_value,
-                })),
-                deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
-                images: allImagePaths,
-                deleted_image_paths: variant.deleted_image_paths ?? [],
-              }
-            }),
-
             deleted_variant_ids: data.deleted_variant_ids,
+
+            variants: variantsWithImages.map((variant) => ({
+              variant_id: variant.variant_id,
+              sku: variant.sku,
+              price: variant.price,
+              stock: variant.stock ?? 0,
+              is_active: variant.is_active ?? true,
+              pricing_tiers: (variant.pricing_tiers ?? []).map((t) => ({
+                id: t.id,
+                label: t.label ?? 'wholesale',
+                min_quantity: t.min_quantity,
+                discount_percent: t.discount_percent,
+              })),
+              deleted_tier_ids: variant.deleted_tier_ids ?? [],
+              attributes: (variant.attributes ?? []).map((a) => ({
+                id: a.id,
+                attribute_name: a.attribute_name,
+                attribute_value: a.attribute_value,
+              })),
+              deleted_attribute_ids: variant.deleted_attribute_ids ?? [],
+              // images is now a flat string[] of Storage paths — both
+              // existing (passed through) and newly uploaded
+              images: variant.images.map((img, i) => ({
+                url: img.url,
+                is_primary: img.is_primary ?? i === 0,
+                sort_order: img.sort_order ?? i,
+              })),
+              deleted_image_paths: variant.deleted_image_paths ?? [],
+            })),
           }),
         })
 

@@ -35,23 +35,26 @@ export const uploadVariantImages = async (
   return Promise.all(
     variants.map(async (variant) => {
       const uploadedImages = await Promise.all(
-        variant.images.map(async ({ file, is_primary, sort_order, url: existingUrl }) => {
-          // Existing Storage image — file is null so skip upload and pass
-          // the existing Storage path through to the RPC as-is
-          if (!file || (file as any) === null) {
-            return { url: existingUrl as string, is_primary, sort_order }
+        variant.images.map(async ({ file, is_primary, sort_order, url: existingUrl, path: existingPath }) => {
+          // Existing Storage image — file is null/undefined so skip upload.
+          // Edit flow stores the path in `path`; add flow stores it in `url`.
+          // Fall back between both so either form works correctly.
+          if (!file) {
+            const storagePath = existingPath ?? existingUrl
+            if (!storagePath) throw new Error('Existing image is missing a storage path')
+            return { url: storagePath, is_primary, sort_order }
           }
 
           // New image — upload to Storage and return the generated path.
           // Throws on failure so Promise.all rejects and the caller catches it.
-          const path = `variants/${generateFileName(file)}`
+          const uploadPath = `variants/${generateFileName(file)}`
           const { error } = await supabase.storage
             .from('product-images')
-            .upload(path, file)
+            .upload(uploadPath, file)
 
           if (error) throw new Error(`Image upload failed: ${error.message}`)
 
-          return { url: path, is_primary, sort_order }
+          return { url: uploadPath, is_primary, sort_order }
         })
       )
 
@@ -59,7 +62,7 @@ export const uploadVariantImages = async (
       return {
         ...rest,
         // Pass variant_id through if present so the RPC knows to UPDATE
-        variant_id: (variant as any).variant_id as number | undefined,
+        variant_id: variant.variant_id,
         images: uploadedImages,
       }
     })

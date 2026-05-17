@@ -12,23 +12,38 @@ export type AddProductPayload = Omit<ProductFormValues, 'variants'> & {
 export type UpdateProductPayload = {
   name: string
   slug: string
-  description?: string
+  description?: string | null
   status: 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED'
   discount?: number | null
-  category_id?: number
+  category_id?: number | null
   type?: string
-  product_details?: any[]
-  deleted_detail_ids?: number[]
+  product_details?: {
+    id?: number
+    attribute_name: string
+    attribute_value: string
+    sort_order: number
+  }[]
+  deleted_detail_ids?: number[]   // ← was missing
+  deleted_variant_ids?: number[]  // ← was missing
   variants: {
     variant_id?: number
     sku?: string
     price: number
     stock: number
-    is_active: boolean  // variant still uses is_active
-    pricing_tiers?: { label: string; min_quantity: number; discount_percent: number }[]
-    deleted_tier_ids?: number[]
-    attributes?: { attribute_name: string; attribute_value: string }[]
-    deleted_attribute_ids?: number[]
+    is_active: boolean
+    pricing_tiers?: {
+      id?: number
+      label: string
+      min_quantity: number
+      discount_percent: number
+    }[]
+    deleted_tier_ids?: number[]       // ← was missing
+    attributes?: {
+      id?: number
+      attribute_name: string
+      attribute_value: string
+    }[]
+    deleted_attribute_ids?: number[]  // ← was missing
     images: string[]
     deleted_image_paths?: string[]
   }[]
@@ -123,30 +138,37 @@ export const updateAdminProduct = async (
   const supabase = await createClient()
 
   const payload = {
-    product_id:  productId,
-    name:        data.name,
-    slug:        data.slug,
-    description: data.description,
-    status:      data.status,
-    discount:    data.discount,
-    category_id: data.category_id,
-    type:        data.type,
-    details:     data.product_details ?? [],
-    variants:    data.variants.map((v) => ({
+    product_id:          productId,
+    name:                data.name,
+    slug:                data.slug,
+    description:         data.description,
+    status:              data.status,
+    discount:            data.discount,
+    category_id:         data.category_id,
+    type:                data.type,
+    details:             data.product_details ?? [],
+    deleted_detail_ids:  data.deleted_detail_ids ?? [],
+    deleted_variant_ids: data.deleted_variant_ids ?? [],
+    variants: data.variants.map((v) => ({
       ...(v.variant_id ? { variant_id: v.variant_id } : {}),
       price:                 v.price,
       stock:                 v.stock,
       is_active:             v.is_active,
       pricing_tiers:         (v.pricing_tiers ?? []).map((t) => ({
+        ...(t.id ? { id: t.id } : {}),
         label:            t.label,
         min_quantity:     t.min_quantity,
         discount_percent: t.discount_percent,
       })),
+      deleted_tier_ids:      v.deleted_tier_ids ?? [],
       attributes:            (v.attributes ?? []).map((a) => ({
+        ...(a.id ? { id: a.id } : {}),
         attribute_name:  a.attribute_name,
         attribute_value: a.attribute_value,
       })),
+      deleted_attribute_ids: v.deleted_attribute_ids ?? [],
       images:                v.images,
+      deleted_image_paths:   v.deleted_image_paths ?? [],
     })),
   }
 
