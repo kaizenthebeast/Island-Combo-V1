@@ -7,11 +7,12 @@ import { calculateTotals } from '@/helper/pricing/calculateTotals'
 
 const AddressBillingSummary = () => {
   const { totalQty, subtotal } = useCartStore()
-  const { voucher, loyaltyPoints, loyaltyEnabled } = useCheckoutStore()
+  const { voucher, loyaltyPoints, loyaltyEnabled, shippingFee, shippingMethod } = useCheckoutStore()
   const { voucherDiscount, total } = calculateTotals({
     subtotal,
     voucher,
     loyaltyDiscount: loyaltyEnabled ? loyaltyPoints : 0,
+    shippingFee: shippingFee ?? 0,
   })
 
   return (
@@ -31,8 +32,10 @@ const AddressBillingSummary = () => {
           <span>-${loyaltyPoints.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm text-gray-600">
-          <span>Shipping fee</span>
-          <span>Pending</span>
+          <span>Shipping fee{shippingMethod ? ` (${shippingMethod})` : ""}</span>
+          <span>
+            {shippingFee !== null ? `$${shippingFee.toFixed(2)}` : "Pending"}
+          </span>
         </div>
         <div className="border-t pt-3 flex justify-between font-semibold">
           <span>Total</span>

@@ -114,6 +114,23 @@ export const deleteAddress = async (addressId: number) => {
   return { success: true, status: 200, message: 'Address successfully deleted' };
 };
 
+export const getUserProfile = async (): Promise<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null> => {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Unauthorized');
+
+  const { data, error } = await supabase
+    .from("profile")
+    .select("first_name, last_name, phone_text")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+
+  return data ?? null;
+};
+
 export const getUserAddress = async (): Promise<Address[]> => {
   const supabase = await createClient();
 
