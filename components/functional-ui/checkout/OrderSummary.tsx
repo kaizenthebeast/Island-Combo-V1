@@ -61,22 +61,11 @@ const OrderSummary = ({ cartItems }: Props) => {
 
             <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
-                    const key = `${item.variant_id}`
+                    const key = `${item.id}`
                     const isActive = activeItemKey === key
                     const quantity = editQuantities[key] ?? item.quantity
-
-                    // Wholesale is now derived from applied_tier_label resolved
-                    // by cart_view in SQL — true when the active tier is 'wholesale'
                     const isWholesale = item.applied_tier_label === 'wholesale'
-
-                    // Use applied_price (tier-resolved) as the displayed price.
-                    // Falls back to final_price (sale discount only) then base price
-                    // to guard against the optimistic stub case where applied_price
-                    // hasn't been backfilled by fetchCart yet.
                     const displayPrice = item.applied_price || item.final_price || item.price
-
-                    // Show the original base price struck through only when a
-                    // discount is actually reducing the price from retail
                     const hasDiscount = item.discount !== null && item.discount > 0
                     const priceIsReduced = displayPrice < item.price
 
@@ -86,12 +75,12 @@ const OrderSummary = ({ cartItems }: Props) => {
                             className="grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5"
                         >
                             {/* Image */}
-                            <div className="relative w-full aspect-square sm:aspect-[3/4] bg-gray-100 rounded-md overflow-hidden">
+                            <div className="relative w-full aspect-square bg-gray-100 rounded-md overflow-hidden">
                                 <Image
                                     src={item.image_url ?? '/images/placeholder.png'}
                                     alt="product"
                                     fill
-                                    className="object-cover"
+                                    className="object-contain p-2"
                                     sizes="(max-width: 640px) 96px, (max-width: 768px) 140px, 160px"
                                     loading="eager"
                                 />
