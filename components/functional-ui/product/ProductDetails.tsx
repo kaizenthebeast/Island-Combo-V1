@@ -61,9 +61,7 @@ const ProductDetails = ({ product }: Props) => {
         ? allProductImages
         : ["/images/placeholder.png"]
 
-    // ─── 1. Resolved variant ────────────────────────────────────────────────
-    // The single SKU that matches ALL selected attributes.
-    // null if any attribute is still unselected.
+    // ───  Resolved variant ────────────────────────────────────────────────
     const resolvedVariant = attributeKeys.every(k => selectedAttributes[k] !== null)
         ? product.variants.find(v =>
             attributeKeys.every(k =>
@@ -72,9 +70,7 @@ const ProductDetails = ({ product }: Props) => {
         ) ?? null
         : null
 
-    // ─── 2. Display variant ─────────────────────────────────────────────────
-    // Best-effort partial match so price updates as user selects attributes,
-    // even before all are chosen. Falls back to the first variant.
+    // ───  Display variant ─────────────────────────────────────────────────
     const displayVariant = resolvedVariant
         ?? product.variants.find(v =>
             attributeKeys
@@ -85,11 +81,7 @@ const ProductDetails = ({ product }: Props) => {
         )
         ?? defaultVariant
 
-    // ─── 3. Wholesale tier logic ────────────────────────────────────────────
-    // Must come AFTER displayVariant since it reads from displayVariant.pricing_tiers.
-    // wholesaleTier: the first tier with label 'wholesale' on the current variant.
-    // wholesaleUnlocked: true when quantityInput meets the min_quantity threshold.
-    // wholesalePrice: base price minus discount_percent, computed for display.
+    // ───  Wholesale tier logic ────────────────────────────────────────────
     const wholesaleTier = displayVariant?.pricing_tiers?.find(
         (t) => t.label === 'wholesale'
     ) ?? null
