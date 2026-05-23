@@ -153,11 +153,8 @@ const ProductDetails = ({ product }: Props) => {
         if (firstUnselected) { alert(`Please select a ${firstUnselected}`); return }
         if (!resolvedVariant) { alert('This combination is not available'); return }
         if (quantityInput <= 0) return
-        const sizeValue =
-            selectedAttributes['size'] ??
-            Object.values(selectedAttributes)[0] ??
-            ''
-        await addItem(resolvedVariant.variant_id, quantityInput, sizeValue)
+        const selectedOption = Object.values(selectedAttributes)[0] ?? null
+        await addItem(resolvedVariant.variant_id, quantityInput, selectedOption)
     }
 
     async function handleFavoriteToggle(productId: number) {
