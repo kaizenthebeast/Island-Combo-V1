@@ -52,3 +52,14 @@ export const editVoucherSchema = z.object({
 })
 
 export type EditVoucherFormValues = z.infer<typeof editVoucherSchema>
+
+// ─── Apply (customer-side promo code input) ──────────────────────────────────
+
+export const applyVoucherSchema = z.object({
+  voucherCode: z
+    .string()
+    .min(3, 'Voucher code must be at least 3 characters')
+    .max(32, 'Voucher code must be 32 characters or less'),
+})
+
+export type ApplyVoucherFormValues = z.infer<typeof applyVoucherSchema>

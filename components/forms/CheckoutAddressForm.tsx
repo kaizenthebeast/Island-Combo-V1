@@ -1,14 +1,24 @@
 "use client";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { AddressFormValues } from "@/types/users";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    checkoutAddressSchema,
+    CheckoutAddressFormValues,
+} from "@/form-schema/addressSchema";
 import { insertAddressInfo, updateAddressInfo } from "@/lib/users";
 
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
 
 import {
     Sheet,
@@ -16,7 +26,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
-import { customToast } from "@/components/popup/ToastCustom"
+import { customToast } from "@/components/popup/ToastCustom";
 
 type Props = {
     children: React.ReactNode;
@@ -51,14 +61,8 @@ const CheckoutAddress = ({
 }: Props) => {
     const [open, setOpen] = useState(false);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-        reset,
-        watch,
-    } = useForm<AddressFormValues>({
+    const form = useForm<CheckoutAddressFormValues>({
+        resolver: zodResolver(checkoutAddressSchema),
         defaultValues: {
             firstName: firstName || "",
             lastName: lastName || "",
@@ -71,34 +75,13 @@ const CheckoutAddress = ({
         },
     });
 
-    // watch the form value, not the prop
-    const makeDefaultValue = watch("makeDefault");
-
-    const onSubmit: SubmitHandler<AddressFormValues> = async (data) => {
+    const onSubmit: SubmitHandler<CheckoutAddressFormValues> = async (data) => {
         try {
             if (action === "add") {
-                await insertAddressInfo({
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    address: data.address,
-                    phone: data.phone,
-                    postalCode: data.postalCode,
-                    locality: data.locality,
-                    country: data.country,
-                    makeDefault: data.makeDefault,
-                });
-                reset();
+                await insertAddressInfo(data);
+                form.reset();
             } else if (action === "edit") {
-                await updateAddressInfo(addressId, {
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    address: data.address,
-                    phone: data.phone,
-                    postalCode: data.postalCode,
-                    locality: data.locality,
-                    country: data.country,
-                    makeDefault: data.makeDefault,
-                });
+                await updateAddressInfo(addressId, data);
             }
             setOpen(false);
             if (onSuccess) onSuccess();
@@ -106,19 +89,19 @@ const CheckoutAddress = ({
                 customToast.success({
                     title: "Successfully added address",
                     description: "Your new address has been added to your account.",
-                })
+                });
             } else {
                 customToast.success({
                     title: "Successfully updated address",
                     description: "Your address has been updated.",
-                })
+                });
             }
         } catch (error) {
             console.error("Error saving address:", error);
             customToast.error({
                 title: "An Error Occured",
-                description: "There's an error occured during the process."
-            })
+                description: "There's an error occured during the process.",
+            });
         }
     };
 
@@ -134,133 +117,178 @@ const CheckoutAddress = ({
                     <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
                 </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="firstName">First name</Label>
-                            <Input
-                                id="firstName"
-                                placeholder="Jane"
-                                maxLength={15}
-                                required
-                                {...register("firstName", { required: "First name is required" })}
-                                aria-invalid={errors.firstName ? "true" : "false"}
-                                readOnly={!!firstName}
-                                className={!!firstName ? "bg-gray-100 cursor-not-allowed" : ""}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="firstName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>First name</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Jane"
+                                                maxLength={15}
+                                                autoComplete="given-name"
+                                                readOnly={!!firstName}
+                                                className={!!firstName ? "bg-gray-100 cursor-not-allowed" : ""}
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.firstName && (
-                                <p className="text-sm text-red-500">{errors.firstName.message}</p>
-                            )}
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="lastName">Last name</Label>
-                            <Input
-                                id="lastName"
-                                placeholder="Smith"
-                                maxLength={15}
-                                required
-                                {...register("lastName", { required: "Last name is required" })}
-                                aria-invalid={errors.lastName ? "true" : "false"}
-                                readOnly={!!lastName}
-                                className={!!lastName ? "bg-gray-100 cursor-not-allowed" : ""}
+                            <FormField
+                                control={form.control}
+                                name="lastName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Last name</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Smith"
+                                                maxLength={15}
+                                                autoComplete="family-name"
+                                                readOnly={!!lastName}
+                                                className={!!lastName ? "bg-gray-100 cursor-not-allowed" : ""}
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.lastName && (
-                                <p className="text-sm text-red-500">{errors.lastName.message}</p>
-                            )}
                         </div>
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="phone">Mobile number</Label>
-                        <Input
-                            id="phone"
-                            type="tel"
-                            placeholder="091234545454"
-                            maxLength={16}
-                            required
-                            {...register("phone", { required: "Mobile number is required" })}
-                            aria-invalid={errors.phone ? "true" : "false"}
-                            readOnly={!!phone}
-                            className={!!phone ? "bg-gray-100 cursor-not-allowed" : ""}
+                        <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Mobile number</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="tel"
+                                            placeholder="091234545454"
+                                            maxLength={16}
+                                            autoComplete="tel"
+                                            readOnly={!!phone}
+                                            className={!!phone ? "bg-gray-100 cursor-not-allowed" : ""}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                        {errors.phone && (
-                            <p className="text-sm text-red-500">{errors.phone.message}</p>
-                        )}
-                    </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="address">Address</Label>
-                        <Input
-                            id="address"
-                            placeholder="Apartment, suite, etc."
-                            required
-                            {...register("address")}
+                        <FormField
+                            control={form.control}
+                            name="address"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Address</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Apartment, suite, etc."
+                                            autoComplete="street-address"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-2">
-                            <Label htmlFor="postalCode">Postal Code</Label>
-                            <Input
-                                id="postalCode"
-                                placeholder="96941"
-                                required
-                                {...register("postalCode", { required: "Postal code is required" })}
-                                aria-invalid={errors.postalCode ? "true" : "false"}
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="postalCode"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Postal Code</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="96941"
+                                                autoComplete="postal-code"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.postalCode && (
-                                <p className="text-sm text-red-500">{errors.postalCode.message}</p>
-                            )}
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="locality">Locality</Label>
-                            <Input
-                                id="locality"
-                                placeholder="Kolonia"
-                                required
-                                {...register("locality", { required: "Locality is required" })}
-                                aria-invalid={errors.locality ? "true" : "false"}
+                            <FormField
+                                control={form.control}
+                                name="locality"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Locality</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                placeholder="Kolonia"
+                                                autoComplete="address-level2"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.locality && (
-                                <p className="text-sm text-red-500">{errors.locality.message}</p>
+                        </div>
+
+                        <FormField
+                            control={form.control}
+                            name="country"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Country</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Micronesia, Federated States of"
+                                            autoComplete="country-name"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="country">Country</Label>
-                        <Input
-                            id="country"
-                            placeholder="Micronesia, Federated States of"
-                            {...register("country", { required: "Country is required" })}
-                            aria-invalid={errors.country ? "true" : "false"}
-                            required
                         />
-                        {errors.country && (
-                            <p className="text-sm text-red-500">{errors.country.message}</p>
-                        )}
-                    </div>
 
-                    <div className="flex items-center justify-between rounded-3xl border border-gray-200 bg-gray-50 px-4 py-4">
-                        <div>
-                            <p className="text-sm font-medium">Make default</p>
-                            <p className="text-xs text-gray-500">Use this address for future orders.</p>
-                        </div>
-                        <Switch
-                            checked={makeDefaultValue}  // use watched form value, not prop
-                            onCheckedChange={(checked) => setValue("makeDefault", Boolean(checked))}
+                        <FormField
+                            control={form.control}
+                            name="makeDefault"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center justify-between rounded-3xl border border-gray-200 bg-gray-50 px-4 py-4 gap-2">
+                                    <div>
+                                        <FormLabel className="text-sm font-medium">Make default</FormLabel>
+                                        <p className="text-xs text-gray-500">
+                                            Use this address for future orders.
+                                        </p>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
                         />
-                    </div>
 
-                    <Button
-                        type="submit"
-                        className="w-full bg-[#900036] hover:bg-[#77002d] rounded-full"
-                    >
-                        Save
-                    </Button>
-                </form>
+                        <Button
+                            type="submit"
+                            className="w-full bg-[#900036] hover:bg-[#77002d] rounded-full"
+                            disabled={form.formState.isSubmitting}
+                        >
+                            {form.formState.isSubmitting ? "Saving…" : "Save"}
+                        </Button>
+                    </form>
+                </Form>
             </SheetContent>
         </Sheet>
     );

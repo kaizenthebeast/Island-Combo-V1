@@ -9,7 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,48 +30,48 @@ export function SignUpForm() {
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<SignupFormInput>({
+  const form = useForm<SignupFormInput>({
     resolver: zodResolver(signupSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
- const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
-  setMessage("");
-  setIsLoading(true);
-  const supabase = createClient();
+  const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
+    setMessage("");
+    setIsLoading(true);
+    const supabase = createClient();
 
-  try {
-    const { data: { session: anonSession } } = await supabase.auth.getSession();
-    const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
+    try {
+      const { data: { session: anonSession } } = await supabase.auth.getSession();
+      const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
 
-    if (guestUserId) {
-      document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
+      if (guestUserId) {
+        document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
+      }
+
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
+        },
+      });
+
+      if (error) {
+        throw new Error(error?.message || "Signup failed");
+      }
+
+      form.reset();
+      router.push("/auth/sign-up-success");
+    } catch (err: unknown) {
+      setMessage(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
     }
-
-    const { data: signUpData, error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
-      },
-    });
-
-    if (error) {
-      throw new Error(error?.message || "Signup failed");
-    }
-
-    reset();
-    router.push("/auth/sign-up-success");
-  } catch (err: unknown) {
-    setMessage(err instanceof Error ? err.message : "An error occurred");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const googleSignUp = async () => {
     const supabase = createClient();
@@ -95,39 +102,72 @@ export function SignUpForm() {
           <CardTitle className="text-2xl">Sign Up</CardTitle>
         </CardHeader>
         <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="john@example.com"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="new-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Email */}
-            <div>
-              <Label>Email</Label>
-              <Input type="email" placeholder="john@example.com" {...register("email")} />
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-            </div>
+              {message && <p className="text-sm text-red-500">{message}</p>}
 
-            {/* Password */}
-            <div>
-              <Label>Password</Label>
-              <Input type="password" placeholder="••••••••" {...register("password")} />
-              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <Label>Confirm Password</Label>
-              <Input type="password" placeholder="••••••••" {...register("confirmPassword")} />
-              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>}
-            </div>
-
-            {/* Message */}
-            {message && <p className="text-sm text-green-600">{message}</p>}
-
-            <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
+              <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
+                {isLoading ? "Creating account..." : "Create Account"}
+              </Button>
+            </form>
+          </Form>
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">

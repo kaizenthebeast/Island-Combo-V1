@@ -2,13 +2,23 @@
 
 import React from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import {
+  applyVoucherSchema,
+  ApplyVoucherFormValues,
+} from '@/form-schema/voucherSchema'
 import { applyVoucher } from '@/lib/voucher'
 import { useCartStore } from '@/store/cartStore'
 import type { Voucher } from '@/types/voucher'
 
-type FormValues = {
-  voucherCode: string
-}
+import { Input } from '@/components/ui/input'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form'
 
 type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
 
@@ -20,67 +30,68 @@ type Props = {
 const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
   const { totalQty } = useCartStore()
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    clearErrors,
-    reset,
-    formState: { errors },
-  } = useForm<FormValues>()
+  const form = useForm<ApplyVoucherFormValues>({
+    resolver: zodResolver(applyVoucherSchema),
+    defaultValues: { voucherCode: '' },
+  })
 
-  const onSubmit: SubmitHandler<FormValues> = async (data) => {
+  const onSubmit: SubmitHandler<ApplyVoucherFormValues> = async (data) => {
     const result = await applyVoucher(data.voucherCode, totalQty)
 
     if (!result.success) {
       setVoucher(null)
-      setError('voucherCode', { message: result.message ?? 'Invalid voucher code' })
+      form.setError('voucherCode', {
+        message: result.message ?? 'Invalid voucher code',
+      })
       return
     }
 
-    clearErrors('voucherCode')
+    form.clearErrors('voucherCode')
     setVoucher(result.voucher ?? null)
-    reset()
+    form.reset()
   }
 
   const removeVoucher = () => {
     setVoucher(null)
-    reset()
+    form.reset()
   }
 
   return (
     <div className="space-y-3">
-
       <h3 className="text-base font-semibold">Apply Voucher Code</h3>
 
-      {/* INPUT */}
-      <form onSubmit={handleSubmit(onSubmit)} className="flex items-center gap-3">
-        <input
-          type="text"
-          placeholder="Voucher code"
-          disabled={!!activeVoucher}
-          {...register('voucherCode', {
-            required: 'Voucher code is required',
-            minLength: {
-              value: 3,
-              message: 'Voucher code must be at least 3 characters',
-            },
-          })}
-          className="flex-1 bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#900036] disabled:opacity-50"
-        />
-        <button
-          type="submit"
-          disabled={!!activeVoucher}
-          className="text-[#900036] font-medium text-sm disabled:opacity-50"
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex items-start gap-3"
         >
-          Apply
-        </button>
-      </form>
-
-      {/* ERROR */}
-      {errors.voucherCode && (
-        <p className="text-sm text-red-500">{errors.voucherCode.message}</p>
-      )}
+          <FormField
+            control={form.control}
+            name="voucherCode"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Voucher code"
+                    disabled={!!activeVoucher}
+                    className="bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#900036] disabled:opacity-50"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <button
+            type="submit"
+            disabled={!!activeVoucher}
+            className="text-[#900036] font-medium text-sm disabled:opacity-50 pt-3"
+          >
+            Apply
+          </button>
+        </form>
+      </Form>
 
       {/* ACTIVE VOUCHER */}
       {activeVoucher && (
@@ -98,7 +109,6 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
           </button>
         </div>
       )}
-
     </div>
   )
 }

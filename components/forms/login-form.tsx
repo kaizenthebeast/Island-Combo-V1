@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, LoginFormInput } from "@/form-schema/loginSchema"
+import { loginSchema, LoginFormInput } from "@/form-schema/loginSchema";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Image from "next/image";
 
 export function LoginForm() {
@@ -23,8 +30,13 @@ export function LoginForm() {
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-
-  const { register, handleSubmit, formState: { errors }, } = useForm<LoginFormInput>({ resolver: zodResolver(loginSchema), });
+  const form = useForm<LoginFormInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
     setMessage("");
@@ -91,49 +103,62 @@ export function LoginForm() {
       <Card className="border-none shadow-none">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
-
         </CardHeader>
         <CardContent>
-
-          {/* Email/Password Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                {...register("email")}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        autoComplete="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-            </div>
 
-            <div className="grid gap-2">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
-            </div>
 
-            {message && <p className="text-sm text-red-500">{message}</p>}
-            <Link
-              href="/auth/forgot-password"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </Link>
+              {message && <p className="text-sm text-red-500">{message}</p>}
 
-            <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading} >
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
+              <Link
+                href="/auth/forgot-password"
+                className="ml-auto text-sm underline-offset-4 hover:underline"
+              >
+                Forgot your password?
+              </Link>
+
+              <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </Button>
+            </form>
+          </Form>
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
@@ -164,8 +189,6 @@ export function LoginForm() {
               Sign up
             </Link>
           </div>
-
-
         </CardContent>
       </Card>
     </div>
