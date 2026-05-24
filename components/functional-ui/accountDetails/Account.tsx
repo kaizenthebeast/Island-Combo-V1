@@ -86,6 +86,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
               action='add'
               firstName={profile?.first_name ?? undefined}
               lastName={profile?.last_name ?? undefined}
+              phone={profile?.phone_text ?? undefined}
               onSuccess={() => router.refresh()}
             >
               <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>

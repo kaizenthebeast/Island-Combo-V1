@@ -36,8 +36,8 @@ const AddressContainer = () => {
   const [shippingLoading, setShippingLoading] = useState(false)
   const [shippingError, setShippingError] = useState<string | null>(null)
 
-  // Account profile — used to pre-fill (and lock) the name on the Add Address form
-  const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null } | null>(null)
+  // Account profile — used to pre-fill (and lock) the name + phone on the Add Address form
+  const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null>(null)
 
   const cart = useCartStore((s) => s.cart)
   const setShipping = useCheckoutStore((s) => s.setShipping)
@@ -68,7 +68,7 @@ const AddressContainer = () => {
     let cancelled = false
     getUserProfile()
       .then((p) => {
-        if (!cancelled) setProfile(p ? { first_name: p.first_name, last_name: p.last_name } : null)
+        if (!cancelled) setProfile(p ? { first_name: p.first_name, last_name: p.last_name, phone_text: p.phone_text } : null)
       })
       .catch(() => {
         // Silently ignore the form just won't be pre-filled. Address fetch error already surfaces auth issues.
@@ -311,6 +311,7 @@ const AddressContainer = () => {
               action="add"
               firstName={profile?.first_name ?? undefined}
               lastName={profile?.last_name ?? undefined}
+              phone={profile?.phone_text ?? undefined}
               onSuccess={fetchAddresses}
             >
               <Button className="rounded-full" variant="default">

@@ -181,6 +181,8 @@ const CheckoutAddress = ({
                             required
                             {...register("phone", { required: "Mobile number is required" })}
                             aria-invalid={errors.phone ? "true" : "false"}
+                            readOnly={!!phone}
+                            className={!!phone ? "bg-gray-100 cursor-not-allowed" : ""}
                         />
                         {errors.phone && (
                             <p className="text-sm text-red-500">{errors.phone.message}</p>
