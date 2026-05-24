@@ -1,0 +1,71 @@
+'use client'
+import { useState } from 'react'
+import { User, Star, Ticket, PackageSearch, CreditCard } from 'lucide-react'
+import Account from '@/components/functional-ui/accountDetails/Account'
+import Loyalty from '@/components/functional-ui/accountDetails/Loyalty'
+import CashVoucher from '@/components/functional-ui/accountDetails/CashVoucher'
+import OrderTracking from '@/components/functional-ui/accountDetails/OrderTracking'
+import MyCards from '@/components/functional-ui/accountDetails/MyCards'
+import { Address } from '@/types/users'
+
+const navLinks = [
+    { name: 'Account Details', icon: User },
+    { name: 'Loyalty Points', icon: Star },
+    { name: 'Buy Cash Voucher', icon: Ticket },
+    { name: 'Orders & Tracking', icon: PackageSearch },
+    { name: 'My Cards', icon: CreditCard },
+]
+
+type AccountContainerProps = {
+    email: string
+    profile: { first_name: string | null; last_name: string | null } | null
+    addresses: Address[]
+}
+
+const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) => {
+    const [activeLink, setActiveLink] = useState('Account Details')
+
+    const handleLinkClick = (linkName: string) => {
+        setActiveLink(linkName)
+    }
+
+    return (
+        <div className='grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6'>
+            <aside className='bg-white border rounded-xl p-4 h-fit shadow-sm md:sticky md:top-6'>
+                <h2 className='text-lg font-semibold text-gray-800 mb-4 px-2'>My Account</h2>
+                <div className='flex flex-col items-start gap-1'>
+                    {navLinks.map((link) => {
+                        const Icon = link.icon
+                        const active = activeLink === link.name
+                        return (
+                            <button
+                                key={link.name}
+                                onClick={() => handleLinkClick(link.name)}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-md w-full text-left text-sm font-medium transition-colors
+                                    ${active
+                                        ? 'text-[#900036] bg-[#FFF0F4]'
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <Icon className={`w-4 h-4 ${active ? 'text-[#900036]' : 'text-gray-400'}`} />
+                                {link.name}
+                            </button>
+                        )
+                    })}
+                </div>
+            </aside>
+
+            <section className='flex flex-col gap-5'>
+                {activeLink === 'Account Details' && (
+                    <Account email={email} profile={profile} addresses={addresses} />
+                )}
+                {activeLink === 'Loyalty Points' && <Loyalty />}
+                {activeLink === 'Buy Cash Voucher' && <CashVoucher />}
+                {activeLink === 'Orders & Tracking' && <OrderTracking />}
+                {activeLink === 'My Cards' && <MyCards />}
+            </section>
+        </div>
+    )
+}
+
+export default AccountContainer

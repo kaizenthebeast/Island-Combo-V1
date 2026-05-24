@@ -37,37 +37,9 @@ export function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem asChild>
-          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/user/details" className="flex items-center gap-2 cursor-pointer">
             <Settings size={15} />
             Account
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
-            <Star size={15} />
-            Loyalty Points
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
-            <Ticket size={15} />
-            Buy Cash Voucher
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
-            <PackageSearch size={15} />
-            Order & Tracking
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/protected/user_details" className="flex items-center gap-2 cursor-pointer">
-            <CreditCard size={15} />
-            Payment Method
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

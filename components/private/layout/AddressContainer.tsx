@@ -71,14 +71,13 @@ const AddressContainer = () => {
         if (!cancelled) setProfile(p ? { first_name: p.first_name, last_name: p.last_name } : null)
       })
       .catch(() => {
-        // Silently ignore — the form just won't be pre-filled. Address fetch error already surfaces auth issues.
+        // Silently ignore the form just won't be pre-filled. Address fetch error already surfaces auth issues.
       })
     return () => { cancelled = true }
   }, [])
 
   // Hit /api/shipping whenever the user is delivering to a known address with a non-empty cart
   useEffect(() => {
-    // Pickup is always free — short-circuit and clear any prior quote
     if (method === "pickup") {
       setShippingQuote(null)
       setShippingError(null)
@@ -152,7 +151,7 @@ const AddressContainer = () => {
   }, [method, selectedAddressId, addresses, cart])
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
+    <main className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
       <h2 className="title-header">How would you like to get your order?</h2>
 
       <div className="grid md:grid-cols-4 grid-cols-1 gap-10">
@@ -252,57 +251,57 @@ const AddressContainer = () => {
 
           {/* ── Saved addresses (deliver method only) ──────────────────── */}
           {method === "deliver" && (
-          <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-[#900036]" />
-              <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
-            </div>
-
-            {/* Loading state */}
-            {loading && (
-              <div className="flex items-center gap-2 text-sm text-gray-400 py-4 justify-center">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Loading addresses…
+            <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-4">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#900036]" />
+                <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
               </div>
-            )}
 
-            {/* Error state */}
-            {!loading && fetchError && (
-              <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 ">
-                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm text-rose-700 font-medium">{fetchError}</p>
-                  <button
-                    type="button"
-                    onClick={fetchAddresses}
-                    className="text-xs text-rose-600 underline underline-offset-2 w-fit"
-                  >
-                    Try again
-                  </button>
+              {/* Loading state */}
+              {loading && (
+                <div className="flex items-center gap-2 text-sm text-gray-400 py-4 justify-center">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Loading addresses…
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Empty state */}
-            {!loading && !fetchError && addresses.length === 0 && (
-              <div className="flex flex-col items-center gap-2 py-8 text-center">
-                <MapPin className="w-8 h-8 text-gray-200" />
-                <p className="text-sm font-medium text-gray-400">No saved addresses yet</p>
-                <p className="text-xs text-gray-300">Add an address below to get started</p>
-              </div>
-            )}
+              {/* Error state */}
+              {!loading && fetchError && (
+                <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 ">
+                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1">
+                    <p className="text-sm text-rose-700 font-medium">{fetchError}</p>
+                    <button
+                      type="button"
+                      onClick={fetchAddresses}
+                      className="text-xs text-rose-600 underline underline-offset-2 w-fit"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                </div>
+              )}
 
-            {/* Address list */}
-            {!loading && !fetchError && addresses.map((address) => (
-              <AddressDetails
-                key={address.id}
-                address={address}
-                selectedAddressId={selectedAddressId}
-                setSelectedAddressId={setSelectedAddressId}
-                onSuccess={fetchAddresses}
-              />
-            ))}
-          </div>
+              {/* Empty state */}
+              {!loading && !fetchError && addresses.length === 0 && (
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <MapPin className="w-8 h-8 text-gray-200" />
+                  <p className="text-sm font-medium text-gray-400">No saved addresses yet</p>
+                  <p className="text-xs text-gray-300">Add an address below to get started</p>
+                </div>
+              )}
+
+              {/* Address list */}
+              {!loading && !fetchError && addresses.map((address) => (
+                <AddressDetails
+                  key={address.id}
+                  address={address}
+                  selectedAddressId={selectedAddressId}
+                  setSelectedAddressId={setSelectedAddressId}
+                  onSuccess={fetchAddresses}
+                />
+              ))}
+            </div>
           )}
 
           {/* ── Add new address (deliver method only) ──────────────────── */}
@@ -319,7 +318,7 @@ const AddressContainer = () => {
               </Button>
             </CheckoutAddress>
           ) : (
-            // Limit reached — show a notice instead of the add button
+            // Limit reached show a notice instead of the add button
             <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
               <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-sm text-amber-700 font-medium">
@@ -328,12 +327,12 @@ const AddressContainer = () => {
             </div>
           ))}
 
-        
+
         </div>
 
         <AddressBillingSummary />
       </div>
-    </div>
+    </main>
   )
 }
 
