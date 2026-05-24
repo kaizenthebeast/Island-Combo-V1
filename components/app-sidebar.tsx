@@ -79,9 +79,15 @@ export function AppSidebar({ user, ...props }: { user: User } & React.ComponentP
   return (
     <Sidebar collapsible="icon" className="bg-[#900036] text-white" {...props}>
       <SidebarHeader>
-        <div className="flex items-center">
-          <Image src='/images/logo.png' alt="island combo logo" width={45} height={45}></Image>
-          <h1 className="ms-3 font-bold">ISLAND COMBO</h1>
+        <div className="flex items-center group-data-[collapsible=icon]:justify-center">
+          <Image
+            src='/images/logo.png'
+            alt="island combo logo"
+            width={45}
+            height={45}
+            className="size-[45px] shrink-0 group-data-[collapsible=icon]:size-7"
+          />
+          <h1 className="ms-3 font-bold group-data-[collapsible=icon]:hidden">ISLAND COMBO</h1>
         </div>
       </SidebarHeader>
       <SidebarContent>

@@ -53,7 +53,7 @@ export function Field({
 }
 
 const inputBase = [
-  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-slate-800 outline-none leading-5',
+  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-slate-800 outline-hidden leading-5',
   'border-slate-200 placeholder:text-slate-300',
   'focus:border-slate-400 focus:ring-2 focus:ring-slate-100',
   'disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed',

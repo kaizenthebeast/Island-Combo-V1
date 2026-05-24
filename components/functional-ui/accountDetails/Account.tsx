@@ -32,7 +32,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
   return (
     <>
       {/* Personal details card */}
-      <div className='bg-white border rounded-xl p-5 shadow-sm'>
+      <div className='bg-white border rounded-xl p-5 shadow-xs'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='text-base font-bold text-gray-800 flex items-center gap-2'>
             <User className='w-4 h-4' />
@@ -74,7 +74,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
       </div>
 
       {/* Saved address card */}
-      <div className='bg-white border rounded-xl p-5 shadow-sm'>
+      <div className='bg-white border rounded-xl p-5 shadow-xs'>
         <div className='flex items-center justify-between mb-4'>
           <h3 className='text-base font-bold text-gray-800 flex items-center gap-2'>
             <MapPin className='w-4 h-4' />

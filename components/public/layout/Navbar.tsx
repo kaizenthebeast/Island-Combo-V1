@@ -25,7 +25,7 @@ const Navbar = async () => {
           <input
             type="text"
             placeholder="Search products..."
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#900036]"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#900036]"
           />
         </div>
 

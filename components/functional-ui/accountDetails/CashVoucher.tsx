@@ -2,7 +2,7 @@ import { Ticket } from 'lucide-react'
 
 const CashVoucher = () => {
   return (
-    <div className='bg-white border rounded-xl p-5 shadow-sm'>
+    <div className='bg-white border rounded-xl p-5 shadow-xs'>
       <div className='flex items-center justify-between mb-4'>
         <h3 className='text-base font-bold text-gray-800 flex items-center gap-2'>
           <Ticket className='w-4 h-4' />

@@ -47,7 +47,7 @@ function showToast(variant: ToastVariant, { title, description, action }: ToastO
 
   toast.custom(() => (
     <div className={cn(
-      "flex items-start gap-3 w-[356px] rounded-xl border px-4 py-3.5 shadow-sm",
+      "flex items-start gap-3 w-[356px] rounded-xl border px-4 py-3.5 shadow-xs",
       bg
     )}>
       <Icon className={cn("size-5 mt-0.5 shrink-0", icon_color)} />

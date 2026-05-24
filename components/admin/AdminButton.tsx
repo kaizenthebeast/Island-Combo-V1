@@ -40,8 +40,8 @@ interface AdminButtonProps {
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
-    'text-white shadow-sm hover:shadow-md active:scale-95'
-    + ' bg-gradient-to-br from-slate-800 to-slate-700'
+    'text-white shadow-xs hover:shadow-md active:scale-95'
+    + ' bg-linear-to-br from-slate-800 to-slate-700'
     + ' hover:from-slate-700 hover:to-slate-600',
 
   secondary:

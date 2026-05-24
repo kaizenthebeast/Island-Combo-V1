@@ -73,7 +73,7 @@ export function PageHeader({ title, eyebrow, subtitle, actions = [], className =
 
       {/* ── Right: action buttons ── */}
       {actions.length > 0 && (
-        <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+        <div className="flex items-center gap-2 shrink-0 mt-1">
           {actions.map(action => (
             <AdminButton
               key={action.label}

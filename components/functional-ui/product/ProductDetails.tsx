@@ -175,7 +175,7 @@ const ProductDetails = ({ product }: Props) => {
                         <CarouselContent>
                             {carouselImages.map((url: string, index: number) => (
                                 <CarouselItem key={index}>
-                                    <div className="relative w-full aspect-square sm:aspect-[12/13]">
+                                    <div className="relative w-full aspect-square sm:aspect-12/13">
                                         <Image
                                             src={getPublicImageUrl(url) || defaultVariant.image_url[0]}
                                             alt={`${product.name} image ${index + 1}`}

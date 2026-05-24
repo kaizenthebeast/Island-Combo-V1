@@ -207,7 +207,7 @@ export function DataTable<T extends Record<string, unknown>>({
   )
 
   return (
-    <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden ${className}`}>
 
       {/* ── Toolbar ── */}
       <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
@@ -220,7 +220,7 @@ export function DataTable<T extends Record<string, unknown>>({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:border-slate-400"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-400"
           />
         </div>
 

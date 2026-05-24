@@ -31,7 +31,7 @@ export function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center focus:outline-none cursor-pointer">
+        <button className="flex items-center focus:outline-hidden cursor-pointer">
           <User size={22} />
         </button>
       </DropdownMenuTrigger>

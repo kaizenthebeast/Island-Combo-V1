@@ -50,7 +50,7 @@ export const ProductCategory = async () => {
         }}
         className="w-full"
       >
-        <CarouselContent className="-ml-0 justify-around">
+        <CarouselContent className="ml-0 justify-around">
           {categories.map((cat) => {
             const Icon = CATEGORY_ICONS[cat.name] ?? LayoutGrid;
 
@@ -63,7 +63,7 @@ export const ProductCategory = async () => {
                   >
                     <Icon className="w-5 h-5 text-amber-600" />
                   </div>
-                  <span className="text-[11px] text-gray-500 text-center leading-tight break-words w-14 group-hover:text-gray-700">
+                  <span className="text-[11px] text-gray-500 text-center leading-tight wrap-break-word w-14 group-hover:text-gray-700">
                     {cat.name}
                   </span>
                 </button>

@@ -187,7 +187,7 @@ const AddressContainer = () => {
 
           {/* ── Shipping quote status (deliver method only) ────────────── */}
           {method === "deliver" && (shippingLoading || shippingError || shippingQuote) && (
-            <div className="rounded-xl border p-4 shadow-sm flex flex-col gap-2">
+            <div className="rounded-xl border p-4 shadow-xs flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#900036]" />
                 <h3 className="text-sm font-bold text-gray-800">Shipping estimate</h3>
@@ -232,7 +232,7 @@ const AddressContainer = () => {
 
           {/* ── Pickup location (pickup method only) ───────────────────── */}
           {method === "pickup" && (
-            <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-3">
+            <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <Store className="w-4 h-4 text-[#900036]" />
                 <h2 className="text-base font-bold text-gray-800">Pickup Location</h2>
@@ -251,7 +251,7 @@ const AddressContainer = () => {
 
           {/* ── Saved addresses (deliver method only) ──────────────────── */}
           {method === "deliver" && (
-            <div className="border rounded-xl p-5 shadow-sm flex flex-col gap-4">
+            <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-[#900036]" />
                 <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
