@@ -18,7 +18,7 @@ const AddressBillingSummary = () => {
   return (
     <div className="w-full md:w-[350px]">
       <div className="bg-white p-5 rounded-xl border space-y-4 sticky top-4">
-        <h2 className="font-semibold">Order Summary</h2>
+        <h2 className="font-semibold">Billing Summary</h2>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Subtotal ({totalQty} items)</span>
           <span>${subtotal.toFixed(2)}</span>

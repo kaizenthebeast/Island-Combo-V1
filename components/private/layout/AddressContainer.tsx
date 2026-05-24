@@ -162,7 +162,7 @@ const AddressContainer = () => {
             <button
               type="button"
               onClick={() => setMethod("deliver")}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
+              className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "deliver"
                   ? "border-brand bg-brand-tint text-brand"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
@@ -174,7 +174,7 @@ const AddressContainer = () => {
             <button
               type="button"
               onClick={() => setMethod("pickup")}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
+              className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "pickup"
                   ? "border-brand bg-brand-tint text-brand"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
@@ -314,7 +314,7 @@ const AddressContainer = () => {
               phone={profile?.phone_text ?? undefined}
               onSuccess={fetchAddresses}
             >
-              <Button className="rounded-full" variant="default">
+              <Button className="rounded-full cursor-pointer" variant="default">
                 + Add New Address
               </Button>
             </CheckoutAddress>

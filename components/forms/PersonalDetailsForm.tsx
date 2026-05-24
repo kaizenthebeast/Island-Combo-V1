@@ -167,7 +167,7 @@ const PersonalDetailsForm = ({
             <Button
               type='submit'
               disabled={form.formState.isSubmitting}
-              className='w-full bg-brand hover:bg-brand-hover rounded-full'
+              className='w-full bg-brand hover:bg-brand-hover rounded-full cursor-pointer'
             >
               {form.formState.isSubmitting ? 'Saving…' : 'Save'}
             </Button>

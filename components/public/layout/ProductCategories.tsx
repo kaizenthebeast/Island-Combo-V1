@@ -42,7 +42,7 @@ export const ProductCategory = async () => {
   const categories = await getAllParentCategories();
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full">
       <Carousel
         opts={{
           align: "start",
@@ -50,13 +50,13 @@ export const ProductCategory = async () => {
         }}
         className="w-full"
       >
-        <CarouselContent className="ml-0 justify-around">
+        <CarouselContent className="ml-0 justify-between">
           {categories.map((cat) => {
             const Icon = CATEGORY_ICONS[cat.name] ?? LayoutGrid;
 
             return (
               <CarouselItem key={cat.category_id} className="basis-auto px-3">
-                <button className="flex flex-col items-center gap-2 group">
+                <button className="flex flex-col items-center gap-2 group cursor-pointer">
                   <div
                     className="rounded-full flex items-center justify-center transition-colors border bg-amber-100 border-amber-300 group-hover:bg-amber-200"
                     style={{ width: 52, height: 52 }}

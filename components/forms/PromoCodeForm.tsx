@@ -86,7 +86,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
           <button
             type="submit"
             disabled={!!activeVoucher}
-            className="text-brand font-medium text-sm disabled:opacity-50 pt-3"
+            className="text-brand font-medium text-sm disabled:opacity-50 pt-3 cursor-pointer"
           >
             Apply
           </button>

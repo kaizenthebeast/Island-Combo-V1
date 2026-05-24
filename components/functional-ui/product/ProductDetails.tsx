@@ -326,7 +326,7 @@ const ProductDetails = ({ product }: Props) => {
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <div className="flex gap-3 sm:contents">
                             <Button type="button" onClick={handleAddToCart} disabled={!canProceed}
-                                className="sm:flex-1 h-11 bg-brand hover:bg-brand-hover text-white rounded-full">
+                                className="sm:flex-1 h-11 bg-brand hover:bg-brand-hover text-white rounded-full cursor-pointer">
                                 <ShoppingCart className="mr-2 w-4 h-4" />
                                 Add to cart
                             </Button>

@@ -270,7 +270,7 @@ const CheckoutAddress = ({
                                             Use this address for future orders.
                                         </p>
                                     </div>
-                                    <FormControl>
+                                    <FormControl className='cursor-pointer'>
                                         <Switch
                                             checked={field.value}
                                             onCheckedChange={field.onChange}
@@ -282,7 +282,7 @@ const CheckoutAddress = ({
 
                         <Button
                             type="submit"
-                            className="w-full bg-brand hover:bg-brand-hover rounded-full"
+                            className="w-full bg-brand hover:bg-brand-hover rounded-full cursor-pointer"
                             disabled={form.formState.isSubmitting}
                         >
                             {form.formState.isSubmitting ? "Saving…" : "Save"}

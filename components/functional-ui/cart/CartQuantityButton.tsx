@@ -16,7 +16,7 @@ const CartQuantityButton = ({ value, onChange, min = 1 }: Props) => {
         type="button"
         onClick={() => onChange(Math.max(min, value - 1))}
         disabled={value <= min}
-        className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
+        className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md cursor-pointer"
       >
         −
       </button>
@@ -28,7 +28,7 @@ const CartQuantityButton = ({ value, onChange, min = 1 }: Props) => {
       <button
         type="button"
         onClick={() => onChange(value + 1)}
-        className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md"
+        className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md cursor-pointer"
       >
         +
       </button>

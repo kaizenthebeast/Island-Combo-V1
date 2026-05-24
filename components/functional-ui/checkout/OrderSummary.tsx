@@ -96,7 +96,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     </h4>
                                     <button
                                         onClick={() => handleActions('remove', item.variant_id, item.quantity)}
-                                        className="text-red-400 hover:text-red-600 shrink-0 mt-0.5"
+                                        className="text-red-400 hover:text-red-600 shrink-0 mt-0.5 cursor-pointer"
                                     >
                                         <X size={16} />
                                     </button>
@@ -146,7 +146,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     <button
                                         type="button"
                                         onClick={() => handleEditToggle(key, item.quantity)}
-                                        className="text-xs text-brand underline underline-offset-2"
+                                        className="text-xs text-brand underline underline-offset-2 cursor-pointer"
                                     >
                                         {isActive ? 'Cancel' : 'Update'}
                                     </button>
@@ -162,7 +162,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                                     handleActions('update', item.variant_id, quantity)
                                                     setActiveItemKey(null)
                                                 }}
-                                                className="text-xs bg-brand text-white px-3 py-1 rounded-full"
+                                                className="text-xs bg-brand text-white px-3 py-1 rounded-full cursor-pointer"
                                             >
                                                 Save
                                             </button>
