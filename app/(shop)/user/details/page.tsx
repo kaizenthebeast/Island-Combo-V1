@@ -16,7 +16,7 @@ const UserDetailsPage = async () => {
       <AccountContainer
         email={authResult.data.user?.email ?? ''}
         profile={profile}
-        addresses={addresses}
+        addresses={addresses ?? []}
       />
     </main>
   )

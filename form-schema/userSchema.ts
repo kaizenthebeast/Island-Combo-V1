@@ -21,5 +21,16 @@ export const editUserSchema = z.object({
   role:       z.enum(['customer', 'staff', 'admin']),
 })
 
-export type AddUserFormValues  = z.infer<typeof addUserSchema>
-export type EditUserFormValues = z.infer<typeof editUserSchema>
+export const personalDetailsSchema = z.object({
+  first_name: z.string().min(1, 'First name is required').max(15, 'Max 15 characters'),
+  last_name:  z.string().min(1, 'Last name is required').max(15, 'Max 15 characters'),
+  phone_text: z
+    .string()
+    .max(16, 'Max 16 characters')
+    .optional()
+    .or(z.literal('')),
+})
+
+export type AddUserFormValues          = z.infer<typeof addUserSchema>
+export type EditUserFormValues         = z.infer<typeof editUserSchema>
+export type PersonalDetailsFormValues  = z.infer<typeof personalDetailsSchema>

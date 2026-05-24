@@ -1,14 +1,33 @@
+'use client'
+
 import { User, MapPin } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Address } from '@/types/users'
+import { deleteAddress } from '@/lib/users'
+import CheckoutAddress from '@/components/forms/CheckoutAddressForm'
+import PersonalDetailsForm from '@/components/forms/PersonalDetailsForm'
+import DeleteModal from '@/components/popup/DeleteModal'
+import { customToast } from '@/components/popup/ToastCustom'
 
 type AccountProps = {
   email: string
-  profile: { first_name: string | null; last_name: string | null } | null
+  profile: { first_name: string | null; last_name: string | null; phone_text: string | null } | null
   addresses: Address[]
 }
 
 const Account = ({ email, profile, addresses }: AccountProps) => {
+  const router = useRouter()
   const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ')
+  const atAddressLimit = addresses.length >= 3
+
+  const handleDeleteAddress = async (id: number) => {
+    await deleteAddress(id)
+    customToast.success({
+      title: 'Address successfully deleted!',
+      description: 'The address has been removed from your account.',
+    })
+    router.refresh()
+  }
 
   return (
     <>
@@ -19,9 +38,17 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
             <User className='w-4 h-4' />
             Personal details
           </h3>
-          <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
-            Edit
-          </button>
+          <PersonalDetailsForm
+            firstName={profile?.first_name}
+            lastName={profile?.last_name}
+            phone={profile?.phone_text}
+            email={email}
+            onSuccess={() => router.refresh()}
+          >
+            <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+              Edit
+            </button>
+          </PersonalDetailsForm>
         </div>
 
         <div className='flex flex-col gap-3 text-sm'>
@@ -33,6 +60,12 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
             <p className='font-semibold text-gray-800'>Name</p>
             <p className='text-gray-600'>{fullName || '—'}</p>
           </div>
+          {profile?.phone_text && (
+            <div>
+              <p className='font-semibold text-gray-800'>Mobile number</p>
+              <p className='text-gray-600'>{profile.phone_text}</p>
+            </div>
+          )}
           <div>
             <p className='font-semibold text-gray-800'>Password</p>
             <p className='text-gray-600 tracking-widest'>••••••••••••</p>
@@ -47,9 +80,19 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
             <MapPin className='w-4 h-4' />
             Saved address
           </h3>
-          <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
-            Add
-          </button>
+          {!atAddressLimit && (
+            <CheckoutAddress
+              title='Add New Address'
+              action='add'
+              firstName={profile?.first_name ?? undefined}
+              lastName={profile?.last_name ?? undefined}
+              onSuccess={() => router.refresh()}
+            >
+              <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+                Add
+              </button>
+            </CheckoutAddress>
+          )}
         </div>
 
         <div className='flex flex-col gap-4'>
@@ -79,12 +122,42 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
                     <p className='text-gray-600'>{address.profile.phone_text}</p>
                   )}
                 </div>
-                <button type='button' className='text-sm text-[#900036] font-medium hover:underline shrink-0'>
-                  Edit
-                </button>
+
+                <div className='flex items-center gap-3 shrink-0'>
+                  <CheckoutAddress
+                    title='Edit Address'
+                    action='edit'
+                    addressId={address.id}
+                    firstName={address.profile?.first_name}
+                    lastName={address.profile?.last_name}
+                    phone={address.profile?.phone_text}
+                    address={address.address}
+                    postalCode={address.postal_code}
+                    locality={address.locality}
+                    country={address.country}
+                    makeDefault={address.make_default}
+                    onSuccess={() => router.refresh()}
+                  >
+                    <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+                      Edit
+                    </button>
+                  </CheckoutAddress>
+
+                  <DeleteModal subtitle='address' onSuccess={() => handleDeleteAddress(address.id)}>
+                    <button type='button' className='text-sm text-gray-500 font-medium hover:underline'>
+                      Remove
+                    </button>
+                  </DeleteModal>
+                </div>
               </div>
             )
           })}
+
+          {atAddressLimit && (
+            <p className='text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2'>
+              You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+            </p>
+          )}
         </div>
       </div>
     </>

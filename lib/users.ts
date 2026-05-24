@@ -114,6 +114,29 @@ export const deleteAddress = async (addressId: number) => {
   return { success: true, status: 200, message: 'Address successfully deleted' };
 };
 
+export const updateMyProfile = async (
+  data: { first_name: string; last_name: string; phone_text?: string },
+) => {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+
+  const { error } = await supabase.from('profile').upsert({
+    user_id: user.id,
+    email: user.email,
+    first_name: data.first_name,
+    last_name: data.last_name,
+    phone_text: data.phone_text ?? null,
+    updated_at: new Date().toISOString(),
+  }).eq('user_id', user.id);
+
+  if (error) return { success: false, status: 403, message: error.message };
+
+  revalidatePath('/user/details');
+  return { success: true, status: 200, message: 'Profile successfully updated' };
+};
+
 export const getUserProfile = async (): Promise<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null> => {
   const supabase = await createClient();
 
