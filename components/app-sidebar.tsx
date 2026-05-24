@@ -77,7 +77,7 @@ type User = {
 
 export function AppSidebar({ user, ...props }: { user: User } & React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="none" className="bg-[#900036] h-100 text-white" {...props}>
+    <Sidebar collapsible="icon" className="bg-[#900036] text-white" {...props}>
       <SidebarHeader>
         <div className="flex items-center">
           <Image src='/images/logo.png' alt="island combo logo" width={45} height={45}></Image>

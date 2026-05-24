@@ -109,7 +109,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
     ]
 
     return (
-        <section className="min-h-screen bg-slate-50 px-6 py-10">
+        <section className="min-h-full bg-slate-50 px-6 py-10">
             <PageHeader
                 eyebrow="Catalog"
                 title="Products"

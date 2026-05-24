@@ -99,7 +99,7 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
     ]
 
     return (
-        <section className="min-h-screen bg-slate-50 px-6 py-10">
+        <section className="min-h-full bg-slate-50 px-6 py-10">
             <PageHeader
                 eyebrow="People"
                 title="Customers"
