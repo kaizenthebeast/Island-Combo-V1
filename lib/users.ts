@@ -318,11 +318,17 @@ export const getStaffPage = async (
   return { success: true, status: 200, rows: data ?? [], total: count ?? 0 }
 }
 
+export const createUser = async(data: AddUserFormValues) => {
+  const supabase = await createClient();
+
+
+}
+
 export const updateUser = async (userId: string, data: EditUserFormValues) => {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  // ✅ added status
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  
 
   const { error } = await supabase
     .from('profile')
@@ -338,10 +344,10 @@ export const updateUser = async (userId: string, data: EditUserFormValues) => {
     })
     .eq('user_id', userId)
 
-  if (error) return { success: false, status: 403, message: error.message }   // ✅ added status
+  if (error) return { success: false, status: 403, message: error.message }   
 
   revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'User successfully updated' } // ✅ added status
+  return { success: true, status: 200, message: 'User successfully updated' } 
 }
 
 export const deleteUser = async (userId: string) => {
