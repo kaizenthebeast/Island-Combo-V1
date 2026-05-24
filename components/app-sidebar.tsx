@@ -77,7 +77,7 @@ type User = {
 
 export function AppSidebar({ user, ...props }: { user: User } & React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar collapsible="icon" className="bg-brand text-brand-foreground" {...props}>
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center group-data-[collapsible=icon]:justify-center">
           <Image
