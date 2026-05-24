@@ -5,9 +5,10 @@ import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddUsersDialog from '@/components/admin/users/AddUsersDialog'
 import EditUserDialog from '@/components/admin/users/EditUserDialog'
-import DeleteStaffDialog from '@/components/admin/users/DeleteStaffDialog'  
+import DeleteStaffDialog from '@/components/admin/users/DeleteStaffDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { softDeleteUser } from '@/lib/users' 
+import { useTableUrlState } from '@/hooks/useTableUrlState'
+import { softDeleteUser } from '@/lib/users'
 import type { AdminStaff } from '@/types/users'
 
 type StaffStatus = 'ACTIVE' | 'INACTIVE'
@@ -18,7 +19,7 @@ type Row = {
   email: string
   phone: string
   role: string
-  status: StaffStatus 
+  status: StaffStatus
   joined: string
   raw: AdminStaff
 }
@@ -36,12 +37,35 @@ const STATUS_BADGE: Record<StaffStatus, { label: string; variant: BadgeVariant }
   INACTIVE: { label: 'Inactive', variant: 'default' },
 }
 
-export default function StaffClient({ staff }: { staff: AdminStaff[] }) {
+interface Props {
+  staff: AdminStaff[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export default function StaffClient({ staff, total, page, pageSize }: Props) {
   const [addOpen, setAddOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<AdminStaff | null>(null)
-  const [deletingRow, setDeletingRow] = useState<Row | null>(null) 
+  const [deletingRow, setDeletingRow] = useState<Row | null>(null)
   const [, startTransition] = useTransition()
   const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const {
+    state,
+    isPending,
+    searchInput,
+    setSearchInput,
+    setPage,
+    setPageSize,
+    setFilter,
+    setSort,
+  } = useTableUrlState({
+    pageSize,
+    filter: 'All',
+    sortKey: 'member_since',
+    sortDir: 'desc',
+  })
 
   const handleDeleteConfirm = async () => {
     if (!deletingRow) return
@@ -70,20 +94,21 @@ export default function StaffClient({ staff }: { staff: AdminStaff[] }) {
       email: u.email ?? '—',
       phone: u.phone_text ?? '—',
       role: u.role,
-      status: u.is_active ? 'ACTIVE' : 'INACTIVE', 
+      status: u.is_active ? 'ACTIVE' : 'INACTIVE',
       joined: new Date(u.member_since).toLocaleDateString(),
       raw: u,
     }))
   }, [staff])
 
   const columns: ColumnDef<Row>[] = [
-    { key: 'name',  label: 'Name'  },
-    { key: 'email', label: 'Email' },
-    { key: 'phone', label: 'Phone' },
+    { key: 'name',  label: 'Name',  sortable: false },
+    { key: 'email', label: 'Email', sortable: false },
+    { key: 'phone', label: 'Phone', sortable: false },
     {
       key: 'role',
       label: 'Role',
       align: 'center',
+      sortable: false,
       render: (v) => (
         <StatusBadge status={String(v)} variant={getRoleVariant(String(v))} />
       ),
@@ -91,12 +116,13 @@ export default function StaffClient({ staff }: { staff: AdminStaff[] }) {
     {
       key: 'status',
       label: 'Status',
+      sortable: false,
       render: (v) => {
         const { label, variant } = STATUS_BADGE[v as StaffStatus] ?? STATUS_BADGE.ACTIVE
         return <StatusBadge status={label} variant={variant} />
       },
     },
-    { key: 'joined', label: 'Joined', align: 'right' },
+    { key: 'joined', label: 'Joined', align: 'right', sortable: false },
   ]
 
   return (
@@ -133,15 +159,31 @@ export default function StaffClient({ staff }: { staff: AdminStaff[] }) {
       />
 
       <DataTable<Row>
-        data={rows}
+        rows={rows}
+        total={total}
         columns={columns}
-        searchKeys={['name', 'email', 'phone']}
-        filterKey="status"                              
-        filterOptions={['All', 'ACTIVE', 'INACTIVE']}  
-        defaultSortKey="name"
+        loading={isPending}
+
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+
+        search={searchInput}
+        onSearchChange={setSearchInput}
+        searchPlaceholder="Search by name, email, or phone…"
+
+        filterValue={state.filter || 'All'}
+        onFilterChange={setFilter}
+        filterOptions={['All', 'ACTIVE', 'INACTIVE']}
+
+        sortKey={state.sortKey as keyof Row | undefined}
+        sortDir={state.sortDir}
+        onSortChange={(key, dir) => setSort(String(key), dir)}
+
         getRowId={(row) => row.user_id}
         onEdit={(row) => setEditingUser(row.raw)}
-        onDelete={(row) => setDeletingRow(row)}         
+        onDelete={(row) => setDeletingRow(row)}
         expandedRowRender={(row) => {
           const u = row.raw
           return (

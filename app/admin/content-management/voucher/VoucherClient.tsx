@@ -7,7 +7,8 @@ import AddVoucherDialog from '@/components/admin/voucher/AddVoucherDialog'
 import EditVoucherDialog from '@/components/admin/voucher/EditVoucherDialog'
 import DeleteVoucherDialog from '@/components/admin/voucher/DeleteVoucherDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { archiveVoucher, restoreVoucher } from '@/lib/voucher'
+import { useTableUrlState } from '@/hooks/useTableUrlState'
+import { archiveVoucher } from '@/lib/voucher'
 import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/types/voucher'
 
 // ─── table row shape ──────────────────────────────────────────────────────────
@@ -22,12 +23,12 @@ type TableRow = {
   raw: Voucher
 }
 
-// ─── status badge config — mirrors STATUS_BADGE in CategoryClient ─────────────
+// ─── status badge config ──────────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<VoucherEffectiveStatus, { label: string; variant: BadgeVariant }> = {
-  ACTIVE: { label: 'Active', variant: 'success' },
-  DRAFT: { label: 'Draft', variant: 'warning' },
-  EXPIRED: { label: 'Expired', variant: 'error' },
+  ACTIVE:   { label: 'Active',   variant: 'success' },
+  DRAFT:    { label: 'Draft',    variant: 'warning' },
+  EXPIRED:  { label: 'Expired',  variant: 'error'   },
   ARCHIVED: { label: 'Archived', variant: 'default' },
 }
 
@@ -44,13 +45,36 @@ const formatDate = (iso: string | null): string => {
 
 // ─── component ────────────────────────────────────────────────────────────────
 
-export default function VoucherClient({ voucher }: { voucher: VoucherRow[] }) {
+interface Props {
+  voucher: VoucherRow[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+export default function VoucherClient({ voucher, total, page, pageSize }: Props) {
   const [addOpen, setAddOpen] = useState(false)
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null)
   const [deletingRow, setDeletingRow] = useState<TableRow | null>(null)
-  const [restoringRow, setRestoringRow] = useState<TableRow | null>(null)
+  const [, setRestoringRow] = useState<TableRow | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
+
+  const {
+    state,
+    isPending,
+    searchInput,
+    setSearchInput,
+    setPage,
+    setPageSize,
+    setFilter,
+    setSort,
+  } = useTableUrlState({
+    pageSize,
+    filter: 'All',
+    sortKey: 'created_at',
+    sortDir: 'desc',
+  })
 
   // ── archive ────────────────────────────────────────────────────────────────
 
@@ -73,7 +97,6 @@ export default function VoucherClient({ voucher }: { voucher: VoucherRow[] }) {
     })
   }
 
-
   // ── rows ───────────────────────────────────────────────────────────────────
 
   const rows: TableRow[] = useMemo(
@@ -93,17 +116,17 @@ export default function VoucherClient({ voucher }: { voucher: VoucherRow[] }) {
   // ── columns ────────────────────────────────────────────────────────────────
 
   const columns: ColumnDef<TableRow>[] = [
-    { key: 'id', label: 'ID', width: '70px' },
-    { key: 'code', label: 'Code' },
-    { key: 'value', label: 'Discount', align: 'center' },
-    { key: 'min_quantity', label: 'Min. Qty', align: 'center' },
-    { key: 'expires_at', label: 'Expires', align: 'center' },
+    { key: 'id',               label: 'ID',       width: '70px'                       },
+    { key: 'code',             label: 'Code'                                          },
+    { key: 'value',            label: 'Discount',     align: 'center'                 },
+    { key: 'min_quantity',     label: 'Min. Qty',     align: 'center', sortable: false },
+    { key: 'expires_at',       label: 'Expires',      align: 'center'                 },
     {
       key: 'effective_status',
       label: 'Status',
+      sortable: false,
       render: (v) => {
-        const { label, variant } =
-          STATUS_BADGE[v as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
+        const { label, variant } = STATUS_BADGE[v as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
         return <StatusBadge status={label} variant={variant} />
       },
     },
@@ -146,18 +169,32 @@ export default function VoucherClient({ voucher }: { voucher: VoucherRow[] }) {
         onOpenChange={(open) => { if (!open) setDeletingRow(null) }}
       />
 
-
       <DataTable<TableRow>
-        data={rows}
+        rows={rows}
+        total={total}
         columns={columns}
-        searchKeys={['code']}
-        filterKey="effective_status"
+        loading={isPending}
+
+        page={page}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+
+        search={searchInput}
+        onSearchChange={setSearchInput}
+        searchPlaceholder="Search by code…"
+
+        filterValue={state.filter || 'All'}
+        onFilterChange={setFilter}
         filterOptions={['All', 'ACTIVE', 'DRAFT', 'EXPIRED', 'ARCHIVED']}
-        defaultSortKey="code"
+
+        sortKey={state.sortKey as keyof TableRow | undefined}
+        sortDir={state.sortDir}
+        onSortChange={(key, dir) => setSort(String(key), dir)}
+
         getRowId={(row) => row.id}
         onEdit={(row) => setEditingVoucher(row.raw)}
         onDelete={(row) => {
-          // ARCHIVED rows get restore action instead of archive
           if (row.effective_status === 'ARCHIVED') {
             setRestoringRow(row)
           } else {

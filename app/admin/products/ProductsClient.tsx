@@ -7,6 +7,7 @@ import AddProductDialog from '@/components/admin/products/AddProductDialog'
 import EditProductDialog from '@/components/admin/products/EditProductDialog'
 import DeleteProductDialog from '@/components/admin/products/DeleteProductDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { useTableUrlState } from '@/hooks/useTableUrlState'
 import type { AdminProduct, ProductStatus } from '@/types/product'
 import { softDeleteProduct } from '@/lib/product'
 
@@ -28,12 +29,35 @@ const STATUS_BADGE: Record<ProductStatus, { label: string; variant: BadgeVariant
     ARCHIVED: { label: 'Archived', variant: 'default'  },
 }
 
-export default function ProductsClient({ products }: { products: AdminProduct[] }) {
+interface Props {
+    products: AdminProduct[]
+    total: number
+    page: number
+    pageSize: number
+}
+
+export default function ProductsClient({ products, total, page, pageSize }: Props) {
     const [open, setOpen] = useState(false)
     const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
     const [deletingRow, setDeletingRow] = useState<Row | null>(null)
     const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
+
+    const {
+        state,
+        isPending,
+        searchInput,
+        setSearchInput,
+        setPage,
+        setPageSize,
+        setFilter,
+        setSort,
+    } = useTableUrlState({
+        pageSize,
+        filter: 'All',
+        sortKey: 'created_at',
+        sortDir: 'desc',
+    })
 
     const handleDeleteConfirm = async () => {
         if (!deletingRow) return
@@ -68,12 +92,12 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
     }, [products])
 
     const columns: ColumnDef<Row>[] = [
-        { key: 'product_id', label: 'ID',       width: '80px'   },
-        { key: 'name',       label: 'Product'                   },
-        { key: 'category',   label: 'Category'                  },
-        { key: 'type',       label: 'Type'                      },
-        { key: 'variants',   label: 'Variants', align: 'center' },
-        { key: 'stock',      label: 'Stock',    align: 'right'  },
+        { key: 'product_id', label: 'ID',       width: '80px'                    },
+        { key: 'name',       label: 'Product'                                    },
+        { key: 'category',   label: 'Category', sortable: false                  },
+        { key: 'type',       label: 'Type'                                       },
+        { key: 'variants',   label: 'Variants', align: 'center', sortable: false },
+        { key: 'stock',      label: 'Stock',    align: 'right',  sortable: false },
         {
             key: 'status',
             label: 'Status',
@@ -119,12 +143,28 @@ export default function ProductsClient({ products }: { products: AdminProduct[] 
             />
 
             <DataTable<Row>
-                data={rows}
+                rows={rows}
+                total={total}
                 columns={columns}
-                searchKeys={['name', 'category', 'product_id', 'category']}
-                filterKey="status"
-                filterOptions={['All', 'ACTIVE', 'ARCHIVED', ]}
-                defaultSortKey="name"
+                loading={isPending}
+
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                searchPlaceholder="Search products by name…"
+
+                filterValue={state.filter || 'All'}
+                onFilterChange={setFilter}
+                filterOptions={['All', 'ACTIVE', 'DRAFT', 'HIDDEN', 'ARCHIVED']}
+
+                sortKey={state.sortKey as keyof Row | undefined}
+                sortDir={state.sortDir}
+                onSortChange={(key, dir) => setSort(String(key), dir)}
+
                 getRowId={(row) => row.product_id}
                 onDelete={(row) => setDeletingRow(row)}
                 onEdit={(row) => setEditingProduct(row.raw)}

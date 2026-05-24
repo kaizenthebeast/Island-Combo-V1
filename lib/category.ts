@@ -24,6 +24,94 @@ export const getCategories = async (): Promise<Category[]> => {
     }))
 }
 
+// ─── READ (paginated parents + their children) ────────────────────────────────
+
+export type CategoriesSortKey = 'category_id' | 'name'
+
+export type CategoriesPageInput = {
+    page: number
+    pageSize: number
+    search?: string
+    filter?: string                          // 'ACTIVE' | 'ARCHIVED' | 'All'
+    sortKey?: CategoriesSortKey
+    sortDir?: 'asc' | 'desc'
+}
+
+export type CategoriesPageResult = {
+    parents: Category[]
+    children: Category[]                     // only children belonging to the current page of parents
+    total: number
+}
+
+export const getCategoriesPage = async (
+    input: CategoriesPageInput,
+): Promise<CategoriesPageResult> => {
+    const supabase = await createClient()
+
+    const {
+        page,
+        pageSize,
+        search,
+        filter,
+        sortKey = 'name',
+        sortDir = 'asc',
+    } = input
+
+    let parentQuery = supabase
+        .from('category')
+        .select('category_id, name, parent_id, is_active', { count: 'exact' })
+        .is('parent_id', null)
+
+    if (filter === 'ACTIVE')   parentQuery = parentQuery.eq('is_active', true)
+    if (filter === 'ARCHIVED') parentQuery = parentQuery.eq('is_active', false)
+
+    const q = search?.trim()
+    if (q) {
+        const safe = q.replace(/[\\%_,]/g, (c) => `\\${c}`)
+        parentQuery = parentQuery.ilike('name', `%${safe}%`)
+    }
+
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+
+    parentQuery = parentQuery
+        .order(sortKey, { ascending: sortDir === 'asc' })
+        .range(from, to)
+
+    const { data: parentRows, error: parentErr, count } = await parentQuery
+    if (parentErr) throw new Error(parentErr.message)
+
+    const parents: Category[] = (parentRows ?? []).map((c) => ({
+        id: c.category_id,
+        name: c.name,
+        parent_id: c.parent_id ?? null,
+        is_active: c.is_active,
+    }))
+
+    // Fetch only the children of THIS page's parents — keeps the second
+    // query bounded even when the categories table grows.
+    let children: Category[] = []
+    if (parents.length > 0) {
+        const parentIds = parents.map((p) => p.id)
+
+        const { data: childRows, error: childErr } = await supabase
+            .from('category')
+            .select('category_id, name, parent_id, is_active')
+            .in('parent_id', parentIds)
+
+        if (childErr) throw new Error(childErr.message)
+
+        children = (childRows ?? []).map((c) => ({
+            id: c.category_id,
+            name: c.name,
+            parent_id: c.parent_id ?? null,
+            is_active: c.is_active,
+        }))
+    }
+
+    return { parents, children, total: count ?? 0 }
+}
+
 export const getAllSubCategories = async () => {
     const supabase = await createClient()
     const { data, error } = await supabase

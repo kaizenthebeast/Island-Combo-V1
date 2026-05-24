@@ -1,12 +1,28 @@
 import React from 'react'
 import StaffClient from './StaffClient'
-import { getStaff } from '@/lib/users'
+import { getStaffPage, type StaffSortKey } from '@/lib/users'
 import type { AdminStaff } from '@/types/users'
 
-const StaffPage = async () => {
-  const result = await getStaff()
+type SearchParams = Promise<Record<string, string | undefined>>
 
-  if (!result.success || !('data' in result)) {
+const DEFAULT_PAGE_SIZE = 10
+
+const StaffPage = async ({ searchParams }: { searchParams: SearchParams }) => {
+  const params = await searchParams
+
+  const page     = Number(params.page)     || 1
+  const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE
+
+  const result = await getStaffPage({
+    page,
+    pageSize,
+    search:  params.search || undefined,
+    filter:  params.filter || undefined,
+    sortKey: (params.sortKey as StaffSortKey) || 'member_since',
+    sortDir: (params.sortDir as 'asc' | 'desc') || 'desc',
+  })
+
+  if (!result.success) {
     return (
       <div className="p-8 text-red-500">
         Failed to load staff: {result.message}
@@ -14,7 +30,14 @@ const StaffPage = async () => {
     )
   }
 
-  return <StaffClient staff={result.data as AdminStaff[]} />
+  return (
+    <StaffClient
+      staff={result.rows as AdminStaff[]}
+      total={result.total}
+      page={page}
+      pageSize={pageSize}
+    />
+  )
 }
 
 export default StaffPage

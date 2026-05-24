@@ -41,6 +41,96 @@ export const getVouchers = async (): Promise<VoucherRow[]> => {
   })
 }
 
+// ─── READ (paginated) ─────────────────────────────────────────────────────────
+
+export type VouchersSortKey = 'id' | 'code' | 'value' | 'expires_at' | 'created_at'
+
+export type VouchersPageInput = {
+  page: number
+  pageSize: number
+  search?: string                          // matches code
+  filter?: string                          // VoucherEffectiveStatus or 'All'
+  sortKey?: VouchersSortKey
+  sortDir?: 'asc' | 'desc'
+}
+
+export type VouchersPageResult = {
+  rows: VoucherRow[]
+  total: number
+}
+
+export const getVouchersPage = async (input: VouchersPageInput): Promise<VouchersPageResult> => {
+  const supabase = await createClient()
+
+  const {
+    page,
+    pageSize,
+    search,
+    filter,
+    sortKey = 'created_at',
+    sortDir = 'desc',
+  } = input
+
+  const nowIso = new Date().toISOString()
+
+  let query = supabase
+    .from('promo')
+    .select('id, code, value, min_quantity, expires_at, status, created_at, updated_at', {
+      count: 'exact',
+    })
+
+  // Translate effective status → SQL predicates
+  switch (filter) {
+    case 'ACTIVE':
+      query = query.eq('status', 'ACTIVE')
+        .or(`expires_at.is.null,expires_at.gte.${nowIso}`)
+      break
+    case 'DRAFT':
+      query = query.eq('status', 'DRAFT')
+        .or(`expires_at.is.null,expires_at.gte.${nowIso}`)
+      break
+    case 'EXPIRED':
+      query = query.neq('status', 'ARCHIVED')
+        .not('expires_at', 'is', null)
+        .lt('expires_at', nowIso)
+      break
+    case 'ARCHIVED':
+      query = query.eq('status', 'ARCHIVED')
+      break
+    // 'All' / undefined → no filter
+  }
+
+  const q = search?.trim()
+  if (q) {
+    const safe = q.replace(/[\\%_,]/g, (c) => `\\${c}`)
+    query = query.ilike('code', `%${safe}%`)
+  }
+
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  query = query.order(sortKey, { ascending: sortDir === 'asc' }).range(from, to)
+
+  const { data, error, count } = await query
+  if (error) throw new Error(error.message)
+
+  const rows: VoucherRow[] = (data ?? []).map((item) => {
+    const voucher: Voucher = {
+      id: item.id,
+      code: item.code,
+      value: item.value,
+      min_quantity: item.min_quantity ?? null,
+      expires_at: item.expires_at ?? null,
+      status: item.status,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    }
+    return { ...voucher, effective_status: deriveEffectiveStatus(voucher) }
+  })
+
+  return { rows, total: count ?? 0 }
+}
+
 // ─── APPLY (lookup by code) ───────────────────────────────────────────────────
 
 export const applyVoucher = async (

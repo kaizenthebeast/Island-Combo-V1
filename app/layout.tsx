@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AnonAuthProvider from "@/helper/AnonAuthProvider";
 
-const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL
+const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 const siteName = "Island Combo";
 
@@ -13,6 +13,7 @@ const defaultDescription =
   `Shop ${siteName} for clothing, electronics, beauty products, household essentials, kids' toys, jewelry, and more. Fast delivery across FSM.`;
 
 export const metadata: Metadata = {
+  metadataBase: new URL(defaultUrl),
   title: {
     default: defaultTitle,
     template: `%s | ${siteName}`,

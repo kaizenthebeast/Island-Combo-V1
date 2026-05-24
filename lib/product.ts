@@ -84,6 +84,70 @@ export const getAdminProducts = async (): Promise<AdminProduct[]> => {
   }))
 }
 
+// ─── ADMIN — READ (paginated) ─────────────────────────────────────────────────
+
+export type AdminProductsPageInput = {
+  page: number              // 1-indexed
+  pageSize: number
+  search?: string           // matches name (case-insensitive)
+  status?: string           // 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED' | undefined = all
+  sortKey?: 'name' | 'product_id' | 'type' | 'status' | 'created_at'
+  sortDir?: 'asc' | 'desc'
+}
+
+export type AdminProductsPageResult = {
+  rows: AdminProduct[]
+  total: number
+}
+
+export const getAdminProductsPage = async (
+  input: AdminProductsPageInput,
+): Promise<AdminProductsPageResult> => {
+  const supabase = await createClient()
+
+  const {
+    page,
+    pageSize,
+    search,
+    status,
+    sortKey = 'created_at',
+    sortDir = 'desc',
+  } = input
+
+  let query = supabase
+    .from('admin_products_mv')
+    .select('*', { count: 'exact' })
+
+  if (status && status !== 'All') {
+    query = query.eq('status', status)
+  }
+
+  const q = search?.trim()
+  if (q) {
+    // Escape Postgres ILIKE wildcards in user input so the search behaves literally.
+    const safe = q.replace(/[\\%_,]/g, (c) => `\\${c}`)
+    query = query.ilike('name', `%${safe}%`)
+  }
+
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  query = query
+    .order(sortKey, { ascending: sortDir === 'asc' })
+    .range(from, to)
+
+  const { data, error, count } = await query
+  if (error) throw new Error(error.message)
+
+  const rows: AdminProduct[] = (data ?? []).map((p) => ({
+    ...p,
+    product_details: p.product_details ?? [],
+    variants: p.variants ?? [],
+  }))
+
+  return { rows, total: count ?? 0 }
+}
+
 export const getAdminProductById = async (productId: number): Promise<AdminProduct | null> => {
   const supabase = await createClient()
 

@@ -4,6 +4,7 @@ import { useMemo, useTransition, useState } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { useTableUrlState } from '@/hooks/useTableUrlState'
 import { deleteUser } from '@/lib/users'
 import type { AdminUser } from '@/types/users'
 
@@ -20,19 +21,39 @@ type Row = {
 
 const getRoleVariant = (role: string): BadgeVariant => {
     switch (role) {
-        case 'admin':
-            return 'danger'
-        case 'staff':
-            return 'warning'
+        case 'admin':    return 'danger'
+        case 'staff':    return 'warning'
         case 'customer':
-        default:
-            return 'success'
+        default:         return 'success'
     }
 }
 
-export default function UsersClient({ users }: { users: AdminUser[] }) {
-    const [isPending, startTransition] = useTransition()
+interface Props {
+    users: AdminUser[]
+    total: number
+    page: number
+    pageSize: number
+}
+
+export default function UsersClient({ users, total, page, pageSize }: Props) {
+    const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
+
+    const {
+        state,
+        isPending,
+        searchInput,
+        setSearchInput,
+        setPage,
+        setPageSize,
+        setFilter,
+        setSort,
+    } = useTableUrlState({
+        pageSize,
+        filter: 'All',
+        sortKey: 'member_since',
+        sortDir: 'desc',
+    })
 
     const handleDelete = (row: Row) => {
         startTransition(async () => {
@@ -58,13 +79,14 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
     }, [users])
 
     const columns: ColumnDef<Row>[] = [
-        { key: 'name', label: 'Name' },
-        { key: 'email', label: 'Email' },
-        { key: 'phone', label: 'Phone' },
+        { key: 'name',   label: 'Name',  sortable: false },
+        { key: 'email',  label: 'Email', sortable: false },
+        { key: 'phone',  label: 'Phone', sortable: false },
         {
             key: 'role',
             label: 'Role',
             align: 'center',
+            sortable: false,
             render: (v) => (
                 <StatusBadge
                     status={String(v)}
@@ -72,16 +94,8 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
                 />
             ),
         },
-        {
-            key: 'points',
-            label: 'Points',
-            align: 'right',
-        },
-        {
-            key: 'joined',
-            label: 'Joined',
-            align: 'right',
-        },
+        { key: 'points', label: 'Points', align: 'right', sortable: false },
+        { key: 'joined', label: 'Joined', align: 'right', sortable: false },
     ]
 
     return (
@@ -99,11 +113,28 @@ export default function UsersClient({ users }: { users: AdminUser[] }) {
             )}
 
             <DataTable<Row>
-                data={rows}
+                rows={rows}
+                total={total}
                 columns={columns}
-                searchKeys={['name', 'email', 'phone']}
-                filterKey="role"
-                defaultSortKey="name"
+                loading={isPending}
+
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                searchPlaceholder="Search by name, email, or phone…"
+
+                filterValue={state.filter || 'All'}
+                onFilterChange={setFilter}
+                filterOptions={['All', 'customer', 'staff', 'admin']}
+
+                sortKey={state.sortKey as keyof Row | undefined}
+                sortDir={state.sortDir}
+                onSortChange={(key, dir) => setSort(String(key), dir)}
+
                 getRowId={(row) => row.user_id}
                 onDelete={handleDelete}
                 expandedRowRender={(row) => {

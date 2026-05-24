@@ -6,8 +6,9 @@ import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddCategoryDialog from '@/components/admin/category/AddCategoryDialog'
 import EditCategoryDialog from '@/components/admin/category/EditCategoryDialog'
 import DeleteCategoryDialog from '@/components/admin/category/DeleteCategoryDialog'
-import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge' 
+import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
+import { useTableUrlState } from '@/hooks/useTableUrlState'
 import type { Category } from '@/types/category'
 import { softDeleteCategory } from '@/lib/category'
 
@@ -17,22 +18,53 @@ type Row = {
     id: number
     name: string
     subcategory_count: number
-    status: CategoryStatus  
+    status: CategoryStatus
     raw: Category
 }
 
-// Mirrors STATUS_BADGE from ProductsClient
 const STATUS_BADGE: Record<CategoryStatus, { label: string; variant: BadgeVariant }> = {
     ACTIVE:   { label: 'Active',   variant: 'success' },
     ARCHIVED: { label: 'Archived', variant: 'default' },
 }
 
-export default function CategoryClient({ categories }: { categories: Category[] }) {
+interface Props {
+    parents: Category[]
+    childrenRows: Category[]
+    allParentOptions: CategoryOption[]
+    total: number
+    page: number
+    pageSize: number
+}
+
+export default function CategoryClient({
+    parents,
+    childrenRows,
+    allParentOptions,
+    total,
+    page,
+    pageSize,
+}: Props) {
     const [open, setOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
     const [deletingRow, setDeletingRow] = useState<Row | null>(null)
     const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
+
+    const {
+        state,
+        isPending,
+        searchInput,
+        setSearchInput,
+        setPage,
+        setPageSize,
+        setFilter,
+        setSort,
+    } = useTableUrlState({
+        pageSize,
+        filter: 'All',
+        sortKey: 'name',
+        sortDir: 'asc',
+    })
 
     const handleDeleteConfirm = async () => {
         if (!deletingRow) return
@@ -53,38 +85,24 @@ export default function CategoryClient({ categories }: { categories: Category[] 
         })
     }
 
-    const parentCategories = useMemo(
-        () => categories.filter((c) => c.parent_id === null),
-        [categories]
-    )
-
-    const childCategories = useMemo(
-        () => categories.filter((c) => c.parent_id !== null),
-        [categories]
-    )
-
-    const parentOptions: CategoryOption[] = useMemo(
-        () => parentCategories.map((c) => ({ category_id: c.id, name: c.name })),
-        [parentCategories]
-    )
-
     const rows: Row[] = useMemo(() => {
-        return parentCategories.map((c) => ({
+        return parents.map((c) => ({
             id: c.id,
             name: c.name,
-            subcategory_count: childCategories.filter((child) => child.parent_id === c.id).length,
-            status: c.is_active ? 'ACTIVE' : 'ARCHIVED', 
+            subcategory_count: childrenRows.filter((child) => child.parent_id === c.id).length,
+            status: c.is_active ? 'ACTIVE' : 'ARCHIVED',
             raw: c,
         }))
-    }, [parentCategories, childCategories])
+    }, [parents, childrenRows])
 
     const columns: ColumnDef<Row>[] = [
-        { key: 'id',                label: 'ID',            width: '80px'   },
-        { key: 'name',              label: 'Category'                        },
-        { key: 'subcategory_count', label: 'Subcategories', align: 'center' },
+        { key: 'id',                label: 'ID',            width: '80px'                       },
+        { key: 'name',              label: 'Category'                                           },
+        { key: 'subcategory_count', label: 'Subcategories', align: 'center', sortable: false   },
         {
             key: 'status',
             label: 'Status',
+            sortable: false,
             render: (v) => {
                 const { label, variant } = STATUS_BADGE[v as CategoryStatus] ?? STATUS_BADGE.ACTIVE
                 return <StatusBadge status={label} variant={variant} />
@@ -113,7 +131,7 @@ export default function CategoryClient({ categories }: { categories: Category[] 
 
             <EditCategoryDialog
                 selectedCategory={editingCategory}
-                parentOptions={parentOptions}
+                parentOptions={allParentOptions}
                 open={!!editingCategory}
                 onClose={() => setEditingCategory(null)}
             />
@@ -127,17 +145,33 @@ export default function CategoryClient({ categories }: { categories: Category[] 
             />
 
             <DataTable<Row>
-                data={rows}
+                rows={rows}
+                total={total}
                 columns={columns}
-                searchKeys={['name']}
-                filterKey="status"                             
-                filterOptions={['All', 'ACTIVE', 'ARCHIVED']}  
-                defaultSortKey="name"
+                loading={isPending}
+
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                searchPlaceholder="Search categories…"
+
+                filterValue={state.filter || 'All'}
+                onFilterChange={setFilter}
+                filterOptions={['All', 'ACTIVE', 'ARCHIVED']}
+
+                sortKey={state.sortKey as keyof Row | undefined}
+                sortDir={state.sortDir}
+                onSortChange={(key, dir) => setSort(String(key), dir)}
+
                 getRowId={(row) => row.id}
                 onDelete={(row) => setDeletingRow(row)}
                 onEdit={(row) => setEditingCategory(row.raw)}
                 expandedRowRender={(row) => {
-                    const subs = childCategories.filter((c) => c.parent_id === row.id)
+                    const subs = childrenRows.filter((c) => c.parent_id === row.id)
 
                     if (subs.length === 0) {
                         return (
@@ -178,7 +212,7 @@ export default function CategoryClient({ categories }: { categories: Category[] 
                                                 name: sub.name,
                                                 subcategory_count: 0,
                                                 status: sub.is_active ? 'ACTIVE' : 'ARCHIVED',
-                                                raw: sub
+                                                raw: sub,
                                             })}
                                             className="text-red-400 hover:text-red-600 transition-colors"
                                             title="Archive"

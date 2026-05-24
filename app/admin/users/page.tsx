@@ -1,12 +1,28 @@
 import React from 'react'
 import UsersClient from './UsersClient'
-import { getUsers } from '@/lib/users'
+import { getUsersPage, type UsersSortKey } from '@/lib/users'
 import type { AdminUser } from '@/types/users'
 
-const AdminUsersPage = async () => {
-  const result = await getUsers()
+type SearchParams = Promise<Record<string, string | undefined>>
 
-  if (!result.success || !('data' in result)) {
+const DEFAULT_PAGE_SIZE = 10
+
+const AdminUsersPage = async ({ searchParams }: { searchParams: SearchParams }) => {
+  const params = await searchParams
+
+  const page     = Number(params.page)     || 1
+  const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE
+
+  const result = await getUsersPage({
+    page,
+    pageSize,
+    search:  params.search || undefined,
+    filter:  params.filter || undefined,
+    sortKey: (params.sortKey as UsersSortKey) || 'member_since',
+    sortDir: (params.sortDir as 'asc' | 'desc') || 'desc',
+  })
+
+  if (!result.success) {
     return (
       <div className="p-8 text-red-500">
         Failed to load users: {result.message}
@@ -14,7 +30,14 @@ const AdminUsersPage = async () => {
     )
   }
 
-  return <UsersClient users={result.data as AdminUser[]} />
+  return (
+    <UsersClient
+      users={result.rows as AdminUser[]}
+      total={result.total}
+      page={page}
+      pageSize={pageSize}
+    />
+  )
 }
 
 export default AdminUsersPage
