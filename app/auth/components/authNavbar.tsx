@@ -17,7 +17,7 @@ const AuthNavbar = () => {
             height={40}
             className="object-contain"
           />
-          <span className="font-bold text-lg text-[#900036] hidden sm:block">
+          <span className="font-bold text-lg text-brand hidden sm:block">
             Island Combo
           </span>
         </Link>

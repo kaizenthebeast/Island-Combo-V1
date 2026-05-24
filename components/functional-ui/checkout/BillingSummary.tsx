@@ -42,7 +42,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
           </div>
           <div>
             <p className="text-sm font-medium">300 Loyalty Points ($3)</p>
-            <p className="text-xs text-[#900036]">Custom loyalty points to use</p>
+            <p className="text-xs text-brand">Custom loyalty points to use</p>
           </div>
         </div>
         <Switch checked={loyaltyEnabled} onCheckedChange={toggleLoyalty} />
@@ -88,7 +88,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
       {/* CHECKOUT */}
       <Link
         href="/checkout/address"
-        className="w-full bg-[#900036] text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
+        className="w-full bg-brand text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
       >
         Checkout
       </Link>

@@ -43,11 +43,11 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                                 onClick={() => handleLinkClick(link.name)}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md w-full text-left text-sm font-medium transition-colors
                                     ${active
-                                        ? 'text-[#900036] bg-[#FFF0F4]'
+                                        ? 'text-brand bg-brand-tint'
                                         : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
-                                <Icon className={`w-4 h-4 ${active ? 'text-[#900036]' : 'text-gray-400'}`} />
+                                <Icon className={`w-4 h-4 ${active ? 'text-brand' : 'text-gray-400'}`} />
                                 {link.name}
                             </button>
                         )

@@ -11,14 +11,14 @@ export function AuthButtonClient({ isAuthenticated }: { isAuthenticated: boolean
     <div className="flex items-center gap-6">
       <Link href="/checkout" className="relative flex items-center">
         <ShoppingCart size={22} />
-        <span className="absolute -top-2 -right-2 text-xs bg-[#900036] text-white rounded-full px-1.5">
+        <span className="absolute -top-2 -right-2 text-xs bg-brand text-white rounded-full px-1.5">
           <CartCount />
         </span>
       </Link>
 
       <Link href="/product/favorites" className="relative flex items-center">
         <Heart size={22} />
-        <span className="absolute -top-2 -right-2 text-xs bg-[#900036] text-white rounded-full px-1.5">
+        <span className="absolute -top-2 -right-2 text-xs bg-brand text-white rounded-full px-1.5">
           <FavoriteCount />
         </span>
       </Link>

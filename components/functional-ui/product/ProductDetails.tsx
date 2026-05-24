@@ -199,7 +199,7 @@ const ProductDetails = ({ product }: Props) => {
 
                     {/* Wholesale available badge — only shown if variant has a wholesale tier */}
                     {wholesaleTier && (
-                        <div className="inline-flex items-center gap-2 bg-[#900036] text-white text-xs px-3 py-2 w-fit rounded-md">
+                        <div className="inline-flex items-center gap-2 bg-brand text-white text-xs px-3 py-2 w-fit rounded-md">
                             <Package className="shrink-0 w-4 h-4" />
                             <span>
                                 Wholesale available — buy {wholesaleTier.min_quantity}+ for{' '}
@@ -217,7 +217,7 @@ const ProductDetails = ({ product }: Props) => {
                     {/* PRICE */}
                     <div className="flex flex-wrap items-center gap-3">
                         {/* Swaps to wholesale price when threshold is met */}
-                        <p className="text-3xl sm:text-4xl font-bold text-[#900036]">
+                        <p className="text-3xl sm:text-4xl font-bold text-brand">
                             ${wholesaleUnlocked && wholesalePrice !== null
                                 ? wholesalePrice.toFixed(2)
                                 : displayVariant.final_price.toFixed(2)
@@ -229,7 +229,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <p className="text-base sm:text-lg line-through text-gray-400">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
-                                <p className="text-xs sm:text-sm bg-[#900036] text-white px-2 py-1 rounded-md">
+                                <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
                                     -{wholesaleTier!.discount_percent}%
                                 </p>
                             </div>
@@ -239,7 +239,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <p className="text-base sm:text-lg line-through text-gray-400">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
-                                <p className="text-xs sm:text-sm bg-[#900036] text-white px-2 py-1 rounded-md">
+                                <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
                                     -{product.discount}%
                                 </p>
                             </div>
@@ -265,7 +265,7 @@ const ProductDetails = ({ product }: Props) => {
                                                 : '/images/placeholder.png'
                                             return (
                                                 <button type="button" key={value} onClick={() => handleAttributeSelect(key, value)} className="flex flex-col items-center gap-1">
-                                                    <div className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-[#900036]' : 'border-gray-200 hover:border-gray-400'}`}>
+                                                    <div className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-gray-200 hover:border-gray-400'}`}>
                                                         <Image src={thumbnailUrl} fill sizes="80px" className="object-cover" alt={value} loading="eager" />
                                                     </div>
                                                     <span className="text-xs text-gray-600">{value}</span>
@@ -274,7 +274,7 @@ const ProductDetails = ({ product }: Props) => {
                                         }
                                         return (
                                             <button key={value} type="button" onClick={() => handleAttributeSelect(key, value)}
-                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${isSelected ? 'bg-[#900036] text-white border-[#900036]' : 'border-gray-300 hover:border-gray-500'}`}>
+                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-gray-300 hover:border-gray-500'}`}>
                                                 {value}
                                             </button>
                                         )
@@ -326,17 +326,17 @@ const ProductDetails = ({ product }: Props) => {
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <div className="flex gap-3 sm:contents">
                             <Button type="button" onClick={handleAddToCart} disabled={!canProceed}
-                                className="sm:flex-1 h-11 bg-[#900036] hover:bg-[#700028] text-white rounded-full">
+                                className="sm:flex-1 h-11 bg-brand hover:bg-brand-hover text-white rounded-full">
                                 <ShoppingCart className="mr-2 w-4 h-4" />
                                 Add to cart
                             </Button>
                             <Button type="button" variant="outline" disabled={!canProceed}
-                                className="sm:flex-1 h-11 border-[#900036] text-[#900036] rounded-full hover:bg-[#900036] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="sm:flex-1 h-11 border-brand text-brand rounded-full hover:bg-brand hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
                                 asChild={canProceed}>
                                 {canProceed ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
                             </Button>
                             <Button type="button" variant="ghost" size="icon" onClick={() => handleFavoriteToggle(product.product_id)} className="shrink-0">
-                                <Heart className={`w-5 h-5 transition-colors ${favorited ? 'fill-[#900036] text-[#900036]' : 'text-gray-500'}`} />
+                                <Heart className={`w-5 h-5 transition-colors ${favorited ? 'fill-brand text-brand' : 'text-gray-500'}`} />
                             </Button>
                         </div>
                     </div>

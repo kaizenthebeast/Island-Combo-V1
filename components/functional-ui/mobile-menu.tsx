@@ -26,7 +26,7 @@ export function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
 
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
           <Image src="/images/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
-          <span className="font-bold text-base text-[#900036]">Island Combo</span>
+          <span className="font-bold text-base text-brand">Island Combo</span>
         </div>
 
         <div className="px-5 py-4 border-b border-gray-100">
@@ -35,7 +35,7 @@ export function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full pl-4 pr-9 py-2 text-sm rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#900036]"
+              className="w-full pl-4 pr-9 py-2 text-sm rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-brand"
             />
           </div>
         </div>

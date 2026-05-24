@@ -42,6 +42,12 @@
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
+
+  /* Brand palette — change here and every bg-brand / text-brand / border-brand updates */
+  --color-brand: #900036;
+  --color-brand-hover: #77002d;
+  --color-brand-tint: #fff0f4;
+  --color-brand-foreground: #ffffff;
 }
 
 @theme inline {

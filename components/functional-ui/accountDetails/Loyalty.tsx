@@ -11,7 +11,7 @@ const Loyalty = () => {
       </div>
 
       <div className='flex flex-col items-center justify-center text-center py-8 gap-2'>
-        <p className='text-3xl font-bold text-[#900036]'>0 pts</p>
+        <p className='text-3xl font-bold text-brand'>0 pts</p>
         <p className='text-sm text-gray-500'>You haven't earned any loyalty points yet.</p>
       </div>
     </div>

@@ -154,7 +154,7 @@ export function LoginForm() {
                 Forgot your password?
               </Link>
 
-              <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>

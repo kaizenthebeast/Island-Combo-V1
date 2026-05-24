@@ -282,7 +282,7 @@ const CheckoutAddress = ({
 
                         <Button
                             type="submit"
-                            className="w-full bg-[#900036] hover:bg-[#77002d] rounded-full"
+                            className="w-full bg-brand hover:bg-brand-hover rounded-full"
                             disabled={form.formState.isSubmitting}
                         >
                             {form.formState.isSubmitting ? "Saving…" : "Save"}

@@ -17,7 +17,7 @@ const Navbar = async () => {
 
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image src="/images/logo.png" alt="Logo" width={40} height={40} className="object-contain" />
-          <span className="font-bold text-lg text-[#900036] hidden sm:block">Island Combo</span>
+          <span className="font-bold text-lg text-brand hidden sm:block">Island Combo</span>
         </Link>
 
         <div className="flex-1 relative hidden md:block">
@@ -25,7 +25,7 @@ const Navbar = async () => {
           <input
             type="text"
             placeholder="Search products..."
-            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-[#900036]"
+            className="w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-brand"
           />
         </div>
 

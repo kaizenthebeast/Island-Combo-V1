@@ -164,7 +164,7 @@ const AddressContainer = () => {
               onClick={() => setMethod("deliver")}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "deliver"
-                  ? "border-[#900036] bg-[#FFF0F4] text-[#900036]"
+                  ? "border-brand bg-brand-tint text-brand"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
                 }`}
             >
@@ -176,7 +176,7 @@ const AddressContainer = () => {
               onClick={() => setMethod("pickup")}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "pickup"
-                  ? "border-[#900036] bg-[#FFF0F4] text-[#900036]"
+                  ? "border-brand bg-brand-tint text-brand"
                   : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
                 }`}
             >
@@ -189,7 +189,7 @@ const AddressContainer = () => {
           {method === "deliver" && (shippingLoading || shippingError || shippingQuote) && (
             <div className="rounded-xl border p-4 shadow-xs flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#900036]" />
+                <Truck className="w-4 h-4 text-brand" />
                 <h3 className="text-sm font-bold text-gray-800">Shipping estimate</h3>
               </div>
 
@@ -234,11 +234,11 @@ const AddressContainer = () => {
           {method === "pickup" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-[#900036]" />
+                <Store className="w-4 h-4 text-brand" />
                 <h2 className="text-base font-bold text-gray-800">Pickup Location</h2>
               </div>
               <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4">
-                <MapPin className="w-5 h-5 text-[#900036] shrink-0 mt-0.5" />
+                <MapPin className="w-5 h-5 text-brand shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
                   <p className="text-sm font-semibold text-gray-800">Our Store</p>
                   <p className="text-sm text-gray-600">
@@ -253,7 +253,7 @@ const AddressContainer = () => {
           {method === "deliver" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#900036]" />
+                <MapPin className="w-4 h-4 text-brand" />
                 <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
               </div>
 

@@ -20,7 +20,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
       <Card className="w-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group">
 
         {product.has_wholesale && (
-          <div className="absolute top-0 right-0 bg-[#900036] text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
+          <div className="absolute top-0 right-0 bg-brand text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
             <Package className="w-3 h-3" />
             Wholesale
           </div>

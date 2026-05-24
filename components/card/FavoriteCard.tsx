@@ -176,7 +176,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
       >
         {/* Wholesale badge — shown when variant has a wholesale tier */}
         {wholesaleTier && (
-          <div className="absolute top-0 right-0 bg-[#900036] text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
+          <div className="absolute top-0 right-0 bg-brand text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
             <Package className="w-3 h-3" />
             Wholesale
           </div>
@@ -212,7 +212,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
           )}
           {/* Wholesale nudge on card */}
           {wholesaleTier && (
-            <p className="text-xs text-[#900036] font-medium">
+            <p className="text-xs text-brand font-medium">
               Buy {wholesaleTier.min_quantity}+ for {wholesaleTier.discount_percent}% off
             </p>
           )}
@@ -223,7 +223,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
             type="button"
             variant="outline"
             onClick={(e) => { e.stopPropagation(); setOpen(true) }}
-            className="w-full rounded-full border-[#900036] text-[#900036] text-xs sm:text-sm font-bold hover:bg-[#900036] hover:text-white transition-colors duration-200"
+            className="w-full rounded-full border-brand text-brand text-xs sm:text-sm font-bold hover:bg-brand hover:text-white transition-colors duration-200"
           >
             Add To Cart
           </Button>
@@ -282,7 +282,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                       <span className="text-sm text-gray-400 line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
                       </span>
-                      <span className="text-xs bg-[#900036] text-white px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs bg-brand text-white px-2 py-0.5 rounded font-medium">
                         -{wholesaleTier!.discount_percent}%
                       </span>
                     </>
@@ -301,7 +301,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
                 {/* Wholesale available badge in sheet header */}
                 {wholesaleTier && (
-                  <div className="mt-1 flex items-center gap-1.5 bg-[#900036] text-white text-xs px-3 py-1.5 rounded-full w-fit font-medium">
+                  <div className="mt-1 flex items-center gap-1.5 bg-brand text-white text-xs px-3 py-1.5 rounded-full w-fit font-medium">
                     <ShoppingBag className="w-3.5 h-3.5" />
                     Buy {wholesaleTier.min_quantity}+ for {wholesaleTier.discount_percent}% off
                   </div>
@@ -338,7 +338,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                             onClick={() => handleAttributeSelect(key, value)}
                             className="flex flex-col items-center gap-1"
                           >
-                            <div className={`w-14 h-14 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-[#900036]' : 'border-gray-200 hover:border-gray-400'}`}>
+                            <div className={`w-14 h-14 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-gray-200 hover:border-gray-400'}`}>
                               <Image
                                 src={thumbnailUrl ?? '/images/placeholder.png'}
                                 fill sizes="56px"
@@ -357,7 +357,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                           key={value}
                           type="button"
                           onClick={() => handleAttributeSelect(key, value)}
-                          className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${isSelected ? 'bg-[#900036] text-white border-[#900036]' : 'border-gray-300 hover:border-gray-500'}`}
+                          className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-gray-300 hover:border-gray-500'}`}
                         >
                           {value}
                         </button>
@@ -412,7 +412,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={!canProceed || isAdding}
-                className="w-full rounded-full bg-[#900036] hover:bg-[#700028] disabled:opacity-40 text-white font-bold text-base py-6 transition-colors duration-200"
+                className="w-full rounded-full bg-brand hover:bg-brand-hover disabled:opacity-40 text-white font-bold text-base py-6 transition-colors duration-200"
               >
                 {isAdding ? 'Adding...' : 'Add to cart'}
               </Button>

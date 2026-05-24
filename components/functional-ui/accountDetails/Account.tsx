@@ -45,7 +45,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
             email={email}
             onSuccess={() => router.refresh()}
           >
-            <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+            <button type='button' className='text-sm text-brand font-medium hover:underline'>
               Edit
             </button>
           </PersonalDetailsForm>
@@ -89,7 +89,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
               phone={profile?.phone_text ?? undefined}
               onSuccess={() => router.refresh()}
             >
-              <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+              <button type='button' className='text-sm text-brand font-medium hover:underline'>
                 Add
               </button>
             </CheckoutAddress>
@@ -139,7 +139,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
                     makeDefault={address.make_default}
                     onSuccess={() => router.refresh()}
                   >
-                    <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+                    <button type='button' className='text-sm text-brand font-medium hover:underline'>
                       Edit
                     </button>
                   </CheckoutAddress>

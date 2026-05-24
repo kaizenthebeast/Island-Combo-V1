@@ -75,7 +75,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
                     type="text"
                     placeholder="Voucher code"
                     disabled={!!activeVoucher}
-                    className="bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-1 focus:ring-[#900036] disabled:opacity-50"
+                    className="bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-1 focus:ring-brand disabled:opacity-50"
                     {...field}
                   />
                 </FormControl>
@@ -86,7 +86,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
           <button
             type="submit"
             disabled={!!activeVoucher}
-            className="text-[#900036] font-medium text-sm disabled:opacity-50 pt-3"
+            className="text-brand font-medium text-sm disabled:opacity-50 pt-3"
           >
             Apply
           </button>

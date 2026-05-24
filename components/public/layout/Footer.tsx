@@ -18,7 +18,7 @@ const Footer = () => {
               height={100}
               className="object-contain"
             />
-            <h2 className="font-bold text-2xl text-[#900036]">
+            <h2 className="font-bold text-2xl text-brand">
               Island Combo
             </h2>
           </div>

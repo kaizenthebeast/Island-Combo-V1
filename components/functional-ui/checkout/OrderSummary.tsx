@@ -115,7 +115,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     Strikes through the base price when any discount is active
                                     (either a product-level sale discount or wholesale tier). */}
                                 <div className="flex items-center gap-2 flex-wrap mt-2">
-                                    <p className="text-base sm:text-lg font-bold text-[#900036]">
+                                    <p className="text-base sm:text-lg font-bold text-brand">
                                         ${displayPrice.toFixed(2)}
                                     </p>
                                     {priceIsReduced && (
@@ -146,7 +146,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     <button
                                         type="button"
                                         onClick={() => handleEditToggle(key, item.quantity)}
-                                        className="text-xs text-[#900036] underline underline-offset-2"
+                                        className="text-xs text-brand underline underline-offset-2"
                                     >
                                         {isActive ? 'Cancel' : 'Update'}
                                     </button>
@@ -162,7 +162,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                                     handleActions('update', item.variant_id, quantity)
                                                     setActiveItemKey(null)
                                                 }}
-                                                className="text-xs bg-[#900036] text-white px-3 py-1 rounded-full"
+                                                className="text-xs bg-brand text-white px-3 py-1 rounded-full"
                                             >
                                                 Save
                                             </button>

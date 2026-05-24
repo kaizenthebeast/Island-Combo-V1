@@ -163,7 +163,7 @@ export function SignUpForm() {
 
               {message && <p className="text-sm text-red-500">{message}</p>}
 
-              <Button type="submit" className="w-full bg-[#900036]" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
             </form>

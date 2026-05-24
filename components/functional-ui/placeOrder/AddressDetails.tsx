@@ -51,12 +51,12 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
                         makeDefault={address.make_default}
                         onSuccess={onSuccess}
                     >
-                        <button type="button" className="mt-3 text-[#900036] font-bold">
+                        <button type="button" className="mt-3 text-brand font-bold">
                             Edit
                         </button>
                     </CheckoutAddress>
                     <DeleteModal subtitle="address" onSuccess={() => handleDeleteAdd(address.id)}>
-                        <button type="button" className="mt-3 ms-3 text-[#900036] font-bold">
+                        <button type="button" className="mt-3 ms-3 text-brand font-bold">
                             Remove
                         </button>
                     </DeleteModal>

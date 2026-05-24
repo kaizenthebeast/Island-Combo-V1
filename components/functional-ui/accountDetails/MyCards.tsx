@@ -8,7 +8,7 @@ const MyCards = () => {
           <CreditCard className='w-4 h-4' />
           My Cards
         </h3>
-        <button type='button' className='text-sm text-[#900036] font-medium hover:underline'>
+        <button type='button' className='text-sm text-brand font-medium hover:underline'>
           Add
         </button>
       </div>
