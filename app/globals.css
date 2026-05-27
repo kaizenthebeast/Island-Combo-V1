@@ -52,7 +52,7 @@
   /* Semantic state palette — each gives bg-/text-/border-<name> + -foreground + -tint */
   --color-success: #059669;
   --color-success-foreground: #ffffff;
-  --color-success-tint: #ecfdf5;
+  --color-success-tint: #eaf7f1;
 
   --color-warning: #d97706;
   --color-warning-foreground: #ffffff;

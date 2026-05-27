@@ -172,11 +172,11 @@ const OrderSummary = ({ cartItems }: Props) => {
 
                                 {/* Wholesale badge — shown when applied_tier_label is 'wholesale',
                                     meaning the current quantity meets the wholesale threshold.
-                                    Replaces the old item.wholesale boolean check. */}
+                                   */}
                                 {isWholesale && (
                                     <div className="flex items-center gap-1.5 bg-success-tint text-success px-2 py-1.5 rounded-md mt-3 text-xs">
                                         <CircleCheckBig size={14} className="shrink-0" />
-                                        <p>Wholesale pricing applied!</p>
+                                        <p>Wholesale pricing applied to your order!</p>
                                     </div>
                                 )}
                             </div>
