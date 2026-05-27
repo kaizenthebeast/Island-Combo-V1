@@ -242,19 +242,16 @@ const AddressContainer = () => {
           {/* ── Pickup location (pickup method only) ───────────────────── */}
           {method === "pickup" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Store className="w-4 h-4 text-brand" />
-                <h2 className="text-base font-bold text-foreground">Pickup Location</h2>
-              </div>
-              <div className="flex items-start gap-3 rounded-lg border border-border bg-muted p-4">
-                <MapPin className="w-5 h-5 text-brand shrink-0 mt-0.5" />
+             
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-foreground">Our Store</p>
+                  <p className="text-sm font-semibold text-foreground">Island Combo</p>
                   <p className="text-sm text-muted-foreground">
-                    Dolonier, Kolonia,<br />Federated States of Micronesia
+                    Dolonier, Kolonia, Federated States of Micronesia 
+                    <br />
+                    #691-320-6666
                   </p>
                 </div>
-              </div>
+            
             </div>
           )}
 
