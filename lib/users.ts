@@ -318,11 +318,22 @@ export const getStaffPage = async (
   return { success: true, status: 200, rows: data ?? [], total: count ?? 0 }
 }
 
-export const createUser = async(data: AddUserFormValues) => {
-  const supabase = await createClient();
+// export const createUser = async(data: AddUserFormValues) => {
+//   const supabase = await createClient();
 
+//   //Insert to the profile table at the same create a record in the authentication table with the same email and a default password.
+//   const {data: {user}, error} = await supabase.from('profile').insert({
+//     first_name: data.first_name,
+//     last_name: data.last_name,
+//     email: data.email,
+//     phone_text: data.phone_text ?? null,
+//     sex: data.sex ?? null,
+//     age: data.age ?? null,
+//     role: data.role,
+//   })
 
-}
+//   if(error)
+// }
 
 export const updateUser = async (userId: string, data: EditUserFormValues) => {
   const supabase = await createClient()

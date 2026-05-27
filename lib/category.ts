@@ -11,7 +11,7 @@ export const getCategories = async (): Promise<Category[]> => {
 
     const { data, error } = await supabase
         .from('category')
-        .select('category_id, name, parent_id, is_active') // 👈 added
+        .select('category_id, name, slug, parent_id, is_active')
         .order('name', { ascending: true })
 
     if (error) throw new Error(error.message)
@@ -19,8 +19,9 @@ export const getCategories = async (): Promise<Category[]> => {
     return (data ?? []).map((c) => ({
         id: c.category_id,
         name: c.name,
+        slug: c.slug,
         parent_id: c.parent_id ?? null,
-        is_active: c.is_active,     
+        is_active: c.is_active,
     }))
 }
 
@@ -59,7 +60,7 @@ export const getCategoriesPage = async (
 
     let parentQuery = supabase
         .from('category')
-        .select('category_id, name, parent_id, is_active', { count: 'exact' })
+        .select('category_id, name, slug, parent_id, is_active', { count: 'exact' })
         .is('parent_id', null)
 
     if (filter === 'ACTIVE')   parentQuery = parentQuery.eq('is_active', true)
@@ -84,6 +85,7 @@ export const getCategoriesPage = async (
     const parents: Category[] = (parentRows ?? []).map((c) => ({
         id: c.category_id,
         name: c.name,
+        slug: c.slug,
         parent_id: c.parent_id ?? null,
         is_active: c.is_active,
     }))
@@ -96,7 +98,7 @@ export const getCategoriesPage = async (
 
         const { data: childRows, error: childErr } = await supabase
             .from('category')
-            .select('category_id, name, parent_id, is_active')
+            .select('category_id, name, slug, parent_id, is_active')
             .in('parent_id', parentIds)
 
         if (childErr) throw new Error(childErr.message)
@@ -104,6 +106,7 @@ export const getCategoriesPage = async (
         children = (childRows ?? []).map((c) => ({
             id: c.category_id,
             name: c.name,
+            slug: c.slug,
             parent_id: c.parent_id ?? null,
             is_active: c.is_active,
         }))
@@ -126,13 +129,56 @@ export const getAllParentCategories = async () => {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('category')
-    .select('category_id, name')
+    .select('category_id, name, slug')
+    .eq('is_active', true)
     .is('parent_id', null)
+    .order('name', { ascending: true })
   if (error) throw new Error(error.message)
   return data
 }
 
+export type CategoryWithChildren = {
+  id: number
+  name: string
+  slug: string
+  children: { id: number; name: string; slug: string }[]
+}
 
+export const getCategoryBySlug = async (
+  slug: string,
+): Promise<CategoryWithChildren | null> => {
+  const supabase = await createClient()
+
+  const { data: cat, error } = await supabase
+    .from('category')
+    .select('category_id, name, slug')
+    .eq('slug', slug)
+    .eq('is_active', true)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  if (!cat) return null
+
+  const { data: childRows, error: childErr } = await supabase
+    .from('category')
+    .select('category_id, name, slug')
+    .eq('parent_id', cat.category_id)
+    .eq('is_active', true)
+    .order('name', { ascending: true })
+
+  if (childErr) throw new Error(childErr.message)
+
+  return {
+    id: cat.category_id,
+    name: cat.name,
+    slug: cat.slug,
+    children: (childRows ?? []).map((c) => ({
+      id: c.category_id,
+      name: c.name,
+      slug: c.slug,
+    })),
+  }
+}
 
 // ─── CREATE ───────────────────────────────────────────────────────────────────
 

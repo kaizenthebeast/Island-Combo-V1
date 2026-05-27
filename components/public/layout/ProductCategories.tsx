@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { getAllParentCategories } from "@/lib/category"
 import {
   Carousel,
@@ -56,7 +57,10 @@ export const ProductCategory = async () => {
 
             return (
               <CarouselItem key={cat.category_id} className="basis-auto px-3">
-                <button className="flex flex-col items-center gap-2 group cursor-pointer">
+                <Link
+                  href={`/category/${cat.slug}`}
+                  className="flex flex-col items-center gap-2 group cursor-pointer"
+                >
                   <div
                     className="rounded-full flex items-center justify-center transition-colors border bg-amber-100 border-amber-300 group-hover:bg-amber-200"
                     style={{ width: 52, height: 52 }}
@@ -66,7 +70,7 @@ export const ProductCategory = async () => {
                   <span className="text-[11px] text-gray-500 text-center leading-tight wrap-break-word w-14 group-hover:text-gray-700">
                     {cat.name}
                   </span>
-                </button>
+                </Link>
               </CarouselItem>
             );
           })}

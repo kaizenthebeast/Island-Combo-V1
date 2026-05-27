@@ -51,11 +51,62 @@ export type UpdateProductPayload = {
 
 // ─── PUBLIC ───────────────────────────────────────────────────────────────────
 
-export const getAllProducts = async (): Promise<ProductCatalogItem[]> => {
+export const getAllProducts = async (
+  opts?: { categoryId?: number | null; sort?: 'latest' },
+): Promise<ProductCatalogItem[]> => {
   const supabase = await createClient()
-  const { data, error } = await supabase.from('product_catalog_mv').select('*')
+
+  let query = supabase.from('product_catalog_mv').select('*')
+
+  if (opts?.categoryId) {
+    const { data: cats, error: catErr } = await supabase
+      .from('category')
+      .select('category_id, parent_id')
+      .eq('is_active', true)
+
+    if (catErr) throw new Error(catErr.message)
+
+    const ids = collectCategoryDescendants(cats ?? [], opts.categoryId)
+    if (ids.length === 0) return []
+    query = query.in('category_id', ids)
+  }
+
+  if (opts?.sort === 'latest') {
+    // product_id is an IDENTITY column, so DESC == newest-first without
+    // needing created_at in the materialized view.
+    query = query.order('product_id', { ascending: false })
+  }
+
+  const { data, error } = await query
   if (error) throw new Error(error.message)
   return data
+}
+
+function collectCategoryDescendants(
+  cats: { category_id: number; parent_id: number | null }[],
+  rootId: number,
+): number[] {
+  const childrenByParent = new Map<number, number[]>()
+  for (const c of cats) {
+    if (c.parent_id !== null) {
+      const arr = childrenByParent.get(c.parent_id) ?? []
+      arr.push(c.category_id)
+      childrenByParent.set(c.parent_id, arr)
+    }
+  }
+
+  const result: number[] = []
+  const stack: number[] = [rootId]
+  const seen = new Set<number>()
+  while (stack.length > 0) {
+    const id = stack.pop()!
+    if (seen.has(id)) continue
+    seen.add(id)
+    result.push(id)
+    const children = childrenByParent.get(id)
+    if (children) stack.push(...children)
+  }
+  return result
 }
 
 export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {

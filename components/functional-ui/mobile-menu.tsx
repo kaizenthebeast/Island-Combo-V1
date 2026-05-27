@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { AuthButtonClient } from "./AuthButtonClient";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import SearchBar from "@/components/public/layout/SearchBar";
 
 export function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [open, setOpen] = useState(false);
@@ -30,14 +31,10 @@ export function MobileMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
         </div>
 
         <div className="px-5 py-4 border-b border-gray-100">
-          <div className="relative">
-            <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full pl-4 pr-9 py-2 text-sm rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-brand"
-            />
-          </div>
+          <SearchBar
+            inputClassName="w-full pl-4 pr-9 py-2 text-sm rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-brand"
+            onNavigate={() => setOpen(false)}
+          />
         </div>
 
         <div className="px-5 py-4">
