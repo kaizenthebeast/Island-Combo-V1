@@ -3,11 +3,13 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { Address } from "@/types/users"
 import CheckoutAddress from "@/components/forms/CheckoutAddressForm"
+import AddressFormBody from "@/components/forms/AddressFormBody"
 import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails"
+import PaymentMethod from "@/components/functional-ui/placeOrder/PaymentMethod"
 import { getUserAddress, getUserProfile } from "@/lib/users"
 import { Button } from '@/components/ui/button'
 import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary"
-import { MapPin, Truck, Store, AlertCircle, Loader2 } from "lucide-react"
+import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
 import { useCheckoutStore } from "@/store/useCheckoutStore"
 import { getZoneFromAddress, type ShippingZone } from "@/lib/shipping/zone"
@@ -31,6 +33,13 @@ const AddressContainer = () => {
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null)
+  const [addingNew, setAddingNew] = useState(false)
+
+  // Selecting a saved address cancels the inline "new address" mode
+  const handleSelectSaved = (id: number | null) => {
+    setSelectedAddressId(id)
+    setAddingNew(false)
+  }
 
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
   const [shippingLoading, setShippingLoading] = useState(false)
@@ -253,7 +262,6 @@ const AddressContainer = () => {
           {method === "deliver" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-brand" />
                 <h2 className="text-base font-bold text-foreground">Saved Addresses</h2>
               </div>
 
@@ -297,7 +305,7 @@ const AddressContainer = () => {
                   key={address.id}
                   address={address}
                   selectedAddressId={selectedAddressId}
-                  setSelectedAddressId={setSelectedAddressId}
+                  setSelectedAddressId={handleSelectSaved}
                   onSuccess={fetchAddresses}
                 />
               ))}
@@ -306,18 +314,67 @@ const AddressContainer = () => {
 
           {/* ── Add new address (deliver method only) ──────────────────── */}
           {method === "deliver" && (addresses.length < 3 ? (
-            <CheckoutAddress
-              title="Add New Address"
-              action="add"
-              firstName={profile?.first_name ?? undefined}
-              lastName={profile?.last_name ?? undefined}
-              phone={profile?.phone_text ?? undefined}
-              onSuccess={fetchAddresses}
-            >
-              <Button className="rounded-full cursor-pointer" variant="default">
-                + Add New Address
-              </Button>
-            </CheckoutAddress>
+            <>
+              {/* Desktop: "New address" radio that expands an inline form */}
+              <div className="hidden md:flex flex-col gap-4">
+                <label
+                  className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${
+                    addingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Plus className="w-4 h-4 text-brand" />
+                    <span className="font-semibold text-foreground">New address</span>
+                  </div>
+                  <input
+                    type="radio"
+                    name="selectedAddress"
+                    checked={addingNew}
+                    onChange={() => {
+                      setAddingNew(true)
+                      setSelectedAddressId(null)
+                    }}
+                    className="w-5 h-5 accent-brand cursor-pointer shrink-0"
+                  />
+                </label>
+
+                {addingNew && (
+                  <div className="rounded-xl border border-border p-5 shadow-xs">
+                    <h3 className="text-base font-bold text-foreground mb-4">New address</h3>
+                    <AddressFormBody
+                      action="add"
+                      lockIdentity={!!profile?.first_name}
+                      defaults={{
+                        firstName: profile?.first_name ?? "",
+                        lastName: profile?.last_name ?? "",
+                        phone: profile?.phone_text ?? "",
+                      }}
+                      onSuccess={() => {
+                        setAddingNew(false)
+                        fetchAddresses()
+                      }}
+                      onCancel={() => setAddingNew(false)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile: full-screen slide-out sheet */}
+              <div className="md:hidden">
+                <CheckoutAddress
+                  title="New Address"
+                  action="add"
+                  firstName={profile?.first_name ?? undefined}
+                  lastName={profile?.last_name ?? undefined}
+                  phone={profile?.phone_text ?? undefined}
+                  onSuccess={fetchAddresses}
+                >
+                  <Button className="rounded-full cursor-pointer w-full" variant="default">
+                    + Add New Address
+                  </Button>
+                </CheckoutAddress>
+              </div>
+            </>
           ) : (
             // Limit reached show a notice instead of the add button
             <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
@@ -328,6 +385,9 @@ const AddressContainer = () => {
             </div>
           ))}
 
+          {/* ── Payment method ─────────────────────────────────────────── */}
+          <div className="border-t border-border mt-2" />
+          <PaymentMethod />
 
         </div>
 
