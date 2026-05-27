@@ -17,7 +17,7 @@ const ProductQuantityButton = () => {
                 type="button"
                 onClick={decrementQty}
                 disabled={quantityInput <= 1}
-                className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md cursor-pointer"
+                className="w-8 h-8 flex items-center bg-muted justify-center text-lg font-semibold text-muted-foreground rounded-md cursor-pointer"
             >
                 −
             </button>
@@ -29,7 +29,7 @@ const ProductQuantityButton = () => {
             <button
                 type="button"
                 onClick={incrementQty}
-                className="w-8 h-8 flex items-center bg-gray-100 justify-center text-lg font-semibold text-gray-600 rounded-md cursor-pointer"
+                className="w-8 h-8 flex items-center bg-muted justify-center text-lg font-semibold text-muted-foreground rounded-md cursor-pointer"
             >
                 +
             </button>

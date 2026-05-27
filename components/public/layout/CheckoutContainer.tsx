@@ -27,11 +27,11 @@ const CheckoutContainer = () => {
           />
 
 
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+          <h2 className="text-xl md:text-2xl font-semibold text-foreground">
             Your Cart is empty.
           </h2>
 
-          <p className="text-sm md:text-base text-gray-500">
+          <p className="text-sm md:text-base text-muted-foreground">
             Start shopping and find your next favourites
           </p>
 

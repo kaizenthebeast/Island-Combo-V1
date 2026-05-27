@@ -2,6 +2,7 @@ import { getProductBySlug } from '@/lib/product'
 import { Suspense } from 'react'
 import ProductDetails from '@/components/functional-ui/product/ProductDetails'
 import ProductReview from '@/components/functional-ui/review/ProductReview'
+import RecommendedProducts from '@/components/functional-ui/product/RecommendedProducts'
 import { notFound } from 'next/navigation'
 
 type Props = {
@@ -47,6 +48,13 @@ const ProductDetailsContainer = async ({ slug }: Props) => {
             {/* Reviews stream in independently — doesn't block the product render */}
             <Suspense fallback={<ReviewSkeleton />}>
                 <ProductReview slug={slug} />
+            </Suspense>
+
+            <Suspense fallback={null}>
+                <RecommendedProducts
+                    productId={product.product_id}
+                    categoryId={product.category?.category_id ?? null}
+                />
             </Suspense>
         </section>
     )

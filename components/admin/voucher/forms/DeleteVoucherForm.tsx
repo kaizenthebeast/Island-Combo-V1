@@ -18,9 +18,9 @@ export default function DeleteVoucherDialog({ open, voucherCode, onConfirm, onOp
           <DialogTitle>Archive Voucher</DialogTitle>
         </DialogHeader>
 
-        <p className="text-[13px] text-slate-600">
+        <p className="text-[13px] text-muted-foreground">
           Are you sure you want to archive{' '}
-          <span className="font-semibold text-slate-800">{voucherCode}</span>?
+          <span className="font-semibold text-foreground">{voucherCode}</span>?
           Customers will no longer be able to use this code. You can restore it later.
         </p>
 

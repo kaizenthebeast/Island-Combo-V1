@@ -12,7 +12,7 @@ const Navbar = async () => {
   const isAuthenticated = !!data?.claims?.email;
 
   return (
-    <header className="w-full bg-white border-b border-gray-100">
+    <header className="w-full bg-white border-b border-border">
       <nav className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
         <div className="flex items-center justify-between md:justify-start gap-4 shrink-0">
           <Link href="/" className="flex items-center gap-2">
@@ -31,7 +31,7 @@ const Navbar = async () => {
           <Link
             href="/checkout"
             aria-label="Cart"
-            className="relative md:hidden text-gray-700"
+            className="relative md:hidden text-foreground"
           >
             <ShoppingCart size={22} />
             <span className="absolute -top-2 -right-2 text-[10px] bg-brand text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">

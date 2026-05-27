@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-[#F8FBFF] py-12 px-6">
+    <footer className="w-full bg-muted py-12 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
 
         {/* Logo */}
@@ -23,7 +23,7 @@ const Footer = () => {
             </h2>
           </div>
 
-          <p className="text-gray-500 text-sm mt-2">
+          <p className="text-muted-foreground text-sm mt-2">
             ©2026 All Rights Reserved. Island Combo
           </p>
         </div>
@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <h1 className="font-semibold text-xl">Contact us</h1>
 
-          <ul className="flex flex-col space-y-4 text-sm mt-6 text-gray-700 items-center md:items-start">
+          <ul className="flex flex-col space-y-4 text-sm mt-6 text-foreground items-center md:items-start">
             <li className="flex gap-3 items-center">
               <Phone size={18} />
               <span>320-6666</span>
@@ -54,7 +54,7 @@ const Footer = () => {
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
           <h1 className="font-semibold text-xl">About Us</h1>
 
-          <ul className="flex flex-col space-y-4 text-sm mt-6 text-gray-700 items-center md:items-start">
+          <ul className="flex flex-col space-y-4 text-sm mt-6 text-foreground items-center md:items-start">
             <li>
               <Link href="#" className="inline-block hover:text-black">
                 Who we are

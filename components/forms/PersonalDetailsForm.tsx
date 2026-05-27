@@ -106,9 +106,9 @@ const PersonalDetailsForm = ({
                   id='email'
                   value={email}
                   readOnly
-                  className='bg-gray-100 cursor-not-allowed'
+                  className='bg-muted cursor-not-allowed'
                 />
-                <p className='text-xs text-gray-500'>Email cannot be changed here.</p>
+                <p className='text-xs text-muted-foreground'>Email cannot be changed here.</p>
               </div>
             )}
 
@@ -162,7 +162,7 @@ const PersonalDetailsForm = ({
               )}
             />
 
-            {submitError && <p className='text-sm text-red-500'>{submitError}</p>}
+            {submitError && <p className='text-sm text-danger'>{submitError}</p>}
 
             <Button
               type='submit'

@@ -75,7 +75,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                             className="grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5"
                         >
                             {/* Image */}
-                            <div className="relative w-full aspect-square bg-gray-100 rounded-md overflow-hidden">
+                            <div className="relative w-full aspect-square bg-muted rounded-md overflow-hidden">
                                 <Image
                                     src={item.image_url ?? '/images/placeholder.png'}
                                     alt="product"
@@ -96,7 +96,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     </h4>
                                     <button
                                         onClick={() => handleActions('remove', item.variant_id, item.quantity)}
-                                        className="text-red-400 hover:text-red-600 shrink-0 mt-0.5 cursor-pointer"
+                                        className="text-danger hover:text-danger shrink-0 mt-0.5 cursor-pointer"
                                     >
                                         <X size={16} />
                                     </button>
@@ -104,7 +104,7 @@ const OrderSummary = ({ cartItems }: Props) => {
 
                                 {/* Variant attributes e.g. Flavor: Coke - Size: 500ml */}
                                 {item.attributes && item.attributes.length > 0 && (
-                                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                                         {item.attributes
                                             .map(attr => `${attr.name.charAt(0).toUpperCase() + attr.name.slice(1)}: ${attr.value}`)
                                             .join(' - ')}
@@ -120,17 +120,17 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     </p>
                                     {priceIsReduced && (
                                         <>
-                                            <p className="text-xs text-gray-400 line-through">
+                                            <p className="text-xs text-muted-foreground line-through">
                                                 ${item.price.toFixed(2)}
                                             </p>
                                             {isWholesale ? (
                                                 // Show the wholesale discount percent from the matched tier
-                                                <p className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
+                                                <p className="text-xs bg-success-tint text-success px-1.5 py-0.5 rounded">
                                                     -{item.pricing_tiers.find(t => t.label === 'wholesale')?.discount_percent}% wholesale discount
                                                 </p>
                                             ) : hasDiscount && (
                                                 // Show the product-level sale discount percent
-                                                <p className="text-xs bg-pink-100 text-pink-600 px-1.5 py-0.5 rounded">
+                                                <p className="text-xs bg-brand-tint text-brand px-1.5 py-0.5 rounded">
                                                     -{item.discount}%
                                                 </p>
                                             )}
@@ -174,7 +174,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                     meaning the current quantity meets the wholesale threshold.
                                     Replaces the old item.wholesale boolean check. */}
                                 {isWholesale && (
-                                    <div className="flex items-center gap-1.5 bg-[#EAF7F1] text-[#0F5132] px-2 py-1.5 rounded-md mt-3 text-xs">
+                                    <div className="flex items-center gap-1.5 bg-success-tint text-success px-2 py-1.5 rounded-md mt-3 text-xs">
                                         <CircleCheckBig size={14} className="shrink-0" />
                                         <p>Wholesale pricing applied!</p>
                                     </div>

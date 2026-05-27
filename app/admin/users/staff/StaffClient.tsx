@@ -126,7 +126,7 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
   ]
 
   return (
-    <section className="min-h-full bg-slate-50 px-6 py-10">
+    <section className="min-h-full bg-muted px-6 py-10">
       <PageHeader
         eyebrow="People"
         title="Staff"
@@ -137,8 +137,8 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
       />
 
       {deleteError && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-          <p className="text-[12px] text-rose-700 font-medium">{deleteError}</p>
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+          <p className="text-[12px] text-danger font-medium">{deleteError}</p>
         </div>
       )}
 
@@ -189,27 +189,27 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
           return (
             <div className="space-y-4 text-sm">
               <div>
-                <h4 className="font-semibold text-slate-700">Personal Info</h4>
-                <ul className="mt-1 space-y-1 text-slate-600">
+                <h4 className="font-semibold text-foreground">Personal Info</h4>
+                <ul className="mt-1 space-y-1 text-muted-foreground">
                   <li><strong>Sex:</strong> {u.sex ?? '—'}</li>
                   <li><strong>Age:</strong> {u.age ?? '—'}</li>
                 </ul>
               </div>
               {u.default_address && (
                 <div>
-                  <h4 className="font-semibold text-slate-700">Default Address</h4>
-                  <div className="mt-1 border rounded-lg p-3 text-slate-600">
+                  <h4 className="font-semibold text-foreground">Default Address</h4>
+                  <div className="mt-1 border rounded-lg p-3 text-muted-foreground">
                     <p>
                       {u.default_address}, {u.default_locality},{' '}
                       {u.default_postal_code}, {u.default_country}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       {u.total_addresses} address{u.total_addresses !== 1 ? 'es' : ''} total
                     </p>
                   </div>
                 </div>
               )}
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 User ID: {u.user_id} · Joined: {new Date(u.member_since).toLocaleString()}
               </div>
             </div>

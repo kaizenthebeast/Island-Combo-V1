@@ -25,7 +25,7 @@ export default function MobileBottomNav({ isAuthenticated }: Props) {
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 grid grid-cols-4"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border grid grid-cols-4"
     >
       {tabs.map((tab) => {
         const active = isActive(tab.href)
@@ -36,7 +36,7 @@ export default function MobileBottomNav({ isAuthenticated }: Props) {
             href={tab.href}
             aria-current={active ? 'page' : undefined}
             className={`flex flex-col items-center justify-center gap-0.5 py-2 transition-colors ${
-              active ? 'text-brand' : 'text-gray-500 hover:text-gray-700'
+              active ? 'text-brand' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Icon size={20} strokeWidth={active ? 2.5 : 2} />

@@ -24,7 +24,7 @@ const AdminUsersPage = async ({ searchParams }: { searchParams: SearchParams }) 
 
   if (!result.success) {
     return (
-      <div className="p-8 text-red-500">
+      <div className="p-8 text-danger">
         Failed to load users: {result.message}
       </div>
     )

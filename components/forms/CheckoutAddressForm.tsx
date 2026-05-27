@@ -132,7 +132,7 @@ const CheckoutAddress = ({
                                                 maxLength={15}
                                                 autoComplete="given-name"
                                                 readOnly={!!firstName}
-                                                className={!!firstName ? "bg-gray-100 cursor-not-allowed" : ""}
+                                                className={!!firstName ? "bg-muted cursor-not-allowed" : ""}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -153,7 +153,7 @@ const CheckoutAddress = ({
                                                 maxLength={15}
                                                 autoComplete="family-name"
                                                 readOnly={!!lastName}
-                                                className={!!lastName ? "bg-gray-100 cursor-not-allowed" : ""}
+                                                className={!!lastName ? "bg-muted cursor-not-allowed" : ""}
                                                 {...field}
                                             />
                                         </FormControl>
@@ -176,7 +176,7 @@ const CheckoutAddress = ({
                                             maxLength={16}
                                             autoComplete="tel"
                                             readOnly={!!phone}
-                                            className={!!phone ? "bg-gray-100 cursor-not-allowed" : ""}
+                                            className={!!phone ? "bg-muted cursor-not-allowed" : ""}
                                             {...field}
                                         />
                                     </FormControl>
@@ -263,10 +263,10 @@ const CheckoutAddress = ({
                             control={form.control}
                             name="makeDefault"
                             render={({ field }) => (
-                                <FormItem className="flex items-center justify-between rounded-3xl border border-gray-200 bg-gray-50 px-4 py-4 gap-2">
+                                <FormItem className="flex items-center justify-between rounded-3xl border border-border bg-muted px-4 py-4 gap-2">
                                     <div>
                                         <FormLabel className="text-sm font-medium">Make default</FormLabel>
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs text-muted-foreground">
                                             Use this address for future orders.
                                         </p>
                                     </div>

@@ -182,12 +182,12 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
           </div>
         )}
 
-        <div className="relative w-full aspect-square overflow-hidden rounded-md bg-gray-50">
+        <div className="relative w-full aspect-square overflow-hidden rounded-md bg-muted">
           <Image
             src={getPublicImageUrl(product.primary_image) ?? '/images/placeholder.png'}
             alt={product.product_name}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105 bg-gray-100 rounded-md overflow-hidden"
+            className="object-cover transition-transform duration-300 group-hover:scale-105 bg-muted rounded-md overflow-hidden"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             priority
           />
@@ -202,10 +202,10 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
           </p>
           {hasDiscount && (
             <div className="flex items-center justify-between flex-wrap gap-1">
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-xs text-muted-foreground line-through">
                 ${originalPrice.toFixed(2)}
               </span>
-              <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
+              <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded">
                 -{product.discount}%
               </span>
             </div>
@@ -243,7 +243,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
             </VisuallyHidden>
             <button
               onClick={() => setOpen(false)}
-              className="flex items-center gap-1 text-gray-700 hover:text-black transition-colors w-fit"
+              className="flex items-center gap-1 text-foreground hover:text-black transition-colors w-fit"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -253,7 +253,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
             {/* Product Summary Row */}
             <div className="flex gap-4 items-start px-4">
-              <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+              <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
                 <Image
                   src={getPublicImageUrl(product.primary_image) ?? '/images/placeholder.png'}
                   alt={product.product_name}
@@ -264,13 +264,13 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               </div>
 
               <div className="flex flex-col gap-1 flex-1 min-w-0">
-                <h2 className="text-sm font-semibold leading-snug text-gray-900">
+                <h2 className="text-sm font-semibold leading-snug text-foreground">
                   {product.product_name}
                 </h2>
 
                 {/* Price — swaps to wholesale price when threshold is met */}
                 <div className="flex items-center gap-2 flex-wrap mt-1">
-                  <span className="text-base font-bold text-gray-900">
+                  <span className="text-base font-bold text-foreground">
                     ${wholesaleUnlocked && wholesalePrice !== null
                       ? wholesalePrice.toFixed(2)
                       : (displayVariant?.final_price ?? discountedPrice).toFixed(2)
@@ -279,7 +279,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                   {wholesaleUnlocked && wholesalePrice !== null ? (
                     // Wholesale active — show original price struck through
                     <>
-                      <span className="text-sm text-gray-400 line-through">
+                      <span className="text-sm text-muted-foreground line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
                       </span>
                       <span className="text-xs bg-brand text-white px-2 py-0.5 rounded font-medium">
@@ -289,10 +289,10 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                   ) : hasDiscount && (
                     // Regular sale discount
                     <>
-                      <span className="text-sm text-gray-400 line-through">
+                      <span className="text-sm text-muted-foreground line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
                       </span>
-                      <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded font-medium">
                         -{product.discount}%
                       </span>
                     </>
@@ -309,7 +309,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               </div>
             </div>
 
-            <div className="bg-[#F5F5F5] h-[8px] rounded-md" />
+            <div className="bg-muted h-[8px] rounded-md" />
 
             {/* Attribute Pickers */}
             {attributeKeys.map((key, keyIndex) => {
@@ -318,7 +318,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
               return (
                 <div key={key} className="flex flex-col space-y-2 px-4">
-                  <p className="text-sm font-medium text-gray-700 capitalize">{key}</p>
+                  <p className="text-sm font-medium text-foreground capitalize">{key}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.map((value) => {
                       const isSelected = selectedAttributes[key] === value
@@ -338,7 +338,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                             onClick={() => handleAttributeSelect(key, value)}
                             className="flex flex-col items-center gap-1"
                           >
-                            <div className={`w-14 h-14 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-gray-200 hover:border-gray-400'}`}>
+                            <div className={`w-14 h-14 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-border hover:border-border'}`}>
                               <Image
                                 src={thumbnailUrl ?? '/images/placeholder.png'}
                                 fill sizes="56px"
@@ -347,7 +347,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                                 loading="eager"
                               />
                             </div>
-                            <span className="text-xs text-gray-600">{value}</span>
+                            <span className="text-xs text-muted-foreground">{value}</span>
                           </button>
                         )
                       }
@@ -357,7 +357,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                           key={value}
                           type="button"
                           onClick={() => handleAttributeSelect(key, value)}
-                          className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-gray-300 hover:border-gray-500'}`}
+                          className={`px-3 py-1.5 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-border hover:border-border'}`}
                         >
                           {value}
                         </button>
@@ -370,7 +370,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
             {/* Stock */}
             {attributeKeys.length > 0 && (
-              <p className="text-sm font-medium text-gray-700 px-4">
+              <p className="text-sm font-medium text-foreground px-4">
                 {resolvedVariant
                   ? `Stocks: ${resolvedVariant.stock}`
                   : `Select ${attributeKeys.find(k => !selectedAttributes[k]) ?? 'an option'} to see stock`
@@ -380,13 +380,13 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
             {/* Quantity + wholesale notice */}
             <div className="space-y-3 px-4">
-              <h3 className="text-base font-bold text-gray-900">Quantity</h3>
+              <h3 className="text-base font-bold text-foreground">Quantity</h3>
               <ProductQuantityButton />
 
               {wholesaleTier && (
                 wholesaleUnlocked ? (
                   //  Threshold met — confirm wholesale is active
-                  <div className="inline-flex items-center gap-2 text-[#0F5132] bg-[#EAF7F1] px-3 py-2 rounded-md w-fit text-sm">
+                  <div className="inline-flex items-center gap-2 text-success bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
                     <CircleCheckBig size={14} className="shrink-0" />
                     <p className="font-medium">
                       Wholesale pricing applied! ({wholesaleTier.discount_percent}% off)
@@ -394,7 +394,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                   </div>
                 ) : (
                   //  Nudge — show how many more needed
-                  <div className="inline-flex items-center gap-2 text-[#856404] bg-[#FFF8E1] px-3 py-2 rounded-md w-fit text-sm">
+                  <div className="inline-flex items-center gap-2 text-warning bg-warning-tint px-3 py-2 rounded-md w-fit text-sm">
                     <Package size={14} className="shrink-0" />
                     <p className="font-medium">
                       Add {wholesaleTier.min_quantity - quantityInput} more for {wholesaleTier.discount_percent}% wholesale discount

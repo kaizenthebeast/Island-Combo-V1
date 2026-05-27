@@ -123,6 +123,52 @@ export const getSaleProducts = async (
   return data ?? []
 }
 
+export const getRecommendedProducts = async (
+  productId: number,
+  categoryId: number | null,
+  limit = 12,
+): Promise<ProductCatalogItem[]> => {
+  const supabase = await createClient()
+
+  const collected: ProductCatalogItem[] = []
+  const seen = new Set<number>([productId])
+
+  const take = (rows: ProductCatalogItem[]) => {
+    for (const p of rows) {
+      if (collected.length >= limit) break
+      if (seen.has(p.product_id)) continue
+      seen.add(p.product_id)
+      collected.push(p)
+    }
+  }
+
+  if (categoryId) {
+    const { data, error } = await supabase
+      .from('product_catalog_mv')
+      .select('*')
+      .eq('category_id', categoryId)
+      .neq('product_id', productId)
+      .order('product_id', { ascending: false })
+      .limit(limit)
+    if (error) throw new Error(error.message)
+    take(data ?? [])
+  }
+
+  // Backfill with newest products when the category doesn't have enough.
+  if (collected.length < limit) {
+    const { data, error } = await supabase
+      .from('product_catalog_mv')
+      .select('*')
+      .neq('product_id', productId)
+      .order('product_id', { ascending: false })
+      .limit(limit * 2)
+    if (error) throw new Error(error.message)
+    take(data ?? [])
+  }
+
+  return collected
+}
+
 export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('get_product_by_slug', { p_slug })

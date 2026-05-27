@@ -74,18 +74,18 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
         {errors.root && (
-          <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-            <p className="text-[12px] text-rose-700 font-medium">
+          <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+            <p className="text-[12px] text-danger font-medium">
               {errors.root.message}
             </p>
           </div>
         )}
 
         {!selectedCategory.is_active && (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
-              <p className="text-[12px] text-amber-700 font-medium">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-warning" />
+              <p className="text-[12px] text-warning font-medium">
                 This category is archived and hidden from the storefront.
               </p>
             </div>
@@ -93,7 +93,7 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
               type="button"
               onClick={handleRestore}
               disabled={isRestoring}
-              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+              className="shrink-0 rounded-md bg-warning hover:bg-warning disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
             >
               {isRestoring ? 'Restoring…' : 'Restore'}
             </button>
@@ -106,15 +106,15 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
           <>
             {fields.length > 0 && (
               <div className="flex flex-col gap-3">
-                <div className="h-px bg-slate-100" />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+                <div className="h-px bg-muted" />
+                <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
                   New sub-categories
                 </p>
 
                 {fields.map((field, index) => (
                   <div key={field.id} className="flex items-start gap-2">
                     <div className="flex flex-col items-center self-stretch pt-2 pl-2">
-                      <div className="w-3 h-3 border-l-2 border-b-2 border-slate-200 rounded-bl-sm" />
+                      <div className="w-3 h-3 border-l-2 border-b-2 border-border rounded-bl-sm" />
                     </div>
 
                     <Field
@@ -131,7 +131,7 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
                     <button
                       type="button"
                       onClick={() => remove(index)}
-                      className="mt-1 rounded-md p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                      className="mt-1 rounded-md p-1.5 text-muted-foreground hover:text-danger hover:bg-danger-tint transition-colors"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -145,7 +145,7 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
             <button
               type="button"
               onClick={() => append({ name: '' })}
-              className="flex items-center gap-1.5 w-fit text-[12px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
+              className="flex items-center gap-1.5 w-fit text-[12px] font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -155,19 +155,19 @@ export function EditCategoryForm({ selectedCategory, parentOptions, onSuccess, o
           </>
         )}
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            className="rounded-lg border border-border px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
+            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? 'Saving...' : 'Save changes'}
           </button>

@@ -131,18 +131,18 @@ export function Field({
     <FieldErrorCtx.Provider value={!!error}>
       <div className={cn('flex flex-col gap-1', className)}>
         {label && (
-          <label className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+          <label className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
             {label}
-            {required && <span className="text-rose-400 leading-none">*</span>}
+            {required && <span className="text-danger leading-none">*</span>}
           </label>
         )}
         {children}
         {error ? (
-          <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium mt-0.5">
+          <p className="flex items-center gap-1 text-[11px] text-danger font-medium mt-0.5">
             <AlertIcon />{error}
           </p>
         ) : hint ? (
-          <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>
         ) : null}
       </div>
     </FieldErrorCtx.Provider>
@@ -150,14 +150,14 @@ export function Field({
 }
 
 const inputBase = [
-  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-slate-800 outline-hidden leading-5',
-  'border-slate-200 placeholder:text-slate-300',
-  'focus:border-slate-400 focus:ring-2 focus:ring-slate-100',
-  'disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed',
+  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-foreground outline-hidden leading-5',
+  'border-border placeholder:text-muted-foreground',
+  'focus:border-ring focus:ring-2 focus:ring-ring',
+  'disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed',
   'transition-colors duration-150',
 ].join(' ')
 
-const inputError = 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+const inputError = 'border-danger/30 focus:border-danger focus:ring-danger/20'
 
 export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   const hasError = React.useContext(FieldErrorCtx)
@@ -196,7 +196,7 @@ export function Toggle({
     <button type="button" onClick={() => onChange(!checked)} className="flex items-start gap-3 text-left">
       <span className={cn(
         'relative mt-0.5 inline-flex h-[18px] w-8 shrink-0 items-center rounded-full border transition-colors duration-200',
-        checked ? 'bg-slate-800 border-slate-800' : 'bg-white border-slate-300',
+        checked ? 'bg-primary border-primary' : 'bg-white border-border',
       )}>
         <span
           className="inline-block h-3 w-3 rounded-full bg-white shadow-xs transition-transform duration-200"
@@ -204,8 +204,8 @@ export function Toggle({
         />
       </span>
       <span className="flex flex-col">
-        <span className="text-[13px] text-slate-700 leading-snug">{label}</span>
-        {description && <span className="text-[11px] text-slate-400 mt-0.5">{description}</span>}
+        <span className="text-[13px] text-foreground leading-snug">{label}</span>
+        {description && <span className="text-[11px] text-muted-foreground mt-0.5">{description}</span>}
       </span>
     </button>
   )
@@ -214,8 +214,8 @@ export function Toggle({
 export function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 my-1">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-300 whitespace-nowrap">{label}</span>
-      <div className="h-px flex-1 bg-slate-100" />
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground whitespace-nowrap">{label}</span>
+      <div className="h-px flex-1 bg-muted" />
     </div>
   )
 }
@@ -236,8 +236,8 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
     <div className="flex flex-col gap-2.5">
       {fields.length > 0 && (
         <div className="grid grid-cols-[120px_1fr_32px] gap-2 px-0.5">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Min qty</span>
-          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Discount %</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">Min qty</span>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">Discount %</span>
         </div>
       )}
 
@@ -267,14 +267,14 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
                 type="number" min={0} max={100} step={0.01} placeholder="e.g. 20"
                 className="pr-7"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 pointer-events-none select-none">%</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground pointer-events-none select-none">%</span>
             </div>
           </Field>
 
           <button
             type="button"
             onClick={() => remove(idx)}
-            className="mt-1.5 p-1.5 rounded text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+            className="mt-1.5 p-1.5 rounded text-muted-foreground hover:text-danger hover:bg-danger-tint transition-colors"
           >
             <TrashIcon />
           </button>
@@ -282,12 +282,12 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
       ))}
 
       {tierErrors?.root?.message && (
-        <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+        <p className="flex items-center gap-1 text-[11px] text-danger font-medium">
           <AlertIcon />{tierErrors.root.message}
         </p>
       )}
       {typeof tierErrors?.message === 'string' && (
-        <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium">
+        <p className="flex items-center gap-1 text-[11px] text-danger font-medium">
           <AlertIcon />{tierErrors.message}
         </p>
       )}
@@ -300,7 +300,7 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
             min_quantity: undefined as unknown as number,
             discount_percent: undefined as unknown as number,
           })}
-          className="flex items-center justify-center gap-2 rounded-md border border-dashed border-slate-200 py-2 text-[11px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all"
+          className="flex items-center justify-center gap-2 rounded-md border border-dashed border-border py-2 text-[11px] font-medium text-muted-foreground hover:border-border hover:text-muted-foreground hover:bg-muted/60 transition-all"
         >
           <PlusIcon /> Add wholesale pricing
         </button>
@@ -375,16 +375,16 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
         className={cn(
           'flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-6 cursor-pointer transition-all duration-150',
           dragging
-            ? 'border-slate-400 bg-slate-50'
-            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/60',
+            ? 'border-border bg-muted'
+            : 'border-border hover:border-border hover:bg-muted/60',
         )}
       >
-        <div className="text-slate-300"><UploadIcon /></div>
+        <div className="text-muted-foreground"><UploadIcon /></div>
         <div className="text-center">
-          <p className="text-[12px] text-slate-500 font-medium">
-            Drop images here or <span className="text-slate-700 underline underline-offset-2">browse</span>
+          <p className="text-[12px] text-muted-foreground font-medium">
+            Drop images here or <span className="text-foreground underline underline-offset-2">browse</span>
           </p>
-          <p className="text-[11px] text-slate-400 mt-0.5">JPEG · PNG · WebP · GIF — max 5 MB each</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">JPEG · PNG · WebP · GIF — max 5 MB each</p>
         </div>
         <input
           ref={inputRef}
@@ -397,9 +397,9 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
       </div>
 
       {rejectedFiles.length > 0 && (
-        <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+        <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2">
           <AlertIcon />
-          <p className="text-[11px] text-amber-700">Skipped: {rejectedFiles.join(', ')}</p>
+          <p className="text-[11px] text-warning">Skipped: {rejectedFiles.join(', ')}</p>
         </div>
       )}
 
@@ -415,8 +415,8 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
               <div
                 key={field.id}
                 className={cn(
-                  'relative group rounded-md overflow-hidden border aspect-square bg-slate-100 transition-all',
-                  isPrimary ? 'ring-2 ring-slate-700 ring-offset-1' : 'border-slate-200',
+                  'relative group rounded-md overflow-hidden border aspect-square bg-muted transition-all',
+                  isPrimary ? 'ring-2 ring-foreground ring-offset-1' : 'border-border',
                 )}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -427,14 +427,14 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
                 />
 
                 {isPrimary && (
-                  <div className="absolute top-1 left-1 bg-slate-800 text-white text-[8px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
+                  <div className="absolute top-1 left-1 bg-primary text-white text-[8px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
                     Cover
                   </div>
                 )}
 
                 {/* Badge for existing Storage images — visually distinct from new uploads */}
                 {isExisting && !isPrimary && (
-                  <div className="absolute top-1 left-1 bg-blue-600 text-white text-[7px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
+                  <div className="absolute top-1 left-1 bg-info text-white text-[7px] font-semibold px-1.5 py-0.5 rounded-sm leading-tight tracking-wide uppercase">
                     Saved
                   </div>
                 )}
@@ -454,7 +454,7 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
                     type="button"
                     onClick={() => remove(idx)}
                     title="Remove"
-                    className="p-1.5 rounded bg-white/20 text-white hover:bg-rose-500/80 transition-colors"
+                    className="p-1.5 rounded bg-white/20 text-white hover:bg-danger-tint0/80 transition-colors"
                   >
                     <TrashIcon />
                   </button>
@@ -466,7 +466,7 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="aspect-square rounded-md border border-dashed border-slate-200 flex items-center justify-center text-slate-300 hover:border-slate-300 hover:text-slate-400 hover:bg-slate-50 transition-all"
+            className="aspect-square rounded-md border border-dashed border-border flex items-center justify-center text-muted-foreground hover:border-border hover:text-muted-foreground hover:bg-muted transition-all"
           >
             <PlusIcon />
           </button>
@@ -503,12 +503,12 @@ export function AttributeTypeSelector({
   }, [showCustom])
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50/60">
-        <span className="text-slate-400"><TagIcon /></span>
+    <div className="rounded-lg border border-border bg-white overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/60">
+        <span className="text-muted-foreground"><TagIcon /></span>
         <div>
-          <p className="text-[12px] font-semibold text-slate-700">Variant attributes</p>
-          <p className="text-[11px] text-slate-400">Choose which attributes define variants of this product (e.g. Size, Color)</p>
+          <p className="text-[12px] font-semibold text-foreground">Variant attributes</p>
+          <p className="text-[11px] text-muted-foreground">Choose which attributes define variants of this product (e.g. Size, Color)</p>
         </div>
       </div>
 
@@ -524,8 +524,8 @@ export function AttributeTypeSelector({
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border transition-all duration-150',
                   isSelected
-                    ? 'bg-slate-800 border-slate-800 text-white'
-                    : 'bg-white border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700',
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-white border-border text-muted-foreground hover:border-border hover:text-foreground',
                 )}
               >
                 {isSelected && <CheckIcon />}
@@ -539,7 +539,7 @@ export function AttributeTypeSelector({
             .map((name) => (
               <span
                 key={name}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border bg-slate-800 border-slate-800 text-white"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold border bg-primary border-primary text-white"
               >
                 {name}
                 <button
@@ -563,19 +563,19 @@ export function AttributeTypeSelector({
                   if (e.key === 'Escape') { setShowCustom(false); setCustomValue('') }
                 }}
                 placeholder="e.g. Style"
-                className="rounded-full border border-slate-300 px-3 py-1 text-[11px] outline-hidden focus:border-slate-500 focus:ring-2 focus:ring-slate-100 w-28 transition-all"
+                className="rounded-full border border-border px-3 py-1 text-[11px] outline-hidden focus:border-ring focus:ring-2 focus:ring-ring w-28 transition-all"
               />
               <button
                 type="button"
                 onClick={handleAddCustom}
-                className="rounded-full border border-slate-800 bg-slate-800 text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-slate-900 transition-colors"
+                className="rounded-full border border-primary bg-primary text-white px-2.5 py-1 text-[11px] font-semibold hover:bg-primary/90 transition-colors"
               >
                 Add
               </button>
               <button
                 type="button"
                 onClick={() => { setShowCustom(false); setCustomValue('') }}
-                className="rounded-full border border-slate-200 text-slate-400 px-2.5 py-1 text-[11px] hover:border-slate-300 transition-colors"
+                className="rounded-full border border-border text-muted-foreground px-2.5 py-1 text-[11px] hover:border-border transition-colors"
               >
                 Cancel
               </button>
@@ -584,7 +584,7 @@ export function AttributeTypeSelector({
             <button
               type="button"
               onClick={() => setShowCustom(true)}
-              className="flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold border border-dashed border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-all"
+              className="flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold border border-dashed border-border text-muted-foreground hover:border-border hover:text-muted-foreground transition-all"
             >
               <PlusIcon /> Custom
             </button>
@@ -592,14 +592,14 @@ export function AttributeTypeSelector({
         </div>
 
         {selected.length > 0 && (
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-muted-foreground">
             Each variant will have fields for:{' '}
-            <span className="font-medium text-slate-600">{selected.join(', ')}</span>
+            <span className="font-medium text-muted-foreground">{selected.join(', ')}</span>
           </p>
         )}
 
         {selected.length === 0 && (
-          <p className="text-[11px] text-slate-300 italic">
+          <p className="text-[11px] text-muted-foreground italic">
             No attributes selected — variants will only differ by price and stock.
           </p>
         )}
@@ -635,19 +635,19 @@ export function VariantCard({
   const isExistingVariant = !!(watch(`variants.${index}`) as any)?.variant_id
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/40 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-white">
+    <div className="rounded-lg border border-border bg-muted/40 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-white">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300">#{index + 1}</span>
-          <span className="text-[12px] font-semibold text-slate-600 truncate max-w-[160px]">{variantLabel}</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">#{index + 1}</span>
+          <span className="text-[12px] font-semibold text-muted-foreground truncate max-w-[160px]">{variantLabel}</span>
           {/* Only shown in edit context — indicates UPDATE vs INSERT to admin */}
           {showVariantBadge && (
             isExistingVariant ? (
-              <span className="text-[9px] font-semibold uppercase tracking-wide bg-blue-50 text-blue-500 border border-blue-100 px-1.5 py-0.5 rounded-full">
+              <span className="text-[9px] font-semibold uppercase tracking-wide bg-info-tint text-info border border-info/30 px-1.5 py-0.5 rounded-full">
                 Existing
               </span>
             ) : (
-              <span className="text-[9px] font-semibold uppercase tracking-wide bg-green-50 text-green-500 border border-green-100 px-1.5 py-0.5 rounded-full">
+              <span className="text-[9px] font-semibold uppercase tracking-wide bg-success-tint text-success border border-success/30 px-1.5 py-0.5 rounded-full">
                 New
               </span>
             )
@@ -657,7 +657,7 @@ export function VariantCard({
           <button
             type="button"
             onClick={onRemove}
-            className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-500 transition-colors font-medium"
+            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-danger transition-colors font-medium"
           >
             <TrashIcon /> Remove
           </button>
@@ -669,7 +669,7 @@ export function VariantCard({
           {/* FIX: cast .message as string | undefined */}
           <Field label="Price" required error={variantErrors?.price?.message as string | undefined}>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 pointer-events-none font-medium select-none">₱</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-muted-foreground pointer-events-none font-medium select-none">₱</span>
               <Input
                 {...register(`variants.${index}.price`, {
                   setValueAs: (v) => v === '' ? undefined : parseFloat(v),
@@ -741,9 +741,9 @@ export function VariantCard({
 
         <div className="flex flex-col gap-2">
           <SectionDivider label="Wholesale pricing" />
-          <p className="text-[11px] text-slate-400 leading-relaxed">
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
             Optionally set a wholesale discount for this variant. Customers who add{' '}
-            <span className="font-medium text-slate-600">at least the minimum quantity</span>{' '}
+            <span className="font-medium text-muted-foreground">at least the minimum quantity</span>{' '}
             to their cart will automatically receive the discount.
           </p>
           <PricingTiersSection variantIndex={index} />
@@ -775,23 +775,23 @@ export function StepIndicator({ current }: { current: number }) {
             <div className={cn(
               'h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-semibold transition-all duration-300 border',
               i < current
-                ? 'bg-slate-800 border-slate-800 text-white'
+                ? 'bg-primary border-primary text-white'
                 : i === current
-                  ? 'bg-white border-slate-800 text-slate-800 ring-4 ring-slate-100'
-                  : 'bg-white border-slate-200 text-slate-300',
+                  ? 'bg-white border-primary text-foreground ring-4 ring-ring'
+                  : 'bg-white border-border text-muted-foreground',
             )}>
               {i < current ? <CheckIcon /> : i + 1}
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <span className={cn(
                 'text-[11px] font-semibold whitespace-nowrap transition-colors',
-                i === current ? 'text-slate-800' : i < current ? 'text-slate-500' : 'text-slate-300',
+                i === current ? 'text-foreground' : i < current ? 'text-muted-foreground' : 'text-muted-foreground',
               )}>
                 {step.label}
               </span>
               <span className={cn(
                 'text-[10px] whitespace-nowrap hidden sm:block transition-colors',
-                i === current ? 'text-slate-400' : 'text-slate-300',
+                i === current ? 'text-muted-foreground' : 'text-muted-foreground',
               )}>
                 {step.description}
               </span>
@@ -800,7 +800,7 @@ export function StepIndicator({ current }: { current: number }) {
 
           {i < STEPS.length - 1 && (
             <div className="flex-1 mx-1 mt-3">
-              <div className={cn('h-px transition-colors duration-500', i < current ? 'bg-slate-800' : 'bg-slate-200')} />
+              <div className={cn('h-px transition-colors duration-500', i < current ? 'bg-primary' : 'bg-muted')} />
             </div>
           )}
         </React.Fragment>
@@ -814,9 +814,9 @@ export function StepIndicator({ current }: { current: number }) {
 export function StepErrorBanner({ errorCount }: { errorCount: number }) {
   if (errorCount === 0) return null
   return (
-    <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4 animate-in fade-in slide-in-from-top-1 duration-200">
-      <span className="text-rose-500 shrink-0"><AlertIcon /></span>
-      <p className="text-[12px] text-rose-700 font-medium leading-snug">
+    <div className="flex items-center gap-2.5 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 mb-4 animate-in fade-in slide-in-from-top-1 duration-200">
+      <span className="text-danger shrink-0"><AlertIcon /></span>
+      <p className="text-[12px] text-danger font-medium leading-snug">
         {errorCount === 1
           ? '1 field needs attention before continuing.'
           : `${errorCount} fields need attention before continuing.`}
@@ -849,7 +849,7 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
 
         <Field label="Slug" required error={errors.slug?.message as string | undefined} hint="Auto-generated from name — editable">
           <div className="relative flex items-center">
-            <span className="absolute left-3 text-[11px] text-slate-300 pointer-events-none select-none whitespace-nowrap font-medium">
+            <span className="absolute left-3 text-[11px] text-muted-foreground pointer-events-none select-none whitespace-nowrap font-medium">
               /products/
             </span>
             <Input {...register('slug')} className="pl-[74px]" placeholder="classic-white-tee" />
@@ -865,7 +865,7 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
         </Field>
       </div>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-muted" />
 
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
@@ -906,12 +906,12 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
               type="number" min={0} max={100} step={0.01} placeholder="0"
               className="pr-8"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-slate-400 pointer-events-none select-none">%</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] text-muted-foreground pointer-events-none select-none">%</span>
           </div>
         </Field>
       </div>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-muted" />
 
       <Toggle
         checked={watch('is_active') ?? true}
@@ -970,9 +970,9 @@ export function Step2Variants({ showVariantBadge = false }: { showVariantBadge?:
       />
 
       {errors.variants?.root && (
-        <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-          <span className="text-rose-500"><AlertIcon /></span>
-          <p className="text-[12px] text-rose-700 font-medium">{(errors.variants.root as any).message}</p>
+        <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+          <span className="text-danger"><AlertIcon /></span>
+          <p className="text-[12px] text-danger font-medium">{(errors.variants.root as any).message}</p>
         </div>
       )}
 
@@ -990,7 +990,7 @@ export function Step2Variants({ showVariantBadge = false }: { showVariantBadge?:
       <button
         type="button"
         onClick={() => append(makeBlankVariant(attributeTypes))}
-        className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 py-3 text-[12px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all"
+        className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-[12px] font-medium text-muted-foreground hover:border-border hover:text-muted-foreground hover:bg-muted/60 transition-all"
       >
         <PlusIcon /> Add variant
       </button>
@@ -1009,29 +1009,29 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-md border border-slate-100 bg-slate-50 px-4 py-3">
-        <p className="text-[12px] text-slate-500 leading-relaxed">
+      <div className="rounded-md border border-border bg-muted px-4 py-3">
+        <p className="text-[12px] text-muted-foreground leading-relaxed">
           Add structured attributes shown on the product page — e.g.{' '}
-          <span className="font-medium text-slate-700">Material</span>,{' '}
-          <span className="font-medium text-slate-700">Care Instructions</span>,{' '}
-          <span className="font-medium text-slate-700">Country of Origin</span>.
+          <span className="font-medium text-foreground">Material</span>,{' '}
+          <span className="font-medium text-foreground">Care Instructions</span>,{' '}
+          <span className="font-medium text-foreground">Country of Origin</span>.
           These are displayed as a spec table to customers.
         </p>
       </div>
 
       {fields.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-200 py-10 flex flex-col items-center gap-2 text-center">
-          <span className="text-[11px] font-medium text-slate-300 uppercase tracking-widest">No details added</span>
-          <p className="text-[11px] text-slate-300 max-w-[200px]">
+        <div className="rounded-lg border border-dashed border-border py-10 flex flex-col items-center gap-2 text-center">
+          <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">No details added</span>
+          <p className="text-[11px] text-muted-foreground max-w-[200px]">
             Optional — skip this step if you don't have extra specs to display
           </p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           <div className="grid grid-cols-[1fr_1fr_80px_32px] gap-2 px-0.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Attribute</span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Value</span>
-            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-300">Order</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">Attribute</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">Value</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">Order</span>
           </div>
 
           {fields.map((field, idx) => (
@@ -1050,7 +1050,7 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="mt-1.5 p-1.5 rounded text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                className="mt-1.5 p-1.5 rounded text-muted-foreground hover:text-danger hover:bg-danger-tint transition-colors"
               >
                 <TrashIcon />
               </button>
@@ -1062,7 +1062,7 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
       <button
         type="button"
         onClick={() => append({ attribute_name: '', attribute_value: '', sort_order: fields.length + 1 })}
-        className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 py-3 text-[12px] font-medium text-slate-400 hover:border-slate-300 hover:text-slate-600 hover:bg-slate-50/60 transition-all w-full"
+        className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border py-3 text-[12px] font-medium text-muted-foreground hover:border-border hover:text-muted-foreground hover:bg-muted/60 transition-all w-full"
       >
         <PlusIcon /> Add detail
       </button>

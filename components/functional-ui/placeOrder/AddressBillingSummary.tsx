@@ -19,19 +19,19 @@ const AddressBillingSummary = () => {
     <div className="w-full md:w-[350px]">
       <div className="bg-white p-5 rounded-xl border space-y-4 sticky top-4">
         <h2 className="font-semibold">Billing Summary</h2>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>Subtotal ({totalQty} items)</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>Discount</span>
-          <span className="text-green-600">-${voucherDiscount.toFixed(2)}</span>
+          <span className="text-success">-${voucherDiscount.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>Loyalty points</span>
           <span>-${loyaltyPoints.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>Shipping fee{shippingMethod ? ` (${shippingMethod})` : ""}</span>
           <span>
             {shippingFee !== null ? `$${shippingFee.toFixed(2)}` : "Pending"}
@@ -39,9 +39,9 @@ const AddressBillingSummary = () => {
         </div>
         <div className="border-t pt-3 flex justify-between font-semibold">
           <span>Total</span>
-          <span className="text-pink-600">${total.toFixed(2)}</span>
+          <span className="text-brand">${total.toFixed(2)}</span>
         </div>
-        <button className="w-full bg-pink-700 text-white py-3 rounded-full mt-2">
+        <button className="w-full bg-brand text-white py-3 rounded-full mt-2">
           Place Order
         </button>
       </div>

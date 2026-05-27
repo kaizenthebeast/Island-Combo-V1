@@ -165,7 +165,7 @@ const AddressContainer = () => {
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "deliver"
                   ? "border-brand bg-brand-tint text-brand"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
+                  : "border-border bg-muted text-muted-foreground hover:border-border"
                 }`}
             >
               <Truck className="w-4 h-4" />
@@ -177,7 +177,7 @@ const AddressContainer = () => {
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
                 ${method === "pickup"
                   ? "border-brand bg-brand-tint text-brand"
-                  : "border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300"
+                  : "border-border bg-muted text-muted-foreground hover:border-border"
                 }`}
             >
               <Store className="w-4 h-4" />
@@ -190,27 +190,27 @@ const AddressContainer = () => {
             <div className="rounded-xl border p-4 shadow-xs flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-brand" />
-                <h3 className="text-sm font-bold text-gray-800">Shipping estimate</h3>
+                <h3 className="text-sm font-bold text-foreground">Shipping estimate</h3>
               </div>
 
               {shippingLoading && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Calculating shipping…
                 </div>
               )}
 
               {!shippingLoading && shippingError && (
-                <div className="flex items-start gap-2 text-sm text-rose-700">
-                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 text-sm text-danger">
+                  <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                   <p>{shippingError}</p>
                 </div>
               )}
 
               {!shippingLoading && !shippingError && shippingQuote && (
-                <div className="flex flex-col gap-1 text-sm text-gray-700">
-                  <p className="text-xs text-gray-500">
-                    Zone: <span className="font-medium text-gray-700">{shippingQuote.zone}</span> · {shippingQuote.totalPieces} piece(s) · {shippingQuote.totalWeightKg}kg
+                <div className="flex flex-col gap-1 text-sm text-foreground">
+                  <p className="text-xs text-muted-foreground">
+                    Zone: <span className="font-medium text-foreground">{shippingQuote.zone}</span> · {shippingQuote.totalPieces} piece(s) · {shippingQuote.totalWeightKg}kg
                   </p>
                   {/* Show only the method that the billing summary is using
                       (GCR preferred, QPI as fallback when GCR is unavailable). */}
@@ -235,13 +235,13 @@ const AddressContainer = () => {
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <Store className="w-4 h-4 text-brand" />
-                <h2 className="text-base font-bold text-gray-800">Pickup Location</h2>
+                <h2 className="text-base font-bold text-foreground">Pickup Location</h2>
               </div>
-              <div className="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 p-4">
+              <div className="flex items-start gap-3 rounded-lg border border-border bg-muted p-4">
                 <MapPin className="w-5 h-5 text-brand shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-gray-800">Our Store</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm font-semibold text-foreground">Our Store</p>
+                  <p className="text-sm text-muted-foreground">
                     Dolonier, Kolonia,<br />Federated States of Micronesia
                   </p>
                 </div>
@@ -254,12 +254,12 @@ const AddressContainer = () => {
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-brand" />
-                <h2 className="text-base font-bold text-gray-800">Saved Addresses</h2>
+                <h2 className="text-base font-bold text-foreground">Saved Addresses</h2>
               </div>
 
               {/* Loading state */}
               {loading && (
-                <div className="flex items-center gap-2 text-sm text-gray-400 py-4 justify-center">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Loading addresses…
                 </div>
@@ -267,14 +267,14 @@ const AddressContainer = () => {
 
               {/* Error state */}
               {!loading && fetchError && (
-                <div className="flex items-start gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 ">
-                  <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 ">
+                  <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm text-rose-700 font-medium">{fetchError}</p>
+                    <p className="text-sm text-danger font-medium">{fetchError}</p>
                     <button
                       type="button"
                       onClick={fetchAddresses}
-                      className="text-xs text-rose-600 underline underline-offset-2 w-fit"
+                      className="text-xs text-danger underline underline-offset-2 w-fit"
                     >
                       Try again
                     </button>
@@ -285,9 +285,9 @@ const AddressContainer = () => {
               {/* Empty state */}
               {!loading && !fetchError && addresses.length === 0 && (
                 <div className="flex flex-col items-center gap-2 py-8 text-center">
-                  <MapPin className="w-8 h-8 text-gray-200" />
-                  <p className="text-sm font-medium text-gray-400">No saved addresses yet</p>
-                  <p className="text-xs text-gray-300">Add an address below to get started</p>
+                  <MapPin className="w-8 h-8 text-muted-foreground" />
+                  <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
+                  <p className="text-xs text-muted-foreground">Add an address below to get started</p>
                 </div>
               )}
 
@@ -320,9 +320,9 @@ const AddressContainer = () => {
             </CheckoutAddress>
           ) : (
             // Limit reached show a notice instead of the add button
-            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
-              <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700 font-medium">
+            <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
+              <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <p className="text-sm text-warning font-medium">
                 You've reached the maximum of 3 saved addresses. Remove one to add a new one.
               </p>
             </div>

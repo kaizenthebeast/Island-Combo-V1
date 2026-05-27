@@ -48,8 +48,8 @@ const DeleteProductDialog = ({
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100">
-              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-warning-tint">
+              <AlertTriangle className="h-5 w-5 text-warning" />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -79,7 +79,7 @@ const DeleteProductDialog = ({
           <Button
             onClick={handleConfirm}
             disabled={isDeleting}
-            className="gap-2 bg-amber-600 hover:bg-amber-700 text-white"
+            className="gap-2 bg-warning hover:bg-warning text-white"
           >
             {isDeleting ? (
               <>

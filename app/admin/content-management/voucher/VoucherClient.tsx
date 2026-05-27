@@ -135,7 +135,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
   // ── render ─────────────────────────────────────────────────────────────────
 
   return (
-    <section className="min-h-full bg-slate-50 px-6 py-10">
+    <section className="min-h-full bg-muted px-6 py-10">
       <PageHeader
         eyebrow="Promotions"
         title="Vouchers"
@@ -146,8 +146,8 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
       />
 
       {actionError && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-          <p className="text-[12px] font-medium text-rose-700">{actionError}</p>
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+          <p className="text-[12px] font-medium text-danger">{actionError}</p>
         </div>
       )}
 

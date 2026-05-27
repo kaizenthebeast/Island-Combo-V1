@@ -25,12 +25,12 @@ interface StatusBadgeProps {
 }
 
 const STYLES: Record<BadgeVariant, { pill: string; dot: string }> = {
-  success: { pill: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500' },
-  warning: { pill: 'bg-amber-50  text-amber-700  border border-amber-200',    dot: 'bg-amber-500'  },
-  danger:  { pill: 'bg-red-50    text-red-600    border border-red-200',       dot: 'bg-red-400'   },
-  error:   { pill: 'bg-red-50    text-red-600    border border-red-200',       dot: 'bg-red-400'   },
-  info:    { pill: 'bg-blue-50   text-blue-700   border border-blue-200',      dot: 'bg-blue-500'  },
-  default: { pill: 'bg-slate-100 text-slate-600  border border-slate-200',     dot: 'bg-slate-400' },
+  success: { pill: 'bg-success-tint text-success border border-success/30', dot: 'bg-success' },
+  warning: { pill: 'bg-warning-tint  text-warning  border border-warning/30',    dot: 'bg-warning'  },
+  danger:  { pill: 'bg-danger-tint    text-danger    border border-danger/30',       dot: 'bg-danger'   },
+  error:   { pill: 'bg-danger-tint    text-danger    border border-danger/30',       dot: 'bg-danger'   },
+  info:    { pill: 'bg-info-tint   text-info   border border-info/30',      dot: 'bg-info'  },
+  default: { pill: 'bg-muted text-muted-foreground  border border-border',     dot: 'bg-muted' },
 }
 export function StatusBadge({ status, variant, className = '' }: StatusBadgeProps) {
   const { pill, dot } = STYLES[variant]

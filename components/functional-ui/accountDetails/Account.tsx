@@ -34,7 +34,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
       {/* Personal details card */}
       <div className='bg-white border rounded-xl p-5 shadow-xs'>
         <div className='flex items-center justify-between mb-4'>
-          <h3 className='text-base font-bold text-gray-800 flex items-center gap-2'>
+          <h3 className='text-base font-bold text-foreground flex items-center gap-2'>
             <User className='w-4 h-4' />
             Personal details
           </h3>
@@ -53,22 +53,22 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
 
         <div className='flex flex-col gap-3 text-sm'>
           <div>
-            <p className='font-semibold text-gray-800'>Email address</p>
-            <p className='text-gray-600'>{email || '—'}</p>
+            <p className='font-semibold text-foreground'>Email address</p>
+            <p className='text-muted-foreground'>{email || '—'}</p>
           </div>
           <div>
-            <p className='font-semibold text-gray-800'>Name</p>
-            <p className='text-gray-600'>{fullName || '—'}</p>
+            <p className='font-semibold text-foreground'>Name</p>
+            <p className='text-muted-foreground'>{fullName || '—'}</p>
           </div>
           {profile?.phone_text && (
             <div>
-              <p className='font-semibold text-gray-800'>Mobile number</p>
-              <p className='text-gray-600'>{profile.phone_text}</p>
+              <p className='font-semibold text-foreground'>Mobile number</p>
+              <p className='text-muted-foreground'>{profile.phone_text}</p>
             </div>
           )}
           <div>
-            <p className='font-semibold text-gray-800'>Password</p>
-            <p className='text-gray-600 tracking-widest'>••••••••••••</p>
+            <p className='font-semibold text-foreground'>Password</p>
+            <p className='text-muted-foreground tracking-widest'>••••••••••••</p>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
       {/* Saved address card */}
       <div className='bg-white border rounded-xl p-5 shadow-xs'>
         <div className='flex items-center justify-between mb-4'>
-          <h3 className='text-base font-bold text-gray-800 flex items-center gap-2'>
+          <h3 className='text-base font-bold text-foreground flex items-center gap-2'>
             <MapPin className='w-4 h-4' />
             Saved address
           </h3>
@@ -98,7 +98,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
 
         <div className='flex flex-col gap-4'>
           {addresses.length === 0 && (
-            <p className='text-sm text-gray-400'>No saved addresses yet</p>
+            <p className='text-sm text-muted-foreground'>No saved addresses yet</p>
           )}
 
           {addresses.map((address) => {
@@ -108,19 +108,19 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
             return (
               <div key={address.id} className='flex items-start justify-between gap-3'>
                 <div className='flex flex-col gap-0.5 text-sm'>
-                  <p className='font-semibold text-gray-800 flex items-center gap-2'>
+                  <p className='font-semibold text-foreground flex items-center gap-2'>
                     {name}
                     {address.make_default && (
-                      <span className='text-[10px] font-semibold uppercase bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded'>
+                      <span className='text-[10px] font-semibold uppercase bg-warning-tint text-warning px-1.5 py-0.5 rounded'>
                         Default
                       </span>
                     )}
                   </p>
-                  <p className='text-gray-600'>
+                  <p className='text-muted-foreground'>
                     {address.address}, {address.locality}, {address.country} {address.postal_code}
                   </p>
                   {address.profile?.phone_text && (
-                    <p className='text-gray-600'>{address.profile.phone_text}</p>
+                    <p className='text-muted-foreground'>{address.profile.phone_text}</p>
                   )}
                 </div>
 
@@ -145,7 +145,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
                   </CheckoutAddress>
 
                   <DeleteModal subtitle='address' onSuccess={() => handleDeleteAddress(address.id)}>
-                    <button type='button' className='text-sm text-gray-500 font-medium hover:underline'>
+                    <button type='button' className='text-sm text-muted-foreground font-medium hover:underline'>
                       Remove
                     </button>
                   </DeleteModal>
@@ -155,7 +155,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
           })}
 
           {atAddressLimit && (
-            <p className='text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2'>
+            <p className='text-xs text-warning bg-warning-tint border border-warning/30 rounded-md px-3 py-2'>
               You've reached the maximum of 3 saved addresses. Remove one to add a new one.
             </p>
           )}

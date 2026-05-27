@@ -111,7 +111,7 @@ export default function CategoryClient({
     ]
 
     return (
-        <section className="min-h-full bg-slate-50 px-6 py-10">
+        <section className="min-h-full bg-muted px-6 py-10">
             <PageHeader
                 eyebrow="Catalog"
                 title="Categories"
@@ -122,8 +122,8 @@ export default function CategoryClient({
             />
 
             {deleteError && (
-                <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-                    <p className="text-[12px] text-rose-700 font-medium">{deleteError}</p>
+                <div className="mb-4 flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+                    <p className="text-[12px] text-danger font-medium">{deleteError}</p>
                 </div>
             )}
 
@@ -175,7 +175,7 @@ export default function CategoryClient({
 
                     if (subs.length === 0) {
                         return (
-                            <p className="text-[12px] text-slate-400 italic">
+                            <p className="text-[12px] text-muted-foreground italic">
                                 No subcategories yet.
                             </p>
                         )
@@ -183,23 +183,23 @@ export default function CategoryClient({
 
                     return (
                         <div className="flex flex-col gap-2">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground">
                                 Subcategories
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {subs.map((sub) => (
                                     <div
                                         key={sub.id}
-                                        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[12px] text-slate-700"
+                                        className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-[12px] text-foreground"
                                     >
                                         <span className="font-medium">{sub.name}</span>
-                                        <span className="text-slate-300">#{sub.id}</span>
+                                        <span className="text-muted-foreground">#{sub.id}</span>
                                         {!sub.is_active && (
                                             <StatusBadge status="Archived" variant="default" />
                                         )}
                                         <button
                                             onClick={() => setEditingCategory(sub)}
-                                            className="text-blue-400 hover:text-blue-600 transition-colors"
+                                            className="text-info hover:text-info transition-colors"
                                             title="Edit"
                                         >
                                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -214,7 +214,7 @@ export default function CategoryClient({
                                                 status: sub.is_active ? 'ACTIVE' : 'ARCHIVED',
                                                 raw: sub,
                                             })}
-                                            className="text-red-400 hover:text-red-600 transition-colors"
+                                            className="text-danger hover:text-danger transition-colors"
                                             title="Archive"
                                         >
                                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

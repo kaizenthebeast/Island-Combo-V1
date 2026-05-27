@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gray-50">
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-muted">
       <CartMerger />
       <div className="w-full max-w-sm">
         <Card className="text-center shadow-lg rounded-xl">

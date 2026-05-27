@@ -62,12 +62,12 @@ export const ProductCategory = async () => {
                   className="flex flex-col items-center gap-2 group cursor-pointer"
                 >
                   <div
-                    className="rounded-full flex items-center justify-center transition-colors border bg-amber-100 border-amber-300 group-hover:bg-amber-200"
+                    className="rounded-full flex items-center justify-center transition-colors border bg-warning-tint border-warning/30 group-hover:bg-warning-tint"
                     style={{ width: 52, height: 52 }}
                   >
-                    <Icon className="w-5 h-5 text-amber-600" />
+                    <Icon className="w-5 h-5 text-warning" />
                   </div>
-                  <span className="text-[11px] text-gray-500 text-center leading-tight wrap-break-word w-14 group-hover:text-gray-700">
+                  <span className="text-[11px] text-muted-foreground text-center leading-tight wrap-break-word w-14 group-hover:text-foreground">
                     {cat.name}
                   </span>
                 </Link>

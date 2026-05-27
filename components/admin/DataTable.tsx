@@ -103,13 +103,13 @@ function EmptyState({ colSpan }: { colSpan: number }) {
     <tr>
       <td colSpan={colSpan} className="py-16 text-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-            <svg className="w-5 h-5 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+            <svg className="w-5 h-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </div>
-          <p className="text-sm font-medium text-slate-400">No results found</p>
-          <p className="text-xs text-slate-300">Try adjusting your search or filter</p>
+          <p className="text-sm font-medium text-muted-foreground">No results found</p>
+          <p className="text-xs text-muted-foreground">Try adjusting your search or filter</p>
         </div>
       </td>
     </tr>
@@ -121,8 +121,8 @@ function LoadingState({ colSpan }: { colSpan: number }) {
     <tr>
       <td colSpan={colSpan} className="py-16 text-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
-          <p className="text-xs text-slate-400">Loading…</p>
+          <div className="w-6 h-6 border-2 border-border border-t-slate-500 rounded-full animate-spin" />
+          <p className="text-xs text-muted-foreground">Loading…</p>
         </div>
       </td>
     </tr>
@@ -201,26 +201,26 @@ export function DataTable<T extends Record<string, unknown>>({
   }
 
   const SortArrow = ({ col }: { col: keyof T }) => (
-    <span className={`ml-1 text-xs ${sortKey === col ? 'text-slate-700' : 'text-slate-300'}`}>
+    <span className={`ml-1 text-xs ${sortKey === col ? 'text-foreground' : 'text-muted-foreground'}`}>
       {sortKey === col ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
     </span>
   )
 
   return (
-    <div className={`bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden ${className}`}>
+    <div className={`bg-white rounded-2xl border border-border shadow-xs overflow-hidden ${className}`}>
 
       {/* ── Toolbar ── */}
-      <div className="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
+      <div className="px-5 py-4 border-b border-border flex flex-wrap items-center gap-3">
 
         <div className="relative flex-1 min-w-[180px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <SearchIcon />
           </span>
           <input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-slate-200 focus:outline-hidden focus:border-slate-400"
+            className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-border focus:outline-hidden focus:border-ring"
           />
         </div>
 
@@ -228,13 +228,13 @@ export function DataTable<T extends Record<string, unknown>>({
           <select
             value={filterValue ?? filterOptions[0]}
             onChange={(e) => onFilterChange(e.target.value)}
-            className="px-3 py-2 text-sm rounded-xl border border-slate-200"
+            className="px-3 py-2 text-sm rounded-xl border border-border"
           >
             {filterOptions.map((opt) => <option key={opt}>{opt}</option>)}
           </select>
         )}
 
-        <span className="ml-auto text-xs text-slate-400">
+        <span className="ml-auto text-xs text-muted-foreground">
           {total} {total === 1 ? 'result' : 'results'}
         </span>
       </div>
@@ -244,7 +244,7 @@ export function DataTable<T extends Record<string, unknown>>({
         <table className="w-full text-sm">
 
           <thead>
-            <tr className="bg-slate-50 border-b">
+            <tr className="bg-muted border-b">
               {columns.map((col) => {
                 const sortable = col.sortable !== false && Boolean(onSortChange)
                 return (
@@ -252,7 +252,7 @@ export function DataTable<T extends Record<string, unknown>>({
                     key={String(col.key)}
                     onClick={() => handleSort(col.key, sortable)}
                     className={`px-5 py-3 text-xs font-semibold text-${col.align ?? 'left'} ${
-                      sortable ? 'cursor-pointer select-none hover:bg-slate-100' : ''
+                      sortable ? 'cursor-pointer select-none hover:bg-muted' : ''
                     }`}
                     style={col.width ? { width: col.width } : undefined}
                   >
@@ -287,7 +287,7 @@ export function DataTable<T extends Record<string, unknown>>({
                         if (!expandedRowRender) return
                         setExpandedRowId((prev) => (prev === rowId ? null : rowId))
                       }}
-                      className={`border-b text-center hover:bg-slate-50 ${
+                      className={`border-b text-center hover:bg-muted ${
                         expandedRowRender ? 'cursor-pointer' : ''
                       }`}
                     >
@@ -311,7 +311,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                   e.stopPropagation()
                                   onEdit(row)
                                 }}
-                                className="text-blue-500 text-xs hover:text-blue-700 transition-colors"
+                                className="text-info text-xs hover:text-info transition-colors"
                                 title="Edit"
                               >
                                 <EditIcon />
@@ -323,7 +323,7 @@ export function DataTable<T extends Record<string, unknown>>({
                                   e.stopPropagation()
                                   onDelete(row)
                                 }}
-                                className="text-red-500 text-xs hover:text-red-700 transition-colors"
+                                className="text-danger text-xs hover:text-danger transition-colors"
                                 title="Delete"
                               >
                                 <TrashIcon />
@@ -336,7 +336,7 @@ export function DataTable<T extends Record<string, unknown>>({
 
                     {/* EXPANDED ROW */}
                     {isExpanded && expandedRowRender && (
-                      <tr className="bg-slate-50">
+                      <tr className="bg-muted">
                         <td colSpan={totalColumns} className="px-5 py-4">
                           {expandedRowRender(row)}
                         </td>
@@ -353,18 +353,18 @@ export function DataTable<T extends Record<string, unknown>>({
       </div>
 
       {/* ── Pagination footer ── */}
-      <div className="px-5 py-3 border-t bg-slate-50 flex flex-wrap items-center gap-3">
-        <span className="text-xs text-slate-500">
+      <div className="px-5 py-3 border-t bg-muted flex flex-wrap items-center gap-3">
+        <span className="text-xs text-muted-foreground">
           {total === 0 ? 'No results' : `Showing ${startRow}–${endRow} of ${total}`}
         </span>
 
         {onPageSizeChange && (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Rows per page:</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="px-2 py-1 rounded-md border border-slate-200 text-xs"
+              className="px-2 py-1 rounded-md border border-border text-xs"
             >
               {pageSizeOptions.map((n) => (
                 <option key={n} value={n}>{n}</option>
@@ -377,7 +377,7 @@ export function DataTable<T extends Record<string, unknown>>({
           <button
             onClick={() => onPageChange(safePage - 1)}
             disabled={safePage <= 1 || loading}
-            className="p-1.5 rounded-md text-slate-500 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-md text-muted-foreground hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="Previous page"
           >
             <ChevronLeft />
@@ -385,7 +385,7 @@ export function DataTable<T extends Record<string, unknown>>({
 
           {getPageWindow(safePage, totalPages).map((p, idx) =>
             p === '…' ? (
-              <span key={`gap-${idx}`} className="px-2 text-xs text-slate-400">…</span>
+              <span key={`gap-${idx}`} className="px-2 text-xs text-muted-foreground">…</span>
             ) : (
               <button
                 key={p}
@@ -393,8 +393,8 @@ export function DataTable<T extends Record<string, unknown>>({
                 disabled={loading}
                 className={`min-w-[28px] h-7 px-2 rounded-md text-xs font-medium transition-colors ${
                   p === safePage
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:bg-white'
+                    ? 'bg-primary text-white'
+                    : 'text-muted-foreground hover:bg-white'
                 }`}
               >
                 {p}
@@ -405,7 +405,7 @@ export function DataTable<T extends Record<string, unknown>>({
           <button
             onClick={() => onPageChange(safePage + 1)}
             disabled={safePage >= totalPages || loading}
-            className="p-1.5 rounded-md text-slate-500 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-md text-muted-foreground hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="Next page"
           >
             <ChevronRight />

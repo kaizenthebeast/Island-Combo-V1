@@ -36,18 +36,18 @@ export function Field({
     <FieldErrorCtx.Provider value={!!error}>
       <div className={cn('flex flex-col gap-1', className)}>
         {label && (
-          <label className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.07em] text-slate-400 select-none">
+          <label className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
             {label}
-            {required && <span className="text-rose-400 leading-none">*</span>}
+            {required && <span className="text-danger leading-none">*</span>}
           </label>
         )}
         {children}
         {error ? (
-          <p className="flex items-center gap-1 text-[11px] text-rose-500 font-medium mt-0.5">
+          <p className="flex items-center gap-1 text-[11px] text-danger font-medium mt-0.5">
             <AlertIcon />{error}
           </p>
         ) : hint ? (
-          <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">{hint}</p>
         ) : null}
       </div>
     </FieldErrorCtx.Provider>
@@ -55,14 +55,14 @@ export function Field({
 }
 
 const inputBase = [
-  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-slate-800 outline-hidden leading-5',
-  'border-slate-200 placeholder:text-slate-300',
-  'focus:border-slate-400 focus:ring-2 focus:ring-slate-100',
-  'disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed',
+  'w-full rounded-md border bg-white px-3 py-2 text-[13px] text-foreground outline-hidden leading-5',
+  'border-border placeholder:text-muted-foreground',
+  'focus:border-ring focus:ring-2 focus:ring-ring',
+  'disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed',
   'transition-colors duration-150',
 ].join(' ')
 
-const inputError = 'border-rose-300 focus:border-rose-400 focus:ring-rose-100'
+const inputError = 'border-danger/30 focus:border-danger focus:ring-danger/20'
 
 export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   const hasError = React.useContext(FieldErrorCtx)
@@ -96,7 +96,7 @@ export function VoucherFields() {
         />
       </Field>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-muted" />
 
       {/* Discount value — always percentage */}
       <Field
@@ -115,7 +115,7 @@ export function VoucherFields() {
             placeholder="e.g. 10"
             className="pr-8"
           />
-          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-slate-400">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-muted-foreground">
             %
           </span>
         </div>
@@ -138,7 +138,7 @@ export function VoucherFields() {
         />
       </Field>
 
-      <div className="h-px bg-slate-100" />
+      <div className="h-px bg-muted" />
 
       {/* Expiry date */}
       <Field

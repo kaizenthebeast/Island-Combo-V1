@@ -31,7 +31,7 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
                     <MapPin />
                     <span>{address.country}</span>
                     {address.make_default && (
-                        <span className="bg-yellow-200 px-2 text-sm">Default</span>
+                        <span className="bg-warning-tint px-2 text-sm">Default</span>
                     )}
                 </div>
                 <div>

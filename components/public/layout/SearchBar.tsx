@@ -137,13 +137,13 @@ export function SearchBar({
 
   const showDropdown = isOpen && query.trim().length >= MIN_QUERY_LEN
   const defaultInputClass =
-    'w-full pl-4 pr-10 py-2 rounded-lg border border-gray-300 focus:outline-hidden focus:ring-2 focus:ring-brand'
+    'w-full pl-4 pr-10 py-2 rounded-lg border border-border focus:outline-hidden focus:ring-2 focus:ring-brand'
 
   return (
     <div ref={containerRef} className="relative w-full">
       <Search
         size={18}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
       />
       <input
         ref={inputRef}
@@ -170,17 +170,17 @@ export function SearchBar({
         <div
           id="search-suggestions"
           role="listbox"
-          className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden max-h-[480px] overflow-y-auto"
+          className="absolute z-50 left-0 right-0 mt-1 bg-white border border-border rounded-lg shadow-lg overflow-hidden max-h-[480px] overflow-y-auto"
         >
           {loading && suggestions.length === 0 && (
-            <div className="flex items-center justify-center py-4 text-gray-400 text-sm">
+            <div className="flex items-center justify-center py-4 text-muted-foreground text-sm">
               <Loader2 className="animate-spin mr-2" size={16} />
               Searching...
             </div>
           )}
 
           {!loading && suggestions.length === 0 && (
-            <div className="py-4 text-center text-gray-400 text-sm">
+            <div className="py-4 text-center text-muted-foreground text-sm">
               No products found for &ldquo;{query.trim()}&rdquo;
             </div>
           )}
@@ -197,10 +197,10 @@ export function SearchBar({
               }}
               onMouseEnter={() => setHighlight(i)}
               className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors cursor-pointer ${
-                i === highlight ? 'bg-brand-tint' : 'hover:bg-gray-50'
+                i === highlight ? 'bg-brand-tint' : 'hover:bg-muted'
               }`}
             >
-              <div className="relative w-10 h-10 flex-shrink-0 rounded bg-gray-50 overflow-hidden">
+              <div className="relative w-10 h-10 flex-shrink-0 rounded bg-muted overflow-hidden">
                 <Image
                   src={getPublicImageUrl(s.image_url)}
                   alt={s.name}
@@ -210,8 +210,8 @@ export function SearchBar({
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{s.name}</p>
-                <p className="text-xs text-gray-500">${s.final_price.toFixed(2)}</p>
+                <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
+                <p className="text-xs text-muted-foreground">${s.final_price.toFixed(2)}</p>
               </div>
             </button>
           ))}

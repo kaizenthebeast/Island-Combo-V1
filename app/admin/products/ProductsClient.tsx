@@ -109,7 +109,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
     ]
 
     return (
-        <section className="min-h-full bg-slate-50 px-6 py-10">
+        <section className="min-h-full bg-muted px-6 py-10">
             <PageHeader
                 eyebrow="Catalog"
                 title="Products"
@@ -121,8 +121,8 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
             />
 
             {deleteError && (
-                <div className="mb-4 flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-                    <p className="text-[12px] text-rose-700 font-medium">{deleteError}</p>
+                <div className="mb-4 flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+                    <p className="text-[12px] text-danger font-medium">{deleteError}</p>
                 </div>
             )}
 
@@ -174,14 +174,14 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                         <div className="space-y-4 text-sm">
                             {p.description && (
                                 <div>
-                                    <h4 className="font-semibold text-slate-700">Description</h4>
-                                    <p className="text-slate-600">{p.description}</p>
+                                    <h4 className="font-semibold text-foreground">Description</h4>
+                                    <p className="text-muted-foreground">{p.description}</p>
                                 </div>
                             )}
                             {p.product_details.length > 0 && (
                                 <div>
-                                    <h4 className="font-semibold text-slate-700">Details</h4>
-                                    <ul className="list-disc ml-5 text-slate-600">
+                                    <h4 className="font-semibold text-foreground">Details</h4>
+                                    <ul className="list-disc ml-5 text-muted-foreground">
                                         {p.product_details.map((d, i) => (
                                             <li key={i}>{d.attribute_name}: {d.attribute_value}</li>
                                         ))}
@@ -189,7 +189,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                                 </div>
                             )}
                             <div>
-                                <h4 className="font-semibold text-slate-700">Variants</h4>
+                                <h4 className="font-semibold text-foreground">Variants</h4>
                                 <div className="space-y-2">
                                     {p.variants.map((v) => (
                                         <div key={v.variant_id} className="border rounded-lg p-3">
@@ -197,7 +197,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                                             <p><strong>Price:</strong> {v.price}</p>
                                             <p><strong>Stock:</strong> {v.stock}</p>
                                             {v.attributes.length > 0 && (
-                                                <div className="mt-1 text-xs text-slate-500">
+                                                <div className="mt-1 text-xs text-muted-foreground">
                                                     {v.attributes.map((a, i) => (
                                                         <span key={i}>{a.name}: {a.value} </span>
                                                     ))}
@@ -207,7 +207,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                                     ))}
                                 </div>
                             </div>
-                            <div className="text-xs text-slate-400">
+                            <div className="text-xs text-muted-foreground">
                                 Created: {new Date(p.created_at).toLocaleString()}
                             </div>
                         </div>

@@ -216,18 +216,18 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
         <StepErrorBanner errorCount={stepErrorCount} />
 
         {saveError && (
-          <div className="flex items-center gap-2.5 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5 mb-4">
-            <span className="text-rose-500 shrink-0"><AlertIcon /></span>
-            <p className="text-[12px] text-rose-700 font-medium">{saveError}</p>
+          <div className="flex items-center gap-2.5 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 mb-4">
+            <span className="text-danger shrink-0"><AlertIcon /></span>
+            <p className="text-[12px] text-danger font-medium">{saveError}</p>
           </div>
         )}
 
       
         {product.status === 'ARCHIVED' && step === 0 && (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 mb-4">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5 mb-4">
             <div className="flex items-center gap-2">
-              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
-              <p className="text-[12px] text-amber-700 font-medium">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-warning" />
+              <p className="text-[12px] text-warning font-medium">
                 This product is archived and hidden from your storefront.
               </p>
             </div>
@@ -235,7 +235,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
               type="button"
               onClick={handleRestore}
               disabled={isRestoring}
-              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+              className="shrink-0 rounded-md bg-warning hover:bg-warning disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
             >
               {isRestoring ? 'Restoring…' : 'Restore'}
             </button>
@@ -248,17 +248,17 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
           {step === 2 && <Step3Details fieldName="product_details" />}
         </div>
 
-        <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
+        <div className="flex items-center justify-between pt-4 mt-4 border-t border-border">
           <button
             type="button"
             onClick={step === 0 ? onCancel : goBack}
-            className="flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            className="flex items-center gap-1.5 rounded-md px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             {step === 0 ? 'Cancel' : <><ChevronLeft /> Back</>}
           </button>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-300 mr-1 select-none">
+            <span className="text-[11px] text-muted-foreground mr-1 select-none">
               {step + 1} / {STEP_FIELDS.length}
             </span>
 
@@ -266,7 +266,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
               <button
                 type="button"
                 onClick={goNext}
-                className="flex items-center gap-1.5 rounded-md bg-slate-800 px-5 py-2 text-[13px] font-semibold text-white hover:bg-slate-900 active:scale-[0.97] transition-all"
+                className="flex items-center gap-1.5 rounded-md bg-primary px-5 py-2 text-[13px] font-semibold text-white hover:bg-primary/90 active:scale-[0.97] transition-all"
               >
                 Continue <ChevronRight />
               </button>
@@ -275,7 +275,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
                 type="button"
                 onClick={handleSave}
                 disabled={isPending || !isDirty}
-                className="flex items-center gap-2 rounded-md bg-slate-800 px-5 py-2 text-[13px] font-semibold text-white hover:bg-slate-900 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-[13px] font-semibold text-white hover:bg-primary/90 active:scale-[0.97] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
               >
                 {isPending ? (
                   <>

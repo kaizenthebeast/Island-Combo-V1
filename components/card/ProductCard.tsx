@@ -27,7 +27,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
         )}
 
         {/* Image */}
-        <div className="relative w-full rounded-md bg-gray-50 overflow-hidden" style={{ paddingBottom: '100%' }}>
+        <div className="relative w-full rounded-md bg-muted overflow-hidden" style={{ paddingBottom: '100%' }}>
           <Image
             src={getPublicImageUrl(product.image_url) ?? 'images/placeholder.png'}
             alt={product.name}
@@ -54,10 +54,10 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             <div className="flex items-center justify-between flex-wrap gap-1 h-5">
               {hasDiscount ? (
                 <>
-                  <span className="text-xs text-gray-400 line-through">
+                  <span className="text-xs text-muted-foreground line-through">
                     ${product.base_price.toFixed(2)}
                   </span>
-                  <span className="text-xs bg-pink-100 text-pink-600 px-2 py-0.5 rounded">
+                  <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded">
                     -{product.discount}%
                   </span>
                 </>

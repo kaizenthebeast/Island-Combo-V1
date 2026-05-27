@@ -67,18 +67,18 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
         {errors.root && (
-          <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-            <p className="text-[12px] text-rose-700 font-medium">
+          <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+            <p className="text-[12px] text-danger font-medium">
               {errors.root.message}
             </p>
           </div>
         )}
 
         {voucher.status === 'ARCHIVED' && (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
             <div className="flex items-center gap-2">
-              <ArchiveRestore className="h-4 w-4 shrink-0 text-amber-600" />
-              <p className="text-[12px] text-amber-700 font-medium">
+              <ArchiveRestore className="h-4 w-4 shrink-0 text-warning" />
+              <p className="text-[12px] text-warning font-medium">
                 This voucher is archived and cannot be used at checkout.
               </p>
             </div>
@@ -86,7 +86,7 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
               type="button"
               onClick={handleRestore}
               disabled={isRestoring}
-              className="shrink-0 rounded-md bg-amber-600 hover:bg-amber-700 disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
+              className="shrink-0 rounded-md bg-warning hover:bg-warning disabled:opacity-50 px-3 py-1.5 text-[12px] font-medium text-white transition-colors"
             >
               {isRestoring ? 'Restoring…' : 'Restore'}
             </button>
@@ -95,19 +95,19 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
 
         <VoucherFields />
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            className="rounded-lg border border-border px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting || voucher.status === 'ARCHIVED'}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
+            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}
           </button>

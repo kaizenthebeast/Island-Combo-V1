@@ -43,8 +43,8 @@ export function AddVoucherForm({ onSuccess, onCancel }: Props) {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
 
         {errors.root && (
-          <div className="flex items-center gap-2 rounded-md border border-rose-200 bg-rose-50 px-3 py-2.5">
-            <p className="text-[12px] text-rose-700 font-medium">
+          <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+            <p className="text-[12px] text-danger font-medium">
               {errors.root.message}
             </p>
           </div>
@@ -52,19 +52,19 @@ export function AddVoucherForm({ onSuccess, onCancel }: Props) {
 
         <VoucherFields />
 
-        <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <button
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-lg border border-slate-200 px-4 py-2 text-[13px] font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            className="rounded-lg border border-border px-4 py-2 text-[13px] font-medium text-muted-foreground hover:bg-muted disabled:opacity-50 transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-[13px] font-medium text-white hover:bg-slate-900 disabled:opacity-50 transition-colors"
+            className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? 'Creating...' : 'Create Voucher'}
           </button>

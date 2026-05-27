@@ -161,7 +161,7 @@ export function SignUpForm() {
                 )}
               />
 
-              {message && <p className="text-sm text-red-500">{message}</p>}
+              {message && <p className="text-sm text-danger">{message}</p>}
 
               <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create Account"}
@@ -171,15 +171,15 @@ export function SignUpForm() {
 
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gray-300" />
-            <span className="text-md text-gray-500">or</span>
-            <div className="flex-1 h-px bg-gray-300" />
+            <div className="flex-1 h-px bg-muted" />
+            <span className="text-md text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-muted" />
           </div>
           {/* Google Login */}
           <button
             type="button"
             onClick={googleSignUp}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-50 transition mb-4"
+            className="w-full flex items-center justify-center gap-3 border border-border py-2 rounded-lg hover:bg-muted transition mb-4"
           >
             <Image
               src="https://developers.google.com/identity/images/g-logo.png"
@@ -188,7 +188,7 @@ export function SignUpForm() {
               height={20}
             />
 
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-foreground">
               Continue with Google
             </span>
           </button>

@@ -12,7 +12,7 @@ export const StarRating = ({ rating }: { rating: number }) => (
                 key={i}
                 className={`w-4 h-4 ${
                     i < rating
-                        ? 'fill-yellow-400 text-yellow-400'
+                        ? 'fill-warning text-warning'
                         : 'fill-muted text-muted-foreground'
                 }`}
             />
@@ -54,7 +54,7 @@ export const ReviewCard = ({ review }: { review: ProductReview }) => {
                 </div>
                 <Badge
                     variant="secondary"
-                    className="ml-auto flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 border-emerald-200"
+                    className="ml-auto flex items-center gap-1 text-xs text-success bg-success-tint border-success/30"
                 >
                     <ShieldCheck className="w-3 h-3" />
                     Verified Purchase

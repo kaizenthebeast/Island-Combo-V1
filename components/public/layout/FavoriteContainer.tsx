@@ -14,7 +14,7 @@ const FavoriteContainer = () => {
   }, [fetchFavorite])
 
   if (error) {
-    return <p className="text-center text-red-500">{error}</p>
+    return <p className="text-center text-danger">{error}</p>
   }
 
   if (favorites.length === 0) {
@@ -28,10 +28,10 @@ const FavoriteContainer = () => {
             className="object-contain"
             alt="favorite-icon"
           />
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+          <h2 className="text-xl md:text-2xl font-semibold text-foreground">
             Your Favorite is empty.
           </h2>
-          <p className="text-sm md:text-base text-gray-500">
+          <p className="text-sm md:text-base text-muted-foreground">
             Start shopping and find your next favourites look
           </p>
           <Link href='/' className="w-full mt-2 px-6 py-2 rounded-full border border-brand text-brand hover:bg-brand hover:text-white transition text-center text-sm md:text-base">

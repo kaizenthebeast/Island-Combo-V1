@@ -54,7 +54,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       )}
 
       {products.length === 0 ? (
-        <div className="py-12 text-center text-gray-400 text-sm">
+        <div className="py-12 text-center text-muted-foreground text-sm">
           No products found in this category.
         </div>
       ) : (
@@ -87,14 +87,14 @@ function CategoryPill({ href, label, isActive, icon: Icon }: PillProps) {
         className={`rounded-full flex items-center justify-center transition-colors border ${
           isActive
             ? "bg-brand border-brand group-hover:bg-brand-hover"
-            : "bg-gray-100 border-gray-200 group-hover:bg-gray-200"
+            : "bg-muted border-border group-hover:bg-muted"
         }`}
         style={{ width: 56, height: 56 }}
       >
         {Icon && (
           <Icon
             className={`w-5 h-5 ${
-              isActive ? "text-brand-foreground" : "text-gray-600"
+              isActive ? "text-brand-foreground" : "text-muted-foreground"
             }`}
           />
         )}
@@ -103,7 +103,7 @@ function CategoryPill({ href, label, isActive, icon: Icon }: PillProps) {
         className={`text-xs text-center leading-tight w-20 ${
           isActive
             ? "text-brand font-medium"
-            : "text-gray-600 group-hover:text-gray-800"
+            : "text-muted-foreground group-hover:text-foreground"
         }`}
       >
         {label}

@@ -52,22 +52,22 @@ export function PageHeader({ title, eyebrow, subtitle, actions = [], className =
       <div>
         {eyebrow && (
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-none" />
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-success flex-none" />
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
               {eyebrow}
             </span>
           </div>
         )}
 
         <h1
-          className="text-3xl font-bold text-slate-900"
+          className="text-3xl font-bold text-foreground"
           style={{ letterSpacing: '-0.02em' }}
         >
           {title}
         </h1>
 
         {subtitle && (
-          <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         )}
       </div>
 

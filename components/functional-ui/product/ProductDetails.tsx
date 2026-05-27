@@ -210,7 +210,7 @@ const ProductDetails = ({ product }: Props) => {
 
                     <h1 className="title-header">{product.name}</h1>
 
-                    <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
+                    <p className="text-muted-foreground leading-relaxed text-sm sm:text-base">
                         {product.description}
                     </p>
 
@@ -226,7 +226,7 @@ const ProductDetails = ({ product }: Props) => {
                         {wholesaleUnlocked && wholesalePrice !== null ? (
                             // Wholesale active — show original price struck through
                             <div className="flex gap-2 items-center">
-                                <p className="text-base sm:text-lg line-through text-gray-400">
+                                <p className="text-base sm:text-lg line-through text-muted-foreground">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
                                 <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
@@ -236,7 +236,7 @@ const ProductDetails = ({ product }: Props) => {
                         ) : hasDiscount && (
                             // Regular sale discount
                             <div className="flex gap-2 items-center">
-                                <p className="text-base sm:text-lg line-through text-gray-400">
+                                <p className="text-base sm:text-lg line-through text-muted-foreground">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
                                 <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
@@ -252,7 +252,7 @@ const ProductDetails = ({ product }: Props) => {
                         const isFirstKey = keyIndex === 0
                         return (
                             <div key={key} className="flex flex-col space-y-2">
-                                <p className="text-sm font-medium text-gray-700 capitalize">{key}</p>
+                                <p className="text-sm font-medium text-foreground capitalize">{key}</p>
                                 <div className="flex flex-wrap gap-2">
                                     {options.map((value) => {
                                         const isSelected = selectedAttributes[key] === value
@@ -265,16 +265,16 @@ const ProductDetails = ({ product }: Props) => {
                                                 : '/images/placeholder.png'
                                             return (
                                                 <button type="button" key={value} onClick={() => handleAttributeSelect(key, value)} className="flex flex-col items-center gap-1">
-                                                    <div className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-gray-200 hover:border-gray-400'}`}>
+                                                    <div className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-border hover:border-border'}`}>
                                                         <Image src={thumbnailUrl} fill sizes="80px" className="object-cover" alt={value} loading="eager" />
                                                     </div>
-                                                    <span className="text-xs text-gray-600">{value}</span>
+                                                    <span className="text-xs text-muted-foreground">{value}</span>
                                                 </button>
                                             )
                                         }
                                         return (
                                             <button key={value} type="button" onClick={() => handleAttributeSelect(key, value)}
-                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-gray-300 hover:border-gray-500'}`}>
+                                                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-sm border rounded-md transition-colors ${isSelected ? 'bg-brand text-white border-brand' : 'border-border hover:border-border'}`}>
                                                 {value}
                                             </button>
                                         )
@@ -285,7 +285,7 @@ const ProductDetails = ({ product }: Props) => {
                     })}
 
                     {/* STOCK */}
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className="text-sm font-medium text-foreground">
                         {resolvedVariant
                             ? `Stocks: ${resolvedVariant.stock}`
                             : attributeKeys.length > 0
@@ -297,14 +297,14 @@ const ProductDetails = ({ product }: Props) => {
                     {/* QUANTITY + WHOLESALE NOTICE */}
                     <div className="flex flex-col gap-2">
                         <div className="flex items-center gap-3">
-                            <p className="text-sm font-medium text-gray-700">Quantity</p>
+                            <p className="text-sm font-medium text-foreground">Quantity</p>
                             <ProductQuantityButton />
                         </div>
 
                         {wholesaleTier && (
                             wholesaleUnlocked ? (
                                 // Threshold met — confirm wholesale is active
-                                <div className="inline-flex items-center gap-2 text-[#0F5132] mt-3 bg-[#EAF7F1] px-3 py-2 rounded-md w-fit text-sm">
+                                <div className="inline-flex items-center gap-2 text-success mt-3 bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
                                     <CircleCheckBig className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
                                         Wholesale pricing applied! ({wholesaleTier.discount_percent}% off)
@@ -312,7 +312,7 @@ const ProductDetails = ({ product }: Props) => {
                                 </div>
                             ) : (
                                 // Threshold not yet met — nudge user to add more
-                                <div className="inline-flex items-center gap-2 text-[#856404] mt-3 bg-[#FFF8E1] px-3 py-2 rounded-md w-fit text-sm">
+                                <div className="inline-flex items-center gap-2 text-warning mt-3 bg-warning-tint px-3 py-2 rounded-md w-fit text-sm">
                                     <Package className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
                                         Add {wholesaleTier.min_quantity - quantityInput} more for {wholesaleTier.discount_percent}% wholesale discount
@@ -336,7 +336,7 @@ const ProductDetails = ({ product }: Props) => {
                                 {canProceed ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
                             </Button>
                             <Button type="button" variant="ghost" size="icon" onClick={() => handleFavoriteToggle(product.product_id)} className="shrink-0">
-                                <Heart className={`w-5 h-5 transition-colors ${favorited ? 'fill-brand text-brand' : 'text-gray-500'}`} />
+                                <Heart className={`w-5 h-5 transition-colors ${favorited ? 'fill-brand text-brand' : 'text-muted-foreground'}`} />
                             </Button>
                         </div>
                     </div>
@@ -347,10 +347,10 @@ const ProductDetails = ({ product }: Props) => {
             {product.product_details?.length > 0 && (
                 <div className="w-full sm:w-2/3 md:w-1/2 lg:w-2/5 mt-6 md:mt-10 space-y-2">
                     <h2 className="title-header">Product Details</h2>
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-border">
                         {product.product_details.map((item, index) => (
                             <div key={index} className="flex items-start justify-between gap-4 py-2">
-                                <span className="text-sm text-gray-500 shrink-0">{item.attribute_name}</span>
+                                <span className="text-sm text-muted-foreground shrink-0">{item.attribute_name}</span>
                                 <span className="text-sm font-medium text-right">{item.attribute_value}</span>
                             </div>
                         ))}
@@ -358,7 +358,7 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
             )}
 
-            <div className="bg-[#F5F5F5] h-[8px] my-7 rounded-md" />
+            <div className="bg-muted h-[8px] my-7 rounded-md" />
         </div>
     )
 }

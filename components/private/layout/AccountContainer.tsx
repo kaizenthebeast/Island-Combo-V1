@@ -32,7 +32,7 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
     return (
         <div className='grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 mt-10'>
             <aside className='bg-white border rounded-xl p-4 h-fit shadow-xs md:sticky md:top-6'>
-                <h2 className='text-lg font-semibold text-gray-800 mb-4 px-2'>My Account</h2>
+                <h2 className='text-lg font-semibold text-foreground mb-4 px-2'>My Account</h2>
                 <div className='flex flex-col items-start gap-1'>
                     {navLinks.map((link) => {
                         const Icon = link.icon
@@ -44,10 +44,10 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md w-full text-left text-sm font-medium transition-colors
                                     ${active
                                         ? 'text-brand bg-brand-tint'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                        : 'text-muted-foreground hover:bg-muted'
                                     }`}
                             >
-                                <Icon className={`w-4 h-4 ${active ? 'text-brand' : 'text-gray-400'}`} />
+                                <Icon className={`w-4 h-4 ${active ? 'text-brand' : 'text-muted-foreground'}`} />
                                 {link.name}
                             </button>
                         )

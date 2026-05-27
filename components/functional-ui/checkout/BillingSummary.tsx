@@ -26,7 +26,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
   }, [subtotal, voucher, loyaltyDiscount])
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-5 space-y-6">
+    <div className="bg-muted rounded-2xl p-5 space-y-6">
 
       {/* VOUCHER */}
       <VoucherCodeForm
@@ -37,8 +37,8 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
       {/* LOYALTY */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-yellow-100 p-2 rounded-full">
-            <CircleDollarSign className="text-yellow-600" size={18} />
+          <div className="bg-warning-tint p-2 rounded-full">
+            <CircleDollarSign className="text-warning" size={18} />
           </div>
           <div>
             <p className="text-sm font-medium">300 Loyalty Points ($3)</p>
@@ -55,22 +55,22 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
         <h3 className="text-lg font-semibold">Billing Summary</h3>
 
         <div className="space-y-3 text-sm">
-          <div className="flex justify-between text-gray-700">
+          <div className="flex justify-between text-foreground">
             <span>Subtotal ({totalQty} items)</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between text-green-600">
+          <div className="flex justify-between text-success">
             <span>Discount</span>
             <span>- ${voucherDiscount.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between text-green-600">
+          <div className="flex justify-between text-success">
             <span>Loyalty points</span>
             <span>- ${loyaltyDiscount.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between text-gray-400">
+          <div className="flex justify-between text-muted-foreground">
             <span>Shipping fee</span>
             <span>Calculated at checkout</span>
           </div>
@@ -81,7 +81,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
         {/* TOTAL */}
         <div className="flex justify-between items-center">
           <span className="text-lg font-semibold">Total</span>
-          <span className="text-2xl font-bold text-gray-800">${total.toFixed(2)}</span>
+          <span className="text-2xl font-bold text-foreground">${total.toFixed(2)}</span>
         </div>
       </div>
 

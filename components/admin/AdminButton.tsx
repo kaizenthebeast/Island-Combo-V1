@@ -40,21 +40,20 @@ interface AdminButtonProps {
 
 const VARIANT_STYLES: Record<ButtonVariant, string> = {
   primary:
-    'text-white shadow-xs hover:shadow-md active:scale-95'
-    + ' bg-linear-to-br from-slate-800 to-slate-700'
-    + ' hover:from-slate-700 hover:to-slate-600',
+    'text-primary-foreground shadow-xs hover:shadow-md active:scale-95'
+    + ' bg-primary hover:bg-primary/90',
 
   secondary:
-    'bg-white text-slate-700 border border-slate-200'
-    + ' hover:bg-slate-50 hover:border-slate-300 active:scale-95',
+    'bg-white text-foreground border border-border'
+    + ' hover:bg-muted hover:border-border active:scale-95',
 
   danger:
-    'bg-white text-red-600 border border-red-200'
-    + ' hover:bg-red-50 hover:border-red-300 active:scale-95',
+    'bg-white text-danger border border-danger/30'
+    + ' hover:bg-danger-tint hover:border-danger/30 active:scale-95',
 
   ghost:
-    'bg-transparent text-slate-600'
-    + ' hover:bg-slate-100 hover:text-slate-800 active:scale-95',
+    'bg-transparent text-muted-foreground'
+    + ' hover:bg-muted hover:text-foreground active:scale-95',
 }
 
 const SIZE_STYLES: Record<ButtonSize, string> = {

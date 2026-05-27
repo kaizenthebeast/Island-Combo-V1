@@ -75,7 +75,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
                     type="text"
                     placeholder="Voucher code"
                     disabled={!!activeVoucher}
-                    className="bg-transparent border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-1 focus:ring-brand disabled:opacity-50"
+                    className="bg-transparent border border-border rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-1 focus:ring-brand disabled:opacity-50"
                     {...field}
                   />
                 </FormControl>
@@ -95,7 +95,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
 
       {/* ACTIVE VOUCHER */}
       {activeVoucher && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 flex justify-between items-center">
+        <div className="rounded-xl border border-success/30 bg-success-tint px-4 py-3 text-sm text-success flex justify-between items-center">
           <div>
             <p className="font-medium">{activeVoucher.code} applied</p>
             <p>{activeVoucher.value}% discount applied</p>
@@ -103,7 +103,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
           <button
             type="button"
             onClick={removeVoucher}
-            className="text-xs text-red-600 font-medium"
+            className="text-xs text-danger font-medium"
           >
             Remove
           </button>
