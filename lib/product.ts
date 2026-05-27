@@ -109,6 +109,20 @@ function collectCategoryDescendants(
   return result
 }
 
+export const getSaleProducts = async (
+  limit = 12,
+): Promise<ProductCatalogItem[]> => {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('product_catalog_mv')
+    .select('*')
+    .gt('discount', 0)
+    .order('discount', { ascending: false })
+    .limit(limit)
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
 export const getProductBySlug = async (p_slug: string): Promise<ProductDetails> => {
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('get_product_by_slug', { p_slug })

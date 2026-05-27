@@ -1,21 +1,23 @@
 import Footer from "@/components/public/layout/Footer";
 import Navbar from "@/components/public/layout/Navbar";
+import MobileBottomNav from "@/components/public/layout/MobileBottomNav";
+import { createClient } from "@/lib/supabase/server";
 
-export default function ShopLayout({
+export default async function ShopLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const isAuthenticated = !!data?.claims?.email;
+
   return (
     <>
-      {/* MAIN ECOMMERCE NAVBAR */}
       <Navbar />
-
-      {/* PAGE CONTENT */}
-      <main className="min-h-screen">
-        {children}
-      </main>
+      <main className="min-h-screen pb-16 md:pb-0">{children}</main>
       <Footer />
+      <MobileBottomNav isAuthenticated={isAuthenticated} />
     </>
   );
 }
