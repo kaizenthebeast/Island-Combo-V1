@@ -7,7 +7,8 @@ import Image from 'next/image'
 import { FavoriteView } from '@/types/favorite'
 import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
 import { Button } from '../ui/button'
-import { ArrowLeft, ShoppingBag, Package, CircleCheckBig } from 'lucide-react'
+import { ArrowLeft, ShoppingBag, Package } from 'lucide-react'
+import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
 import ProductQuantityButton from '../functional-ui/product/ProductQuantityButton'
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { useCartStore } from '@/store/cartStore'
@@ -387,7 +388,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                 wholesaleUnlocked ? (
                   //  Threshold met — confirm wholesale is active
                   <div className="inline-flex items-center gap-2 text-success bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
-                    <CircleCheckBig size={14} className="shrink-0" />
+                    <WholesaleCheckIcon size={14} className="shrink-0" />
                     <p className="font-medium">
                       Wholesale pricing applied! ({wholesaleTier.discount_percent}% off)
                     </p>

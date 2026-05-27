@@ -3,12 +3,13 @@
 import { useEffect } from "react"
 import BillingSummary from "@/components/functional-ui/checkout/BillingSummary"
 import OrderSummary from "@/components/functional-ui/checkout/OrderSummary"
+import MobileCart from "@/components/functional-ui/cart/MobileCart"
 import { useCartStore } from "@/store/cartStore"
 import Image from "next/image"
 import Link from "next/link"
 
 const CheckoutContainer = () => {
-  const { cart, fetchCart, totalQty, subtotal } = useCartStore()
+  const { cart, fetchCart, selectedQty, selectedSubtotal } = useCartStore()
 
   useEffect(() => {
     fetchCart()
@@ -49,15 +50,22 @@ const CheckoutContainer = () => {
 
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6 mt-8">
-      <div className="w-full md:w-2/3">
-        <OrderSummary cartItems={cart} />
+    <>
+      {/* Desktop — unchanged two-column layout */}
+      <div className="hidden md:flex max-w-7xl mx-auto p-6 gap-6 mt-8">
+        <div className="w-2/3">
+          <OrderSummary cartItems={cart} />
+        </div>
+        <div className="w-1/3">
+          <BillingSummary totalQty={selectedQty} subtotal={selectedSubtotal} />
+        </div>
       </div>
 
-      <div className="w-full md:w-1/3">
-        <BillingSummary totalQty={totalQty} subtotal={subtotal} />
+      {/* Mobile — checkbox list + fixed checkout bar */}
+      <div className="md:hidden">
+        <MobileCart />
       </div>
-    </div>
+    </>
   )
 }
 

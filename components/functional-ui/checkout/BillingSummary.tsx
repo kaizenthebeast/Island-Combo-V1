@@ -52,7 +52,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
 
       {/* SUMMARY */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Billing Summary</h3>
+        <h3 className="text-lg font-semibold">Order Summary</h3>
 
         <div className="space-y-3 text-sm">
           <div className="flex justify-between text-foreground">
@@ -86,12 +86,22 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
       </div>
 
       {/* CHECKOUT */}
-      <Link
-        href="/checkout/address"
-        className="w-full bg-brand text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
-      >
-        Checkout
-      </Link>
+      {totalQty > 0 ? (
+        <Link
+          href="/checkout/address"
+          className="w-full bg-brand text-white py-3 rounded-full font-medium hover:opacity-90 transition text-center inline-block"
+        >
+          Checkout
+        </Link>
+      ) : (
+        <button
+          type="button"
+          disabled
+          className="w-full bg-brand/40 text-white py-3 rounded-full font-medium text-center cursor-not-allowed"
+        >
+          Checkout
+        </button>
+      )}
 
     </div>
   )

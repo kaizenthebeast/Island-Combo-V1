@@ -51,6 +51,11 @@ type CartState = {
   subtotal: number      // sum of (applied_price * quantity) for all items
   quantityInput: number // controlled quantity selector on product pages
 
+  // Selection (which rows are checked for checkout). Defaults to all selected.
+  selectedIds: number[]      // variant_ids currently checked
+  selectedQty: number        // total qty across selected rows only
+  selectedSubtotal: number   // subtotal across selected rows only
+
   incrementQty: () => void
   decrementQty: () => void
 
@@ -59,6 +64,9 @@ type CartState = {
   addItem: (variantId: number, qty: number, selectedOption?: string | null) => Promise<void>
   updateItem: (variantId: number, qty: number) => Promise<void>
   removeItem: (variantId: number) => Promise<void>
+
+  toggleSelected: (variantId: number) => void
+  setAllSelected: (selected: boolean) => void
 
   resetQuantity: () => void
   clearCart: () => void
@@ -72,10 +80,34 @@ export const useCartStore = create<CartState>((set, get) => {
   // so subtotal automatically reflects wholesalek pricing.
   const recalc = (cart: CartItem[]) => calculateCartTotals(cart)
 
-  // Applies recalculated totals and updates the cart in state atomically.
+  // Preserve the user's checkbox selection across cart refreshes:
+  // keep ids that are still selected, and auto-select brand-new rows.
+  // On the very first populated load (prev cart empty) everything is selected.
+  const reconcileSelection = (
+    prevCart: CartItem[],
+    prevSelected: number[],
+    nextCart: CartItem[],
+  ): number[] => {
+    const nextIds = nextCart.map((i) => i.variant_id)
+    if (prevCart.length === 0) return nextIds
+    return nextIds.filter(
+      (id) => prevSelected.includes(id) || !prevCart.some((p) => p.variant_id === id),
+    )
+  }
+
+  // Applies recalculated totals (full + selected) and updates state atomically.
   const setCartState = (cart: CartItem[]) => {
+    const selectedIds = reconcileSelection(get().cart, get().selectedIds, cart)
     const { totalQty, subtotal } = recalc(cart)
-    set({ cart, totalQty, subtotal })
+    const sel = recalc(cart.filter((i) => selectedIds.includes(i.variant_id)))
+    set({
+      cart,
+      totalQty,
+      subtotal,
+      selectedIds,
+      selectedQty: sel.totalQty,
+      selectedSubtotal: sel.subtotal,
+    })
   }
 
   // Optimistic update pattern:
@@ -100,6 +132,9 @@ export const useCartStore = create<CartState>((set, get) => {
     totalQty: 0,
     subtotal: 0,
     quantityInput: 1,
+    selectedIds: [],
+    selectedQty: 0,
+    selectedSubtotal: 0,
 
     // ── Quantity Selector (product page) ──────────────────────────────────
     // Controls the qty input before adding to cart, floored at 1
@@ -233,10 +268,39 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
+    // ── Selection ────────────────────────────────────────────────────────────
+    // Toggle one row's checkbox and recompute the selected-only totals.
+    toggleSelected: (variantId) =>
+      set((state) => {
+        const selectedIds = state.selectedIds.includes(variantId)
+          ? state.selectedIds.filter((id) => id !== variantId)
+          : [...state.selectedIds, variantId]
+        const sel = recalc(state.cart.filter((i) => selectedIds.includes(i.variant_id)))
+        return { selectedIds, selectedQty: sel.totalQty, selectedSubtotal: sel.subtotal }
+      }),
+
+    // Select or clear all rows at once.
+    setAllSelected: (selected) =>
+      set((state) => {
+        const selectedIds = selected ? state.cart.map((i) => i.variant_id) : []
+        const sel = recalc(selected ? state.cart : [])
+        return { selectedIds, selectedQty: sel.totalQty, selectedSubtotal: sel.subtotal }
+      }),
+
     // ── Utility ────────────────────────────────────────────────────────────
     // resetQuantity: resets the product page qty selector back to 1
     // clearCart: wipes all cart state used on logout or order completion
     resetQuantity: () => set({ quantityInput: 1 }),
-    clearCart: () => set({ cart: [], error: null, totalQty: 0, subtotal: 0, quantityInput: 1 }),
+    clearCart: () =>
+      set({
+        cart: [],
+        error: null,
+        totalQty: 0,
+        subtotal: 0,
+        quantityInput: 1,
+        selectedIds: [],
+        selectedQty: 0,
+        selectedSubtotal: 0,
+      }),
   }
 })

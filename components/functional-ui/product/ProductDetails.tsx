@@ -16,9 +16,10 @@ import {
     CarouselItem,
     type CarouselApi,
 } from "@/components/ui/carousel";
-import { ShoppingCart, Heart, CircleCheckBig, Package } from 'lucide-react'
+import { ShoppingCart, Heart, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
+import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
 
 type Props = {
     product: ProductDetails
@@ -142,11 +143,28 @@ const ProductDetails = ({ product }: Props) => {
 
     async function handleAddToCart() {
         const firstUnselected = attributeKeys.find(k => !selectedAttributes[k])
-        if (firstUnselected) { alert(`Please select a ${firstUnselected}`); return }
-        if (!resolvedVariant) { alert('This combination is not available'); return }
+        if (firstUnselected) {
+            customToast.error({ title: 'Selection required', description: `Please select a ${firstUnselected}.` })
+            return
+        }
+        if (!resolvedVariant) {
+            customToast.error({ title: 'Unavailable combination', description: 'This option combination is not available.' })
+            return
+        }
         if (quantityInput <= 0) return
+
         const selectedOption = Object.values(selectedAttributes)[0] ?? null
         await addItem(resolvedVariant.variant_id, quantityInput, selectedOption)
+
+        const error = useCartStore.getState().error
+        if (error) {
+            customToast.error({ title: 'Failed to add to cart', description: error })
+            return
+        }
+        customToast.success({
+            title: 'Added to cart',
+            description: `${product.name} has been added to your cart.`,
+        })
     }
 
     async function handleFavoriteToggle(productId: number) {
@@ -305,7 +323,7 @@ const ProductDetails = ({ product }: Props) => {
                             wholesaleUnlocked ? (
                                 // Threshold met — confirm wholesale is active
                                 <div className="inline-flex items-center gap-2 text-success mt-3 bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
-                                    <CircleCheckBig className="shrink-0 w-4 h-4" />
+                                    <WholesaleCheckIcon className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
                                         Wholesale pricing applied! ({wholesaleTier.discount_percent}% off)
                                     </p>
@@ -347,7 +365,7 @@ const ProductDetails = ({ product }: Props) => {
             {product.product_details?.length > 0 && (
                 <div className="w-full sm:w-2/3 md:w-1/2 lg:w-2/5 mt-6 md:mt-10 space-y-2">
                     <h2 className="title-header">Product Details</h2>
-                    <div className="divide-y divide-border">
+                    <div>
                         {product.product_details.map((item, index) => (
                             <div key={index} className="flex items-start justify-between gap-4 py-2">
                                 <span className="text-sm text-muted-foreground shrink-0">{item.attribute_name}</span>

@@ -6,7 +6,8 @@ import { useCartStore } from '@/store/cartStore'
 import { customToast } from '@/components/popup/ToastCustom'
 import Image from 'next/image'
 import CartQuantityButton from '../cart/CartQuantityButton'
-import { X, CircleCheckBig } from 'lucide-react'
+import { X } from 'lucide-react'
+import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
 
 type Props = {
     cartItems: CartItem[]
@@ -16,7 +17,7 @@ const OrderSummary = ({ cartItems }: Props) => {
     const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
     const [editQuantities, setEditQuantities] = useState<Record<string, number>>({})
 
-    const { removeItem, updateItem } = useCartStore()
+    const { removeItem, updateItem, selectedIds, toggleSelected } = useCartStore()
 
     function handleActions(action: string, variantId: number, qty: number) {
         switch (action) {
@@ -70,10 +71,17 @@ const OrderSummary = ({ cartItems }: Props) => {
                     const priceIsReduced = displayPrice < item.price
 
                     return (
-                        <div
-                            key={key}
-                            className="grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5"
-                        >
+                        <div key={key} className="flex items-start gap-3 sm:gap-4">
+                            {/* Checkbox — selects which items proceed to checkout */}
+                            <input
+                                type="checkbox"
+                                checked={selectedIds.includes(item.variant_id)}
+                                onChange={() => toggleSelected(item.variant_id)}
+                                aria-label={`Select ${item.name}`}
+                                className="w-5 h-5 accent-brand cursor-pointer shrink-0 mt-2"
+                            />
+
+                            <div className="flex-1 min-w-0 grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5">
                             {/* Image */}
                             <div className="relative w-full aspect-square bg-muted rounded-md overflow-hidden">
                                 <Image
@@ -175,10 +183,11 @@ const OrderSummary = ({ cartItems }: Props) => {
                                    */}
                                 {isWholesale && (
                                     <div className="flex items-center gap-1.5 bg-success-tint text-success px-2 py-1.5 rounded-md mt-3 text-xs">
-                                        <CircleCheckBig size={14} className="shrink-0" />
+                                        <WholesaleCheckIcon size={14} className="shrink-0" />
                                         <p>Wholesale pricing applied to your order!</p>
                                     </div>
                                 )}
+                            </div>
                             </div>
                         </div>
                     )

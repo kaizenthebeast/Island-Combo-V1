@@ -58,38 +58,37 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-base font-semibold">Apply Voucher Code</h3>
+      <h3 className="text-base font-semibold">Apply Promo Code</h3>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex items-start gap-3"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="voucherCode"
             render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Voucher code"
+              <FormItem className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Promo code"
+                      disabled={!!activeVoucher}
+                      className="flex-1 h-12 bg-white border border-border rounded-lg px-4 text-sm shadow-none focus-visible:ring-1 focus-visible:ring-brand disabled:opacity-50"
+                      {...field}
+                    />
+                  </FormControl>
+                  <button
+                    type="submit"
                     disabled={!!activeVoucher}
-                    className="bg-transparent border border-border rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-1 focus:ring-brand disabled:opacity-50"
-                    {...field}
-                  />
-                </FormControl>
+                    className="text-brand font-medium text-sm disabled:opacity-50 cursor-pointer shrink-0"
+                  >
+                    Apply
+                  </button>
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <button
-            type="submit"
-            disabled={!!activeVoucher}
-            className="text-brand font-medium text-sm disabled:opacity-50 pt-3 cursor-pointer"
-          >
-            Apply
-          </button>
         </form>
       </Form>
 
