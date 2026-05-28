@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
 import { CartItem } from '@/types/cart'
 import { useCartStore } from '@/store/cartStore'
+import { useCartQuantity } from '@/hooks/useCartQuantity'
 import { customToast } from '@/components/popup/ToastCustom'
 import Image from 'next/image'
 import CartQuantityButton from '../cart/CartQuantityButton'
@@ -13,66 +13,34 @@ type Props = {
     cartItems: CartItem[]
 }
 
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
 const OrderSummary = ({ cartItems }: Props) => {
-    const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
-    const [editQuantities, setEditQuantities] = useState<Record<string, number>>({})
+    const { removeItem, selectedIds, toggleSelected } = useCartStore()
+    const changeQty = useCartQuantity()
 
-    const { removeItem, updateItem, selectedIds, toggleSelected } = useCartStore()
-
-    function handleActions(action: string, variantId: number, qty: number) {
-        switch (action) {
-            case 'remove':
-                removeItem(variantId)
-                customToast.success({
-                    title: "Item removed from cart!",
-                    description: "The item has been removed from your cart.",
-                })
-                break
-            case 'update':
-                updateItem(variantId, qty)
-                customToast.success({
-                    title: "Cart item updated!",
-                    description: "The item has been updated in your cart.",
-                })
-                break
-            default:
-                break
-        }
-    }
-
-    const handleEditToggle = (key: string, currentQty: number) => {
-        setActiveItemKey(prev => {
-            const isSame = prev === key
-            if (!isSame) {
-                setEditQuantities(prev => ({ ...prev, [key]: currentQty }))
-            }
-            return isSame ? null : key
+    const handleRemove = (variantId: number) => {
+        removeItem(variantId)
+        customToast.success({
+            title: 'Item removed from cart!',
+            description: 'The item has been removed from your cart.',
         })
-    }
-
-    const handleQuantityChange = (key: string, value: number) => {
-        setEditQuantities(prev => ({ ...prev, [key]: value }))
     }
 
     return (
         <div className="flex flex-col space-y-4 w-full">
-            <h2 className="title-header text-lg sm:text-xl md:text-2xl">
-                Order Summary
-            </h2>
+            <h2 className="title-header text-lg sm:text-xl md:text-2xl">Order Summary</h2>
 
             <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
-                    const key = `${item.id}`
-                    const isActive = activeItemKey === key
-                    const quantity = editQuantities[key] ?? item.quantity
                     const isWholesale = item.applied_tier_label === 'wholesale'
                     const displayPrice = item.applied_price || item.final_price || item.price
                     const hasDiscount = item.discount !== null && item.discount > 0
                     const priceIsReduced = displayPrice < item.price
 
                     return (
-                        <div key={key} className="flex items-start gap-3 sm:gap-4">
-                            {/* Checkbox — selects which items proceed to checkout */}
+                        <div key={item.id} className="flex items-start gap-3 sm:gap-4">
+                            {/* Selection checkbox */}
                             <input
                                 type="checkbox"
                                 checked={selectedIds.includes(item.variant_id)}
@@ -81,113 +49,79 @@ const OrderSummary = ({ cartItems }: Props) => {
                                 className="w-5 h-5 accent-brand cursor-pointer shrink-0 mt-2"
                             />
 
-                            <div className="flex-1 min-w-0 grid grid-cols-[96px_1fr] sm:grid-cols-[140px_1fr] md:grid-cols-[160px_1fr] gap-3 sm:gap-4 md:gap-5">
                             {/* Image */}
-                            <div className="relative w-full aspect-square bg-muted rounded-md overflow-hidden">
+                            <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 bg-muted rounded-md overflow-hidden">
                                 <Image
                                     src={item.image_url ?? '/images/placeholder.png'}
-                                    alt="product"
+                                    alt={item.name}
                                     fill
                                     className="object-contain p-2"
-                                    sizes="(max-width: 640px) 96px, (max-width: 768px) 140px, 160px"
+                                    sizes="112px"
                                     loading="eager"
                                 />
                             </div>
 
                             {/* Details */}
-                            <div className="flex flex-col justify-between min-w-0 py-1">
-
-                                {/* Name + Remove */}
-                                <div className="flex justify-between items-start gap-2">
-                                    <h4 className="text-md sm:text-base md:text-2xl font-medium line-clamp-2 leading-snug">
-                                        {item.name}
-                                    </h4>
-                                    <button
-                                        onClick={() => handleActions('remove', item.variant_id, item.quantity)}
-                                        className="text-danger hover:text-danger shrink-0 mt-0.5 cursor-pointer"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-
-                                {/* Variant attributes e.g. Flavor: Coke - Size: 500ml */}
-                                {item.attributes && item.attributes.length > 0 && (
-                                    <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                                        {item.attributes
-                                            .map(attr => `${attr.name.charAt(0).toUpperCase() + attr.name.slice(1)}: ${attr.value}`)
-                                            .join(' - ')}
-                                    </p>
-                                )}
-
-                                {/* Price — shows applied_price (tier-resolved) as the main price.
-                                    Strikes through the base price when any discount is active
-                                    (either a product-level sale discount or wholesale tier). */}
-                                <div className="flex items-center gap-2 flex-wrap mt-2">
-                                    <p className="text-base sm:text-lg font-bold text-brand">
-                                        ${displayPrice.toFixed(2)}
-                                    </p>
-                                    {priceIsReduced && (
-                                        <>
-                                            <p className="text-xs text-muted-foreground line-through">
-                                                ${item.price.toFixed(2)}
+                            <div className="flex-1 min-w-0 flex flex-col gap-3">
+                                {/* Name + remove */}
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                        <h4 className="text-sm sm:text-base font-medium leading-snug line-clamp-2">
+                                            {item.name}
+                                        </h4>
+                                        {item.attributes && item.attributes.length > 0 && (
+                                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                                                {item.attributes.map((a) => `${cap(a.name)}: ${a.value}`).join(', ')}
                                             </p>
-                                            {isWholesale ? (
-                                                // Show the wholesale discount percent from the matched tier
-                                                <p className="text-xs bg-success-tint text-success px-1.5 py-0.5 rounded">
-                                                    -{item.pricing_tiers.find(t => t.label === 'wholesale')?.discount_percent}% wholesale discount
-                                                </p>
-                                            ) : hasDiscount && (
-                                                // Show the product-level sale discount percent
-                                                <p className="text-xs bg-brand-tint text-brand px-1.5 py-0.5 rounded">
-                                                    -{item.discount}%
-                                                </p>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
+                                        )}
+                                    </div>
 
-                                {/* Quantity row */}
-                                <div className="flex flex-wrap items-center gap-2 mt-2">
-                                    <p className="text-xs sm:text-sm font-semibold">
-                                        Qty: {item.quantity}
-                                    </p>
                                     <button
                                         type="button"
-                                        onClick={() => handleEditToggle(key, item.quantity)}
-                                        className="text-xs text-brand underline underline-offset-2 cursor-pointer"
+                                        onClick={() => handleRemove(item.variant_id)}
+                                        aria-label="Remove item"
+                                        className="text-muted-foreground hover:text-danger cursor-pointer shrink-0"
                                     >
-                                        {isActive ? 'Cancel' : 'Update'}
+                                        <X size={18} />
                                     </button>
-
-                                    {isActive && (
-                                        <>
-                                            <CartQuantityButton
-                                                value={quantity}
-                                                onChange={(val) => handleQuantityChange(key, val)}
-                                            />
-                                            <button
-                                                onClick={() => {
-                                                    handleActions('update', item.variant_id, quantity)
-                                                    setActiveItemKey(null)
-                                                }}
-                                                className="text-xs bg-brand text-white px-3 py-1 rounded-full cursor-pointer"
-                                            >
-                                                Save
-                                            </button>
-                                        </>
-                                    )}
                                 </div>
 
-                                {/* Wholesale badge — shown when applied_tier_label is 'wholesale',
-                                    meaning the current quantity meets the wholesale threshold.
-                                   */}
+                                {/* Stepper + price on the same row */}
+                                <div className="flex items-center justify-between gap-3">
+                                    <CartQuantityButton
+                                        value={item.quantity}
+                                        onChange={(val) => changeQty(item.variant_id, val)}
+                                    />
+
+                                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                                        <span className="text-sm sm:text-base font-bold">
+                                            ${displayPrice.toFixed(2)}
+                                        </span>
+                                        {priceIsReduced && (
+                                            <>
+                                                <span className="text-xs text-muted-foreground line-through">
+                                                    ${item.price.toFixed(2)}
+                                                </span>
+                                                {isWholesale ? (
+                                                    <span className="text-xs bg-success-tint text-success px-1.5 py-0.5 rounded">
+                                                        -{item.pricing_tiers.find((t) => t.label === 'wholesale')?.discount_percent}%
+                                                    </span>
+                                                ) : hasDiscount && (
+                                                    <span className="text-xs bg-discount text-brand px-1.5 py-0.5 rounded">
+                                                        -{item.discount}%
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {isWholesale && (
-                                    <div className="flex items-center gap-1.5 bg-success-tint text-success px-2 py-1.5 rounded-md mt-3 text-xs">
-                                        <WholesaleCheckIcon size={14} className="shrink-0" />
+                                    <div className="flex items-center gap-1.5 bg-success-tint text-success px-3 py-2 rounded-md text-xs sm:text-sm">
+                                        <WholesaleCheckIcon size={16} className="shrink-0" />
                                         <p>Wholesale pricing applied to your order!</p>
                                     </div>
                                 )}
-                            </div>
                             </div>
                         </div>
                     )

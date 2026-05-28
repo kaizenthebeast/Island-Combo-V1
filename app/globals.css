@@ -49,6 +49,12 @@
   --color-brand-tint: #fff0f4;
   --color-brand-foreground: #ffffff;
 
+  /* Sale/discount badge — bg-discount + text-brand */
+  --color-discount: #ffd6e2;
+
+  /* Soft surface — footer, cart/order summary panels, etc. */
+  --color-surface-soft: #f8fbff;
+
   /* Semantic state palette — each gives bg-/text-/border-<name> + -foreground + -tint */
   --color-success: #059669;
   --color-success-foreground: #ffffff;

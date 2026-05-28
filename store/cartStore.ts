@@ -63,6 +63,7 @@ type CartState = {
 
   addItem: (variantId: number, qty: number, selectedOption?: string | null) => Promise<void>
   updateItem: (variantId: number, qty: number) => Promise<void>
+  setItemQuantityLocal: (variantId: number, qty: number) => void
   removeItem: (variantId: number) => Promise<void>
 
   toggleSelected: (variantId: number) => void
@@ -267,6 +268,35 @@ export const useCartStore = create<CartState>((set, get) => {
         rollback(prev, err)
       }
     },
+
+    // ── Instant quantity (no API) ───────────────────────────────────────────
+    // Updates quantity + re-resolved tier pricing + totals immediately so the
+    // UI feels instant while the API call is debounced by the caller. Persist
+    // the final value with updateItem once the user stops clicking.
+    setItemQuantityLocal: (variantId, qty) =>
+      set((state) => {
+        const cart = state.cart.map((i) =>
+          i.variant_id === variantId
+            ? {
+                ...i,
+                quantity: qty,
+                applied_price:
+                  resolveAppliedPrice(i.pricing_tiers, i.price, qty) ?? i.applied_price,
+                applied_tier_label:
+                  resolveAppliedTierLabel(i.pricing_tiers, qty) ?? i.applied_tier_label,
+              }
+            : i
+        )
+        const { totalQty, subtotal } = recalc(cart)
+        const sel = recalc(cart.filter((i) => state.selectedIds.includes(i.variant_id)))
+        return {
+          cart,
+          totalQty,
+          subtotal,
+          selectedQty: sel.totalQty,
+          selectedSubtotal: sel.subtotal,
+        }
+      }),
 
     // ── Selection ────────────────────────────────────────────────────────────
     // Toggle one row's checkbox and recompute the selected-only totals.

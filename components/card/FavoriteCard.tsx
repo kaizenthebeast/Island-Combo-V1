@@ -39,6 +39,18 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
   const defaultVariant = product.variants?.[0]
 
+  // Card-level wholesale flag: true if ANY variant has a wholesale tier — mirrors
+  // the catalog mv's has_wholesale. (The sheet below still uses the variant-specific
+  // tier for live pricing.) This keeps the favorites card consistent with the
+  // product page, which shows the badge whenever wholesale exists on the product.
+  const cardWholesaleTier = useMemo(() => {
+    for (const v of product.variants ?? []) {
+      const tier = v.pricing_tiers?.find((t) => t.label === 'wholesale')
+      if (tier) return tier
+    }
+    return null
+  }, [product.variants])
+
   const originalPrice = defaultVariant?.price ?? 0
   const discountedPrice = hasDiscount
     ? originalPrice * (1 - (product.discount ?? 0) / 100)
@@ -173,10 +185,10 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
     <>
       <Card
         onClick={() => setOpen(true)}
-        className="w-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group"
+        className="w-full h-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group"
       >
-        {/* Wholesale badge — shown when variant has a wholesale tier */}
-        {wholesaleTier && (
+        {/* Wholesale badge — shown when ANY variant has a wholesale tier */}
+        {cardWholesaleTier && (
           <div className="absolute top-0 right-0 bg-brand text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
             <Package className="w-3 h-3" />
             Wholesale
@@ -206,15 +218,15 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               <span className="text-xs text-muted-foreground line-through">
                 ${originalPrice.toFixed(2)}
               </span>
-              <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded">
+              <span className="text-xs bg-discount text-brand px-2 py-0.5 rounded">
                 -{product.discount}%
               </span>
             </div>
           )}
           {/* Wholesale nudge on card */}
-          {wholesaleTier && (
+          {cardWholesaleTier && (
             <p className="text-xs text-brand font-medium">
-              Buy {wholesaleTier.min_quantity}+ for {wholesaleTier.discount_percent}% off
+              Buy {cardWholesaleTier.min_quantity}+ for {cardWholesaleTier.discount_percent}% off
             </p>
           )}
         </CardContent>
@@ -293,7 +305,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                       <span className="text-sm text-muted-foreground line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
                       </span>
-                      <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs bg-discount text-brand px-2 py-0.5 rounded font-medium">
                         -{product.discount}%
                       </span>
                     </>

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ChevronLeft, Trash2 } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
+import { useCartQuantity } from '@/hooks/useCartQuantity'
 import { customToast } from '@/components/popup/ToastCustom'
 import CartQuantityButton from './CartQuantityButton'
 import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
@@ -18,9 +19,9 @@ const MobileCart = () => {
     selectedQty,
     selectedSubtotal,
     toggleSelected,
-    updateItem,
     removeItem,
   } = useCartStore()
+  const changeQty = useCartQuantity()
 
   const handleRemove = (variantId: number) => {
     removeItem(variantId)
@@ -60,64 +61,69 @@ const MobileCart = () => {
           return (
             <div
               key={item.id}
-              className="flex gap-3 px-4 py-4 border-b border-border"
+              className="px-4 py-4 border-b border-border flex flex-col gap-2"
             >
-              {/* Checkbox */}
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={() => toggleSelected(item.variant_id)}
-                aria-label={`Select ${item.name}`}
-                className="w-5 h-5 accent-brand cursor-pointer shrink-0 mt-1"
-              />
-
-              {/* Image */}
-              <div className="relative w-20 h-20 shrink-0 rounded-md bg-muted overflow-hidden">
-                <Image
-                  src={item.image_url ?? '/images/placeholder.png'}
-                  alt={item.name}
-                  fill
-                  sizes="80px"
-                  className="object-contain p-1.5"
+              <div className="flex gap-3">
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelected(item.variant_id)}
+                  aria-label={`Select ${item.name}`}
+                  className="w-5 h-5 accent-brand cursor-pointer shrink-0 mt-1"
                 />
-              </div>
 
-              {/* Details */}
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <div className="flex items-start justify-between gap-2">
-                  <h4 className="text-sm font-medium line-clamp-2 leading-snug">
-                    {item.name}
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(item.variant_id)}
-                    aria-label="Remove item"
-                    className="text-muted-foreground hover:text-danger shrink-0"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                {/* Image */}
+                <div className="relative w-20 h-20 shrink-0 rounded-md bg-muted overflow-hidden">
+                  <Image
+                    src={item.image_url ?? '/images/placeholder.png'}
+                    alt={item.name}
+                    fill
+                    sizes="80px"
+                    className="object-contain p-1.5"
+                  />
                 </div>
 
-                {item.attributes && item.attributes.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    {item.attributes
-                      .map((a) => `${a.name.charAt(0).toUpperCase() + a.name.slice(1)}: ${a.value}`)
-                      .join(', ')}
-                  </p>
-                )}
+                {/* Details */}
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                  {/* Name + trash */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-medium line-clamp-2 leading-snug">
+                        {item.name}
+                      </h4>
+                      {item.attributes && item.attributes.length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {item.attributes
+                            .map((a) => `${a.name.charAt(0).toUpperCase() + a.name.slice(1)}: ${a.value}`)
+                            .join(', ')}
+                        </p>
+                      )}
+                    </div>
 
-                <div className="flex items-center justify-between gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => handleRemove(item.variant_id)}
+                      aria-label="Remove item"
+                      className="text-muted-foreground hover:text-danger cursor-pointer shrink-0"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+
+                  {/* Stepper */}
                   <CartQuantityButton
                     value={item.quantity}
-                    onChange={(val) => updateItem(item.variant_id, val)}
+                    onChange={(val) => changeQty(item.variant_id, val)}
                   />
 
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm font-bold text-brand">
+                  {/* Price — below the stepper on mobile */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-bold text-foreground">
                       ${displayPrice.toFixed(2)}
                     </span>
                     {priceIsReduced && (
-                      <div className="flex items-center gap-1">
+                      <>
                         <span className="text-[11px] text-muted-foreground line-through">
                           ${item.price.toFixed(2)}
                         </span>
@@ -126,22 +132,22 @@ const MobileCart = () => {
                             -{item.pricing_tiers.find((t) => t.label === 'wholesale')?.discount_percent}%
                           </span>
                         ) : hasDiscount && (
-                          <span className="text-[10px] bg-brand-tint text-brand px-1 py-0.5 rounded">
+                          <span className="text-[10px] bg-discount text-brand px-1 py-0.5 rounded">
                             -{item.discount}%
                           </span>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
                 </div>
-
-                {isWholesale && (
-                  <div className="flex items-center gap-1.5 bg-success-tint text-success px-2 py-1.5 rounded-md mt-2 text-[11px]">
-                    <WholesaleCheckIcon size={14} className="shrink-0" />
-                    <p>Wholesale pricing applied to your order!</p>
-                  </div>
-                )}
               </div>
+
+              {isWholesale && (
+                <div className="flex items-center gap-1.5 bg-success-tint text-success px-3 py-2 rounded-md text-[11px]">
+                  <WholesaleCheckIcon size={14} className="shrink-0" />
+                  <p>Wholesale pricing applied to your order!</p>
+                </div>
+              )}
             </div>
           )
         })}

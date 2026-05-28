@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ReviewCard } from './ReviewCard'
-import { ReviewSummary } from './ReviewSummary'
+import { ReviewSummary, type ReviewFilter } from './ReviewSummary'
 import { getProductReviews } from '@/lib/review'
 import type { ProductReview, ReviewStats } from '@/types/review'
 
@@ -26,7 +26,14 @@ export default function ReviewPagination({
 }: Props) {
     const [reviews, setReviews] = useState(initialReviews)
     const [currentPage, setCurrentPage] = useState(1)
+    const [filter, setFilter] = useState<ReviewFilter>('all')
     const [isPending, startTransition] = useTransition()
+
+    // "With media" filters the currently-loaded page to reviews that have images.
+    const visibleReviews =
+        filter === 'media'
+            ? reviews.filter((r) => r.review_images && r.review_images.length > 0)
+            : reviews
 
     const safeTotalPages = Number.isFinite(totalPages) && totalPages > 0 ? totalPages : 1
 
@@ -71,8 +78,12 @@ export default function ReviewPagination({
     const endItem = (currentPage - 1) * pageSize + reviews.length
 
     return (
-        <div id="reviews" className="flex flex-col gap-6">
-            <ReviewSummary stats={stats} />
+        <div id="reviews" className="flex flex-col gap-5">
+            <h2 className="title-header text-lg sm:text-xl md:text-2xl">
+                Reviews ({total})
+            </h2>
+
+            <ReviewSummary stats={stats} filter={filter} onFilterChange={setFilter} />
 
             {/* Review List */}
             <div
@@ -80,9 +91,15 @@ export default function ReviewPagination({
                     isPending ? 'opacity-40 pointer-events-none' : 'opacity-100'
                 }`}
             >
-                {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
-                ))}
+                {visibleReviews.length > 0 ? (
+                    visibleReviews.map((review) => (
+                        <ReviewCard key={review.id} review={review} />
+                    ))
+                ) : (
+                    <p className="py-6 text-sm text-muted-foreground">
+                        No reviews with photos on this page.
+                    </p>
+                )}
             </div>
 
             {/* Pagination Controls */}
@@ -119,7 +136,7 @@ export default function ReviewPagination({
                                     className={`w-8 h-8 rounded-md text-xs font-medium transition-colors
                                         ${
                                             currentPage === p
-                                                ? 'bg-primary text-primary-foreground'
+                                                ? 'bg-brand-tint text-brand border border-brand/30'
                                                 : 'border hover:bg-muted text-muted-foreground hover:text-foreground'
                                         }
                                         disabled:cursor-not-allowed`}

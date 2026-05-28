@@ -5,6 +5,7 @@ import { CircleDollarSign } from 'lucide-react'
 import VoucherCodeForm from '@/components/forms/PromoCodeForm'
 import { Switch } from '@/components/ui/switch'
 import { useCheckoutStore } from '@/store/useCheckoutStore'
+import { useCartStore } from '@/store/cartStore'
 import { calculateTotals } from '@/helper/pricing/calculateTotals'
 import Link from 'next/link'
 
@@ -15,18 +16,26 @@ type Props = {
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
   const { voucher, loyaltyEnabled, setVoucher, toggleLoyalty, loyaltyPoints } = useCheckoutStore()
+  const { cart, selectedIds } = useCartStore()
   const loyaltyDiscount = loyaltyEnabled ? loyaltyPoints : 0
+
+  // Vouchers can't combine with wholesale pricing — ignore any applied voucher
+  // when a selected item is wholesale-priced.
+  const hasWholesale = cart.some(
+    (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
+  )
+  const effectiveVoucher = hasWholesale ? null : voucher
 
   const { voucherDiscount, total } = useMemo(() => {
     return calculateTotals({
       subtotal,
-      voucher,
+      voucher: effectiveVoucher,
       loyaltyDiscount,
     })
-  }, [subtotal, voucher, loyaltyDiscount])
+  }, [subtotal, effectiveVoucher, loyaltyDiscount])
 
   return (
-    <div className="bg-muted rounded-2xl p-5 space-y-6">
+    <div className="bg-surface-soft rounded-2xl p-5 space-y-6">
 
       {/* VOUCHER */}
       <VoucherCodeForm

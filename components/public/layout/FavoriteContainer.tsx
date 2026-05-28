@@ -47,7 +47,7 @@ const FavoriteContainer = () => {
       <h2 className="title-header text-lg sm:text-xl md:text-2xl">
         Favorites
       </h2>
-      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 w-full place-items-center'>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 w-full items-stretch'>
         {favorites.map((favorite) => (
           <FavoriteCard key={favorite.product_id} product={favorite} />
         ))}

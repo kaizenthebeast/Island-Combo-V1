@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const Footer = () => {
   return (
-    <footer className="w-full bg-muted py-12 px-6">
+    <footer className="w-full bg-surface-soft py-12 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 justify-items-center">
 
         {/* Logo */}

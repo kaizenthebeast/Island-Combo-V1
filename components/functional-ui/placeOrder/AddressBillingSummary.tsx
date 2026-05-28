@@ -6,11 +6,17 @@ import { useCheckoutStore } from '@/store/useCheckoutStore'
 import { calculateTotals } from '@/helper/pricing/calculateTotals'
 
 const AddressBillingSummary = () => {
-  const { totalQty, subtotal } = useCartStore()
+  const { totalQty, subtotal, cart, selectedIds } = useCartStore()
   const { voucher, loyaltyPoints, loyaltyEnabled, shippingFee, shippingMethod } = useCheckoutStore()
+
+  // Vouchers can't combine with wholesale pricing.
+  const hasWholesale = cart.some(
+    (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
+  )
+
   const { voucherDiscount, total } = calculateTotals({
     subtotal,
-    voucher,
+    voucher: hasWholesale ? null : voucher,
     loyaltyDiscount: loyaltyEnabled ? loyaltyPoints : 0,
     shippingFee: shippingFee ?? 0,
   })

@@ -31,7 +31,13 @@ const ProductDetails = ({ product }: Props) => {
     const { addFavorite, removeFavorite, isFavorite } = useFavoriteStore();
 
     const favorited = isFavorite(product.product_id)
-    const defaultVariant = product.variants?.[0]
+
+    // Default to the cheapest variant so the page mirrors the catalog (mv),
+    // which surfaces the lowest-priced variant for each product.
+    const defaultVariant = product.variants?.reduce(
+        (cheapest, v) => (v.final_price < cheapest.final_price ? v : cheapest),
+        product.variants[0]
+    )
 
     // ─── Derive all attribute dimensions from the variants ──────────────────
     const attributeKeys: string[] = Array.from(
@@ -40,8 +46,15 @@ const ProductDetails = ({ product }: Props) => {
         )
     )
 
+    // Pre-select the default variant's attributes (variation, size, …) so price,
+    // stock, and "Add to cart" are ready on load without manual selection.
     const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string | null>>(
-        () => Object.fromEntries(attributeKeys.map(k => [k, null]))
+        () => Object.fromEntries(
+            attributeKeys.map(k => [
+                k,
+                defaultVariant?.attributes?.find(a => a.name === k)?.value ?? null,
+            ])
+        )
     )
 
     const [api, setApi] = useState<CarouselApi>()
@@ -100,6 +113,13 @@ const ProductDetails = ({ product }: Props) => {
         setCount(api.scrollSnapList().length)
         setCurrent(api.selectedScrollSnap() + 1)
         api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
+
+        // Open the gallery on the default variant's image
+        const firstImage = defaultVariant?.image_url?.[0]
+        if (firstImage) {
+            const index = carouselImages.indexOf(firstImage)
+            if (index > 0) api.scrollTo(index, true)
+        }
     }, [api])
 
     // ─── Available options per attribute key ────────────────────────────────
@@ -247,7 +267,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <p className="text-base sm:text-lg line-through text-muted-foreground">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
-                                <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
+                                <p className="text-xs sm:text-sm bg-discount text-brand px-2 py-1 rounded-md">
                                     -{wholesaleTier!.discount_percent}%
                                 </p>
                             </div>
@@ -257,7 +277,7 @@ const ProductDetails = ({ product }: Props) => {
                                 <p className="text-base sm:text-lg line-through text-muted-foreground">
                                     ${displayVariant.price.toFixed(2)}
                                 </p>
-                                <p className="text-xs sm:text-sm bg-brand text-white px-2 py-1 rounded-md">
+                                <p className="text-xs sm:text-sm bg-discount text-brand px-2 py-1 rounded-md">
                                     -{product.discount}%
                                 </p>
                             </div>
@@ -312,28 +332,26 @@ const ProductDetails = ({ product }: Props) => {
                         }
                     </p>
 
-                    {/* QUANTITY + WHOLESALE NOTICE */}
-                    <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-3">
-                            <p className="text-sm font-medium text-foreground">Quantity</p>
-                            <ProductQuantityButton />
-                        </div>
+                    {/* QUANTITY + WHOLESALE NOTICE (beside the stepper) */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-sm font-medium text-foreground">Quantity</p>
+                        <ProductQuantityButton />
 
                         {wholesaleTier && (
                             wholesaleUnlocked ? (
                                 // Threshold met — confirm wholesale is active
-                                <div className="inline-flex items-center gap-2 text-success mt-3 bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
+                                <div className="inline-flex items-center gap-2 text-success bg-success-tint px-3 py-2 rounded-full w-fit text-xs sm:text-sm">
                                     <WholesaleCheckIcon className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
-                                        Wholesale pricing applied! ({wholesaleTier.discount_percent}% off)
+                                        Wholesale pricing applied to your order!
                                     </p>
                                 </div>
                             ) : (
                                 // Threshold not yet met — nudge user to add more
-                                <div className="inline-flex items-center gap-2 text-warning mt-3 bg-warning-tint px-3 py-2 rounded-md w-fit text-sm">
+                                <div className="inline-flex items-center gap-2 text-warning bg-warning-tint px-3 py-2 rounded-full w-fit text-xs sm:text-sm">
                                     <Package className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
-                                        Add {wholesaleTier.min_quantity - quantityInput} more for {wholesaleTier.discount_percent}% wholesale discount
+                                        Add {wholesaleTier.min_quantity - quantityInput} more for {wholesaleTier.discount_percent}% off
                                     </p>
                                 </div>
                             )

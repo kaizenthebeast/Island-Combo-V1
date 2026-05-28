@@ -1,40 +1,47 @@
-import { Star } from 'lucide-react'
 import { StarRating } from './ReviewCard'
 import type { ReviewStats } from '@/types/review'
 
+export type ReviewFilter = 'all' | 'media'
+
 type Props = {
     stats: ReviewStats
+    filter: ReviewFilter
+    onFilterChange: (filter: ReviewFilter) => void
 }
 
-export const ReviewSummary = ({ stats }: Props) => {
-    const { avgRating, ratingCounts, total } = stats
+export const ReviewSummary = ({ stats, filter, onFilterChange }: Props) => {
+    const { avgRating } = stats
+    const displayAvg = Number.isInteger(avgRating) ? `${avgRating}` : avgRating.toFixed(1)
 
     return (
-        <div className="flex items-start gap-8 p-6 rounded-lg border bg-muted/30">
-            <div className="flex flex-col items-center gap-1">
-                <span className="text-4xl font-bold">{avgRating.toFixed(1)}</span>
+        <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold">{displayAvg}/5</span>
                 <StarRating rating={Math.round(avgRating)} />
-                <span className="text-xs text-muted-foreground mt-1">
-                    {total} {total === 1 ? 'review' : 'reviews'}
-                </span>
             </div>
 
-            <div className="flex flex-col gap-1.5 flex-1">
-                {ratingCounts.map(({ star, count }) => (
-                    <div key={star} className="flex items-center gap-2 text-xs">
-                        <span className="w-3 text-right text-muted-foreground">{star}</span>
-                        <Star className="w-3 h-3 fill-warning text-warning shrink-0" />
-                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-warning rounded-full transition-all duration-500"
-                                style={{
-                                    width: total > 0 ? `${(count / total) * 100}%` : '0%',
-                                }}
-                            />
-                        </div>
-                        <span className="w-4 text-muted-foreground">{count}</span>
-                    </div>
-                ))}
+            <div className="flex items-center gap-2">
+                {([
+                    { key: 'all', label: 'All' },
+                    { key: 'media', label: 'With media' },
+                ] as const).map(({ key, label }) => {
+                    const active = filter === key
+                    return (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => onFilterChange(key)}
+                            aria-pressed={active}
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+                                active
+                                    ? 'bg-brand-tint text-brand border-brand/30'
+                                    : 'border-border text-muted-foreground hover:bg-muted'
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    )
+                })}
             </div>
         </div>
     )

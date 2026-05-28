@@ -57,7 +57,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                   <span className="text-xs text-muted-foreground line-through">
                     ${product.base_price.toFixed(2)}
                   </span>
-                  <span className="text-xs bg-brand-tint text-brand px-2 py-0.5 rounded">
+                  <span className="text-xs bg-discount text-brand px-2 py-0.5 rounded">
                     -{product.discount}%
                   </span>
                 </>

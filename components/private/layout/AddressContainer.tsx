@@ -1,13 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Address } from "@/types/users"
-import CheckoutAddress from "@/components/forms/CheckoutAddressForm"
 import AddressFormBody from "@/components/forms/AddressFormBody"
 import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails"
+import MobileAddressSelector from "@/components/functional-ui/placeOrder/MobileAddressSelector"
 import PaymentMethod from "@/components/functional-ui/placeOrder/PaymentMethod"
 import { getUserAddress, getUserProfile } from "@/lib/users"
-import { Button } from '@/components/ui/button'
 import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
@@ -255,132 +254,145 @@ const AddressContainer = () => {
             </div>
           )}
 
-          {/* ── Saved addresses (deliver method only) ──────────────────── */}
+          {/* ── Addresses (deliver method only) ────────────────────────── */}
           {method === "deliver" && (
-            <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-foreground">Saved Addresses</h2>
-              </div>
-
-              {/* Loading state */}
-              {loading && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Loading addresses…
-                </div>
-              )}
-
-              {/* Error state */}
-              {!loading && fetchError && (
-                <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 ">
-                  <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm text-danger font-medium">{fetchError}</p>
-                    <button
-                      type="button"
-                      onClick={fetchAddresses}
-                      className="text-xs text-danger underline underline-offset-2 w-fit"
-                    >
-                      Try again
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Empty state */}
-              {!loading && !fetchError && addresses.length === 0 && (
-                <div className="flex flex-col items-center gap-2 py-8 text-center">
-                  <MapPin className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
-                  <p className="text-xs text-muted-foreground">Add an address below to get started</p>
-                </div>
-              )}
-
-              {/* Address list */}
-              {!loading && !fetchError && addresses.map((address) => (
-                <AddressDetails
-                  key={address.id}
-                  address={address}
-                  selectedAddressId={selectedAddressId}
-                  setSelectedAddressId={handleSelectSaved}
-                  onSuccess={fetchAddresses}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* ── Add new address (deliver method only) ──────────────────── */}
-          {method === "deliver" && (addresses.length < 3 ? (
             <>
-              {/* Desktop: "New address" radio that expands an inline form */}
-              <div className="hidden md:flex flex-col gap-4">
-                <label
-                  className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${
-                    addingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
-                  }`}
-                >
+              {/* DESKTOP: saved-address list + inline new-address form */}
+              <div className="hidden md:flex flex-col gap-6">
+                <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-4">
                   <div className="flex items-center gap-2">
-                    <Plus className="w-4 h-4 text-brand" />
-                    <span className="font-semibold text-foreground">New address</span>
+                    <h2 className="text-base font-bold text-foreground">Saved Addresses</h2>
                   </div>
-                  <input
-                    type="radio"
-                    name="selectedAddress"
-                    checked={addingNew}
-                    onChange={() => {
-                      setAddingNew(true)
-                      setSelectedAddressId(null)
-                    }}
-                    className="w-5 h-5 accent-brand cursor-pointer shrink-0"
-                  />
-                </label>
 
-                {addingNew && (
-                  <div className="rounded-xl border border-border p-5 shadow-xs">
-                    <h3 className="text-base font-bold text-foreground mb-4">New address</h3>
-                    <AddressFormBody
-                      action="add"
-                      lockIdentity={!!profile?.first_name}
-                      defaults={{
-                        firstName: profile?.first_name ?? "",
-                        lastName: profile?.last_name ?? "",
-                        phone: profile?.phone_text ?? "",
-                      }}
-                      onSuccess={() => {
-                        setAddingNew(false)
-                        fetchAddresses()
-                      }}
-                      onCancel={() => setAddingNew(false)}
+                  {loading && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading addresses…
+                    </div>
+                  )}
+
+                  {!loading && fetchError && (
+                    <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 ">
+                      <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+                      <div className="flex flex-col gap-1">
+                        <p className="text-sm text-danger font-medium">{fetchError}</p>
+                        <button
+                          type="button"
+                          onClick={fetchAddresses}
+                          className="text-xs text-danger underline underline-offset-2 w-fit"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {!loading && !fetchError && addresses.length === 0 && (
+                    <div className="flex flex-col items-center gap-2 py-8 text-center">
+                      <MapPin className="w-8 h-8 text-muted-foreground" />
+                      <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
+                      <p className="text-xs text-muted-foreground">Add an address below to get started</p>
+                    </div>
+                  )}
+
+                  {!loading && !fetchError && addresses.map((address) => (
+                    <AddressDetails
+                      key={address.id}
+                      address={address}
+                      selectedAddressId={selectedAddressId}
+                      setSelectedAddressId={handleSelectSaved}
+                      onSuccess={fetchAddresses}
                     />
+                  ))}
+                </div>
+
+                {addresses.length < 3 ? (
+                  <div className="flex flex-col gap-4">
+                    <label
+                      className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${
+                        addingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Plus className="w-4 h-4 text-brand" />
+                        <span className="font-semibold text-foreground">New address</span>
+                      </div>
+                      <input
+                        type="radio"
+                        name="selectedAddress"
+                        checked={addingNew}
+                        onChange={() => {
+                          setAddingNew(true)
+                          setSelectedAddressId(null)
+                        }}
+                        className="w-5 h-5 accent-brand cursor-pointer shrink-0"
+                      />
+                    </label>
+
+                    {addingNew && (
+                      <div className="rounded-xl border border-border p-5 shadow-xs">
+                        <h3 className="text-base font-bold text-foreground mb-4">New address</h3>
+                        <AddressFormBody
+                          action="add"
+                          lockIdentity={!!profile?.first_name}
+                          saveLabel="Add address"
+                          defaults={{
+                            firstName: profile?.first_name ?? "",
+                            lastName: profile?.last_name ?? "",
+                            phone: profile?.phone_text ?? "",
+                          }}
+                          onSuccess={() => {
+                            setAddingNew(false)
+                            fetchAddresses()
+                          }}
+                          onCancel={() => setAddingNew(false)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
+                    <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                    <p className="text-sm text-warning font-medium">
+                      You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+                    </p>
                   </div>
                 )}
               </div>
 
-              {/* Mobile: full-screen slide-out sheet */}
+              {/* MOBILE: tap-to-open list / form selector */}
               <div className="md:hidden">
-                <CheckoutAddress
-                  title="New Address"
-                  action="add"
-                  firstName={profile?.first_name ?? undefined}
-                  lastName={profile?.last_name ?? undefined}
-                  phone={profile?.phone_text ?? undefined}
-                  onSuccess={fetchAddresses}
-                >
-                  <Button className="rounded-full cursor-pointer w-full" variant="default">
-                    + Add New Address
-                  </Button>
-                </CheckoutAddress>
+                {loading ? (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading addresses…
+                  </div>
+                ) : fetchError ? (
+                  <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+                    <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm text-danger font-medium">{fetchError}</p>
+                      <button
+                        type="button"
+                        onClick={fetchAddresses}
+                        className="text-xs text-danger underline underline-offset-2 w-fit"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <MobileAddressSelector
+                    addresses={addresses}
+                    selectedAddressId={selectedAddressId}
+                    onSelect={handleSelectSaved}
+                    profile={profile}
+                    onChanged={fetchAddresses}
+                  />
+                )}
               </div>
             </>
-          ) : (
-            // Limit reached show a notice instead of the add button
-            <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
-              <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-              <p className="text-sm text-warning font-medium">
-                You've reached the maximum of 3 saved addresses. Remove one to add a new one.
-              </p>
-            </div>
-          ))}
+          )}
 
           {/* ── Payment method ─────────────────────────────────────────── */}
           <div className="border-t border-border mt-2" />

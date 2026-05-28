@@ -1,9 +1,8 @@
 'use client'
 import { useState } from 'react'
-import { User, Star, Ticket, PackageSearch, CreditCard } from 'lucide-react'
+import { User, Star, PackageSearch, CreditCard } from 'lucide-react'
 import Account from '@/components/functional-ui/accountDetails/Account'
 import Loyalty from '@/components/functional-ui/accountDetails/Loyalty'
-import CashVoucher from '@/components/functional-ui/accountDetails/CashVoucher'
 import OrderTracking from '@/components/functional-ui/accountDetails/OrderTracking'
 import MyCards from '@/components/functional-ui/accountDetails/MyCards'
 import { Address } from '@/types/users'
@@ -11,7 +10,6 @@ import { Address } from '@/types/users'
 const navLinks = [
     { name: 'Account Details', icon: User },
     { name: 'Loyalty Points', icon: Star },
-    { name: 'Buy Cash Voucher', icon: Ticket },
     { name: 'Orders & Tracking', icon: PackageSearch },
     { name: 'My Cards', icon: CreditCard },
 ]
@@ -60,7 +58,6 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                     <Account email={email} profile={profile} addresses={addresses} />
                 )}
                 {activeLink === 'Loyalty Points' && <Loyalty />}
-                {activeLink === 'Buy Cash Voucher' && <CashVoucher />}
                 {activeLink === 'Orders & Tracking' && <OrderTracking />}
                 {activeLink === 'My Cards' && <MyCards />}
             </section>
