@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Lato } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import AnonAuthProvider from "@/helper/AnonAuthProvider";
@@ -82,16 +82,17 @@ export const metadata: Metadata = {
 
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const lato = Lato({
+  variable: "--font-lato",
   display: "swap",
   subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased min-h-svh w-full`}>
+      <body className={`${lato.variable} font-sans antialiased min-h-svh w-full`}>
         <AnonAuthProvider>
           {children}
           <Toaster />
