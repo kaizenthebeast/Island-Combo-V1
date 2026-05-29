@@ -1,12 +1,10 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,10 +26,7 @@ import {
   ForgotPasswordFormInput,
 } from "@/form-schema/forgotPasswordSchema";
 
-export function ForgotPasswordForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,34 +55,32 @@ export function ForgotPasswordForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
-            <CardDescription>Password reset instructions sent</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+    <div className="w-full max-w-md mx-auto space-y-6 flex flex-col justify-center">
+      <Card className="border-none shadow-none">
+        <CardHeader>
+          <CardTitle className="text-2xl">
+            {success ? "Check your email" : "Reset your password"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {success ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                If you registered with your email and password, you&apos;ll
+                receive a link to reset your password shortly.
+              </p>
+              <Link
+                href="/auth/login"
+                className="inline-block text-sm underline underline-offset-4"
+              >
+                Back to login
+              </Link>
+            </div>
+          ) : (
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="flex flex-col gap-6"
+                className="space-y-4"
               >
                 <FormField
                   control={form.control}
@@ -110,24 +103,21 @@ export function ForgotPasswordForm({
 
                 {error && <p className="text-sm text-danger">{error}</p>}
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
 
-                <div className="text-center text-sm">
-                  Already have an account?{" "}
-                  <Link
-                    href="/auth/login"
-                    className="underline underline-offset-4"
-                  >
+                <div className="mt-4 text-center text-sm">
+                  Remember your password?{" "}
+                  <Link href="/auth/login" className="underline underline-offset-4">
                     Login
                   </Link>
                 </div>
               </form>
             </Form>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

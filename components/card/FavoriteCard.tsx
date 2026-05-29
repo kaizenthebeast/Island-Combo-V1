@@ -202,7 +202,6 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105 bg-muted rounded-md overflow-hidden"
             sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
-            priority
           />
         </div>
 

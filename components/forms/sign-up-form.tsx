@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { signInWithGoogle } from "@/helper/googleSignIn";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +15,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import Link from "next/link";
@@ -24,11 +24,14 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema, SignupFormInput } from "@/form-schema/signupSchema";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export function SignUpForm() {
   const router = useRouter();
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const form = useForm<SignupFormInput>({
     resolver: zodResolver(signupSchema),
@@ -74,25 +77,9 @@ export function SignUpForm() {
   };
 
   const googleSignUp = async () => {
-    const supabase = createClient();
-
-    try {
-      const guestId = localStorage.getItem("guest_id");
-      if (guestId) {
-        document.cookie = `guest_id=${guestId}; path=/; max-age=600`;
-      }
-
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) throw error;
-    } catch (err) {
-      console.error("Google OAuth error:", err);
-    }
+    setMessage("");
+    const error = await signInWithGoogle();
+    if (error) setMessage(error);
   };
 
   return (
@@ -109,12 +96,12 @@ export function SignUpForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="Email"
                         autoComplete="email"
+                        aria-label="Email"
                         {...field}
                       />
                     </FormControl>
@@ -128,14 +115,25 @@ export function SignUpForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        autoComplete="new-password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          autoComplete="new-password"
+                          aria-label="Password"
+                          className="pr-10"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,14 +145,25 @@ export function SignUpForm() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        autoComplete="new-password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showConfirm ? "text" : "password"}
+                          placeholder="Confirm password"
+                          autoComplete="new-password"
+                          aria-label="Confirm password"
+                          className="pr-10"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirm((v) => !v)}
+                          aria-label={showConfirm ? "Hide password" : "Show password"}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,7 +172,7 @@ export function SignUpForm() {
 
               {message && <p className="text-sm text-danger">{message}</p>}
 
-              <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-brand rounded-full" disabled={isLoading}>
                 {isLoading ? "Creating account..." : "Create Account"}
               </Button>
             </form>
@@ -172,7 +181,7 @@ export function SignUpForm() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-muted" />
-            <span className="text-md text-muted-foreground">or</span>
+            <span className="text-md text-muted-foreground">Or</span>
             <div className="flex-1 h-px bg-muted" />
           </div>
           {/* Google Login */}
@@ -189,7 +198,7 @@ export function SignUpForm() {
             />
 
             <span className="font-medium text-foreground">
-              Continue with Google
+              Sign up with Google
             </span>
           </button>
 

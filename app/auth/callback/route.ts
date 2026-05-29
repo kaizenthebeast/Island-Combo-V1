@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin;
 
   if (!code) {
-    return NextResponse.redirect(`${siteUrl}/login`);
+    return NextResponse.redirect(`${siteUrl}/auth/login`);
   }
 
   const guestUserId = requestUrl.searchParams.get("guest_id");
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   if (authError || !authData.session) {
     console.error("OAuth error:", authError?.message);
-    return NextResponse.redirect(`${siteUrl}/login?error=auth_failed`);
+    return NextResponse.redirect(`${siteUrl}/auth/login?error=auth_failed`);
   }
 
   const authUserId = authData.session.user.id;

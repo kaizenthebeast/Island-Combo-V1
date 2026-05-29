@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormInput } from "@/form-schema/loginSchema";
 
 import { createClient } from "@/lib/supabase/client";
+import { signInWithGoogle } from "@/helper/googleSignIn";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,15 +21,16 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormInput>({
     resolver: zodResolver(loginSchema),
@@ -84,18 +86,9 @@ export function LoginForm() {
   };
 
   const googleLogin = async () => {
-    const supabase = createClient();
-    const { data: { user: anonUser }, error: anonError } = await supabase.auth.getUser();
-    if (anonError) {
-      throw new Error(`Failed to get anonymous session: ${anonError.message}`);
-    }
-    const guestUserId = anonUser?.is_anonymous ? anonUser.id : null;
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?guest_id=${guestUserId}`,
-      },
-    });
+    setMessage("");
+    const error = await signInWithGoogle();
+    if (error) setMessage(error);
   };
 
   return (
@@ -112,12 +105,12 @@ export function LoginForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="m@example.com"
+                        placeholder="Email or username"
                         autoComplete="email"
+                        aria-label="Email"
                         {...field}
                       />
                     </FormControl>
@@ -131,14 +124,25 @@ export function LoginForm() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        autoComplete="current-password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Password"
+                          autoComplete="current-password"
+                          aria-label="Password"
+                          className="pr-10"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((v) => !v)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -149,12 +153,12 @@ export function LoginForm() {
 
               <Link
                 href="/auth/forgot-password"
-                className="ml-auto text-sm underline-offset-4 hover:underline"
+                className="ml-auto text-sm underline-offset-4 hover:underline text-right w-full flex justify-end"
               >
                 Forgot your password?
               </Link>
 
-              <Button type="submit" className="w-full bg-brand" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-brand rounded-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
@@ -163,7 +167,7 @@ export function LoginForm() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-muted" />
-            <span className="text-md text-muted-foreground">or</span>
+            <span className="text-md text-muted-foreground">Or</span>
             <div className="flex-1 h-px bg-muted" />
           </div>
           {/* Google Login */}
@@ -180,7 +184,7 @@ export function LoginForm() {
             />
 
             <span className="font-medium text-foreground">
-              Continue with Google
+              Login with Google
             </span>
           </button>
           <div className="mt-4 text-center text-sm">

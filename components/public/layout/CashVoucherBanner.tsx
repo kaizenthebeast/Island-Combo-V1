@@ -12,7 +12,6 @@ const CashVoucherBanner = () => {
             fill
             sizes="(max-width: 640px) 100vw, 35vw"
             className="object-cover"
-            priority
           />
         </div>
 
