@@ -55,7 +55,7 @@ const DeleteStaffDialog = ({
                 Deactivate staff member?
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">"{staffName}"</span>{' '}
+                <span className="font-medium text-foreground">&quot;{staffName}&quot;</span>{' '}
                 will be deactivated and lose access to the system. Their data and
                 history will remain intact and they can be restored at any time.
               </DialogDescription>

@@ -58,7 +58,7 @@ const DeleteProductDialog = ({
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  "{productName}"
+                  &quot;{productName}&quot;
                 </span>{" "}
                 will be archived and hidden from your storefront. Your order
                 history will remain intact and the product can be restored

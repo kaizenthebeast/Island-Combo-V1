@@ -86,15 +86,15 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
   }
 
   const rows: Row[] = useMemo(() => {
-    return staff.map((u) => ({
-      user_id: u.user_id,
-      name: [u.first_name, u.last_name].filter(Boolean).join(' ') || '—',
-      email: u.email ?? '—',
-      phone: u.phone_text ?? '—',
-      role: u.role,
-      status: u.is_active ? 'ACTIVE' : 'INACTIVE',
-      joined: new Date(u.member_since).toLocaleDateString(),
-      raw: u,
+    return staff.map((user) => ({
+      user_id: user.user_id,
+      name: [user.first_name, user.last_name].filter(Boolean).join(' ') || '—',
+      email: user.email ?? '—',
+      phone: user.phone_text ?? '—',
+      role: user.role,
+      status: user.is_active ? 'ACTIVE' : 'INACTIVE',
+      joined: new Date(user.member_since).toLocaleDateString(),
+      raw: user,
     }))
   }, [staff])
 
@@ -107,16 +107,16 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
       label: 'Role',
       align: 'center',
       sortable: false,
-      render: (v) => (
-        <StatusBadge status={String(v)} variant={getRoleVariant(String(v))} />
+      render: (value) => (
+        <StatusBadge status={String(value)} variant={getRoleVariant(String(value))} />
       ),
     },
     {
       key: 'status',
       label: 'Status',
       sortable: false,
-      render: (v) => {
-        const { label, variant } = STATUS_BADGE[v as StaffStatus] ?? STATUS_BADGE.ACTIVE
+      render: (value) => {
+        const { label, variant } = STATUS_BADGE[value as StaffStatus] ?? STATUS_BADGE.ACTIVE
         return <StatusBadge status={label} variant={variant} />
       },
     },
@@ -178,32 +178,32 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
         onEdit={(row) => setEditingUser(row.raw)}
         onDelete={(row) => setDeletingRow(row)}
         expandedRowRender={(row) => {
-          const u = row.raw
+          const user = row.raw
           return (
             <div className="space-y-4 text-sm">
               <div>
                 <h4 className="font-semibold text-foreground">Personal Info</h4>
                 <ul className="mt-1 space-y-1 text-muted-foreground">
-                  <li><strong>Sex:</strong> {u.sex ?? '—'}</li>
-                  <li><strong>Age:</strong> {u.age ?? '—'}</li>
+                  <li><strong>Sex:</strong> {user.sex ?? '—'}</li>
+                  <li><strong>Age:</strong> {user.age ?? '—'}</li>
                 </ul>
               </div>
-              {u.default_address && (
+              {user.default_address && (
                 <div>
                   <h4 className="font-semibold text-foreground">Default Address</h4>
                   <div className="mt-1 border rounded-lg p-3 text-muted-foreground">
                     <p>
-                      {u.default_address}, {u.default_locality},{' '}
-                      {u.default_postal_code}, {u.default_country}
+                      {user.default_address}, {user.default_locality},{' '}
+                      {user.default_postal_code}, {user.default_country}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {u.total_addresses} address{u.total_addresses !== 1 ? 'es' : ''} total
+                      {user.total_addresses} address{user.total_addresses !== 1 ? 'es' : ''} total
                     </p>
                   </div>
                 </div>
               )}
               <div className="text-xs text-muted-foreground">
-                User ID: {u.user_id} · Joined: {new Date(u.member_since).toLocaleString()}
+                User ID: {user.user_id} · Joined: {new Date(user.member_since).toLocaleString()}
               </div>
             </div>
           )

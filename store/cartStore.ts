@@ -2,57 +2,72 @@ import { create } from "zustand"
 import { CartItem } from "@/types/cart"
 import { calculateCartTotals } from "@/helper/cartUtils"
 
-// TIER RESOLUTION HELPERS
-// These run client-side during optimistic updates so the UI reflects the
-// correct price immediately when a user changes quantity — without waiting
-// for a server round-trip.
+// Default tier label for a brand-new item before the server backfills real data.
+const DEFAULT_TIER_LABEL = "retail"
+
+type PricingTier = CartItem["pricing_tiers"][number]
+
+const roundToCents = (value: number) => Math.round(value * 100) / 100
+
+// Most-specific active tier: the highest min_quantity the quantity still
+// qualifies for. Null when the variant has no tiers or none match.
 //
-// Logic: find all tiers where min_quantity <= current quantity, then pick
-// the one with the highest min_quantity (most specific match).
-//
-// Example:
 //   tiers = [{ min_quantity: 1, discount_percent: 0 }, { min_quantity: 10, discount_percent: 20 }]
-//   basePrice = 150
-//   quantity = 12 → 150 * (1 - 20/100) = 120 (wholesale tier)
-//   quantity = 5  → 150 * (1 - 0/100)  = 150 (retail tier)
-
-function resolveAppliedPrice(
+//   quantity = 12 → wholesale tier (20% off);  quantity = 5 → retail tier (0% off)
+const findActiveTier = (
   tiers: CartItem["pricing_tiers"],
-  basePrice: number, // variant base retail price from product_variants.price
-  quantity: number
-): number | null {
+  quantity: number,
+): PricingTier | null => {
   if (!tiers?.length) return null
-  const matched = [...tiers]
-    .filter((t) => quantity >= t.min_quantity)
-    .sort((a, b) => b.min_quantity - a.min_quantity)
-  const tier = matched[0]
-  if (!tier) return null
-  // Apply discount_percent against base price, rounded to 2 decimal places
-  return Math.round(basePrice * (1 - tier.discount_percent / 100) * 100) / 100
+  return (
+    [...tiers]
+      .filter((tier) => quantity >= tier.min_quantity)
+      .sort((a, b) => b.min_quantity - a.min_quantity)[0] ?? null
+  )
 }
 
-function resolveAppliedTierLabel(
-  tiers: CartItem["pricing_tiers"],
-  quantity: number
-): string | null {
-  if (!tiers?.length) return null
-  const matched = [...tiers]
-    .filter((t) => quantity >= t.min_quantity)
-    .sort((a, b) => b.min_quantity - a.min_quantity)
-  return matched[0]?.label ?? null
+// Re-resolves a cart item's tier pricing for a new quantity, client-side, so the
+// price reflects wholesale/bulk thresholds instantly without a server round-trip.
+// When no tier matches, the item keeps its current applied price/label.
+const applyResolvedTier = (item: CartItem, quantity: number): CartItem => {
+  const tier = findActiveTier(item.pricing_tiers, quantity)
+  if (!tier) return { ...item, quantity }
+  return {
+    ...item,
+    quantity,
+    applied_price: roundToCents(item.price * (1 - tier.discount_percent / 100)),
+    applied_tier_label: tier.label,
+  }
 }
+
+// Partial stub for a newly-added item; fetchCart backfills the real pricing_tiers
+// and applied_price from the server. Cast through unknown because the stub is
+// intentionally incomplete — UI should guard with: applied_price || final_price || price.
+const createPendingItem = (
+  variantId: number,
+  quantity: number,
+  selectedOption: string | null,
+): CartItem =>
+  ({
+    variant_id: variantId,
+    quantity,
+    selected_option: selectedOption,
+    pricing_tiers: [],
+    applied_price: 0,
+    applied_tier_label: DEFAULT_TIER_LABEL,
+  } as unknown as CartItem)
 
 type CartState = {
   cart: CartItem[]
   error: string | null
-  totalQty: number      // total number of items across all cart rows
-  subtotal: number      // sum of (applied_price * quantity) for all items
+  totalQty: number      // total items across all cart rows
+  subtotal: number      // sum of applied_price * quantity for all items
   quantityInput: number // controlled quantity selector on product pages
 
-  // Selection (which rows are checked for checkout). Defaults to all selected.
-  selectedIds: number[]      // variant_ids currently checked
-  selectedQty: number        // total qty across selected rows only
-  selectedSubtotal: number   // subtotal across selected rows only
+  // Selection: which rows are checked for checkout. Defaults to all selected.
+  selectedIds: number[]
+  selectedQty: number
+  selectedSubtotal: number
 
   incrementQty: () => void
   decrementQty: () => void
@@ -74,55 +89,52 @@ type CartState = {
 
 export const useCartStore = create<CartState>((set, get) => {
 
-  // Recalculates totalQty and subtotal from the current cart array.
-  // calculateCartTotals must use applied_price tier-resolved not raw price
-  // so subtotal automatically reflects wholesalek pricing.
-  const recalc = (cart: CartItem[]) => calculateCartTotals(cart)
+  const computeTotals = (cart: CartItem[]) => calculateCartTotals(cart)
 
-  // Preserve the user's checkbox selection across cart refreshes:
-  // keep ids that are still selected, and auto-select brand-new rows.
-  // On the very first populated load (prev cart empty) everything is selected.
+  const computeSelectedTotals = (cart: CartItem[], selectedIds: number[]) =>
+    computeTotals(cart.filter((item) => selectedIds.includes(item.variant_id)))
+
+  // Preserve the user's checkbox selection across cart refreshes: keep ids still
+  // selected, auto-select brand-new rows. On the first populated load (previous
+  // cart empty) everything is selected.
   const reconcileSelection = (
-    prevCart: CartItem[],
-    prevSelected: number[],
+    previousCart: CartItem[],
+    previousSelected: number[],
     nextCart: CartItem[],
   ): number[] => {
-    const nextIds = nextCart.map((i) => i.variant_id)
-    if (prevCart.length === 0) return nextIds
+    const nextIds = nextCart.map((item) => item.variant_id)
+    if (previousCart.length === 0) return nextIds
     return nextIds.filter(
-      (id) => prevSelected.includes(id) || !prevCart.some((p) => p.variant_id === id),
+      (id) => previousSelected.includes(id) || !previousCart.some((p) => p.variant_id === id),
     )
   }
 
-  // Applies recalculated totals (full + selected) and updates state atomically.
-  const setCartState = (cart: CartItem[]) => {
+  // Commits a new cart plus its recomputed full + selected-only totals atomically.
+  const commitCart = (cart: CartItem[]) => {
     const selectedIds = reconcileSelection(get().cart, get().selectedIds, cart)
-    const { totalQty, subtotal } = recalc(cart)
-    const sel = recalc(cart.filter((i) => selectedIds.includes(i.variant_id)))
+    const { totalQty, subtotal } = computeTotals(cart)
+    const selectedTotals = computeSelectedTotals(cart, selectedIds)
     set({
       cart,
       totalQty,
       subtotal,
       selectedIds,
-      selectedQty: sel.totalQty,
-      selectedSubtotal: sel.subtotal,
+      selectedQty: selectedTotals.totalQty,
+      selectedSubtotal: selectedTotals.subtotal,
     })
   }
 
-  // Optimistic update pattern:
-  // 1. Snapshot current cart as prev
-  // 2. Apply the updater immediately to the UI feels instant
-  // 3. Return Prev so the caller can rollback if the API call fails
-  const applyOptimistic = (updater: (cart: CartItem[]) => CartItem[]) => {
-    const prev = get().cart
-    setCartState(updater(prev))
-    return prev
+  // Optimistic update: apply the change to the UI immediately and return the
+  // previous cart so the caller can roll back if the API call fails.
+  const applyOptimistic = (applyChange: (cart: CartItem[]) => CartItem[]) => {
+    const previousCart = get().cart
+    commitCart(applyChange(previousCart))
+    return previousCart
   }
 
-  // Rollback: restores previous cart state and surfaces the error message
-  const rollback = (prev: CartItem[], err: unknown) => {
-    setCartState(prev)
-    set({ error: err instanceof Error ? err.message : "Unknown error" })
+  const rollback = (previousCart: CartItem[], error: unknown) => {
+    commitCart(previousCart)
+    set({ error: error instanceof Error ? error.message : "Unknown error" })
   }
 
   return {
@@ -135,189 +147,126 @@ export const useCartStore = create<CartState>((set, get) => {
     selectedQty: 0,
     selectedSubtotal: 0,
 
-    // Quantity Selector (product page)
-    // Controls the qty input before adding to cart, floored at 1
     incrementQty: () => set((state) => ({ quantityInput: state.quantityInput + 1 })),
     decrementQty: () => set((state) => ({ quantityInput: Math.max(1, state.quantityInput - 1) })),
 
-    // Fetch Cart
-    // Loads the full cart from the server via cart_view which includes
-    // pricing_tiers, applied_price, and applied_tier_label resolved in SQL.
-    // This is the source of truth  always called after mutations settle.
+    // Loads the full cart from cart_view (pricing_tiers, applied_price, and
+    // applied_tier_label resolved in SQL) — the source of truth, called after
+    // every mutation settles.
     fetchCart: async () => {
       try {
         set({ error: null })
-        const res = await fetch("/api/cart")
-        const json = await res.json()
-        if (!res.ok || !json.success) throw new Error(json.message || "Fetch failed")
-        setCartState(json.data)
-      } catch (err) {
-        set({ error: err instanceof Error ? err.message : "Unknown error" })
+        const response = await fetch("/api/cart")
+        const payload = await response.json()
+        if (!response.ok || !payload.success) throw new Error(payload.message || "Fetch failed")
+        commitCart(payload.data)
+      } catch (error) {
+        set({ error: error instanceof Error ? error.message : "Unknown error" })
       }
     },
 
-    // Add Item
-    // Optimistically adds a new row or increments quantity of an existing one.
-    //
-    // For NEW items: cast through unknown because the stub is intentionally
-    // partial — pricing_tiers/applied_price are placeholders until fetchCart
-    // backfills real data from the server. UI should guard with:
-    //   applied_price || final_price || price
-    //
-    // For EXISTING items: tier is re-resolved client-side immediately using
-    // the new combined quantity and the variant's base price so the displayed
-    // price updates in the UI right away without a server round-trip.
+    // Adds a new row or increments an existing one. New items get a partial stub
+    // (backfilled by fetchCart); existing items re-resolve their tier immediately
+    // against the combined quantity.
     addItem: async (variantId, qty, selectedOption = null) => {
-      const prev = applyOptimistic((cart) => {
-        const exists = cart.find((i) => i.variant_id === variantId)
-
-        if (!exists) {
-          // New item stub  full data backfilled by fetchCart after API call
-          return [
-            ...cart,
-            {
-              variant_id: variantId,
-              quantity: qty,
-              selected_option: selectedOption,
-              pricing_tiers: [],             // unknown until server responds
-              applied_price: 0,              // placeholder
-              applied_tier_label: "retail",  // safe default assumption
-            } as unknown as CartItem,        // intentionally partial stub
-          ]
+      const previousCart = applyOptimistic((cart) => {
+        const existingItem = cart.find((item) => item.variant_id === variantId)
+        if (!existingItem) {
+          return [...cart, createPendingItem(variantId, qty, selectedOption)]
         }
-
-        // Existing item  bump quantity and re-resolve tier inside the map
-        // i.price is the base retail price used for discount_percent calculation
-        return cart.map((i) => {
-          if (i.variant_id !== variantId) return i
-          const newQty = i.quantity + qty
-          return {
-            ...i,
-            quantity: newQty,
-            applied_price:
-              resolveAppliedPrice(i.pricing_tiers, i.price, newQty) ?? i.applied_price,
-            applied_tier_label:
-              resolveAppliedTierLabel(i.pricing_tiers, newQty) ?? i.applied_tier_label,
-          }
-        })
+        return cart.map((item) =>
+          item.variant_id === variantId
+            ? applyResolvedTier(item, item.quantity + qty)
+            : item,
+        )
       })
 
       try {
-        const res = await fetch("/api/cart", {
+        const response = await fetch("/api/cart", {
           method: "POST",
           body: JSON.stringify({ variantId, quantity: qty, selectedOption }),
           headers: { "Content-Type": "application/json" },
         })
-        if (!res.ok) throw new Error("Failed to add item")
-        // Refresh to get fully populated cart item with real pricing_tiers
+        if (!response.ok) throw new Error("Failed to add item")
         await get().fetchCart()
-      } catch (err) {
-        rollback(prev, err)
+      } catch (error) {
+        rollback(previousCart, error)
       }
     },
 
-    // Update Item
-    // Optimistically sets a new quantity and re-resolves the pricing tier
-    // so the price reflects wholesale/bulk thresholds immediately in the UI.
-    // i.price is passed as basePrice since discount_percent is relative to it.
+    // Sets an exact quantity and re-resolves the tier so wholesale/bulk pricing
+    // shows immediately, then persists via the API.
     updateItem: async (variantId, qty) => {
-      const prev = applyOptimistic((cart) =>
-        cart.map((i) => {
-          if (i.variant_id !== variantId) return i
-          return {
-            ...i,
-            quantity: qty,
-            applied_price:
-              resolveAppliedPrice(i.pricing_tiers, i.price, qty) ?? i.applied_price,
-            applied_tier_label:
-              resolveAppliedTierLabel(i.pricing_tiers, qty) ?? i.applied_tier_label,
-          }
-        })
+      const previousCart = applyOptimistic((cart) =>
+        cart.map((item) =>
+          item.variant_id === variantId ? applyResolvedTier(item, qty) : item,
+        ),
       )
 
       try {
-        const res = await fetch("/api/cart", {
+        const response = await fetch("/api/cart", {
           method: "PATCH",
           body: JSON.stringify({ variantId, quantity: qty }),
           headers: { "Content-Type": "application/json" },
         })
-        if (!res.ok) throw new Error("Update failed")
-          await get().fetchCart()
-      } catch (err) {
-        rollback(prev, err)
+        if (!response.ok) throw new Error("Update failed")
+        await get().fetchCart()
+      } catch (error) {
+        rollback(previousCart, error)
       }
     },
 
-    // Remove Item
-    // Optimistically removes the item from the UI, rollback if API fails.
     removeItem: async (variantId) => {
-      const prev = applyOptimistic((cart) =>
-        cart.filter((i) => i.variant_id !== variantId)
+      const previousCart = applyOptimistic((cart) =>
+        cart.filter((item) => item.variant_id !== variantId),
       )
 
       try {
-        const res = await fetch("/api/cart", {
+        const response = await fetch("/api/cart", {
           method: "DELETE",
           body: JSON.stringify({ variantId }),
           headers: { "Content-Type": "application/json" },
         })
-        if (!res.ok) throw new Error("Remove failed")
-      } catch (err) {
-        rollback(prev, err)
+        if (!response.ok) throw new Error("Remove failed")
+      } catch (error) {
+        rollback(previousCart, error)
       }
     },
 
-    // Instant quantity (no API)
-    // Updates quantity + re-resolved tier pricing + totals immediately so the
-    // UI feels instant while the API call is debounced by the caller. Persist
-    // the final value with updateItem once the user stops clicking.
+    // Instant local quantity change (no API). The caller debounces the persisting
+    // updateItem call while the user keeps clicking.
     setItemQuantityLocal: (variantId, qty) =>
       set((state) => {
-        const cart = state.cart.map((i) =>
-          i.variant_id === variantId
-            ? {
-                ...i,
-                quantity: qty,
-                applied_price:
-                  resolveAppliedPrice(i.pricing_tiers, i.price, qty) ?? i.applied_price,
-                applied_tier_label:
-                  resolveAppliedTierLabel(i.pricing_tiers, qty) ?? i.applied_tier_label,
-              }
-            : i
+        const cart = state.cart.map((item) =>
+          item.variant_id === variantId ? applyResolvedTier(item, qty) : item,
         )
-        const { totalQty, subtotal } = recalc(cart)
-        const sel = recalc(cart.filter((i) => state.selectedIds.includes(i.variant_id)))
+        const { totalQty, subtotal } = computeTotals(cart)
+        const selectedTotals = computeSelectedTotals(cart, state.selectedIds)
         return {
           cart,
           totalQty,
           subtotal,
-          selectedQty: sel.totalQty,
-          selectedSubtotal: sel.subtotal,
+          selectedQty: selectedTotals.totalQty,
+          selectedSubtotal: selectedTotals.subtotal,
         }
       }),
 
-    // Selection
-    // Toggle one row's checkbox and recompute the selected-only totals.
     toggleSelected: (variantId) =>
       set((state) => {
         const selectedIds = state.selectedIds.includes(variantId)
           ? state.selectedIds.filter((id) => id !== variantId)
           : [...state.selectedIds, variantId]
-        const sel = recalc(state.cart.filter((i) => selectedIds.includes(i.variant_id)))
-        return { selectedIds, selectedQty: sel.totalQty, selectedSubtotal: sel.subtotal }
+        const selectedTotals = computeSelectedTotals(state.cart, selectedIds)
+        return { selectedIds, selectedQty: selectedTotals.totalQty, selectedSubtotal: selectedTotals.subtotal }
       }),
 
-    // Select or clear all rows at once.
     setAllSelected: (selected) =>
       set((state) => {
-        const selectedIds = selected ? state.cart.map((i) => i.variant_id) : []
-        const sel = recalc(selected ? state.cart : [])
-        return { selectedIds, selectedQty: sel.totalQty, selectedSubtotal: sel.subtotal }
+        const selectedIds = selected ? state.cart.map((item) => item.variant_id) : []
+        const selectedTotals = computeSelectedTotals(state.cart, selectedIds)
+        return { selectedIds, selectedQty: selectedTotals.totalQty, selectedSubtotal: selectedTotals.subtotal }
       }),
 
-    // Utility
-    // resetQuantity: resets the product page qty selector back to 1
-    // clearCart: wipes all cart state used on logout or order completion
     resetQuantity: () => set({ quantityInput: 1 }),
     clearCart: () =>
       set({

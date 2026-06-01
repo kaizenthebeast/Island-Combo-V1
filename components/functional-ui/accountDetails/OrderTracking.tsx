@@ -12,7 +12,7 @@ const OrderTracking = () => {
 
       <div className='flex flex-col items-center justify-center text-center py-8 gap-2'>
         <PackageSearch className='w-8 h-8 text-muted-foreground' />
-        <p className='text-sm text-muted-foreground'>You haven't placed any orders yet.</p>
+        <p className='text-sm text-muted-foreground'>You haven&apos;t placed any orders yet.</p>
       </div>
     </div>
   )

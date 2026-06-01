@@ -20,6 +20,12 @@ import { ShoppingCart, Heart, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
 import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
+import { variantMatchesSelection } from '@/helper/variantSelection'
+
+const WHOLESALE_LABEL = 'wholesale'
+const PLACEHOLDER_IMAGE = '/images/placeholder.png'
+
+const roundToCents = (value: number) => Math.round(value * 100) / 100
 
 type Props = {
     product: ProductDetails
@@ -30,141 +36,139 @@ const ProductDetails = ({ product }: Props) => {
     const { addItem, quantityInput, resetQuantity } = useCartStore()
     const { addFavorite, removeFavorite, isFavorite } = useFavoriteStore();
 
-    const favorited = isFavorite(product.product_id)
+    const isFavorited = isFavorite(product.product_id)
 
-    // Default to the cheapest variant so the page mirrors the catalog (mv),
-    // which surfaces the lowest-priced variant for each product.
-    const defaultVariant = product.variants?.reduce(
-        (cheapest, v) => (v.final_price < cheapest.final_price ? v : cheapest),
-        product.variants[0]
-    )
+    // A product is sold through its variants, so a variant-less product (an admin
+    // data error) is treated as unavailable: the page still renders with safe
+    // fallbacks (placeholder image, $0.00 price) and purchase is disabled.
+    const hasVariants = (product.variants?.length ?? 0) > 0
 
-    // Derive all attribute dimensions from the variants
+    // Default to the cheapest variant so the page mirrors the catalog (mv).
+    const defaultVariant = hasVariants
+        ? product.variants.reduce(
+            (cheapest, variant) => (variant.final_price < cheapest.final_price ? variant : cheapest),
+            product.variants[0],
+        )
+        : undefined
+
     const attributeKeys: string[] = Array.from(
-        new Set(
-            product.variants.flatMap(v => v.attributes?.map(a => a.name) ?? [])
-        )
+        new Set(product.variants.flatMap((variant) => variant.attributes?.map((attr) => attr.name) ?? [])),
     )
 
-    // Pre-select the default variant's attributes (variation, size, …) so price,
-    // stock, and "Add to cart" are ready on load without manual selection.
+    // Pre-select the default variant's attributes so price, stock, and "Add to cart"
+    // are ready on load without manual selection.
     const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string | null>>(
-        () => Object.fromEntries(
-            attributeKeys.map(k => [
-                k,
-                defaultVariant?.attributes?.find(a => a.name === k)?.value ?? null,
-            ])
-        )
+        () =>
+            Object.fromEntries(
+                attributeKeys.map((key) => [
+                    key,
+                    defaultVariant?.attributes?.find((attr) => attr.name === key)?.value ?? null,
+                ]),
+            ),
     )
 
-    const [api, setApi] = useState<CarouselApi>()
-    const [current, setCurrent] = useState(0)
-    const [count, setCount] = useState(0)
+    const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+    const [currentSlide, setCurrentSlide] = useState(0)
+    const [slideCount, setSlideCount] = useState(0)
 
     const hasDiscount = product.discount !== null && product.discount > 0
 
-    const allProductImages = product.variants
-        .flatMap((v) => v.image_url)
+    const uniqueImages = product.variants
+        .flatMap((variant) => variant.image_url)
         .filter(Boolean)
-        .reduce<string[]>((acc, url) => {
-            if (!acc.includes(url)) acc.push(url)
-            return acc
+        .reduce<string[]>((images, url) => {
+            if (!images.includes(url)) images.push(url)
+            return images
         }, [])
 
-    const carouselImages = allProductImages.length > 0
-        ? allProductImages
-        : ["/images/placeholder.png"]
+    const carouselImages = uniqueImages.length > 0 ? uniqueImages : [PLACEHOLDER_IMAGE]
 
-    // Resolved variant
-    const resolvedVariant = attributeKeys.every(k => selectedAttributes[k] !== null)
-        ? product.variants.find(v =>
-            attributeKeys.every(k =>
-                v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-            )
+    const allAttributesSelected = attributeKeys.every((key) => selectedAttributes[key] !== null)
+    const selectedKeys = attributeKeys.filter((key) => selectedAttributes[key] !== null)
+
+    // The exact variant once every attribute is chosen; null until then.
+    const resolvedVariant = allAttributesSelected
+        ? product.variants.find((variant) =>
+            variantMatchesSelection(variant, attributeKeys, selectedAttributes),
         ) ?? null
         : null
 
-    // Display variant
-    const displayVariant = resolvedVariant
-        ?? product.variants.find(v =>
-            attributeKeys
-                .filter(k => selectedAttributes[k] !== null)
-                .every(k =>
-                    v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-                )
-        )
-        ?? defaultVariant
+    // Best variant to preview: the resolved one, else the closest partial match,
+    // else the cheapest (default) variant.
+    const displayVariant =
+        resolvedVariant ??
+        product.variants.find((variant) =>
+            variantMatchesSelection(variant, selectedKeys, selectedAttributes),
+        ) ??
+        defaultVariant
 
-    // Wholesale tier logic
-    const wholesaleTier = displayVariant?.pricing_tiers?.find(
-        (t) => t.label === 'wholesale'
-    ) ?? null
-
-    const wholesaleUnlocked = wholesaleTier !== null && quantityInput >= wholesaleTier.min_quantity
-
+    const wholesaleTier =
+        displayVariant?.pricing_tiers?.find((tier) => tier.label === WHOLESALE_LABEL) ?? null
+    const isWholesaleUnlocked = wholesaleTier !== null && quantityInput >= wholesaleTier.min_quantity
     const wholesalePrice = wholesaleTier
-        ? Math.round((displayVariant?.price ?? 0) * (1 - wholesaleTier.discount_percent / 100) * 100) / 100
+        ? roundToCents((displayVariant?.price ?? 0) * (1 - wholesaleTier.discount_percent / 100))
         : null
 
     useEffect(() => { resetQuantity() }, [])
 
     useEffect(() => {
-        if (!api) return
-        setCount(api.scrollSnapList().length)
-        setCurrent(api.selectedScrollSnap() + 1)
-        api.on("select", () => setCurrent(api.selectedScrollSnap() + 1))
+        if (!carouselApi) return
+        setSlideCount(carouselApi.scrollSnapList().length)
+        setCurrentSlide(carouselApi.selectedScrollSnap() + 1)
+        carouselApi.on("select", () => setCurrentSlide(carouselApi.selectedScrollSnap() + 1))
 
-        // Open the gallery on the default variant's image
+        // Open the gallery on the default variant's image.
         const firstImage = defaultVariant?.image_url?.[0]
         if (firstImage) {
             const index = carouselImages.indexOf(firstImage)
-            if (index > 0) api.scrollTo(index, true)
+            if (index > 0) carouselApi.scrollTo(index, true)
         }
-    }, [api])
+    }, [carouselApi])
 
-    // Available options per attribute key
+    // Available values for one attribute, given the other already-selected attributes.
     function getOptionsForKey(key: string): string[] {
+        const otherSelectedKeys = attributeKeys.filter(
+            (otherKey) => otherKey !== key && selectedAttributes[otherKey] !== null,
+        )
         return Array.from(
             new Set(
                 product.variants
-                    .filter(v =>
-                        attributeKeys
-                            .filter(k => k !== key && selectedAttributes[k] !== null)
-                            .every(k =>
-                                v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-                            )
+                    .filter((variant) =>
+                        variantMatchesSelection(variant, otherSelectedKeys, selectedAttributes),
                     )
-                    .flatMap(v =>
-                        v.attributes?.filter(a => a.name === key).map(a => a.value) ?? []
-                    )
-            )
+                    .flatMap(
+                        (variant) =>
+                            variant.attributes?.filter((attr) => attr.name === key).map((attr) => attr.value) ?? [],
+                    ),
+            ),
         )
     }
 
-    // Select an attribute value
     function handleAttributeSelect(key: string, value: string) {
         const keyIndex = attributeKeys.indexOf(key)
-        setSelectedAttributes(prev => {
-            const next = { ...prev, [key]: value }
-            attributeKeys.slice(keyIndex + 1).forEach(k => { next[k] = null })
-            return next
+        setSelectedAttributes((previous) => {
+            const updated = { ...previous, [key]: value }
+            // Selecting an earlier attribute clears the later (dependent) ones.
+            attributeKeys.slice(keyIndex + 1).forEach((laterKey) => { updated[laterKey] = null })
+            return updated
         })
-        if (keyIndex === 0 && api) {
-            const repVariant = product.variants.find(v =>
-                v.attributes?.some(a => a.name === key && a.value === value)
+        // Selecting the first attribute scrolls the gallery to its representative image.
+        if (keyIndex === 0 && carouselApi) {
+            const representativeVariant = product.variants.find((variant) =>
+                variant.attributes?.some((attr) => attr.name === key && attr.value === value),
             )
-            const firstImage = repVariant?.image_url?.[0]
+            const firstImage = representativeVariant?.image_url?.[0]
             if (firstImage) {
                 const index = carouselImages.indexOf(firstImage)
-                if (index !== -1) api.scrollTo(index)
+                if (index !== -1) carouselApi.scrollTo(index)
             }
         }
     }
 
     async function handleAddToCart() {
-        const firstUnselected = attributeKeys.find(k => !selectedAttributes[k])
-        if (firstUnselected) {
-            customToast.error({ title: 'Selection required', description: `Please select a ${firstUnselected}.` })
+        const firstUnselectedKey = attributeKeys.find((key) => !selectedAttributes[key])
+        if (firstUnselectedKey) {
+            customToast.error({ title: 'Selection required', description: `Please select a ${firstUnselectedKey}.` })
             return
         }
         if (!resolvedVariant) {
@@ -176,9 +180,9 @@ const ProductDetails = ({ product }: Props) => {
         const selectedOption = Object.values(selectedAttributes)[0] ?? null
         await addItem(resolvedVariant.variant_id, quantityInput, selectedOption)
 
-        const error = useCartStore.getState().error
-        if (error) {
-            customToast.error({ title: 'Failed to add to cart', description: error })
+        const addError = useCartStore.getState().error
+        if (addError) {
+            customToast.error({ title: 'Failed to add to cart', description: addError })
             return
         }
         customToast.success({
@@ -188,20 +192,20 @@ const ProductDetails = ({ product }: Props) => {
     }
 
     async function handleFavoriteToggle(productId: number) {
-        if (favorited) {
+        if (isFavorited) {
             await removeFavorite(productId)
-            const error = useFavoriteStore.getState().error
-            if (error) { customToast.error({ title: 'Failed to remove favorite', description: error }); return }
+            const removeError = useFavoriteStore.getState().error
+            if (removeError) { customToast.error({ title: 'Failed to remove favorite', description: removeError }); return }
             customToast.success({ title: 'Removed from favorites', description: 'Product has been removed from your favorites.' })
         } else {
             await addFavorite(productId)
-            const error = useFavoriteStore.getState().error
-            if (error) { customToast.error({ title: 'Failed to add favorite', description: error }); return }
+            const addError = useFavoriteStore.getState().error
+            if (addError) { customToast.error({ title: 'Failed to add favorite', description: addError }); return }
             customToast.success({ title: 'Added to favorites', description: 'Product has been added to your favorites.' })
         }
     }
 
-    const canProceed = !!resolvedVariant && quantityInput > 0
+    const canAddToCart = !!resolvedVariant && quantityInput > 0
 
     return (
         <div className="w-full h-full">
@@ -209,13 +213,13 @@ const ProductDetails = ({ product }: Props) => {
 
                 {/* IMAGE CAROUSEL */}
                 <div className="relative w-full">
-                    <Carousel className="w-full" setApi={setApi}>
+                    <Carousel className="w-full" setApi={setCarouselApi}>
                         <CarouselContent>
                             {carouselImages.map((url: string, index: number) => (
                                 <CarouselItem key={index}>
                                     <div className="relative w-full aspect-square sm:aspect-12/13">
                                         <Image
-                                            src={getPublicImageUrl(url) || defaultVariant.image_url[0]}
+                                            src={url === PLACEHOLDER_IMAGE ? PLACEHOLDER_IMAGE : getPublicImageUrl(url)}
                                             alt={`${product.name} image ${index + 1}`}
                                             fill
                                             sizes="(max-width: 768px) 100vw, 50vw"
@@ -223,7 +227,7 @@ const ProductDetails = ({ product }: Props) => {
                                             priority={index === 0}
                                         />
                                         <div className="absolute bottom-2 right-3 text-xs text-white bg-black/40 px-2 py-0.5 rounded-full">
-                                            {current} / {count}
+                                            {currentSlide} / {slideCount}
                                         </div>
                                     </div>
                                 </CarouselItem>
@@ -235,7 +239,6 @@ const ProductDetails = ({ product }: Props) => {
                 {/* PRODUCT INFO */}
                 <div className="flex flex-col gap-4">
 
-                    {/* Wholesale available badge — only shown if variant has a wholesale tier */}
                     {wholesaleTier && (
                         <div className="inline-flex items-center gap-2 bg-brand text-white text-xs px-3 py-2 w-fit rounded-md">
                             <Package className="shrink-0 w-4 h-4" />
@@ -252,30 +255,27 @@ const ProductDetails = ({ product }: Props) => {
                         {product.description}
                     </p>
 
-                    {/* PRICE */}
+                    {/* PRICE — swaps to wholesale price when the quantity threshold is met */}
                     <div className="flex flex-wrap items-center gap-3">
-                        {/* Swaps to wholesale price when threshold is met */}
                         <p className="text-3xl sm:text-4xl font-bold text-brand">
-                            ${wholesaleUnlocked && wholesalePrice !== null
+                            ${isWholesaleUnlocked && wholesalePrice !== null
                                 ? wholesalePrice.toFixed(2)
-                                : displayVariant.final_price.toFixed(2)
+                                : (displayVariant?.final_price ?? 0).toFixed(2)
                             }
                         </p>
-                        {wholesaleUnlocked && wholesalePrice !== null ? (
-                            // Wholesale active — show original price struck through
+                        {isWholesaleUnlocked && wholesalePrice !== null ? (
                             <div className="flex gap-2 items-center">
                                 <p className="text-base sm:text-lg line-through text-muted-foreground">
-                                    ${displayVariant.price.toFixed(2)}
+                                    ${(displayVariant?.price ?? 0).toFixed(2)}
                                 </p>
                                 <p className="text-xs sm:text-sm bg-discount text-brand px-2 py-1 rounded-md">
                                     -{wholesaleTier!.discount_percent}%
                                 </p>
                             </div>
                         ) : hasDiscount && (
-                            // Regular sale discount
                             <div className="flex gap-2 items-center">
                                 <p className="text-base sm:text-lg line-through text-muted-foreground">
-                                    ${displayVariant.price.toFixed(2)}
+                                    ${(displayVariant?.price ?? 0).toFixed(2)}
                                 </p>
                                 <p className="text-xs sm:text-sm bg-discount text-brand px-2 py-1 rounded-md">
                                     -{product.discount}%
@@ -284,7 +284,7 @@ const ProductDetails = ({ product }: Props) => {
                         )}
                     </div>
 
-                    {/* GENERIC ATTRIBUTE PICKERS */}
+                    {/* ATTRIBUTE PICKERS. The first key renders image thumbnails, the rest text chips. */}
                     {attributeKeys.map((key, keyIndex) => {
                         const options = getOptionsForKey(key)
                         const isFirstKey = keyIndex === 0
@@ -295,12 +295,12 @@ const ProductDetails = ({ product }: Props) => {
                                     {options.map((value) => {
                                         const isSelected = selectedAttributes[key] === value
                                         if (isFirstKey) {
-                                            const repVariant = product.variants.find(v =>
-                                                v.attributes?.some(a => a.name === key && a.value === value)
+                                            const representativeVariant = product.variants.find((variant) =>
+                                                variant.attributes?.some((attr) => attr.name === key && attr.value === value),
                                             )
-                                            const thumbnailUrl = repVariant?.image_url?.[0]
-                                                ? getPublicImageUrl(repVariant.image_url[0])
-                                                : '/images/placeholder.png'
+                                            const thumbnailUrl = representativeVariant?.image_url?.[0]
+                                                ? getPublicImageUrl(representativeVariant.image_url[0])
+                                                : PLACEHOLDER_IMAGE
                                             return (
                                                 <button type="button" key={value} onClick={() => handleAttributeSelect(key, value)} className="flex flex-col items-center gap-1">
                                                     <div className={`w-16 h-16 sm:w-20 sm:h-20 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-border hover:border-border'}`}>
@@ -327,8 +327,10 @@ const ProductDetails = ({ product }: Props) => {
                         {resolvedVariant
                             ? `Stocks: ${resolvedVariant.stock}`
                             : attributeKeys.length > 0
-                                ? `Select ${attributeKeys.filter(k => !selectedAttributes[k])[0] ?? 'an option'} to see stock`
-                                : `Stocks: ${defaultVariant.stock}`
+                                ? `Select ${attributeKeys.filter((key) => !selectedAttributes[key])[0] ?? 'an option'} to see stock`
+                                : hasVariants
+                                    ? `Stocks: ${defaultVariant?.stock ?? 0}`
+                                    : 'Currently unavailable'
                         }
                     </p>
 
@@ -338,8 +340,7 @@ const ProductDetails = ({ product }: Props) => {
                         <ProductQuantityButton />
 
                         {wholesaleTier && (
-                            wholesaleUnlocked ? (
-                                // Threshold met — confirm wholesale is active
+                            isWholesaleUnlocked ? (
                                 <div className="inline-flex items-center gap-2 text-success bg-success-tint px-3 py-2 rounded-full w-fit text-xs sm:text-sm">
                                     <WholesaleCheckIcon className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
@@ -347,7 +348,6 @@ const ProductDetails = ({ product }: Props) => {
                                     </p>
                                 </div>
                             ) : (
-                                // Threshold not yet met — nudge user to add more
                                 <div className="inline-flex items-center gap-2 text-warning bg-warning-tint px-3 py-2 rounded-full w-fit text-xs sm:text-sm">
                                     <Package className="shrink-0 w-4 h-4" />
                                     <p className="font-medium">
@@ -361,18 +361,18 @@ const ProductDetails = ({ product }: Props) => {
                     {/* ADD TO CART / BUY NOW / FAVORITE */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <div className="flex gap-3 sm:contents">
-                            <Button type="button" onClick={handleAddToCart} disabled={!canProceed}
+                            <Button type="button" onClick={handleAddToCart} disabled={!canAddToCart}
                                 className="sm:flex-1 h-11 bg-brand hover:bg-brand-hover text-white rounded-full cursor-pointer">
                                 <ShoppingCart className="mr-2 w-4 h-4" />
                                 Add to cart
                             </Button>
-                            <Button type="button" variant="outline" disabled={!canProceed}
+                            <Button type="button" variant="outline" disabled={!canAddToCart}
                                 className="sm:flex-1 h-11 border-brand text-brand rounded-full hover:bg-brand hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                                asChild={canProceed}>
-                                {canProceed ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
+                                asChild={canAddToCart}>
+                                {canAddToCart ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
                             </Button>
                             <Button type="button" variant="ghost" size="icon" onClick={() => handleFavoriteToggle(product.product_id)} className="shrink-0">
-                                <Heart className={`w-5 h-5 transition-colors ${favorited ? 'fill-brand text-brand' : 'text-muted-foreground'}`} />
+                                <Heart className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-brand text-brand' : 'text-muted-foreground'}`} />
                             </Button>
                         </div>
                     </div>

@@ -86,12 +86,12 @@ export default function CategoryClient({
     }
 
     const rows: Row[] = useMemo(() => {
-        return parents.map((c) => ({
-            id: c.id,
-            name: c.name,
-            subcategory_count: childrenRows.filter((child) => child.parent_id === c.id).length,
-            status: c.is_active ? 'ACTIVE' : 'ARCHIVED',
-            raw: c,
+        return parents.map((category) => ({
+            id: category.id,
+            name: category.name,
+            subcategory_count: childrenRows.filter((child) => child.parent_id === category.id).length,
+            status: category.is_active ? 'ACTIVE' : 'ARCHIVED',
+            raw: category,
         }))
     }, [parents, childrenRows])
 
@@ -103,8 +103,8 @@ export default function CategoryClient({
             key: 'status',
             label: 'Status',
             sortable: false,
-            render: (v) => {
-                const { label, variant } = STATUS_BADGE[v as CategoryStatus] ?? STATUS_BADGE.ACTIVE
+            render: (value) => {
+                const { label, variant } = STATUS_BADGE[value as CategoryStatus] ?? STATUS_BADGE.ACTIVE
                 return <StatusBadge status={label} variant={variant} />
             },
         },
@@ -171,7 +171,7 @@ export default function CategoryClient({
                 onDelete={(row) => setDeletingRow(row)}
                 onEdit={(row) => setEditingCategory(row.raw)}
                 expandedRowRender={(row) => {
-                    const subs = childrenRows.filter((c) => c.parent_id === row.id)
+                    const subs = childrenRows.filter((category) => category.parent_id === row.id)
 
                     if (subs.length === 0) {
                         return (

@@ -57,7 +57,7 @@ const DeleteVoucherDialog = ({
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  "{voucherCode}"
+                  &quot;{voucherCode}&quot;
                 </span>{" "}
                 will be archived and can no longer be used at checkout. It can
                 be restored at any time from the edit panel.

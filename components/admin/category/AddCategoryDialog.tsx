@@ -19,7 +19,7 @@ type Props = {
 export default function AddCategoryDialog({ open, onClose}: Props) {
   const router = useRouter()
 
-  const handleSuccess = (data: AddCategoryFormValues) => {
+  const handleSuccess = (_data: AddCategoryFormValues) => {
     router.refresh()
     onClose()
   }

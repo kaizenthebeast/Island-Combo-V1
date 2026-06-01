@@ -101,14 +101,14 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
 
   const rows: TableRow[] = useMemo(
     () =>
-      voucher.map((v) => ({
-        id: v.id,
-        code: v.code,
-        value: `${v.value}%`,
-        min_quantity: v.min_quantity != null ? `${v.min_quantity} items` : '—',
-        expires_at: formatDate(v.expires_at),
-        effective_status: v.effective_status,
-        raw: v,
+      voucher.map((voucherItem) => ({
+        id: voucherItem.id,
+        code: voucherItem.code,
+        value: `${voucherItem.value}%`,
+        min_quantity: voucherItem.min_quantity != null ? `${voucherItem.min_quantity} items` : '—',
+        expires_at: formatDate(voucherItem.expires_at),
+        effective_status: voucherItem.effective_status,
+        raw: voucherItem,
       })),
     [voucher],
   )
@@ -125,8 +125,8 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
       key: 'effective_status',
       label: 'Status',
       sortable: false,
-      render: (v) => {
-        const { label, variant } = STATUS_BADGE[v as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
+      render: (value) => {
+        const { label, variant } = STATUS_BADGE[value as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
         return <StatusBadge status={label} variant={variant} />
       },
     },

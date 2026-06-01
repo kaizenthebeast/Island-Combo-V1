@@ -15,20 +15,20 @@ import React from 'react'
 //   sortable  — set to false to disable sorting on this column (defaults to true)
 // Types
 
-export interface ColumnDef<T> {
-  key: keyof T
+export interface ColumnDef<Row> {
+  key: keyof Row
   label: string
-  render?: (value: T[keyof T], row: T) => React.ReactNode
+  render?: (value: Row[keyof Row], row: Row) => React.ReactNode
   width?: string
   align?: 'left' | 'center' | 'right'
   sortable?: boolean
 }
 
-export interface DataTableProps<T extends Record<string, unknown>> {
+export interface DataTableProps<Row extends Record<string, unknown>> {
   // Data (already paginated by the server)
-  rows: T[]
+  rows: Row[]
   total: number
-  columns: ColumnDef<T>[]
+  columns: ColumnDef<Row>[]
   loading?: boolean
 
   // Pagination
@@ -49,17 +49,17 @@ export interface DataTableProps<T extends Record<string, unknown>> {
   filterOptions?: string[]                          // first item = "show all"
 
   // Sort
-  sortKey?: keyof T
+  sortKey?: keyof Row
   sortDir?: 'asc' | 'desc'
-  onSortChange?: (key: keyof T, dir: 'asc' | 'desc') => void
+  onSortChange?: (key: keyof Row, dir: 'asc' | 'desc') => void
 
   // Actions
-  onEdit?: (row: T) => void
-  onDelete?: (row: T) => void
+  onEdit?: (row: Row) => void
+  onDelete?: (row: Row) => void
 
   // Expandable rows
-  getRowId?: (row: T) => string | number
-  expandedRowRender?: (row: T) => React.ReactNode
+  getRowId?: (row: Row) => string | number
+  expandedRowRender?: (row: Row) => React.ReactNode
 
   className?: string
 }
@@ -148,7 +148,7 @@ function getPageWindow(current: number, totalPages: number, span = 1): (number |
 
 // DataTable
 
-export function DataTable<T extends Record<string, unknown>>({
+export function DataTable<Row extends Record<string, unknown>>({
   rows,
   total,
   columns,
@@ -179,7 +179,7 @@ export function DataTable<T extends Record<string, unknown>>({
   expandedRowRender,
 
   className = '',
-}: DataTableProps<T>) {
+}: DataTableProps<Row>) {
 
   const [expandedRowId, setExpandedRowId] = React.useState<string | number | null>(null)
 
@@ -191,7 +191,7 @@ export function DataTable<T extends Record<string, unknown>>({
   const startRow = total === 0 ? 0 : (safePage - 1) * pageSize + 1
   const endRow = Math.min(safePage * pageSize, total)
 
-  const handleSort = (key: keyof T, sortable: boolean) => {
+  const handleSort = (key: keyof Row, sortable: boolean) => {
     if (!sortable || !onSortChange) return
     if (sortKey === key) {
       onSortChange(key, sortDir === 'asc' ? 'desc' : 'asc')
@@ -200,7 +200,7 @@ export function DataTable<T extends Record<string, unknown>>({
     }
   }
 
-  const SortArrow = ({ col }: { col: keyof T }) => (
+  const SortArrow = ({ col }: { col: keyof Row }) => (
     <span className={`ml-1 text-xs ${sortKey === col ? 'text-foreground' : 'text-muted-foreground'}`}>
       {sortKey === col ? (sortDir === 'asc' ? '↑' : '↓') : '↕'}
     </span>

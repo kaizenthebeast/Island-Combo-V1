@@ -229,7 +229,7 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
     name: `variants.${variantIndex}.pricing_tiers`,
   })
 
-  // FIX: cast errors.variants as any before numeric indexing
+  // react-hook-form can't type errors on numerically-indexed field arrays, so cast to read them.
   const tierErrors = (errors.variants as any)?.[variantIndex]?.pricing_tiers
 
   return (
@@ -406,10 +406,10 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
       {fields.length > 0 && (
         <div className="grid grid-cols-5 gap-1.5">
           {fields.map((field, idx) => {
-            const img = watch(`variants.${variantIndex}.images.${idx}`)
-            const isPrimary = img?.is_primary
+            const image = watch(`variants.${variantIndex}.images.${idx}`)
+            const isPrimary = image?.is_primary
             // Existing image: has a url (Storage path) and no File object
-            const isExisting = !img?.file && !!img?.url
+            const isExisting = !image?.file && !!image?.url
 
             return (
               <div
@@ -421,7 +421,7 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={img?.preview}
+                  src={image?.preview}
                   alt=""
                   className="w-full h-full object-cover"
                 />
@@ -454,7 +454,7 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
                     type="button"
                     onClick={() => remove(idx)}
                     title="Remove"
-                    className="p-1.5 rounded bg-white/20 text-white hover:bg-danger-tint0/80 transition-colors"
+                    className="p-1.5 rounded bg-white/20 text-white hover:bg-danger/80 transition-colors"
                   >
                     <TrashIcon />
                   </button>
@@ -622,7 +622,7 @@ export function VariantCard({
 }) {
   const { register, watch, setValue, getValues, formState: { errors } } = useFormContext<any>()
 
-  // FIX: cast errors.variants as any before numeric indexing
+  // react-hook-form can't type errors on numerically-indexed field arrays, so cast to read them.
   const variantErrors = (errors.variants as any)?.[index]
 
   const attributes: { attribute_name: string; attribute_value: string }[] =
@@ -666,7 +666,6 @@ export function VariantCard({
 
       <div className="p-4 flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          {/* FIX: cast .message as string | undefined */}
           <Field label="Price" required error={variantErrors?.price?.message as string | undefined}>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-muted-foreground pointer-events-none font-medium select-none">₱</span>
@@ -1023,7 +1022,7 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
         <div className="rounded-lg border border-dashed border-border py-10 flex flex-col items-center gap-2 text-center">
           <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">No details added</span>
           <p className="text-[11px] text-muted-foreground max-w-[200px]">
-            Optional — skip this step if you don't have extra specs to display
+            Optional — skip this step if you don&apos;t have extra specs to display
           </p>
         </div>
       ) : (
@@ -1036,7 +1035,6 @@ export function Step3Details({ fieldName = 'details' }: { fieldName?: 'details' 
 
           {fields.map((field, idx) => (
             <div key={field.id} className="grid grid-cols-[1fr_1fr_80px_32px] gap-2 items-start">
-              {/* FIX: cast indexed fieldErrors access as any */}
               <Field label="" error={(fieldErrors?.[idx] as any)?.attribute_name?.message as string | undefined}>
                 <Input {...register(`${fieldName}.${idx}.attribute_name`)} placeholder="Material" />
               </Field>

@@ -79,15 +79,15 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
     }
 
     const rows: Row[] = useMemo(() => {
-        return products.map((p) => ({
-            product_id: p.product_id,
-            name:       p.name,
-            category:   p.category?.name ?? '—',
-            type:       p.type,
-            variants:   p.variants.length,
-            stock:      p.variants.reduce((sum, v) => sum + (v.stock ?? 0), 0),
-            status:     p.status,
-            raw:        p,
+        return products.map((product) => ({
+            product_id: product.product_id,
+            name:       product.name,
+            category:   product.category?.name ?? '—',
+            type:       product.type,
+            variants:   product.variants.length,
+            stock:      product.variants.reduce((sum, variant) => sum + (variant.stock ?? 0), 0),
+            status:     product.status,
+            raw:        product,
         }))
     }, [products])
 
@@ -101,8 +101,8 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
         {
             key: 'status',
             label: 'Status',
-            render: (v) => {
-                const { label, variant } = STATUS_BADGE[v as ProductStatus] ?? STATUS_BADGE.ACTIVE
+            render: (value) => {
+                const { label, variant } = STATUS_BADGE[value as ProductStatus] ?? STATUS_BADGE.ACTIVE
                 return <StatusBadge status={label} variant={variant} />
             },
         },
@@ -169,21 +169,21 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                 onDelete={(row) => setDeletingRow(row)}
                 onEdit={(row) => setEditingProduct(row.raw)}
                 expandedRowRender={(row) => {
-                    const p = row.raw
+                    const product = row.raw
                     return (
                         <div className="space-y-4 text-sm">
-                            {p.description && (
+                            {product.description && (
                                 <div>
                                     <h4 className="font-semibold text-foreground">Description</h4>
-                                    <p className="text-muted-foreground">{p.description}</p>
+                                    <p className="text-muted-foreground">{product.description}</p>
                                 </div>
                             )}
-                            {p.product_details.length > 0 && (
+                            {product.product_details.length > 0 && (
                                 <div>
                                     <h4 className="font-semibold text-foreground">Details</h4>
                                     <ul className="list-disc ml-5 text-muted-foreground">
-                                        {p.product_details.map((d, i) => (
-                                            <li key={i}>{d.attribute_name}: {d.attribute_value}</li>
+                                        {product.product_details.map((detail, index) => (
+                                            <li key={index}>{detail.attribute_name}: {detail.attribute_value}</li>
                                         ))}
                                     </ul>
                                 </div>
@@ -191,15 +191,15 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                             <div>
                                 <h4 className="font-semibold text-foreground">Variants</h4>
                                 <div className="space-y-2">
-                                    {p.variants.map((v) => (
-                                        <div key={v.variant_id} className="border rounded-lg p-3">
-                                            <p><strong>SKU:</strong> {v.sku}</p>
-                                            <p><strong>Price:</strong> {v.price}</p>
-                                            <p><strong>Stock:</strong> {v.stock}</p>
-                                            {v.attributes.length > 0 && (
+                                    {product.variants.map((variant) => (
+                                        <div key={variant.variant_id} className="border rounded-lg p-3">
+                                            <p><strong>SKU:</strong> {variant.sku}</p>
+                                            <p><strong>Price:</strong> {variant.price}</p>
+                                            <p><strong>Stock:</strong> {variant.stock}</p>
+                                            {variant.attributes.length > 0 && (
                                                 <div className="mt-1 text-xs text-muted-foreground">
-                                                    {v.attributes.map((a, i) => (
-                                                        <span key={i}>{a.name}: {a.value} </span>
+                                                    {variant.attributes.map((attr, index) => (
+                                                        <span key={index}>{attr.name}: {attr.value} </span>
                                                     ))}
                                                 </div>
                                             )}
@@ -208,7 +208,7 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                                 </div>
                             </div>
                             <div className="text-xs text-muted-foreground">
-                                Created: {new Date(p.created_at).toLocaleString()}
+                                Created: {new Date(product.created_at).toLocaleString()}
                             </div>
                         </div>
                     )

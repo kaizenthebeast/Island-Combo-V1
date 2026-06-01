@@ -24,9 +24,9 @@ export const HTTP = {
 
 export type HttpStatus = (typeof HTTP)[keyof typeof HTTP]
 
-export type ApiSuccess<T> = { success: true; data?: T; message?: string }
+export type ApiSuccess<Data> = { success: true; data?: Data; message?: string }
 export type ApiFailure    = { success: false; message: string }
-export type ApiResponse<T> = ApiSuccess<T> | ApiFailure
+export type ApiResponse<Data> = ApiSuccess<Data> | ApiFailure
 
 type InitOptions = {
   status?: number
@@ -35,11 +35,11 @@ type InitOptions = {
 
 // Success
 
-export function apiOk<T>(
-  payload?: { data?: T; message?: string },
+export function apiOk<Data>(
+  payload?: { data?: Data; message?: string },
   init: InitOptions = {},
 ) {
-  const body: ApiSuccess<T> = { success: true }
+  const body: ApiSuccess<Data> = { success: true }
   if (payload?.data    !== undefined) body.data    = payload.data
   if (payload?.message !== undefined) body.message = payload.message
 
@@ -62,13 +62,13 @@ export function apiError(message: string, status: number, init: Omit<InitOptions
 // Many lib functions return { success, status, message, data? }. Forward them
 // to the client without rewriting each route by hand.
 
-type LibResult<T> =
-  | { success: true;  status: number; message?: string; data?: T }
+type LibResult<Data> =
+  | { success: true;  status: number; message?: string; data?: Data }
   | { success: false; status: number; message:  string }
 
-export function apiResult<T>(result: LibResult<T>) {
+export function apiResult<Data>(result: LibResult<Data>) {
   if (!result.success) return apiError(result.message, result.status)
-  return apiOk<T>(
+  return apiOk<Data>(
     { data: result.data, message: result.message },
     { status: result.status },
   )

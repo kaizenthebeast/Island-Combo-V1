@@ -40,7 +40,7 @@ const CheckoutContainer = () => {
             href="/"
             className="w-full mt-2 px-6 py-2 rounded-full border border-brand text-brand hover:bg-brand hover:text-white transition text-center text-sm md:text-base"
           >
-            Let's Go Shopping!
+            Let&apos;s Go Shopping!
           </Link>
 
         </div>

@@ -18,7 +18,7 @@ type Props = {
 export default function AddProductDialog({ open, onClose }: Props) {
   const router = useRouter()
 
-  const handleSuccess = (data: ProductFormValues) => {
+  const handleSuccess = (_data: ProductFormValues) => {
     router.refresh()
     onClose()
   }

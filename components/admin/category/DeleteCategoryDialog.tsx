@@ -58,7 +58,7 @@ const DeleteCategoryDialog = ({
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  "{categoryName}"
+                  &quot;{categoryName}&quot;
                 </span>{" "}
                 will be archived and hidden from your storefront. Any products
                 linked to this category will be unaffected and it can be

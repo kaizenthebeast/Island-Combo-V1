@@ -186,7 +186,7 @@ const MobileAddressSelector = ({
               <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
                 <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                 <p className="text-sm text-warning font-medium">
-                  You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+                  You&apos;ve reached the maximum of 3 saved addresses. Remove one to add a new one.
                 </p>
               </div>
             ) : (

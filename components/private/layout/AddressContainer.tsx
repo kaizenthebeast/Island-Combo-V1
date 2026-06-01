@@ -14,6 +14,8 @@ import { useCartStore } from "@/store/cartStore"
 import { useCheckoutStore } from "@/store/useCheckoutStore"
 import { getZoneFromAddress, type ShippingZone } from "@/lib/shipping/zone"
 
+const MAX_SAVED_ADDRESSES = 3
+
 type ShippingQuote = {
   success: true
   zone: ShippingZone
@@ -27,29 +29,52 @@ type ShippingQuote = {
   }
 }
 
+const AddressLoadingRow = () => (
+  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
+    <Loader2 className="w-4 h-4 animate-spin" />
+    Loading addresses…
+  </div>
+)
+
+const AddressFetchError = ({ message, onRetry }: { message: string; onRetry: () => void }) => (
+  <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
+    <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
+    <div className="flex flex-col gap-1">
+      <p className="text-sm text-danger font-medium">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="text-xs text-danger underline underline-offset-2 w-fit"
+      >
+        Try again
+      </button>
+    </div>
+  </div>
+)
+
 const AddressContainer = () => {
-  const [method, setMethod] = useState<"deliver" | "pickup">("deliver")
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<"deliver" | "pickup">("deliver")
   const [addresses, setAddresses] = useState<Address[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null)
-  const [addingNew, setAddingNew] = useState(false)
+  const [isAddingNew, setIsAddingNew] = useState(false)
 
-  // Selecting a saved address cancels the inline "new address" mode
+  // Selecting a saved address cancels the inline "new address" mode.
   const handleSelectSaved = (id: number | null) => {
     setSelectedAddressId(id)
-    setAddingNew(false)
+    setIsAddingNew(false)
   }
 
   const [shippingQuote, setShippingQuote] = useState<ShippingQuote | null>(null)
-  const [shippingLoading, setShippingLoading] = useState(false)
+  const [isLoadingShipping, setIsLoadingShipping] = useState(false)
   const [shippingError, setShippingError] = useState<string | null>(null)
 
-  // Account profile — used to pre-fill (and lock) the name + phone on the Add Address form
+  // Account profile — used to pre-fill (and lock) the name + phone on the Add Address form.
   const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null>(null)
 
-  const cart = useCartStore((s) => s.cart)
-  const setShipping = useCheckoutStore((s) => s.setShipping)
+  const cart = useCartStore((state) => state.cart)
+  const setShipping = useCheckoutStore((state) => state.setShipping)
 
   const fetchAddresses = useCallback(async () => {
     try {
@@ -57,15 +82,15 @@ const AddressContainer = () => {
       const userAddresses = await getUserAddress()
       setAddresses(userAddresses)
 
-      // Auto-select the default address on first load only
-      const defaultAddress = userAddresses.find((a: Address) => a.make_default)
+      // Auto-select the default address on first load only.
+      const defaultAddress = userAddresses.find((address: Address) => address.make_default)
       if (defaultAddress && !selectedAddressId) {
         setSelectedAddressId(defaultAddress.id)
       }
     } catch (error: any) {
       setFetchError(error.message ?? 'Failed to load addresses')
     } finally {
-      setLoading(false)
+      setIsLoadingAddresses(false)
     }
   }, [selectedAddressId])
 
@@ -80,14 +105,14 @@ const AddressContainer = () => {
         if (!cancelled) setProfile(p ? { first_name: p.first_name, last_name: p.last_name, phone_text: p.phone_text } : null)
       })
       .catch(() => {
-        // Silently ignore the form just won't be pre-filled. Address fetch error already surfaces auth issues.
+        // Ignore: the form just won't be pre-filled. The address fetch already surfaces auth issues.
       })
     return () => { cancelled = true }
   }, [])
 
-  // Hit /api/shipping whenever the user is delivering to a known address with a non-empty cart
+  // Re-quote shipping whenever the user is delivering to a known address with a non-empty cart.
   useEffect(() => {
-    if (method === "pickup") {
+    if (fulfillmentMethod === "pickup") {
       setShippingQuote(null)
       setShippingError(null)
       setShipping(0, null)
@@ -101,10 +126,10 @@ const AddressContainer = () => {
       return
     }
 
-    const selected = addresses.find((a) => a.id === selectedAddressId)
-    if (!selected) return
+    const selectedAddress = addresses.find((address) => address.id === selectedAddressId)
+    if (!selectedAddress) return
 
-    const zone = getZoneFromAddress(selected)
+    const zone = getZoneFromAddress(selectedAddress)
     if (!zone) {
       setShippingError("Could not resolve shipping zone for this address.")
       setShippingQuote(null)
@@ -116,27 +141,27 @@ const AddressContainer = () => {
 
     const fetchShipping = async () => {
       try {
-        setShippingLoading(true)
+        setIsLoadingShipping(true)
         setShippingError(null)
-        const res = await fetch("/api/shipping", {
+        const response = await fetch("/api/shipping", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
           body: JSON.stringify({
             zone,
-            country: selected.country,
-            postalCode: selected.postal_code,
+            country: selectedAddress.country,
+            postalCode: selectedAddress.postal_code,
             // No per-product weight available yet — assume 1kg per piece.
-            items: cart.map((i) => ({ weightKg: 1, qty: i.quantity })),
+            items: cart.map((item) => ({ weightKg: 1, qty: item.quantity })),
           }),
         })
-        const json = await res.json()
-        if (!res.ok || !json.success) {
-          throw new Error(json.message || "Failed to calculate shipping")
+        const payload = await response.json()
+        if (!response.ok || !payload.success) {
+          throw new Error(payload.message || "Failed to calculate shipping")
         }
-        const quote = json.data as ShippingQuote
+        const quote = payload.data as ShippingQuote
         setShippingQuote(quote)
-        // Default to GCR when available, fall back to QPI
+        // Prefer GCR, fall back to QPI.
         if (quote.options.gcr) {
           setShipping(quote.options.gcr.cost, "GCR")
         } else if (quote.options.qpi) {
@@ -144,20 +169,20 @@ const AddressContainer = () => {
         } else {
           setShipping(null, null)
         }
-      } catch (err: any) {
-        if (err?.name === "AbortError") return
-        setShippingError(err?.message ?? "Failed to calculate shipping")
+      } catch (error: any) {
+        if (error?.name === "AbortError") return
+        setShippingError(error?.message ?? "Failed to calculate shipping")
         setShippingQuote(null)
         setShipping(null, null)
       } finally {
-        setShippingLoading(false)
+        setIsLoadingShipping(false)
       }
     }
 
     fetchShipping()
 
     return () => controller.abort()
-  }, [method, selectedAddressId, addresses, cart])
+  }, [fulfillmentMethod, selectedAddressId, addresses, cart])
 
   return (
     <main className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">
@@ -170,9 +195,9 @@ const AddressContainer = () => {
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
-              onClick={() => setMethod("deliver")}
+              onClick={() => setFulfillmentMethod("deliver")}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
-                ${method === "deliver"
+                ${fulfillmentMethod === "deliver"
                   ? "border-brand bg-brand-tint text-brand"
                   : "border-border bg-muted text-muted-foreground hover:border-border"
                 }`}
@@ -182,9 +207,9 @@ const AddressContainer = () => {
             </button>
             <button
               type="button"
-              onClick={() => setMethod("pickup")}
+              onClick={() => setFulfillmentMethod("pickup")}
               className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all duration-200
-                ${method === "pickup"
+                ${fulfillmentMethod === "pickup"
                   ? "border-brand bg-brand-tint text-brand"
                   : "border-border bg-muted text-muted-foreground hover:border-border"
                 }`}
@@ -195,34 +220,33 @@ const AddressContainer = () => {
           </div>
 
           {/* Shipping quote status (deliver method only) */}
-          {method === "deliver" && (shippingLoading || shippingError || shippingQuote) && (
+          {fulfillmentMethod === "deliver" && (isLoadingShipping || shippingError || shippingQuote) && (
             <div className="rounded-xl border p-4 shadow-xs flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-brand" />
                 <h3 className="text-sm font-bold text-foreground">Shipping estimate</h3>
               </div>
 
-              {shippingLoading && (
+              {isLoadingShipping && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Calculating shipping…
                 </div>
               )}
 
-              {!shippingLoading && shippingError && (
+              {!isLoadingShipping && shippingError && (
                 <div className="flex items-start gap-2 text-sm text-danger">
                   <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                   <p>{shippingError}</p>
                 </div>
               )}
 
-              {!shippingLoading && !shippingError && shippingQuote && (
+              {!isLoadingShipping && !shippingError && shippingQuote && (
                 <div className="flex flex-col gap-1 text-sm text-foreground">
                   <p className="text-xs text-muted-foreground">
                     Zone: <span className="font-medium text-foreground">{shippingQuote.zone}</span> · {shippingQuote.totalPieces} piece(s) · {shippingQuote.totalWeightKg}kg
                   </p>
-                  {/* Show only the method that the billing summary is using
-                      (GCR preferred, QPI as fallback when GCR is unavailable). */}
+                  {/* Show only the method the billing summary uses (GCR preferred, QPI fallback). */}
                   {shippingQuote.options.gcr ? (
                     <div className="flex justify-between">
                       <span>Standard (GCR){shippingQuote.options.gcr.appliedMin ? " — min charge" : ""}</span>
@@ -240,23 +264,21 @@ const AddressContainer = () => {
           )}
 
           {/* Pickup location (pickup method only) */}
-          {method === "pickup" && (
+          {fulfillmentMethod === "pickup" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
-             
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm font-semibold text-foreground">Island Combo</p>
-                  <p className="text-sm text-muted-foreground">
-                    Dolonier, Kolonia, Federated States of Micronesia 
-                    <br />
-                    #691-320-6666
-                  </p>
-                </div>
-            
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-semibold text-foreground">Island Combo</p>
+                <p className="text-sm text-muted-foreground">
+                  Dolonier, Kolonia, Federated States of Micronesia
+                  <br />
+                  #691-320-6666
+                </p>
+              </div>
             </div>
           )}
 
           {/* Addresses (deliver method only) */}
-          {method === "deliver" && (
+          {fulfillmentMethod === "deliver" && (
             <>
               {/* DESKTOP: saved-address list + inline new-address form */}
               <div className="hidden md:flex flex-col gap-6">
@@ -265,30 +287,13 @@ const AddressContainer = () => {
                     <h2 className="text-base font-bold text-foreground">Saved Addresses</h2>
                   </div>
 
-                  {loading && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading addresses…
-                    </div>
+                  {isLoadingAddresses && <AddressLoadingRow />}
+
+                  {!isLoadingAddresses && fetchError && (
+                    <AddressFetchError message={fetchError} onRetry={fetchAddresses} />
                   )}
 
-                  {!loading && fetchError && (
-                    <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5 ">
-                      <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm text-danger font-medium">{fetchError}</p>
-                        <button
-                          type="button"
-                          onClick={fetchAddresses}
-                          className="text-xs text-danger underline underline-offset-2 w-fit"
-                        >
-                          Try again
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {!loading && !fetchError && addresses.length === 0 && (
+                  {!isLoadingAddresses && !fetchError && addresses.length === 0 && (
                     <div className="flex flex-col items-center gap-2 py-8 text-center">
                       <MapPin className="w-8 h-8 text-muted-foreground" />
                       <p className="text-sm font-medium text-muted-foreground">No saved addresses yet</p>
@@ -296,7 +301,7 @@ const AddressContainer = () => {
                     </div>
                   )}
 
-                  {!loading && !fetchError && addresses.map((address) => (
+                  {!isLoadingAddresses && !fetchError && addresses.map((address) => (
                     <AddressDetails
                       key={address.id}
                       address={address}
@@ -307,11 +312,11 @@ const AddressContainer = () => {
                   ))}
                 </div>
 
-                {addresses.length < 3 ? (
+                {addresses.length < MAX_SAVED_ADDRESSES ? (
                   <div className="flex flex-col gap-4">
                     <label
                       className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${
-                        addingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
+                        isAddingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -321,16 +326,16 @@ const AddressContainer = () => {
                       <input
                         type="radio"
                         name="selectedAddress"
-                        checked={addingNew}
+                        checked={isAddingNew}
                         onChange={() => {
-                          setAddingNew(true)
+                          setIsAddingNew(true)
                           setSelectedAddressId(null)
                         }}
                         className="w-5 h-5 accent-brand cursor-pointer shrink-0"
                       />
                     </label>
 
-                    {addingNew && (
+                    {isAddingNew && (
                       <div className="rounded-xl border border-border p-5 shadow-xs">
                         <h3 className="text-base font-bold text-foreground mb-4">New address</h3>
                         <AddressFormBody
@@ -343,10 +348,10 @@ const AddressContainer = () => {
                             phone: profile?.phone_text ?? "",
                           }}
                           onSuccess={() => {
-                            setAddingNew(false)
+                            setIsAddingNew(false)
                             fetchAddresses()
                           }}
-                          onCancel={() => setAddingNew(false)}
+                          onCancel={() => setIsAddingNew(false)}
                         />
                       </div>
                     )}
@@ -355,7 +360,7 @@ const AddressContainer = () => {
                   <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
                     <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
                     <p className="text-sm text-warning font-medium">
-                      You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+                      You&apos;ve reached the maximum of {MAX_SAVED_ADDRESSES} saved addresses. Remove one to add a new one.
                     </p>
                   </div>
                 )}
@@ -363,25 +368,10 @@ const AddressContainer = () => {
 
               {/* MOBILE: tap-to-open list / form selector */}
               <div className="md:hidden">
-                {loading ? (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground py-4 justify-center">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Loading addresses…
-                  </div>
+                {isLoadingAddresses ? (
+                  <AddressLoadingRow />
                 ) : fetchError ? (
-                  <div className="flex items-start gap-2 rounded-md border border-danger/30 bg-danger-tint px-3 py-2.5">
-                    <AlertCircle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm text-danger font-medium">{fetchError}</p>
-                      <button
-                        type="button"
-                        onClick={fetchAddresses}
-                        className="text-xs text-danger underline underline-offset-2 w-fit"
-                      >
-                        Try again
-                      </button>
-                    </div>
-                  </div>
+                  <AddressFetchError message={fetchError} onRetry={fetchAddresses} />
                 ) : (
                   <MobileAddressSelector
                     addresses={addresses}

@@ -7,7 +7,7 @@ const PROTECTED_ROUTES = ["/protected", "/checkout/address"];
 const ADMIN_ROUTES = ["/admin"];
 
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const response = NextResponse.next({ request });
 
   const supabase = createServerClient(
     requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),

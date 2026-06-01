@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
-import { User, Settings, LogOut, Star, Ticket, PackageSearch, CreditCard } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,

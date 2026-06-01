@@ -118,7 +118,7 @@ export function EditProductForm({ product, onSuccess, onCancel }: EditProductFor
     mode: 'onTouched',
   })
 
-  const { trigger, formState: { errors, isDirty }, setError } = methods
+  const { trigger, formState: { errors, isDirty } } = methods
 
   useEffect(() => {
     const count = STEP_FIELDS[step].filter((k) => !!errors[k as keyof typeof errors]).length

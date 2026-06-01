@@ -156,7 +156,7 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
 
           {atAddressLimit && (
             <p className='text-xs text-warning bg-warning-tint border border-warning/30 rounded-md px-3 py-2'>
-              You've reached the maximum of 3 saved addresses. Remove one to add a new one.
+              You&apos;ve reached the maximum of 3 saved addresses. Remove one to add a new one.
             </p>
           )}
         </div>

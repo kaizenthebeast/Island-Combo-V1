@@ -12,7 +12,7 @@ const Loyalty = () => {
 
       <div className='flex flex-col items-center justify-center text-center py-8 gap-2'>
         <p className='text-3xl font-bold text-brand'>0 pts</p>
-        <p className='text-sm text-muted-foreground'>You haven't earned any loyalty points yet.</p>
+        <p className='text-sm text-muted-foreground'>You haven&apos;t earned any loyalty points yet.</p>
       </div>
     </div>
   )

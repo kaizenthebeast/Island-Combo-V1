@@ -13,6 +13,18 @@ import ProductQuantityButton from '../functional-ui/product/ProductQuantityButto
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { useCartStore } from '@/store/cartStore'
 import { customToast } from '@/components/popup/ToastCustom'
+import { variantMatchesSelection } from '@/helper/variantSelection'
+
+const WHOLESALE_LABEL = 'wholesale'
+const PLACEHOLDER_IMAGE = '/images/placeholder.png'
+
+const roundToCents = (value: number) => Math.round(value * 100) / 100
+
+// Leading numeric prefix of a value (e.g. "12oz" → 12), used to sort sizes numerically.
+const parseLeadingNumber = (value: string): number => {
+  const match = value.match(/^[\d.]+/)
+  return match ? parseFloat(match[0]) : NaN
+}
 
 type Props = {
   product: FavoriteView
@@ -21,31 +33,34 @@ type Props = {
 const FavoriteCard: React.FC<Props> = ({ product }) => {
   const hasDiscount = product.discount !== null && product.discount > 0
   const [isAdding, setIsAdding] = useState(false)
-  const [open, setOpen] = useState(false)
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   const { addItem, quantityInput, resetQuantity } = useCartStore()
 
-  const attributeKeys: string[] = useMemo(() => {
-    return Array.from(
-      new Set(
-        (product.variants ?? []).flatMap(v => v.attributes?.map(a => a.name) ?? [])
-      )
-    )
-  }, [product.variants])
+  const attributeKeys: string[] = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (product.variants ?? []).flatMap(
+            (variant) => variant.attributes?.map((attr) => attr.name) ?? [],
+          ),
+        ),
+      ),
+    [product.variants],
+  )
 
   const [selectedAttributes, setSelectedAttributes] = useState<Record<string, string | null>>(
-    () => Object.fromEntries(attributeKeys.map(k => [k, null]))
+    () => Object.fromEntries(attributeKeys.map((key) => [key, null])),
   )
 
   const defaultVariant = product.variants?.[0]
 
-  // Card-level wholesale flag: true if ANY variant has a wholesale tier — mirrors
-  // the catalog mv's has_wholesale. (The sheet below still uses the variant-specific
-  // tier for live pricing.) This keeps the favorites card consistent with the
-  // product page, which shows the badge whenever wholesale exists on the product.
+  // Card-level wholesale flag: true if ANY variant has a wholesale tier (mirrors the
+  // catalog mv's has_wholesale) so the card badge matches the product page. The sheet
+  // below uses the variant-specific tier for live pricing.
   const cardWholesaleTier = useMemo(() => {
-    for (const v of product.variants ?? []) {
-      const tier = v.pricing_tiers?.find((t) => t.label === 'wholesale')
+    for (const variant of product.variants ?? []) {
+      const tier = variant.pricing_tiers?.find((candidate) => candidate.label === WHOLESALE_LABEL)
       if (tier) return tier
     }
     return null
@@ -56,94 +71,86 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
     ? originalPrice * (1 - (product.discount ?? 0) / 100)
     : originalPrice
 
-  const parseLeadingNumber = (val: string): number => {
-    const match = val.match(/^[\d.]+/)
-    return match ? parseFloat(match[0]) : NaN
-  }
-
+  // Available values for one attribute, given the other already-selected attributes.
+  // Numeric-leading values (sizes) sort numerically; the rest alphabetically.
   function getOptionsForKey(key: string): string[] {
-    const raw = Array.from(
+    const otherSelectedKeys = attributeKeys.filter(
+      (otherKey) => otherKey !== key && selectedAttributes[otherKey] !== null,
+    )
+    const optionValues = Array.from(
       new Set(
         (product.variants ?? [])
-          .filter(v =>
-            attributeKeys
-              .filter(k => k !== key && selectedAttributes[k] !== null)
-              .every(k =>
-                v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-              )
+          .filter((variant) =>
+            variantMatchesSelection(variant, otherSelectedKeys, selectedAttributes),
           )
-          .flatMap(v =>
-            v.attributes?.filter(a => a.name === key).map(a => a.value) ?? []
-          )
-      )
+          .flatMap(
+            (variant) =>
+              variant.attributes?.filter((attr) => attr.name === key).map((attr) => attr.value) ?? [],
+          ),
+      ),
     )
 
-    return raw.sort((a, b) => {
-      const numA = parseLeadingNumber(a)
-      const numB = parseLeadingNumber(b)
-      if (!isNaN(numA) && !isNaN(numB)) return numA - numB
-      if (!isNaN(numA)) return -1
-      if (!isNaN(numB)) return 1
+    return optionValues.sort((a, b) => {
+      const aNumber = parseLeadingNumber(a)
+      const bNumber = parseLeadingNumber(b)
+      if (!isNaN(aNumber) && !isNaN(bNumber)) return aNumber - bNumber
+      if (!isNaN(aNumber)) return -1
+      if (!isNaN(bNumber)) return 1
       return a.localeCompare(b)
     })
   }
 
-  const resolvedVariant = attributeKeys.every(k => selectedAttributes[k] !== null)
-    ? (product.variants ?? []).find(v =>
-        attributeKeys.every(k =>
-          v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-        )
+  const allAttributesSelected = attributeKeys.every((key) => selectedAttributes[key] !== null)
+  const selectedKeys = attributeKeys.filter((key) => selectedAttributes[key] !== null)
+
+  // The exact variant once every attribute is chosen; null until then.
+  const resolvedVariant = allAttributesSelected
+    ? (product.variants ?? []).find((variant) =>
+        variantMatchesSelection(variant, attributeKeys, selectedAttributes),
       ) ?? null
     : null
 
-  const displayVariant = resolvedVariant
-    ?? (product.variants ?? []).find(v =>
-        attributeKeys
-          .filter(k => selectedAttributes[k] !== null)
-          .every(k =>
-            v.attributes?.some(a => a.name === k && a.value === selectedAttributes[k])
-          )
-      )
-    ?? defaultVariant
+  // Best variant to preview: the resolved one, else the closest partial match,
+  // else the first variant.
+  const displayVariant =
+    resolvedVariant ??
+    (product.variants ?? []).find((variant) =>
+      variantMatchesSelection(variant, selectedKeys, selectedAttributes),
+    ) ??
+    defaultVariant
 
-  // Wholesale tier logic
-  // Derived from displayVariant.pricing_tiers — same logic as ProductDetails.
-  // wholesaleTier: the wholesale tier for the current variant (null if none).
-  // wholesaleUnlocked: true when quantityInput meets the min_quantity threshold.
-  // wholesalePrice: base price minus discount_percent, computed for display.
-  const wholesaleTier = displayVariant?.pricing_tiers?.find(
-    (t) => t.label === 'wholesale'
-  ) ?? null
-
-  const wholesaleUnlocked = wholesaleTier !== null && quantityInput >= wholesaleTier.min_quantity
-
+  // Wholesale pricing for the previewed variant (same logic as ProductDetails).
+  const wholesaleTier =
+    displayVariant?.pricing_tiers?.find((tier) => tier.label === WHOLESALE_LABEL) ?? null
+  const isWholesaleUnlocked = wholesaleTier !== null && quantityInput >= wholesaleTier.min_quantity
   const wholesalePrice = wholesaleTier
-    ? Math.round((displayVariant?.price ?? 0) * (1 - wholesaleTier.discount_percent / 100) * 100) / 100
+    ? roundToCents((displayVariant?.price ?? 0) * (1 - wholesaleTier.discount_percent / 100))
     : null
 
-  const canProceed = !!resolvedVariant && quantityInput > 0
+  const canAddToCart = !!resolvedVariant && quantityInput > 0
 
   useEffect(() => {
-    if (open) resetQuantity()
-  }, [open])
+    if (isSheetOpen) resetQuantity()
+  }, [isSheetOpen])
 
   function handleAttributeSelect(key: string, value: string) {
     const keyIndex = attributeKeys.indexOf(key)
-    setSelectedAttributes(prev => {
-      const next = { ...prev, [key]: value }
-      attributeKeys.slice(keyIndex + 1).forEach(k => { next[k] = null })
-      return next
+    setSelectedAttributes((previous) => {
+      const updated = { ...previous, [key]: value }
+      // Selecting an earlier attribute clears the later (dependent) ones.
+      attributeKeys.slice(keyIndex + 1).forEach((laterKey) => { updated[laterKey] = null })
+      return updated
     })
   }
 
   async function handleAddToCart() {
     if (isAdding) return
 
-    const firstUnselected = attributeKeys.find(k => !selectedAttributes[k])
-    if (firstUnselected) {
+    const firstUnselectedKey = attributeKeys.find((key) => !selectedAttributes[key])
+    if (firstUnselectedKey) {
       customToast.error({
-        title: `Please select a ${firstUnselected}`,
-        description: `Choose a ${firstUnselected} option before adding to cart.`,
+        title: `Please select a ${firstUnselectedKey}`,
+        description: `Choose a ${firstUnselectedKey} option before adding to cart.`,
       })
       return
     }
@@ -165,9 +172,9 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
     try {
       await addItem(resolvedVariant.variant_id, quantityInput, sizeValue)
 
-      const error = useCartStore.getState().error
-      if (error) {
-        customToast.error({ title: 'Failed to add to cart', description: error })
+      const addError = useCartStore.getState().error
+      if (addError) {
+        customToast.error({ title: 'Failed to add to cart', description: addError })
         return
       }
 
@@ -175,7 +182,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
         title: 'Added to cart',
         description: `${product.product_name} has been added to your cart.`,
       })
-      setOpen(false)
+      setIsSheetOpen(false)
     } finally {
       setIsAdding(false)
     }
@@ -184,10 +191,9 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
   return (
     <>
       <Card
-        onClick={() => setOpen(true)}
+        onClick={() => setIsSheetOpen(true)}
         className="w-full h-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group"
       >
-        {/* Wholesale badge — shown when ANY variant has a wholesale tier */}
         {cardWholesaleTier && (
           <div className="absolute top-0 right-0 bg-brand text-white text-xs px-3 py-1 rounded-tr-md rounded-bl-md z-10 flex items-center gap-1">
             <Package className="w-3 h-3" />
@@ -197,7 +203,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
         <div className="relative w-full aspect-square overflow-hidden rounded-md bg-muted">
           <Image
-            src={getPublicImageUrl(product.primary_image) ?? '/images/placeholder.png'}
+            src={getPublicImageUrl(product.primary_image) ?? PLACEHOLDER_IMAGE}
             alt={product.product_name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105 bg-muted rounded-md overflow-hidden"
@@ -222,7 +228,6 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               </span>
             </div>
           )}
-          {/* Wholesale nudge on card */}
           {cardWholesaleTier && (
             <p className="text-xs text-brand font-medium">
               Buy {cardWholesaleTier.min_quantity}+ for {cardWholesaleTier.discount_percent}% off
@@ -234,7 +239,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
           <Button
             type="button"
             variant="outline"
-            onClick={(e) => { e.stopPropagation(); setOpen(true) }}
+            onClick={(e) => { e.stopPropagation(); setIsSheetOpen(true) }}
             className="w-full rounded-full border-brand text-brand text-xs sm:text-sm font-bold hover:bg-brand hover:text-white transition-colors duration-200"
           >
             Add To Cart
@@ -242,8 +247,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
         </CardFooter>
       </Card>
 
-      {/* Sheet */}
-      <Sheet open={open} onOpenChange={setOpen}>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent
           side="right"
           className="w-full sm:max-w-sm p-0 flex flex-col overflow-y-auto [&>button]:hidden"
@@ -254,7 +258,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               <SheetDescription>Product details and add to cart options</SheetDescription>
             </VisuallyHidden>
             <button
-              onClick={() => setOpen(false)}
+              onClick={() => setIsSheetOpen(false)}
               className="flex items-center gap-1 text-foreground hover:text-black transition-colors w-fit"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -263,11 +267,11 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
           <div className="flex flex-col flex-1 pt-4 pb-6 gap-6">
 
-            {/* Product Summary Row */}
+            {/* Product summary row */}
             <div className="flex gap-4 items-start px-4">
               <div className="relative w-24 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
                 <Image
-                  src={getPublicImageUrl(product.primary_image) ?? '/images/placeholder.png'}
+                  src={getPublicImageUrl(product.primary_image) ?? PLACEHOLDER_IMAGE}
                   alt={product.product_name}
                   fill
                   className="object-cover"
@@ -280,16 +284,15 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                   {product.product_name}
                 </h2>
 
-                {/* Price — swaps to wholesale price when threshold is met */}
+                {/* Price — swaps to wholesale price when the quantity threshold is met */}
                 <div className="flex items-center gap-2 flex-wrap mt-1">
                   <span className="text-base font-bold text-foreground">
-                    ${wholesaleUnlocked && wholesalePrice !== null
+                    ${isWholesaleUnlocked && wholesalePrice !== null
                       ? wholesalePrice.toFixed(2)
                       : (displayVariant?.final_price ?? discountedPrice).toFixed(2)
                     }
                   </span>
-                  {wholesaleUnlocked && wholesalePrice !== null ? (
-                    // Wholesale active — show original price struck through
+                  {isWholesaleUnlocked && wholesalePrice !== null ? (
                     <>
                       <span className="text-sm text-muted-foreground line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
@@ -299,7 +302,6 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                       </span>
                     </>
                   ) : hasDiscount && (
-                    // Regular sale discount
                     <>
                       <span className="text-sm text-muted-foreground line-through">
                         ${(displayVariant?.price ?? originalPrice).toFixed(2)}
@@ -311,7 +313,6 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                   )}
                 </div>
 
-                {/* Wholesale available badge in sheet header */}
                 {wholesaleTier && (
                   <div className="mt-1 flex items-center gap-1.5 bg-brand text-white text-xs px-3 py-1.5 rounded-full w-fit font-medium">
                     <ShoppingBag className="w-3.5 h-3.5" />
@@ -323,7 +324,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
             <div className="bg-muted h-[8px] rounded-md" />
 
-            {/* Attribute Pickers */}
+            {/* Attribute pickers. The first key renders image thumbnails, the rest text chips. */}
             {attributeKeys.map((key, keyIndex) => {
               const options = getOptionsForKey(key)
               const isFirstKey = keyIndex === 0
@@ -336,12 +337,12 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                       const isSelected = selectedAttributes[key] === value
 
                       if (isFirstKey) {
-                        const repVariant = (product.variants ?? []).find(v =>
-                          v.attributes?.some(a => a.name === key && a.value === value)
+                        const representativeVariant = (product.variants ?? []).find((variant) =>
+                          variant.attributes?.some((attr) => attr.name === key && attr.value === value),
                         )
-                        const thumbnailUrl = repVariant?.image_url?.[0]
-                          ? getPublicImageUrl(repVariant.image_url[0])
-                          : '/images/placeholder.png'
+                        const thumbnailUrl = representativeVariant?.image_url?.[0]
+                          ? getPublicImageUrl(representativeVariant.image_url[0])
+                          : PLACEHOLDER_IMAGE
 
                         return (
                           <button
@@ -352,7 +353,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                           >
                             <div className={`w-14 h-14 relative overflow-hidden border-2 rounded-md transition-colors ${isSelected ? 'border-brand' : 'border-border hover:border-border'}`}>
                               <Image
-                                src={thumbnailUrl ?? '/images/placeholder.png'}
+                                src={thumbnailUrl ?? PLACEHOLDER_IMAGE}
                                 fill sizes="56px"
                                 className="object-cover"
                                 alt={value}
@@ -385,7 +386,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               <p className="text-sm font-medium text-foreground px-4">
                 {resolvedVariant
                   ? `Stocks: ${resolvedVariant.stock}`
-                  : `Select ${attributeKeys.find(k => !selectedAttributes[k]) ?? 'an option'} to see stock`
+                  : `Select ${attributeKeys.find((key) => !selectedAttributes[key]) ?? 'an option'} to see stock`
                 }
               </p>
             )}
@@ -396,8 +397,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
               <ProductQuantityButton />
 
               {wholesaleTier && (
-                wholesaleUnlocked ? (
-                  //  Threshold met — confirm wholesale is active
+                isWholesaleUnlocked ? (
                   <div className="inline-flex items-center gap-2 text-success bg-success-tint px-3 py-2 rounded-md w-fit text-sm">
                     <WholesaleCheckIcon size={14} className="shrink-0" />
                     <p className="font-medium">
@@ -405,7 +405,6 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
                     </p>
                   </div>
                 ) : (
-                  //  Nudge — show how many more needed
                   <div className="inline-flex items-center gap-2 text-warning bg-warning-tint px-3 py-2 rounded-md w-fit text-sm">
                     <Package size={14} className="shrink-0" />
                     <p className="font-medium">
@@ -418,12 +417,12 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
 
             <div className="flex-1" />
 
-            {/* Add to Cart */}
+            {/* Add to cart */}
             <div className="px-6">
               <Button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={!canProceed || isAdding}
+                disabled={!canAddToCart || isAdding}
                 className="w-full rounded-full bg-brand hover:bg-brand-hover disabled:opacity-40 text-white font-bold text-base py-6 transition-colors duration-200"
               >
                 {isAdding ? 'Adding...' : 'Add to cart'}

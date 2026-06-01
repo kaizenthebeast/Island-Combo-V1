@@ -3,7 +3,7 @@
 import * as React from "react"
 import {
   Users, Package, ShoppingCart, Crown, Megaphone,
-  LayoutDashboard, Tag, Layers, ListOrdered, Star,
+  LayoutDashboard, Tag, ListOrdered, Star,
   Percent, ShieldX, ImagePlay, ShieldAlert, ScrollText,
 } from "lucide-react"
 import { NavMain } from "@/components/nav-main"

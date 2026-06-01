@@ -66,15 +66,15 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
     }
 
     const rows: Row[] = useMemo(() => {
-        return users.map((u) => ({
-            user_id: u.user_id,
-            name: [u.first_name, u.last_name].filter(Boolean).join(' ') || '—',
-            email: u.email ?? '—',
-            phone: u.phone_text ?? '—',
-            role: u.role,
-            points: u.total_points,
-            joined: new Date(u.member_since).toLocaleDateString(),
-            raw: u,
+        return users.map((user) => ({
+            user_id: user.user_id,
+            name: [user.first_name, user.last_name].filter(Boolean).join(' ') || '—',
+            email: user.email ?? '—',
+            phone: user.phone_text ?? '—',
+            role: user.role,
+            points: user.total_points,
+            joined: new Date(user.member_since).toLocaleDateString(),
+            raw: user,
         }))
     }, [users])
 
@@ -87,10 +87,10 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
             label: 'Role',
             align: 'center',
             sortable: false,
-            render: (v) => (
+            render: (value) => (
                 <StatusBadge
-                    status={String(v)}
-                    variant={getRoleVariant(String(v))}
+                    status={String(value)}
+                    variant={getRoleVariant(String(value))}
                 />
             ),
         },
@@ -138,7 +138,7 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
                 getRowId={(row) => row.user_id}
                 onDelete={handleDelete}
                 expandedRowRender={(row) => {
-                    const u = row.raw
+                    const user = row.raw
 
                     return (
                         <div className="space-y-4 text-sm">
@@ -147,46 +147,46 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
                             <div>
                                 <h4 className="font-semibold text-foreground">Personal Info</h4>
                                 <ul className="mt-1 space-y-1 text-muted-foreground">
-                                    <li><strong>Sex:</strong> {u.sex ?? '—'}</li>
-                                    <li><strong>Age:</strong> {u.age ?? '—'}</li>
+                                    <li><strong>Sex:</strong> {user.sex ?? '—'}</li>
+                                    <li><strong>Age:</strong> {user.age ?? '—'}</li>
                                 </ul>
                             </div>
 
                             {/* DEFAULT ADDRESS */}
-                            {u.default_address && (
+                            {user.default_address && (
                                 <div>
                                     <h4 className="font-semibold text-foreground">Default Address</h4>
                                     <div className="mt-1 border rounded-lg p-3 text-muted-foreground">
                                         <p>
-                                            {u.default_address}, {u.default_locality}, {u.default_postal_code}, {u.default_country}
+                                            {user.default_address}, {user.default_locality}, {user.default_postal_code}, {user.default_country}
                                         </p>
                                         <p className="text-xs text-muted-foreground mt-1">
-                                            {u.total_addresses} address{u.total_addresses !== 1 ? 'es' : ''} total
+                                            {user.total_addresses} address{user.total_addresses !== 1 ? 'es' : ''} total
                                         </p>
                                     </div>
                                 </div>
                             )}
 
                             {/* POINTS SUMMARY */}
-                            {u.total_orders > 0 && (
+                            {user.total_orders > 0 && (
                                 <div>
                                     <h4 className="font-semibold text-foreground">Points Summary</h4>
                                     <ul className="mt-1 space-y-1 text-muted-foreground">
                                         <li className="flex justify-between">
                                             <span>Lifetime Earned</span>
-                                            <span className="text-success">+{u.lifetime_points_earned} pts</span>
+                                            <span className="text-success">+{user.lifetime_points_earned} pts</span>
                                         </li>
                                         <li className="flex justify-between">
                                             <span>Lifetime Spent</span>
-                                            <span className="text-danger">-{u.lifetime_points_spent} pts</span>
+                                            <span className="text-danger">-{user.lifetime_points_spent} pts</span>
                                         </li>
                                         <li className="flex justify-between">
                                             <span>Current Balance</span>
-                                            <span className="font-medium">{u.total_points} pts</span>
+                                            <span className="font-medium">{user.total_points} pts</span>
                                         </li>
-                                        {u.last_pts_activity && (
+                                        {user.last_pts_activity && (
                                             <li className="text-xs text-muted-foreground">
-                                                Last activity: {new Date(u.last_pts_activity).toLocaleDateString()}
+                                                Last activity: {new Date(user.last_pts_activity).toLocaleDateString()}
                                             </li>
                                         )}
                                     </ul>
@@ -199,19 +199,19 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
                                 <ul className="mt-1 space-y-1 text-muted-foreground">
                                     <li className="flex justify-between">
                                         <span>Total Orders</span>
-                                        <span>{u.total_orders}</span>
+                                        <span>{user.total_orders}</span>
                                     </li>
                                     <li className="flex justify-between">
                                         <span>Total Spent</span>
-                                        <span>₱{u.total_order_value.toLocaleString()}</span>
+                                        <span>₱{user.total_order_value.toLocaleString()}</span>
                                     </li>
                                     <li className="flex justify-between">
                                         <span>Discounts Received</span>
-                                        <span>₱{u.total_discount_received.toLocaleString()}</span>
+                                        <span>₱{user.total_discount_received.toLocaleString()}</span>
                                     </li>
-                                    {u.last_order_at && (
+                                    {user.last_order_at && (
                                         <li className="text-xs text-muted-foreground">
-                                            Last order: {new Date(u.last_order_at).toLocaleDateString()}
+                                            Last order: {new Date(user.last_order_at).toLocaleDateString()}
                                         </li>
                                     )}
                                 </ul>
@@ -219,7 +219,7 @@ export default function UsersClient({ users, total, page, pageSize }: Props) {
 
                             {/* META */}
                             <div className="text-xs text-muted-foreground">
-                                User ID: {u.user_id} · Joined: {new Date(u.member_since).toLocaleString()}
+                                User ID: {user.user_id} · Joined: {new Date(user.member_since).toLocaleString()}
                             </div>
 
                         </div>

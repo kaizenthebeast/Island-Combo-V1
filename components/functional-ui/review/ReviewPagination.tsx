@@ -73,10 +73,6 @@ export default function ReviewPagination({
         return pages
     }
 
-    const startItem = total === 0 ? 0 : (currentPage - 1) * pageSize + 1
-    // Use actual loaded reviews count, not pageSize, so partial last pages are correct
-    const endItem = (currentPage - 1) * pageSize + reviews.length
-
     return (
         <div id="reviews" className="flex flex-col gap-5">
             <h2 className="title-header text-lg sm:text-xl md:text-2xl">
