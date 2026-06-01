@@ -10,7 +10,7 @@ import {
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
-// ─── GET /api/category ────────────────────────────────────────────────────────
+// GET /api/category
 
 export async function GET() {
   try {
@@ -21,7 +21,7 @@ export async function GET() {
   }
 }
 
-// ─── POST /api/category ───────────────────────────────────────────────────────
+// POST /api/category
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── PATCH /api/category ──────────────────────────────────────────────────────
+// PATCH /api/category
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -55,7 +55,7 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// ─── PUT /api/category — Restore an archived category (admin) ────────────────
+// PUT /api/category — Restore an archived category (admin)
 
 export async function PUT(req: NextRequest) {
   try {
@@ -72,7 +72,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ─── DELETE /api/category — Soft delete a category (admin) ───────────────────
+// DELETE /api/category — Soft delete a category (admin)
 
 export async function DELETE(req: NextRequest) {
   try {

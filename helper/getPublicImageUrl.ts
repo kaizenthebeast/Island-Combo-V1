@@ -1,4 +1,6 @@
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+import { requireEnv } from '@/lib/env'
+
+const SUPABASE_URL = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')
 
 export function getPublicImageUrl(
   path: string | null | undefined,

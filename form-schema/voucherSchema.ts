@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// ─── Reusable field definitions ───────────────────────────────────────────────
+// Reusable field definitions
 
 const codeField = z
   .string()
@@ -30,7 +30,7 @@ const expiresAtField = z
     { message: 'Expiry date must be in the future' }
   )
 
-// ─── Add ─────────────────────────────────────────────────────────────────────
+// Add
 
 export const addVoucherSchema = z.object({
   code:         codeField,
@@ -41,7 +41,7 @@ export const addVoucherSchema = z.object({
 })
 export type AddVoucherFormValues = z.input<typeof addVoucherSchema>
 
-// ─── Edit ─────────────────────────────────────────────────────────────────────
+// Edit
 
 export const editVoucherSchema = z.object({
   code:         codeField,
@@ -53,7 +53,7 @@ export const editVoucherSchema = z.object({
 
 export type EditVoucherFormValues = z.infer<typeof editVoucherSchema>
 
-// ─── Apply (customer-side promo code input) ──────────────────────────────────
+// Apply (customer-side promo code input)
 
 export const applyVoucherSchema = z.object({
   voucherCode: z

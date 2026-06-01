@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Shared HTTP plumbing for route handlers.
 //
 // Standard response shape:
@@ -9,7 +8,6 @@ import { NextResponse } from 'next/server'
 //
 // Every route handler must go through these helpers. No hard-coded status
 // numbers and no inline NextResponse.json({ error: '...' }, { status: 401 }).
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const HTTP = {
   OK:           200,
@@ -35,7 +33,7 @@ type InitOptions = {
   headers?: HeadersInit
 }
 
-// ─── Success ──────────────────────────────────────────────────────────────────
+// Success
 
 export function apiOk<T>(
   payload?: { data?: T; message?: string },
@@ -51,7 +49,7 @@ export function apiOk<T>(
   })
 }
 
-// ─── Failure ──────────────────────────────────────────────────────────────────
+// Failure
 
 export function apiError(message: string, status: number, init: Omit<InitOptions, 'status'> = {}) {
   return NextResponse.json<ApiFailure>(
@@ -60,7 +58,7 @@ export function apiError(message: string, status: number, init: Omit<InitOptions
   )
 }
 
-// ─── Pass-through for lib results ─────────────────────────────────────────────
+// Pass-through for lib results
 // Many lib functions return { success, status, message, data? }. Forward them
 // to the client without rewriting each route by hand.
 
@@ -76,7 +74,7 @@ export function apiResult<T>(result: LibResult<T>) {
   )
 }
 
-// ─── Catch-block helper ───────────────────────────────────────────────────────
+// Catch-block helper
 // Maps thrown errors to a consistent failure response. `Unauthorized` thrown
 // by a lib (e.g. getMyAccount) becomes a 401 instead of a 500.
 

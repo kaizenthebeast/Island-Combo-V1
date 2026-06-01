@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import type { Category } from '@/types/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
 
-// ─── READ (paginated parents + their children) ────────────────────────────────
+// READ (paginated parents + their children)
 
 export type CategoriesSortKey = 'category_id' | 'name'
 
@@ -94,7 +94,7 @@ export const getCategoriesPage = async (
   return { parents, children, total: count ?? 0 }
 }
 
-// ─── CREATE ───────────────────────────────────────────────────────────────────
+// CREATE
 
 export const createCategory = async (data: AddCategoryFormValues) => {
   const supabase = await createClient()
@@ -111,7 +111,7 @@ export const createCategory = async (data: AddCategoryFormValues) => {
   return { success: true, status: 201, message: 'Category successfully created' }
 }
 
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
+// UPDATE
 
 export const updateCategory = async (id: number, data: EditCategoryFormValues) => {
   const supabase = await createClient()
@@ -130,7 +130,7 @@ export const updateCategory = async (id: number, data: EditCategoryFormValues) =
   return { success: true, status: 200, message: 'Category successfully updated' }
 }
 
-// ─── SOFT DELETE ──────────────────────────────────────────────────────────────
+// SOFT DELETE
 
 export const softDeleteCategory = async (id: number) => {
   const supabase = await createClient()
@@ -146,7 +146,7 @@ export const softDeleteCategory = async (id: number) => {
   return id
 }
 
-// ─── RESTORE ──────────────────────────────────────────────────────────────────
+// RESTORE
 
 export const restoreCategory = async (id: number) => {
   const supabase = await createClient()

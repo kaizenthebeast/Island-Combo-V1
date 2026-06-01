@@ -39,7 +39,7 @@ const ProductDetails = ({ product }: Props) => {
         product.variants[0]
     )
 
-    // ─── Derive all attribute dimensions from the variants ──────────────────
+    // Derive all attribute dimensions from the variants
     const attributeKeys: string[] = Array.from(
         new Set(
             product.variants.flatMap(v => v.attributes?.map(a => a.name) ?? [])
@@ -75,7 +75,7 @@ const ProductDetails = ({ product }: Props) => {
         ? allProductImages
         : ["/images/placeholder.png"]
 
-    // ───  Resolved variant ────────────────────────────────────────────────
+    // Resolved variant
     const resolvedVariant = attributeKeys.every(k => selectedAttributes[k] !== null)
         ? product.variants.find(v =>
             attributeKeys.every(k =>
@@ -84,7 +84,7 @@ const ProductDetails = ({ product }: Props) => {
         ) ?? null
         : null
 
-    // ───  Display variant ─────────────────────────────────────────────────
+    // Display variant
     const displayVariant = resolvedVariant
         ?? product.variants.find(v =>
             attributeKeys
@@ -95,7 +95,7 @@ const ProductDetails = ({ product }: Props) => {
         )
         ?? defaultVariant
 
-    // ───  Wholesale tier logic ────────────────────────────────────────────
+    // Wholesale tier logic
     const wholesaleTier = displayVariant?.pricing_tiers?.find(
         (t) => t.label === 'wholesale'
     ) ?? null
@@ -122,7 +122,7 @@ const ProductDetails = ({ product }: Props) => {
         }
     }, [api])
 
-    // ─── Available options per attribute key ────────────────────────────────
+    // Available options per attribute key
     function getOptionsForKey(key: string): string[] {
         return Array.from(
             new Set(
@@ -141,7 +141,7 @@ const ProductDetails = ({ product }: Props) => {
         )
     }
 
-    // ─── Select an attribute value ──────────────────────────────────────────
+    // Select an attribute value
     function handleAttributeSelect(key: string, value: string) {
         const keyIndex = attributeKeys.indexOf(key)
         setSelectedAttributes(prev => {

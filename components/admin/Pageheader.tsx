@@ -48,7 +48,7 @@ export function PageHeader({ title, eyebrow, subtitle, actions = [], className =
   return (
     <div className={`flex items-start justify-between mb-8 ${className}`}>
 
-      {/* ── Left: text block ── */}
+      {/* Left: text block */}
       <div>
         {eyebrow && (
           <div className="flex items-center gap-2 mb-1">
@@ -71,7 +71,7 @@ export function PageHeader({ title, eyebrow, subtitle, actions = [], className =
         )}
       </div>
 
-      {/* ── Right: action buttons ── */}
+      {/* Right: action buttons */}
       {actions.length > 0 && (
         <div className="flex items-center gap-2 shrink-0 mt-1">
           {actions.map(action => (

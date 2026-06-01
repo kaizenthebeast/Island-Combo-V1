@@ -11,7 +11,7 @@ import { useTableUrlState } from '@/hooks/useTableUrlState'
 import { archiveVoucher } from '@/lib/admin/voucher'
 import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/types/voucher'
 
-// ─── table row shape ──────────────────────────────────────────────────────────
+// table row shape
 
 type TableRow = {
   id: number
@@ -23,7 +23,7 @@ type TableRow = {
   raw: Voucher
 }
 
-// ─── status badge config ──────────────────────────────────────────────────────
+// status badge config
 
 const STATUS_BADGE: Record<VoucherEffectiveStatus, { label: string; variant: BadgeVariant }> = {
   ACTIVE:   { label: 'Active',   variant: 'success' },
@@ -32,7 +32,7 @@ const STATUS_BADGE: Record<VoucherEffectiveStatus, { label: string; variant: Bad
   ARCHIVED: { label: 'Archived', variant: 'default' },
 }
 
-// ─── formatters ───────────────────────────────────────────────────────────────
+// formatters
 
 const formatDate = (iso: string | null): string => {
   if (!iso) return '—'
@@ -43,7 +43,7 @@ const formatDate = (iso: string | null): string => {
   })
 }
 
-// ─── component ────────────────────────────────────────────────────────────────
+// component
 
 interface Props {
   voucher: VoucherRow[]
@@ -76,7 +76,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     sortDir: 'desc',
   })
 
-  // ── archive ────────────────────────────────────────────────────────────────
+  // archive
 
   const handleArchiveConfirm = (): Promise<void> => {
     if (!deletingRow) return Promise.resolve()
@@ -97,7 +97,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     })
   }
 
-  // ── rows ───────────────────────────────────────────────────────────────────
+  // rows
 
   const rows: TableRow[] = useMemo(
     () =>
@@ -113,7 +113,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     [voucher],
   )
 
-  // ── columns ────────────────────────────────────────────────────────────────
+  // columns
 
   const columns: ColumnDef<TableRow>[] = [
     { key: 'id',               label: 'ID',       width: '70px'                       },
@@ -132,7 +132,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     },
   ]
 
-  // ── render ─────────────────────────────────────────────────────────────────
+  // render
 
   return (
     <section className="min-h-full bg-muted px-6 py-10">

@@ -1,4 +1,4 @@
-// ─── Banner Slider ────────────────────────────────────────────
+// Banner Slider
 // Full-width rotating hero banners (typically at the top of a page)
 
 export type Banner = {
@@ -20,7 +20,7 @@ export type BannerInsert = Omit<Banner, 'id' | 'created_at' | 'updated_at'>
 export type BannerUpdate = Partial<BannerInsert>
 
 
-// ─── Promotion Ads ────────────────────────────────────────────
+// Promotion Ads
 // Smaller ads shown in specific sections/pages across the storefront.
 // Use `placement` to control where each ad appears on the frontend.
 
@@ -51,7 +51,7 @@ export type PromotionAdInsert = Omit<PromotionAd, 'id' | 'created_at' | 'updated
 export type PromotionAdUpdate = Partial<PromotionAdInsert>
 
 
-// ─── Shared helpers ───────────────────────────────────────────
+// Shared helpers
 
 export type ContentStatus = 'active' | 'scheduled' | 'expired' | 'inactive'
 

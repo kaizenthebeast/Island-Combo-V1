@@ -4,11 +4,11 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 const msg = (error: any): string | undefined => error?.message as string | undefined
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// Icons
 
 export const AlertIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,7 +16,7 @@ export const AlertIcon = () => (
   </svg>
 )
 
-// ─── Base UI ──────────────────────────────────────────────────────────────────
+// Base UI
 
 const FieldErrorCtx = React.createContext(false)
 
@@ -76,7 +76,7 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   )
 }
 
-// ─── UserFields ───────────────────────────────────────────────────────────────
+// UserFields
 
 export function UserFields() {
   const { register, formState: { errors } } = useFormContext<any>()
@@ -84,7 +84,7 @@ export function UserFields() {
   return (
     <div className="flex flex-col gap-5">
 
-      {/* ── Profile ─────────────────────────────────────────────────── */}
+      {/* Profile */}
       <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
         Profile
       </p>
@@ -142,7 +142,7 @@ export function UserFields() {
 
       <div className="h-px bg-muted" />
 
-      {/* ── Access ──────────────────────────────────────────────────── */}
+      {/* Access */}
       <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
         Access
       </p>

@@ -5,12 +5,12 @@ import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 import type { AddVoucherFormValues } from '@/form-schema/voucherSchema'
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// helpers
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const msg = (error: any): string | undefined => error?.message as string | undefined
 
-// ─── icons ────────────────────────────────────────────────────────────────────
+// icons
 
 const AlertIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,7 +18,7 @@ const AlertIcon = () => (
   </svg>
 )
 
-// ─── base UI primitives ───────────────────────────────────────────────────────
+// base UI primitives
 
 const FieldErrorCtx = React.createContext(false)
 
@@ -78,7 +78,7 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   )
 }
 
-// ─── VoucherFields ────────────────────────────────────────────────────────────
+// VoucherFields
 
 export function VoucherFields() {
   const { register, formState: { errors } } = useFormContext<AddVoucherFormValues>()
@@ -171,6 +171,6 @@ export function VoucherFields() {
   )
 }
 
-// ─── default export for backwards compat ─────────────────────────────────────
+// default export for backwards compat
 
 export default VoucherFields

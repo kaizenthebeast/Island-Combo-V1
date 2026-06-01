@@ -1,20 +1,19 @@
 import 'server-only'
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Server-side PayPal (Orders v2) client. All card data is handled by PayPal's
 // hosted Card Fields on the client and never reaches us — here we only create
 // and capture orders with a server-trusted amount.
 //
 // Required env:
-//   PAYPAL_CLIENT_ID      (falls back to NEXT_PUBLIC_PAYPAL_CLIENT_ID)
-//   PAYPAL_CLIENT_SECRET  (server-only — never expose to the client)
-//   PAYPAL_API_BASE       (optional; defaults to sandbox)
-// ─────────────────────────────────────────────────────────────────────────────
+//   NEXT_PUBLIC_PAYPAL_CLIENT_ID  (validated in getAccessToken)
+//   PAYPAL_CLIENT_SECRET          (server-only — never expose to the client)
+//   PAYPAL_API_BASE               (optional; defaults to the sandbox base)
+//   PAYPAL_CURRENCY               (optional; defaults to USD)
 
-const PAYPAL_API_BASE = process.env.PAYPAL_API_BASE
+const PAYPAL_API_BASE = process.env.PAYPAL_API_BASE ?? 'https://api-m.sandbox.paypal.com'
 const CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
-const CURRENCY = process.env.PAYPAL_CURRENCY
+const CURRENCY = process.env.PAYPAL_CURRENCY ?? 'USD'
 
 export type CapturedPayment = {
   captureId: string
@@ -25,7 +24,7 @@ export type CapturedPayment = {
 
 const getAccessToken = async (): Promise<string> => {
   if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('PayPal is not configured (missing PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET).')
+    throw new Error('PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET).')
   }
 
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')

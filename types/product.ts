@@ -31,10 +31,13 @@ export type ProductDetails = {
   discount: number | null
   status: ProductStatus
 
+  // get_product_by_slug always builds this object (jsonb_build_object), so it is
+  // never null; the inner fields are null for an uncategorized product (LEFT JOIN,
+  // products.category_id is nullable).
   category: {
-    category_id: number
-    name: string
-  } | null
+    category_id: number | null
+    name: string | null
+  }
 
   product_details: {
     attribute_name: string
@@ -43,7 +46,7 @@ export type ProductDetails = {
 
   variants: {
     variant_id: number
-    sku: string
+    sku: string | null
     price: number
     final_price: number
     stock: number

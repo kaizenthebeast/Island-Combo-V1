@@ -2,7 +2,7 @@
 import { createClient } from './supabase/server'
 import type { Category } from '@/types/category'
 
-// ─── READ ─────────────────────────────────────────────────────────────────────
+// READ
 
 export const getCategories = async (): Promise<Category[]> => {
     const supabase = await createClient()

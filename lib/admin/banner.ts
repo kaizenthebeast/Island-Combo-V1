@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { requireEnv } from '@/lib/env'
 import { revalidatePath } from 'next/cache'
 import type {
   Banner, BannerInsert, BannerUpdate,
@@ -8,7 +9,7 @@ import type {
 } from '@/types/banner'
 
 const REVALIDATE    = '/admin/content-management/banner'
-const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const SUPABASE_URL  = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')
 const BANNER_BUCKET = 'banners' as const
 
 // ════════════════════════════════════════════════════════════════

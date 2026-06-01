@@ -4,7 +4,7 @@ import { getFavorite, addFavorite, removeFavorite } from '@/lib/favorite'
 import type { AddFavoritePayload } from '@/types/favorite'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
-// ─── GET /api/favorite — Fetch the current user's favorites ──────────────────
+// GET /api/favorite — Fetch the current user's favorites
 // Auth required — favorites are user-scoped.
 // Returns FavoriteView[] with full product + variant detail.
 
@@ -20,7 +20,7 @@ export async function GET() {
   }
 }
 
-// ─── POST /api/favorite — Add a product to favorites ─────────────────────────
+// POST /api/favorite — Add a product to favorites
 // Body: { product_id: number }
 
 export async function POST(req: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── DELETE /api/favorite — Remove a product from favorites ──────────────────
+// DELETE /api/favorite — Remove a product from favorites
 // Body: { product_id: number }
 
 export async function DELETE(req: NextRequest) {

@@ -3,9 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Address } from '@/types/users';
 import { revalidatePath } from "next/cache";
 
-// ─────────────────────────────────────────────────────────────────────────────
 // Shared types
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type MyAccount = {
   user_id: string
@@ -24,11 +22,9 @@ export type MyAccount = {
 
 export type NotificationPrefs = { order_updates: boolean; promotions: boolean }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // CUSTOMER — PROFILE (self)
 // Aggregated read + scoped self-update + notification prefs. Email and role
 // are intentionally excluded — they have separate flows.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const getMyAccount = async (): Promise<MyAccount> => {
   const supabase = await createClient()

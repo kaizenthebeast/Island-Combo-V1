@@ -4,9 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { EditUserFormValues } from '@/form-schema/userSchema'
 import { escapeIlike, type PaginatedInput, type PaginatedResult } from './_shared'
 
-// ─────────────────────────────────────────────────────────────────────────────
 // PAGINATED READS (users + staff)
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type UsersSortKey = 'full_name' | 'email' | 'role' | 'total_points' | 'member_since'
 
@@ -100,11 +98,9 @@ export const getStaffPage = async (
   return { success: true, status: 200, rows: data ?? [], total: count ?? 0 }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // MUTATIONS
 // Admins can only edit / archive / restore existing accounts. New staff /
 // admin accounts are provisioned directly in Supabase, not through the app.
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const updateUser = async (userId: string, data: EditUserFormValues) => {
   const supabase = await createClient()

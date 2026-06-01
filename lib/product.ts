@@ -2,7 +2,7 @@
 import { createClient } from './supabase/server'
 import type { ProductCatalogItem, ProductDetails } from '@/types/product'
 
-// ─── PUBLIC ───────────────────────────────────────────────────────────────────
+// PUBLIC
 
 export const getAllProducts = async (
   opts?: { categoryId?: number | null; sort?: 'latest' },
@@ -62,7 +62,7 @@ function collectCategoryDescendants(
   return result
 }
 
-// ─── PUBLIC PAGINATED LIST ────────────────────────────────────────────────────
+// PUBLIC PAGINATED LIST
 // Backs `GET /api/product`. Supports descendant-aware category filter, price
 // range, sort, pagination + limit. Returns rows + total + page metadata.
 

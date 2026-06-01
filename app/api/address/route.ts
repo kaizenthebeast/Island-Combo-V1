@@ -9,7 +9,7 @@ import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond'
 // API-layer guard so unauthenticated callers fail fast with a clean 401.
 // Reads (getUserAddress) stay server-to-client; no GET handler.
 
-// ─── POST /api/address — add a new address ────────────────────────────
+// POST /api/address — add a new address
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser()
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── PATCH /api/address — update an existing address ──────────────────
+// PATCH /api/address — update an existing address
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireUser()
@@ -37,7 +37,7 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// ─── DELETE /api/address — remove an address ──────────────────────────
+// DELETE /api/address — remove an address
 export async function DELETE(req: NextRequest) {
   try {
     const user = await requireUser()

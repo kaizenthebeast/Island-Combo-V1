@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 
-// ─── APPLY (lookup by code) ───────────────────────────────────────────────────
+// APPLY (lookup by code)
 // Customer-facing: validates a code at checkout. Admin CRUD lives in lib/admin/voucher.ts.
 
 export const applyVoucher = async (

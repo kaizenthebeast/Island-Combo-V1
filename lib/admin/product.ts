@@ -49,7 +49,7 @@ export type UpdateProductPayload = {
   }[]
 }
 
-// ─── READ (paginated) ─────────────────────────────────────────────────────────
+// READ (paginated)
 
 export type AdminProductsPageInput = {
   page: number              // 1-indexed
@@ -113,7 +113,7 @@ export const getAdminProductsPage = async (
   return { rows, total: count ?? 0 }
 }
 
-// ─── CREATE ───────────────────────────────────────────────────────────────────
+// CREATE
 
 export const addAdminProduct = async (data: AddProductPayload) => {
   const supabase = await createClient()
@@ -137,7 +137,7 @@ export const addAdminProduct = async (data: AddProductPayload) => {
   return result as number
 }
 
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
+// UPDATE
 
 export const updateAdminProduct = async (
   productId: number,
@@ -187,7 +187,7 @@ export const updateAdminProduct = async (
   return result as number
 }
 
-// ─── RESTORE ──────────────────────────────────────────────────────────────────
+// RESTORE
 
 export const restoreProduct = async (productId: number) => {
   const supabase = await createClient()
@@ -203,7 +203,7 @@ export const restoreProduct = async (productId: number) => {
   return productId
 }
 
-// ─── SOFT DELETE ──────────────────────────────────────────────────────────────
+// SOFT DELETE
 
 export const softDeleteProduct = async (productId: number) => {
   const supabase = await createClient()

@@ -106,7 +106,7 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
       )
     ?? defaultVariant
 
-  // ─── Wholesale tier logic ─────────────────────────────────────────────────
+  // Wholesale tier logic
   // Derived from displayVariant.pricing_tiers — same logic as ProductDetails.
   // wholesaleTier: the wholesale tier for the current variant (null if none).
   // wholesaleUnlocked: true when quantityInput meets the min_quantity threshold.

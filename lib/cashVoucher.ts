@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth'
 import type { CashVoucher, CreateCashVoucherInput } from '@/types/cashVoucher'
 
-// ─── CREATE ─────────────────────────────────────────────────────────────────
+// CREATE
 // Creates a cash voucher after payment has succeeded. The code, status and
 // purchaser are all set server-side by the create_cash_voucher() SQL function —
 // the client never supplies them. Returns the voucher (including its code) so the
@@ -34,7 +34,7 @@ export const createCashVoucher = async (
   return { success: true, voucher: data }
 }
 
-// ─── READ (current user's vouchers) ───────────────────────────────────────────
+// READ (current user's vouchers)
 export const getMyCashVouchers = async (): Promise<CashVoucher[]> => {
   const supabase = await createClient()
 
@@ -47,7 +47,7 @@ export const getMyCashVouchers = async (): Promise<CashVoucher[]> => {
   return (data ?? []) as CashVoucher[]
 }
 
-// ─── CLAIM (staff/admin only) ─────────────────────────────────────────────────
+// CLAIM (staff/admin only)
 // Marks a pending voucher as claimed. The SQL function enforces the staff/admin
 // check, so this is safe to expose to any signed-in caller.
 export const claimCashVoucher = async (

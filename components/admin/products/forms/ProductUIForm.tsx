@@ -4,14 +4,14 @@ import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 export type Category = {
   id: number
   name: string
   parent_id: number | null
 }
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// Icons
 
 export const PlusIcon = () => (
   <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -75,7 +75,7 @@ export const TagIcon = () => (
   </svg>
 )
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// Constants
 
 export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024
@@ -102,7 +102,7 @@ export const PREDEFINED_ATTRIBUTE_TYPES: { name: string; options?: string[] }[] 
   { name: 'Style' },
 ]
 
-// ─── makeBlankVariant ─────────────────────────────────────────────────────────
+// makeBlankVariant
 
 export const makeBlankVariant = (attributeTypes: string[]) => ({
   price: undefined as unknown as number,
@@ -113,7 +113,7 @@ export const makeBlankVariant = (attributeTypes: string[]) => ({
   pricing_tiers: [] as any[],
 })
 
-// ─── Base UI ──────────────────────────────────────────────────────────────────
+// Base UI
 
 const FieldErrorCtx = React.createContext(false)
 
@@ -220,7 +220,7 @@ export function SectionDivider({ label }: { label: string }) {
   )
 }
 
-// ─── PricingTiersSection ──────────────────────────────────────────────────────
+// PricingTiersSection
 
 export function PricingTiersSection({ variantIndex }: { variantIndex: number }) {
   const { control, register, formState: { errors } } = useFormContext<any>()
@@ -309,7 +309,7 @@ export function PricingTiersSection({ variantIndex }: { variantIndex: number }) 
   )
 }
 
-// ─── ImageUploadZone ──────────────────────────────────────────────────────────
+// ImageUploadZone
 
 export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
   const { control, setValue, watch } = useFormContext<any>()
@@ -476,7 +476,7 @@ export function ImageUploadZone({ variantIndex }: { variantIndex: number }) {
   )
 }
 
-// ─── AttributeTypeSelector ────────────────────────────────────────────────────
+// AttributeTypeSelector
 
 export function AttributeTypeSelector({
   selected, onAdd, onRemove,
@@ -608,7 +608,7 @@ export function AttributeTypeSelector({
   )
 }
 
-// ─── VariantCard ──────────────────────────────────────────────────────────────
+// VariantCard
 
 export function VariantCard({
   index, onRemove, isOnly, attributeTypes, showVariantBadge = false,
@@ -758,7 +758,7 @@ export function VariantCard({
   )
 }
 
-// ─── StepIndicator ────────────────────────────────────────────────────────────
+// StepIndicator
 
 export const STEPS = [
   { label: 'Basic info', description: 'Name, category, pricing' },
@@ -809,7 +809,7 @@ export function StepIndicator({ current }: { current: number }) {
   )
 }
 
-// ─── StepErrorBanner ──────────────────────────────────────────────────────────
+// StepErrorBanner
 
 export function StepErrorBanner({ errorCount }: { errorCount: number }) {
   if (errorCount === 0) return null
@@ -825,7 +825,7 @@ export function StepErrorBanner({ errorCount }: { errorCount: number }) {
   )
 }
 
-// ─── Step1BasicInfo ───────────────────────────────────────────────────────────
+// Step1BasicInfo
 
 export function Step1BasicInfo({ categories }: { categories: Category[] }) {
   const { register, setValue, watch, formState: { errors } } = useFormContext<any>()
@@ -923,7 +923,7 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
   )
 }
 
-// ─── Step2Variants ────────────────────────────────────────────────────────────
+// Step2Variants
 
 export function Step2Variants({ showVariantBadge = false }: { showVariantBadge?: boolean }) {
   const { control, getValues, setValue, formState: { errors } } = useFormContext<any>()
@@ -998,7 +998,7 @@ export function Step2Variants({ showVariantBadge = false }: { showVariantBadge?:
   )
 }
 
-// ─── Step3Details ─────────────────────────────────────────────────────────────
+// Step3Details
 // Supports both `details` (AddProductForm) and `product_details` (EditProductForm)
 // by reading whichever key is present in the form.
 

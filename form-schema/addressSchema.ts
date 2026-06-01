@@ -12,7 +12,7 @@ export const addressSchema = z.object({
 
 export type AddressFormInput = z.infer<typeof addressSchema>;
 
-// ─── Checkout address form (used by CheckoutAddressForm) ─────────────────────
+// Checkout address form (used by CheckoutAddressForm)
 
 export const checkoutAddressSchema = z.object({
     firstName: z.string().min(1, "First name is required").max(15, "Max 15 characters").trim(),

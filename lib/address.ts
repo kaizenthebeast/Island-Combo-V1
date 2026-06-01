@@ -8,7 +8,7 @@ import type { AddressFormValues, Address } from '@/types/users'
 
 const MAX_ADDRESSES_PER_USER = 3
 
-// ─── READ ─────────────────────────────────────────────────────────────────────
+// READ
 
 export const getUserAddress = async (): Promise<Address[]> => {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export const getUserAddress = async (): Promise<Address[]> => {
   })) as Address[]
 }
 
-// ─── CREATE ───────────────────────────────────────────────────────────────────
+// CREATE
 
 export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
   const supabase = await createClient()
@@ -83,7 +83,7 @@ export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
   return { success: true, status: 201, message: 'Address successfully added' }
 }
 
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
+// UPDATE
 
 export const updateAddressInfo = async (
   addressId: number | undefined,
@@ -127,7 +127,7 @@ export const updateAddressInfo = async (
   return { success: true, status: 200, message: 'Address successfully updated' }
 }
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
+// DELETE
 
 export const deleteAddress = async (addressId: number) => {
   const supabase = await createClient()

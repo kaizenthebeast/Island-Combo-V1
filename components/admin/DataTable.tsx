@@ -5,7 +5,7 @@ import React from 'react'
 // is owned by the parent — typically synced to URL search params via
 // hooks/useTableUrlState. Pair with server-side paginated queries.
 //
-// ─── Column definition ──────────────────────────────────────────────────────
+// Column definition
 //
 //   key       — key from your data object
 //   label     — column header text
@@ -13,7 +13,7 @@ import React from 'react'
 //   width     — optional fixed width (e.g. '120px')
 //   align     — 'left' | 'center' | 'right' (defaults to 'left')
 //   sortable  — set to false to disable sorting on this column (defaults to true)
-// ─── Types ───────────────────────────────────────────────────────────────────
+// Types
 
 export interface ColumnDef<T> {
   key: keyof T
@@ -25,46 +25,46 @@ export interface ColumnDef<T> {
 }
 
 export interface DataTableProps<T extends Record<string, unknown>> {
-  // ── Data (already paginated by the server) ──
+  // Data (already paginated by the server)
   rows: T[]
   total: number
   columns: ColumnDef<T>[]
   loading?: boolean
 
-  // ── Pagination ──
+  // Pagination
   page: number                                      // 1-indexed
   pageSize: number
   onPageChange: (page: number) => void
   onPageSizeChange?: (size: number) => void
   pageSizeOptions?: number[]                        // default [10, 25, 50, 100]
 
-  // ── Search ──
+  // Search
   search: string
   onSearchChange: (q: string) => void
   searchPlaceholder?: string
 
-  // ── Filter dropdown ──
+  // Filter dropdown
   filterValue?: string
   onFilterChange?: (v: string) => void
   filterOptions?: string[]                          // first item = "show all"
 
-  // ── Sort ──
+  // Sort
   sortKey?: keyof T
   sortDir?: 'asc' | 'desc'
   onSortChange?: (key: keyof T, dir: 'asc' | 'desc') => void
 
-  // ── Actions ──
+  // Actions
   onEdit?: (row: T) => void
   onDelete?: (row: T) => void
 
-  // ── Expandable rows ──
+  // Expandable rows
   getRowId?: (row: T) => string | number
   expandedRowRender?: (row: T) => React.ReactNode
 
   className?: string
 }
 
-// ─── Icons ──────────────────────────────────────────────────────────────────
+// Icons
 
 const SearchIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -96,7 +96,7 @@ const ChevronRight = () => (
   </svg>
 )
 
-// ─── Sub-components ─────────────────────────────────────────────────────────
+// Sub-components
 
 function EmptyState({ colSpan }: { colSpan: number }) {
   return (
@@ -146,7 +146,7 @@ function getPageWindow(current: number, totalPages: number, span = 1): (number |
   return out
 }
 
-// ─── DataTable ──────────────────────────────────────────────────────────────
+// DataTable
 
 export function DataTable<T extends Record<string, unknown>>({
   rows,
@@ -209,7 +209,7 @@ export function DataTable<T extends Record<string, unknown>>({
   return (
     <div className={`bg-white rounded-2xl border border-border shadow-xs overflow-hidden ${className}`}>
 
-      {/* ── Toolbar ── */}
+      {/* Toolbar */}
       <div className="px-5 py-4 border-b border-border flex flex-wrap items-center gap-3">
 
         <div className="relative flex-1 min-w-[180px]">
@@ -239,7 +239,7 @@ export function DataTable<T extends Record<string, unknown>>({
         </span>
       </div>
 
-      {/* ── Table ── */}
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
 
@@ -352,7 +352,7 @@ export function DataTable<T extends Record<string, unknown>>({
         </table>
       </div>
 
-      {/* ── Pagination footer ── */}
+      {/* Pagination footer */}
       <div className="px-5 py-3 border-t bg-muted flex flex-wrap items-center gap-3">
         <span className="text-xs text-muted-foreground">
           {total === 0 ? 'No results' : `Showing ${startRow}–${endRow} of ${total}`}

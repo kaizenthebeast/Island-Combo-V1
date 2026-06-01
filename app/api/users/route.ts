@@ -3,7 +3,7 @@ import { requireAdmin } from '@/lib/auth'
 import { updateUser, restoreUser, softDeleteUser, deleteUser } from '@/lib/admin/users'
 import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
-// ─── PATCH /api/users — update a user (admin only) ───────────────────────────
+// PATCH /api/users — update a user (admin only)
 export async function PATCH(req: NextRequest) {
   try {
     const auth = await requireAdmin()
@@ -19,7 +19,7 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// ─── PUT /api/users — restore (reactivate) a user (admin only) ───────────────
+// PUT /api/users — restore (reactivate) a user (admin only)
 export async function PUT(req: NextRequest) {
   try {
     const auth = await requireAdmin()
@@ -35,7 +35,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ─── DELETE /api/users — soft (default) or hard (mode:"hard") delete ─────────
+// DELETE /api/users — soft (default) or hard (mode:"hard") delete
 export async function DELETE(req: NextRequest) {
   try {
     const auth = await requireAdmin()

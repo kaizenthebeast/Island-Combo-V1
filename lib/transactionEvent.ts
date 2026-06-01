@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type { TransactionEvent } from '@/types/transactionEvent'
 
-// ─── READ: audit trail for a cash voucher ─────────────────────────────────────
+// Chronological audit trail for a cash voucher.
 export const getCashVoucherEvents = async (
   cashVoucherId: string,
 ): Promise<TransactionEvent[]> => {
@@ -19,7 +19,7 @@ export const getCashVoucherEvents = async (
   return (data ?? []) as TransactionEvent[]
 }
 
-// ─── READ: audit trail for an order ───────────────────────────────────────────
+// Chronological audit trail for an order.
 export const getOrderEvents = async (orderId: number): Promise<TransactionEvent[]> => {
   const supabase = await createClient()
 

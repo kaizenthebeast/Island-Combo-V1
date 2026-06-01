@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-// ─── Shared: Product Status ───────────────────────────────────────────────────
+// Shared: Product Status
 // Mirrors the `product_status` enum in the DB (is_active removed from products table)
 export const productStatusSchema = z.enum(["ACTIVE", "DRAFT", "HIDDEN", "ARCHIVED"]);
 
-// ─── Shared: Variant Attribute ────────────────────────────────────────────────
+// Shared: Variant Attribute
 export const variantAttributeSchema = z.object({
   // Present when editing an existing attribute; absent when adding a new one
   id: z.number().int().positive().optional(),
@@ -12,7 +12,7 @@ export const variantAttributeSchema = z.object({
   attribute_value: z.string().min(1, "Attribute value is required"),
 });
 
-// ─── Shared: Variant Image ────────────────────────────────────────────────────
+// Shared: Variant Image
 // file    — File object for a newly uploaded image; null/undefined for existing ones
 // preview — blob URL (new) or Storage URL (existing)
 // path    — Storage path; only present for existing images (used for deletion)
@@ -35,7 +35,7 @@ export const variantImageSchema = z.object({
   sort_order: z.number().int().min(0),
 });
 
-// ─── Shared: Pricing Tier ─────────────────────────────────────────────────────
+// Shared: Pricing Tier
 export const pricingTierSchema = z.object({
   // Present when editing an existing tier; absent when adding a new one
   id: z.number().int().positive().optional(),
@@ -61,7 +61,7 @@ export const pricingTierSchema = z.object({
     ),
 });
 
-// ─── Shared: Product Variant ──────────────────────────────────────────────────
+// Shared: Product Variant
 export const productVariantSchema = z.object({
   // Present when editing an existing variant; absent when adding a new one
   variant_id: z.number().int().positive().optional(),
@@ -122,7 +122,7 @@ export const productVariantSchema = z.object({
   deleted_image_paths: z.array(z.string()).default([]),
 });
 
-// ─── Shared: Product Detail ───────────────────────────────────────────────────
+// Shared: Product Detail
 export const productDetailSchema = z.object({
   // Present when editing an existing detail; absent when adding a new one
   id: z.number().int().positive().optional(),
@@ -131,7 +131,7 @@ export const productDetailSchema = z.object({
   sort_order: z.number().int().min(0).default(0),
 });
 
-// ─── Root: Product Schema (Add + Edit unified) ────────────────────────────────
+// Root: Product Schema (Add + Edit unified)
 // Use `product_id` to distinguish add (absent) from edit (present) at runtime.
 export const productSchema = z.object({
   // Only present in the edit flow; absent when creating a new product
@@ -190,7 +190,7 @@ export const productSchema = z.object({
   deleted_variant_ids: z.array(z.number()).default([]),
 });
 
-// ─── Convenience type aliases ─────────────────────────────────────────────────
+// Convenience type aliases
 export type ProductFormValues      = z.infer<typeof productSchema>;
 export type ProductVariantValues   = z.infer<typeof productVariantSchema>;
 export type VariantImageValues     = z.infer<typeof variantImageSchema>;

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getMyAccount, updateMyAccount } from '@/lib/users'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
-// ─── GET /api/profile — authenticated aggregator ─────────────────────────────
+// GET /api/profile — authenticated aggregator
 // Returns identity + role + loyalty + default address for the signed-in user.
 export async function GET() {
   try {
@@ -13,7 +13,7 @@ export async function GET() {
   }
 }
 
-// ─── PATCH /api/profile — self-update (no role, no email, no address) ────────
+// PATCH /api/profile — self-update (no role, no email, no address)
 // Accepts any subset of: first_name, last_name, phone_text, sex, age.
 // Email changes belong to a separate, more sensitive auth flow.
 // Role changes go through /api/users (admin only).

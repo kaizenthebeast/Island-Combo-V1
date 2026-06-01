@@ -4,7 +4,7 @@ import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// Types
 
 export type CategoryOption = {
   category_id: number
@@ -13,7 +13,7 @@ export type CategoryOption = {
 
 const msg = (error: any): string | undefined => error?.message as string | undefined
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// Icons
 
 export const AlertIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +21,7 @@ export const AlertIcon = () => (
   </svg>
 )
 
-// ─── Base UI ──────────────────────────────────────────────────────────────────
+// Base UI
 
 const FieldErrorCtx = React.createContext(false)
 
@@ -81,7 +81,7 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   )
 }
 
-// ─── CategoryFields ───────────────────────────────────────────────────────────
+// CategoryFields
 
 export function CategoryFields({ categories }: { categories?: CategoryOption[] }) {
   const { register, formState: { errors } } = useFormContext<any>()

@@ -166,7 +166,7 @@ const AddressContainer = () => {
       <div className="grid md:grid-cols-4 grid-cols-1 gap-10">
         <div className="md:col-span-3 flex flex-col gap-6">
 
-          {/* ── Delivery method toggle ─────────────────────────────────── */}
+          {/* Delivery method toggle */}
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -194,7 +194,7 @@ const AddressContainer = () => {
             </button>
           </div>
 
-          {/* ── Shipping quote status (deliver method only) ────────────── */}
+          {/* Shipping quote status (deliver method only) */}
           {method === "deliver" && (shippingLoading || shippingError || shippingQuote) && (
             <div className="rounded-xl border p-4 shadow-xs flex flex-col gap-2">
               <div className="flex items-center gap-2">
@@ -239,7 +239,7 @@ const AddressContainer = () => {
             </div>
           )}
 
-          {/* ── Pickup location (pickup method only) ───────────────────── */}
+          {/* Pickup location (pickup method only) */}
           {method === "pickup" && (
             <div className="border rounded-xl p-5 shadow-xs flex flex-col gap-3">
              
@@ -255,7 +255,7 @@ const AddressContainer = () => {
             </div>
           )}
 
-          {/* ── Addresses (deliver method only) ────────────────────────── */}
+          {/* Addresses (deliver method only) */}
           {method === "deliver" && (
             <>
               {/* DESKTOP: saved-address list + inline new-address form */}
@@ -395,7 +395,7 @@ const AddressContainer = () => {
             </>
           )}
 
-          {/* ── Payment method ─────────────────────────────────────────── */}
+          {/* Payment method */}
           <div className="border-t border-border mt-2" />
           <PaymentMethod />
 

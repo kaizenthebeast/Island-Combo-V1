@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/lib/users'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
-// ─── GET /api/profile/notifications ──────────────────────────────────────────
+// GET /api/profile/notifications
 // Returns the signed-in user's email-notification opt-in flags.
 export async function GET() {
   try {
@@ -13,7 +13,7 @@ export async function GET() {
   }
 }
 
-// ─── PATCH /api/profile/notifications ────────────────────────────────────────
+// PATCH /api/profile/notifications
 // Body: { order_updates?: boolean, promotions?: boolean }
 export async function PATCH(req: NextRequest) {
   try {

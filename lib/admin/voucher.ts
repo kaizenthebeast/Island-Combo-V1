@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/types/voucher'
 import type { AddVoucherFormValues, EditVoucherFormValues } from '@/form-schema/voucherSchema'
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// helpers
 
 const deriveEffectiveStatus = (voucher: Voucher): VoucherEffectiveStatus => {
   if (voucher.status === 'ARCHIVED') return 'ARCHIVED'
@@ -14,7 +14,7 @@ const deriveEffectiveStatus = (voucher: Voucher): VoucherEffectiveStatus => {
   return 'ACTIVE'
 }
 
-// ─── READ (all) ───────────────────────────────────────────────────────────────
+// READ (all)
 
 export const getVouchers = async (): Promise<VoucherRow[]> => {
   const supabase = await createClient()
@@ -41,7 +41,7 @@ export const getVouchers = async (): Promise<VoucherRow[]> => {
   })
 }
 
-// ─── READ (paginated) ─────────────────────────────────────────────────────────
+// READ (paginated)
 
 export type VouchersSortKey = 'id' | 'code' | 'value' | 'expires_at' | 'created_at'
 
@@ -131,7 +131,7 @@ export const getVouchersPage = async (input: VouchersPageInput): Promise<Voucher
   return { rows, total: count ?? 0 }
 }
 
-// ─── CREATE ───────────────────────────────────────────────────────────────────
+// CREATE
 
 export const createVoucher = async (data: AddVoucherFormValues) => {
   const supabase = await createClient()
@@ -154,7 +154,7 @@ export const createVoucher = async (data: AddVoucherFormValues) => {
   return { success: true, status: 201, message: 'Voucher successfully created' }
 }
 
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
+// UPDATE
 
 export const updateVoucher = async (id: number, data: EditVoucherFormValues) => {
   const supabase = await createClient()
@@ -180,7 +180,7 @@ export const updateVoucher = async (id: number, data: EditVoucherFormValues) => 
   return { success: true, status: 200, message: 'Voucher successfully updated' }
 }
 
-// ─── ARCHIVE ──────────────────────────────────────────────────────────────────
+// ARCHIVE
 
 export const archiveVoucher = async (id: number) => {
   const supabase = await createClient()
@@ -196,7 +196,7 @@ export const archiveVoucher = async (id: number) => {
   return id
 }
 
-// ─── RESTORE ──────────────────────────────────────────────────────────────────
+// RESTORE
 
 export const restoreVoucher = async (id: number) => {
   const supabase = await createClient()

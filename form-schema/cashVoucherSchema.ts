@@ -1,8 +1,7 @@
 import { z } from 'zod'
 
-// ─── Cash Voucher purchase form (3 steps → DB voucher) ────────────────────────
-// All steps share one schema; the form validates each step's fields before
-// advancing (see CASH_VOUCHER_STEP_FIELDS).
+// Cash voucher purchase form (3 steps → DB voucher). All steps share one schema;
+// the form validates each step's fields before advancing (see CASH_VOUCHER_STEP_FIELDS).
 
 export const cashVoucherSchema = z.object({
   // Step 1 — amount. Set via the preset buttons or the custom input.

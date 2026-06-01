@@ -36,7 +36,9 @@ export type CartItem = {
   // applied_price  = price * (1 - matched_tier.discount_percent / 100)
   // applied_tier_label = e.g. "retail" | "wholesale" | "bulk"
   applied_price: number
-  applied_tier_label: string
+  // null when no tier matches the current quantity (cart_view returns it
+  // un-COALESCEd); consumers compare with === so a null is treated as "no tier".
+  applied_tier_label: string | null
 
   // variant attributes
   attributes: CartAttribute[]

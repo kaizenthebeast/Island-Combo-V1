@@ -11,7 +11,7 @@ import {
 } from '@/lib/admin/product'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
-// ─── GET /api/product — Public list (no auth) ────────────────────────────────
+// GET /api/product — Public list (no auth)
 // Query params:
 //   category_id      (number)    descendant-aware category filter
 //   min_price        (number)    inclusive lower bound on final_price
@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─── POST /api/product — Create (admin only) ─────────────────────────────────
+// POST /api/product — Create (admin only)
 
 export async function POST(req: NextRequest) {
   try {
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// ─── PATCH /api/product — Update (admin only) ────────────────────────────────
+// PATCH /api/product — Update (admin only)
 
 export async function PATCH(req: NextRequest) {
   try {
@@ -109,7 +109,7 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// ─── PUT /api/product — Restore an archived product (admin only) ─────────────
+// PUT /api/product — Restore an archived product (admin only)
 
 export async function PUT(req: NextRequest) {
   try {
@@ -128,7 +128,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// ─── DELETE /api/product — Soft-delete a product (admin only) ────────────────
+// DELETE /api/product — Soft-delete a product (admin only)
 
 export async function DELETE(req: NextRequest) {
   try {

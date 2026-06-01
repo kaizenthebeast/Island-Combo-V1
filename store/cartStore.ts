@@ -2,7 +2,6 @@ import { create } from "zustand"
 import { CartItem } from "@/types/cart"
 import { calculateCartTotals } from "@/helper/cartUtils"
 
-// ─────────────────────────────────────────────────────────────────────────────
 // TIER RESOLUTION HELPERS
 // These run client-side during optimistic updates so the UI reflects the
 // correct price immediately when a user changes quantity — without waiting
@@ -16,7 +15,6 @@ import { calculateCartTotals } from "@/helper/cartUtils"
 //   basePrice = 150
 //   quantity = 12 → 150 * (1 - 20/100) = 120 (wholesale tier)
 //   quantity = 5  → 150 * (1 - 0/100)  = 150 (retail tier)
-// ─────────────────────────────────────────────────────────────────────────────
 
 function resolveAppliedPrice(
   tiers: CartItem["pricing_tiers"],
@@ -137,12 +135,12 @@ export const useCartStore = create<CartState>((set, get) => {
     selectedQty: 0,
     selectedSubtotal: 0,
 
-    // ── Quantity Selector (product page) ──────────────────────────────────
+    // Quantity Selector (product page)
     // Controls the qty input before adding to cart, floored at 1
     incrementQty: () => set((state) => ({ quantityInput: state.quantityInput + 1 })),
     decrementQty: () => set((state) => ({ quantityInput: Math.max(1, state.quantityInput - 1) })),
 
-    // ── Fetch Cart ─────────────────────────────────────────────────────────
+    // Fetch Cart
     // Loads the full cart from the server via cart_view which includes
     // pricing_tiers, applied_price, and applied_tier_label resolved in SQL.
     // This is the source of truth  always called after mutations settle.
@@ -158,7 +156,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // ── Add Item ───────────────────────────────────────────────────────────
+    // Add Item
     // Optimistically adds a new row or increments quantity of an existing one.
     //
     // For NEW items: cast through unknown because the stub is intentionally
@@ -218,7 +216,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // ── Update Item ────────────────────────────────────────────────────────
+    // Update Item
     // Optimistically sets a new quantity and re-resolves the pricing tier
     // so the price reflects wholesale/bulk thresholds immediately in the UI.
     // i.price is passed as basePrice since discount_percent is relative to it.
@@ -250,7 +248,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // ── Remove Item ────────────────────────────────────────────────────────
+    // Remove Item
     // Optimistically removes the item from the UI, rollback if API fails.
     removeItem: async (variantId) => {
       const prev = applyOptimistic((cart) =>
@@ -269,7 +267,7 @@ export const useCartStore = create<CartState>((set, get) => {
       }
     },
 
-    // ── Instant quantity (no API) ───────────────────────────────────────────
+    // Instant quantity (no API)
     // Updates quantity + re-resolved tier pricing + totals immediately so the
     // UI feels instant while the API call is debounced by the caller. Persist
     // the final value with updateItem once the user stops clicking.
@@ -298,7 +296,7 @@ export const useCartStore = create<CartState>((set, get) => {
         }
       }),
 
-    // ── Selection ────────────────────────────────────────────────────────────
+    // Selection
     // Toggle one row's checkbox and recompute the selected-only totals.
     toggleSelected: (variantId) =>
       set((state) => {
@@ -317,7 +315,7 @@ export const useCartStore = create<CartState>((set, get) => {
         return { selectedIds, selectedQty: sel.totalQty, selectedSubtotal: sel.subtotal }
       }),
 
-    // ── Utility ────────────────────────────────────────────────────────────
+    // Utility
     // resetQuantity: resets the product page qty selector back to 1
     // clearCart: wipes all cart state used on logout or order completion
     resetQuantity: () => set({ quantityInput: 1 }),

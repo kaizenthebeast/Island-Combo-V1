@@ -48,7 +48,7 @@ export type AdminUser = {
   user_id: string
   first_name: string | null
   last_name: string | null
-  full_name: string | null
+  full_name: string
   email: string | null
   phone_text: string | null
   sex: 'Male' | 'Female' | null
@@ -88,7 +88,7 @@ export type AdminStaff = {
   user_id: string
   first_name: string | null
   last_name: string | null
-  full_name: string | null
+  full_name: string
   email: string | null
   phone_text: string | null
   sex: 'Male' | 'Female' | null
