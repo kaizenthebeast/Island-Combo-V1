@@ -27,7 +27,7 @@ const CashVoucherBanner = () => {
           </div>
 
           <Link
-            href="#"
+            href="cashvoucher"
             className="inline-flex items-center justify-center bg-brand hover:bg-brand-hover text-brand-foreground text-sm font-semibold px-5 py-2.5 rounded-md transition-colors shrink-0"
           >
             Buy Cash Voucher
