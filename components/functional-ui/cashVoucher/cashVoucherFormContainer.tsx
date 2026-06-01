@@ -2,15 +2,17 @@
 
 import React from 'react'
 import CashVoucherForm from '@/components/forms/CashVoucherForm'
+import CashVoucherPayment from '@/components/functional-ui/cashVoucher/CashVoucherPayment'
+import type { CashVoucher } from '@/types/cashVoucher'
 
 type Props = {
   step: number
-  submitting: boolean
   onNext: () => void
   onBack: () => void
+  onPaid: (voucher: CashVoucher) => void
 }
 
-const CashVoucherFormContainer = ({ step, submitting, onNext, onBack }: Props) => {
+const CashVoucherFormContainer = ({ step, onNext, onBack, onPaid }: Props) => {
   return (
     <div className="w-full max-w-md mx-auto lg:mx-0 p-5 sm:p-6 rounded-2xl shadow-lg border border-gray-100 bg-white">
       {/* Step Indicator */}
@@ -32,46 +34,43 @@ const CashVoucherFormContainer = ({ step, submitting, onNext, onBack }: Props) =
         ))}
       </div>
 
-      {/* Form Content */}
-      <CashVoucherForm currentStep={step} />
+      {step === 3 ? (
+        // Step 3 is the PayPal card-fields payment, with its own Pay now button.
+        <CashVoucherPayment onPaid={onPaid} />
+      ) : (
+        <>
+          <CashVoucherForm currentStep={step} />
 
-      {/* Buttons */}
-      <div className="mt-6">
-        {step === 2 ? (
-          <div className="flex gap-3">
-            <button
-              type="button"
-              onClick={onBack}
-              className="flex-1 py-3 rounded-full border border-brand text-brand font-semibold text-sm tracking-wide hover:bg-brand hover:text-white transition-all"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={onNext}
-              className="flex-1 py-3 rounded-full bg-brand text-white font-semibold text-sm tracking-wide hover:bg-brand-hover transition-colors"
-            >
-              Next
-            </button>
+          <div className="mt-6">
+            {step === 2 ? (
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="flex-1 py-3 rounded-full border border-brand text-brand font-semibold text-sm tracking-wide hover:bg-brand hover:text-white transition-all"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="flex-1 py-3 rounded-full bg-brand text-white font-semibold text-sm tracking-wide hover:bg-brand-hover transition-colors"
+                >
+                  Next
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={onNext}
+                className="w-full py-3 rounded-full bg-brand text-white font-semibold text-sm tracking-wide hover:bg-brand-hover transition-colors"
+              >
+                Next
+              </button>
+            )}
           </div>
-        ) : step === 3 ? (
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 rounded-full bg-brand text-white font-semibold text-sm tracking-wide hover:bg-brand-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {submitting ? 'Processing…' : 'Pay now'}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={onNext}
-            className="w-full py-3 rounded-full bg-brand text-white font-semibold text-sm tracking-wide hover:bg-brand-hover transition-colors"
-          >
-            Next
-          </button>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }

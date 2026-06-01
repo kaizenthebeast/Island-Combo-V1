@@ -24,12 +24,8 @@ export const cashVoucherSchema = z.object({
     .min(1, 'Email is required.')
     .email('Enter a valid email address.'),
 
-  // Step 3 — payment. Validated for completeness only; never stored or sent
-  // to our server (a real processor would tokenise these client-side).
-  cardName: z.string().trim().min(1, 'Name on card is required.'),
-  cardNumber: z.string().trim().min(1, 'Card number is required.'),
-  expiry: z.string().trim().min(1, 'Expiry date is required.'),
-  cvc: z.string().trim().min(1, 'Security code is required.'),
+  // Step 3 — payment is handled by PayPal's hosted Card Fields. Card data is
+  // entered in PayPal-hosted iframes and never enters this form or our server.
 })
 
 export type CashVoucherFormValues = z.infer<typeof cashVoucherSchema>
@@ -39,5 +35,4 @@ export type CashVoucherFormValues = z.infer<typeof cashVoucherSchema>
 export const CASH_VOUCHER_STEP_FIELDS = {
   1: ['amount'],
   2: ['firstName', 'lastName', 'email'],
-  3: ['cardName', 'cardNumber', 'expiry', 'cvc'],
 } as const satisfies Record<number, readonly (keyof CashVoucherFormValues)[]>

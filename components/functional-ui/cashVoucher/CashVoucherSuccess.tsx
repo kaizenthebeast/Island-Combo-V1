@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { Check, Copy, Share2, Download, Link as LinkIcon } from 'lucide-react'
+import { Copy, Download, Link as LinkIcon } from 'lucide-react'
 import { useQRCode } from '@/hooks/generateQRCode'
 
 type Props = {
@@ -19,14 +19,16 @@ type NextStep = {
   withLink?: boolean
 }
 
-const buildNextSteps = (email: string): NextStep[] => [
+const buildNextSteps = (email: string | null): NextStep[] => [
   {
     title: 'Voucher Sent',
-    description: (
+    description: email ? (
       <>
-        An email has been sent to <span className="font-semibold text-foreground">{email}</span> with
-        the secure and unique voucher code
+        An email with the secure and unique voucher code has been sent to the recipient at{' '}
+        <span className="font-semibold text-foreground">{email}</span>
       </>
+    ) : (
+      'An email with the secure and unique voucher code has been sent to the recipient.'
     ),
   },
   {
@@ -50,7 +52,13 @@ const buildNextSteps = (email: string): NextStep[] => [
   },
 ]
 
-const CashVoucherSuccess = ({ code, amount, recipient, recipientEmail, onBuyAgain }: Props) => {
+const CashVoucherSuccess = ({
+  code,
+  amount,
+  recipient,
+  recipientEmail,
+  onBuyAgain,
+}: Props) => {
   const { qrDataUrl, generateQR } = useQRCode()
   const [copied, setCopied] = useState(false)
 
@@ -71,27 +79,127 @@ const CashVoucherSuccess = ({ code, amount, recipient, recipientEmail, onBuyAgai
     }
   }
 
-  const handleDownload = () => {
+  // Renders the whole voucher card (logo, amount, QR, ref, recipient) to a PNG
+  // so the downloaded file is the shareable voucher — not just the bare QR.
+  const handleDownload = async () => {
     if (!qrDataUrl) return
+
+    const BRAND = '#900036'
+    const BRAND_TINT = '#fff0f4'
+    const GRAY = '#6b7280'
+    const DARK = '#111827'
+
+    const scale = 2
+    const W = 360
+    const H = 420
+
+    const canvas = document.createElement('canvas')
+    canvas.width = W * scale
+    canvas.height = H * scale
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.scale(scale, scale)
+
+    const loadImage = (src: string) =>
+      new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new window.Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => resolve(img)
+        img.onerror = reject
+        img.src = src
+      })
+
+    const rrect = (x: number, y: number, w: number, h: number, r: number) => {
+      ctx.beginPath()
+      ctx.roundRect(x, y, w, h, r)
+    }
+
+    // Solid white background filling the whole canvas (no transparent corners).
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, W, H)
+
+    // Logo + "Island Combo", centered as a group.
+    try {
+      const logo = await loadImage('/images/logo.png')
+      const logoSize = 36
+      const gap = 8
+      ctx.font = 'bold 20px sans-serif'
+      const title = 'Island Combo'
+      const groupW = logoSize + gap + ctx.measureText(title).width
+      const startX = (W - groupW) / 2
+      ctx.drawImage(logo, startX, 20, logoSize, logoSize)
+      ctx.fillStyle = BRAND
+      ctx.textAlign = 'left'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(title, startX + logoSize + gap, 20 + logoSize / 2)
+    } catch {
+      // Logo failed to load — skip it, keep the rest of the card.
+    }
+
+    // Brand band: "Redeemable as cash in store" + amount.
+    const bandX = 24
+    const bandY = 76
+    const bandW = W - 48
+    const bandH = 70
+    rrect(bandX, bandY, bandW, bandH, 12)
+    ctx.fillStyle = BRAND
+    ctx.fill()
+    ctx.fillStyle = '#ffffff'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'alphabetic'
+    ctx.font = '12px sans-serif'
+    ctx.fillText('Redeemable as cash in store', W / 2, bandY + 26)
+    ctx.font = 'bold 28px sans-serif'
+    ctx.fillText(`$${amount.toLocaleString()}`, W / 2, bandY + 56)
+
+    // QR code.
+    const qr = await loadImage(qrDataUrl)
+    const qrSize = 150
+    const qrY = bandY + bandH + 20
+    ctx.drawImage(qr, (W - qrSize) / 2, qrY, qrSize, qrSize)
+
+    // Reference code.
+    const refY = qrY + qrSize + 28
+    ctx.fillStyle = DARK
+    ctx.font = '14px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(code, W / 2, refY)
+
+    // Recipient row.
+    const rowX = 24
+    const rowW = W - 48
+    const rowH = 36
+    const rowY = refY + 16
+    rrect(rowX, rowY, rowW, rowH, 8)
+    ctx.fillStyle = BRAND_TINT
+    ctx.fill()
+    ctx.textBaseline = 'middle'
+    ctx.font = '12px sans-serif'
+    ctx.fillStyle = GRAY
+    ctx.textAlign = 'left'
+    ctx.fillText('Recipient name:', rowX + 12, rowY + rowH / 2)
+    ctx.fillStyle = DARK
+    ctx.font = 'bold 12px sans-serif'
+    ctx.textAlign = 'right'
+    ctx.fillText(recipient, rowX + rowW - 12, rowY + rowH / 2)
+
     const link = document.createElement('a')
-    link.href = qrDataUrl
+    link.href = canvas.toDataURL('image/png')
     link.download = `${code}.png`
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
   }
 
-  const nextSteps = buildNextSteps(recipientEmail ?? 'your email')
+  const nextSteps = buildNextSteps(recipientEmail)
 
   return (
     <div className="rounded-2xl border border-gray-100 shadow-sm bg-white p-5 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
       {/* Left: confirmation + voucher card */}
       <div className="flex flex-col items-center text-center">
-        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-          <Check className="text-green-600" size={26} strokeWidth={3} />
-        </div>
+        <Image src="/images/checkCircle.png" alt="Success" width={64} height={64} />
         <h2 className="mt-3 text-xl font-bold">Payment Successful</h2>
-        <p className="text-sm text-muted-foreground">Your receipt was sent to your email!</p>
+        <p className="text-sm text-muted-foreground">Your receipt was sent to your email.</p>
 
         <div className="mt-6 w-full max-w-xs rounded-xl overflow-hidden border border-gray-100 shadow-sm">
           {/* Brand band */}
@@ -135,17 +243,9 @@ const CashVoucherSuccess = ({ code, amount, recipient, recipientEmail, onBuyAgai
 
             <button
               type="button"
-              className="w-full py-2.5 rounded-full bg-brand text-white text-sm font-semibold inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-colors"
-            >
-              <Share2 size={15} />
-              Share with Recipient
-            </button>
-
-            <button
-              type="button"
               onClick={handleDownload}
               disabled={!qrDataUrl}
-              className="w-full py-2.5 rounded-full border border-brand text-brand text-sm font-semibold inline-flex items-center justify-center gap-2 hover:bg-brand hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 rounded-full bg-brand text-white text-sm font-semibold inline-flex items-center justify-center gap-2 hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download size={15} />
               Download QR

@@ -4,7 +4,6 @@ import { useFormContext } from 'react-hook-form'
 import type { CashVoucherFormValues } from '@/form-schema/cashVoucherSchema'
 
 export const PRESET_AMOUNTS = [50, 100, 500, 1000, 500, 2000]
-export const CONVENIENCE_FEE = 5
 
 const inputClass = (hasError?: boolean) =>
   `w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-brand ${
@@ -127,93 +126,12 @@ const StepTwo = () => {
   )
 }
 
-const StepThree = () => {
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useFormContext<CashVoucherFormValues>()
-
-  const amount = watch('amount') || 0
-  const total = amount + CONVENIENCE_FEE
-  const recipientName = `${watch('firstName') ?? ''} ${watch('lastName') ?? ''}`.trim()
-
-  return (
-    <div className="space-y-3">
-      <h2 className="text-lg font-bold">Payment Method</h2>
-      <div>
-        <input
-          type="text"
-          placeholder="Name on card *"
-          {...register('cardName')}
-          className={inputClass(!!errors.cardName)}
-        />
-        <FieldError message={errors.cardName?.message} />
-      </div>
-      <div>
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="Card number *"
-          {...register('cardNumber')}
-          className={inputClass(!!errors.cardNumber)}
-        />
-        <FieldError message={errors.cardNumber?.message} />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <input
-            type="text"
-            placeholder="MM/YY *"
-            {...register('expiry')}
-            className={inputClass(!!errors.expiry)}
-          />
-          <FieldError message={errors.expiry?.message} />
-        </div>
-        <div>
-          <input
-            type="text"
-            inputMode="numeric"
-            placeholder="Security Code *"
-            {...register('cvc')}
-            className={inputClass(!!errors.cvc)}
-          />
-          <FieldError message={errors.cvc?.message} />
-        </div>
-      </div>
-
-      {/* Order Summary */}
-      <div className="bg-pink-50 rounded-lg p-4 space-y-2">
-        <h3 className="text-sm font-bold text-center">Order Summary</h3>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Recipient name</span>
-          <span>{recipientName || '-'}</span>
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Voucher value</span>
-          <span>${amount.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>Convenience fee</span>
-          <span>${CONVENIENCE_FEE.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between text-sm font-bold pt-2 border-t border-pink-200">
-          <span>Total</span>
-          <span className="text-brand">${total.toFixed(2)}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const CashVoucherForm = ({ currentStep }: { currentStep: number }) => {
   switch (currentStep) {
     case 1:
       return <StepOne />
     case 2:
       return <StepTwo />
-    case 3:
-      return <StepThree />
     default:
       return null
   }

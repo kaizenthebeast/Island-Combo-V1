@@ -10,6 +10,7 @@ export type CashVoucher = {
   recipient_name: string
   recipient_email: string | null
   purchaser_id: string
+  purchaser_email: string | null
   payment_method: string | null
   payment_reference: string | null
   claimed_at: string | null

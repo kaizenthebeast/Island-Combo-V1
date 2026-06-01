@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 import CashVoucherFormContainer from '@/components/functional-ui/cashVoucher/cashVoucherFormContainer'
 import CashVoucherSuccess from '@/components/functional-ui/cashVoucher/CashVoucherSuccess'
 import {
@@ -11,10 +12,10 @@ import {
   CASH_VOUCHER_STEP_FIELDS,
   type CashVoucherFormValues,
 } from '@/form-schema/cashVoucherSchema'
-import { createCashVoucher } from '@/lib/cashVoucher'
 import type { CashVoucher } from '@/types/cashVoucher'
 
 const SUCCESS_STEP = 4
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
 const CashVoucherContainer = () => {
   // Step + the created voucher live here so the whole layout can switch to the
@@ -31,21 +32,10 @@ const CashVoucherContainer = () => {
       firstName: '',
       lastName: '',
       email: '',
-      cardName: '',
-      cardNumber: '',
-      expiry: '',
-      cvc: '',
     },
   })
 
-  const {
-    handleSubmit,
-    trigger,
-    reset,
-    setError,
-    clearErrors,
-    formState: { isSubmitting, errors },
-  } = methods
+  const { trigger, reset } = methods
 
   // Validate only the current step's fields before advancing (steps 1 & 2).
   const handleNext = async () => {
@@ -56,27 +46,13 @@ const CashVoucherContainer = () => {
   }
 
   const handleBack = () => {
-    clearErrors('root')
     setStep((prev) => Math.max(prev - 1, 1))
   }
 
-  // Step 3 "Pay now" → react-hook-form validates the whole schema, then submits.
-  const onSubmit = async (values: CashVoucherFormValues) => {
-    const res = await createCashVoucher({
-      amount: values.amount,
-      recipientName: `${values.firstName} ${values.lastName}`.trim(),
-      recipientEmail: values.email,
-      paymentMethod: 'card',
-    })
-
-    if (!res.success || !res.voucher) {
-      setError('root', {
-        message: res.message ?? 'Payment could not be completed. Please try again.',
-      })
-      return
-    }
-
-    setVoucher(res.voucher)
+  // Step 3's PayPal flow creates the voucher server-side after a confirmed
+  // capture, then hands it back here.
+  const handlePaid = (created: CashVoucher) => {
+    setVoucher(created)
     setStep(SUCCESS_STEP)
   }
 
@@ -149,28 +125,38 @@ const CashVoucherContainer = () => {
       </div>
 
       <FormProvider {...methods}>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          // Prevent Enter from submitting before the final step.
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && step !== 3) e.preventDefault()
-          }}
-          className="w-full"
-        >
-          <CashVoucherFormContainer
-            step={step}
-            submitting={isSubmitting}
-            onNext={handleNext}
-            onBack={handleBack}
-          />
-          {errors.root && (
-            <p className="mt-3 max-w-md mx-auto lg:mx-0 text-sm text-red-500 text-center">
-              {errors.root.message}
-            </p>
-          )}
-        </form>
+        {/* PayPal SDK loads here (on page entry) so the card fields are ready by
+            the time the user reaches step 3 — no wait at the payment step. */}
+        <PayPalSdk>
+          <div className="w-full">
+            <CashVoucherFormContainer
+              step={step}
+              onNext={handleNext}
+              onBack={handleBack}
+              onPaid={handlePaid}
+            />
+          </div>
+        </PayPalSdk>
       </FormProvider>
     </section>
+  )
+}
+
+// Loads the PayPal SDK once for the whole flow (preload). If the client id is
+// missing we just render children; CashVoucherPayment shows the config message.
+const PayPalSdk = ({ children }: { children: React.ReactNode }) => {
+  if (!PAYPAL_CLIENT_ID) return <>{children}</>
+  return (
+    <PayPalScriptProvider
+      options={{
+        clientId: PAYPAL_CLIENT_ID,
+        components: 'card-fields',
+        currency: 'USD',
+        intent: 'capture',
+      }}
+    >
+      {children}
+    </PayPalScriptProvider>
   )
 }
 
