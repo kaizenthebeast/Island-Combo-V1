@@ -39,3 +39,23 @@ export const removeFavorite = async (userId: string, productId: number) => {
   if (error) return { success: false, status: 403, message: error.message }
   return { success: true, status: 200, message: 'Product removed from favorites' }
 }
+
+
+export const addWishListToCart = async (userId: string, productId: number) => {
+  const supabase = await createClient();
+
+  const { error } = await supabase.from('cart').insert({ user_id: userId, product_id: productId }).select()
+    .eq('user_id', userId).single();
+
+  if (error) {
+    if (error.code === '23505') return { success: false, status: 409, message: 'Product is already in cart' }
+    return { success: false, status: 403, message: error.message }
+  }
+  const deleteFromFavorites = await removeFavorite(userId, productId);
+  if (!deleteFromFavorites.success) {
+    return { success: false, status: deleteFromFavorites.status, message: deleteFromFavorites.message }
+  }
+
+  return { success: true, status: 201, message: 'Product added to cart' }
+
+}
