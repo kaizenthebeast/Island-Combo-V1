@@ -1,64 +1,54 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { waitUntil } from "@vercel/functions"
-import { ratelimit } from "@/redis/rateLimiter"
+import { waitUntil } from '@vercel/functions'
+import { ratelimit } from '@/redis/rateLimiter'
 import {
   getCart,
   addToCart,
   updateCartQuantity,
   removeFromCart,
-} from "@/lib/cart"
+} from '@/lib/cart'
+import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
-
+// 429 is special-cased here so we can attach a Retry-After header.
 async function applyRateLimit(userId: string) {
-  const { success, limit, remaining, pending } = await ratelimit.limit(userId);
+  const { success, pending } = await ratelimit.limit(userId)
   waitUntil(pending)
   if (!success) {
     return NextResponse.json(
-      { error: "Too many request", limit, remaining },
-      { status: 429, headers: { "Retry-After": "10" } }
+      { success: false, message: 'Too many requests' },
+      { status: HTTP.TOO_MANY, headers: { 'Retry-After': '10' } },
     )
   }
-  return null // null means allowed
-
+  return null
 }
 
 export async function GET() {
   try {
     const user = await requireUser()
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-    const blocked = await applyRateLimit(user.id)
-    if (blocked) {
-      return blocked
-    }
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
-    const cart = await getCart(user.id)
-    return NextResponse.json(cart)
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    const blocked = await applyRateLimit(user.id)
+    if (blocked) return blocked
+
+    const data = await getCart(user.id)
+    return apiOk({ data })
+  } catch (error: unknown) {
+    return toApiError(error)
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser()
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
+
     const blocked = await applyRateLimit(user.id)
-    if (blocked) {
-      return blocked
-    }
+    if (blocked) return blocked
 
     const { variantId, quantity, selectedOption } = await req.json()
     if (!variantId || !quantity) {
-      return NextResponse.json(
-        { error: "variantId and quantity are required" },
-        { status: 400 }
-      )
+      return apiError('variantId and quantity are required', HTTP.BAD_REQUEST)
     }
 
     const data = await addToCart({
@@ -67,79 +57,49 @@ export async function POST(req: NextRequest) {
       quantity,
       selectedOption: selectedOption ?? null,
     })
-    return NextResponse.json(data)
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiOk({ data })
+  } catch (error: unknown) {
+    return toApiError(error)
   }
 }
 
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireUser()
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
     const blocked = await applyRateLimit(user.id)
-    if (blocked) {
-      return blocked
-    }
-    const { variantId, quantity } = await req.json()
+    if (blocked) return blocked
 
-    if (!variantId) {
-      return NextResponse.json(
-        { error: "variantId is required" },
-        { status: 400 }
-      )
-    }
-    if (!quantity || quantity < 1) {
-      return NextResponse.json(
-        { error: "Quantity must be at least 1" },
-        { status: 400 }
-      )
-    }
+    const { variantId, quantity } = await req.json()
+    if (!variantId) return apiError('variantId is required', HTTP.BAD_REQUEST)
+    if (!quantity || quantity < 1) return apiError('Quantity must be at least 1', HTTP.BAD_REQUEST)
 
     const data = await updateCartQuantity({
       userId: user.id,
       variantId,
       quantity,
     })
-    return NextResponse.json(data)
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    return apiOk({ data })
+  } catch (error: unknown) {
+    return toApiError(error)
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
     const user = await requireUser()
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
     const blocked = await applyRateLimit(user.id)
-    if (blocked) {
-      return blocked
-    }
+    if (blocked) return blocked
 
     const { variantId } = await req.json()
+    if (!variantId) return apiError('variantId is required', HTTP.BAD_REQUEST)
 
-    if (!variantId) {
-      return NextResponse.json(
-        { error: "variantId is required" },
-        { status: 400 }
-      )
-    }
-
-    await removeFromCart({
-      userId: user.id,
-      variantId,
-    })
-    return NextResponse.json({ success: true })
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Unknown error"
-    return NextResponse.json({ error: message }, { status: 500 })
+    await removeFromCart({ userId: user.id, variantId })
+    return apiOk()
+  } catch (error: unknown) {
+    return toApiError(error)
   }
 }

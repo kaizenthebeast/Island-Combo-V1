@@ -5,7 +5,7 @@ import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { editCategorySchema, EditCategoryFormValues } from '@/form-schema/categorySchema'
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
-import { restoreCategory } from '@/lib/category'
+import { restoreCategory } from '@/lib/admin/category'
 import { ArchiveRestore } from 'lucide-react'     
 import type { Category } from '@/types/category'
 

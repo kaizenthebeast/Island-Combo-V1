@@ -3,7 +3,7 @@
 import { User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Address } from '@/types/users'
-import { deleteAddress } from '@/lib/users'
+import { deleteAddress } from '@/lib/address'
 import CheckoutAddress from '@/components/forms/CheckoutAddressForm'
 import PersonalDetailsForm from '@/components/forms/PersonalDetailsForm'
 import DeleteModal from '@/components/popup/DeleteModal'

@@ -12,7 +12,7 @@ import { ArrowLeft, MapPin, ChevronRight, Pencil, Trash2, AlertCircle } from 'lu
 import { Address } from '@/types/users'
 import AddressFormBody from '@/components/forms/AddressFormBody'
 import DeleteModal from '@/components/popup/DeleteModal'
-import { deleteAddress } from '@/lib/users'
+import { deleteAddress } from '@/lib/address'
 import { customToast } from '@/components/popup/ToastCustom'
 
 type Profile = { first_name: string | null; last_name: string | null; phone_text: string | null } | null

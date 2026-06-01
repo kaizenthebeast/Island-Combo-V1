@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getProductSuggestions } from '@/lib/search'
+import { apiOk, apiError, HTTP } from '@/lib/api/respond'
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q') ?? ''
@@ -9,17 +10,12 @@ export async function GET(req: NextRequest) {
   try {
     const data = await getProductSuggestions(q, Number.isFinite(limit) ? limit : 8)
 
-    return NextResponse.json(
-      { success: true, data },
-      {
-        status: 200,
-        headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-        },
-      },
+    return apiOk(
+      { data },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return NextResponse.json({ success: false, message, data: [] }, { status: 500 })
+    return apiError(message, HTTP.INTERNAL)
   }
 }

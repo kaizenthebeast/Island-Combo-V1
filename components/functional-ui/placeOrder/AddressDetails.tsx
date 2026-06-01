@@ -3,7 +3,7 @@ import React from "react";
 import { Address } from "@/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
-import { deleteAddress } from "@/lib/users";
+import { deleteAddress } from "@/lib/address";
 import DeleteModal from "../../popup/DeleteModal";
 import { customToast } from '@/components/popup/ToastCustom'
 

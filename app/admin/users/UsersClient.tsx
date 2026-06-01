@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/hooks/useTableUrlState'
-import { deleteUser } from '@/lib/users'
+import { deleteUser } from '@/lib/admin/users'
 import type { AdminUser } from '@/types/users'
 
 type Row = {

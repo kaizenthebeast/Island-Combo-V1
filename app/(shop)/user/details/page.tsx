@@ -1,6 +1,7 @@
 import AccountContainer from '@/components/private/layout/AccountContainer'
 import { createClient } from '@/lib/supabase/server'
-import { getUserProfile, getUserAddress } from '@/lib/users'
+import { getUserProfile } from '@/lib/users'
+import { getUserAddress } from '@/lib/address'
 
 const UserDetailsPage = async () => {
   const supabase = await createClient()

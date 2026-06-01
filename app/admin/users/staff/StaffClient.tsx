@@ -3,12 +3,11 @@
 import { useState, useMemo, useTransition } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import AddUsersDialog from '@/components/admin/users/AddUsersDialog'
 import EditUserDialog from '@/components/admin/users/EditUserDialog'
 import DeleteStaffDialog from '@/components/admin/users/DeleteStaffDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/hooks/useTableUrlState'
-import { softDeleteUser } from '@/lib/users'
+import { softDeleteUser } from '@/lib/admin/users'
 import type { AdminStaff } from '@/types/users'
 
 type StaffStatus = 'ACTIVE' | 'INACTIVE'
@@ -45,7 +44,6 @@ interface Props {
 }
 
 export default function StaffClient({ staff, total, page, pageSize }: Props) {
-  const [addOpen, setAddOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<AdminStaff | null>(null)
   const [deletingRow, setDeletingRow] = useState<Row | null>(null)
   const [, startTransition] = useTransition()
@@ -131,9 +129,6 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
         eyebrow="People"
         title="Staff"
         subtitle="Manage your staff and administrators"
-        actions={[
-          { label: 'Create Staff', onClick: () => setAddOpen(true), variant: 'primary' },
-        ]}
       />
 
       {deleteError && (
@@ -141,8 +136,6 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
           <p className="text-[12px] text-danger font-medium">{deleteError}</p>
         </div>
       )}
-
-      <AddUsersDialog open={addOpen} onClose={() => setAddOpen(false)} />
 
       <EditUserDialog
         user={editingUser}

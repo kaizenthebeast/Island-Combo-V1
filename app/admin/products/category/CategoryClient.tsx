@@ -10,7 +10,7 @@ import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
 import { useTableUrlState } from '@/hooks/useTableUrlState'
 import type { Category } from '@/types/category'
-import { softDeleteCategory } from '@/lib/category'
+import { softDeleteCategory } from '@/lib/admin/category'
 
 type CategoryStatus = 'ACTIVE' | 'ARCHIVED'
 

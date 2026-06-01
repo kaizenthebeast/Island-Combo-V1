@@ -150,9 +150,9 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         set({ error: null })
         const res = await fetch("/api/cart")
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "Fetch failed")
-        setCartState(data)
+        const json = await res.json()
+        if (!res.ok || !json.success) throw new Error(json.message || "Fetch failed")
+        setCartState(json.data)
       } catch (err) {
         set({ error: err instanceof Error ? err.message : "Unknown error" })
       }

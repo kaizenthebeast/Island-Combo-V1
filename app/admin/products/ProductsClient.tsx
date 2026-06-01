@@ -9,7 +9,7 @@ import DeleteProductDialog from '@/components/admin/products/DeleteProductDialog
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/hooks/useTableUrlState'
 import type { AdminProduct, ProductStatus } from '@/types/product'
-import { softDeleteProduct } from '@/lib/product'
+import { softDeleteProduct } from '@/lib/admin/product'
 
 type Row = {
     product_id: number

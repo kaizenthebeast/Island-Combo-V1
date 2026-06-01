@@ -7,7 +7,7 @@ import {
   personalDetailsSchema,
   PersonalDetailsFormValues,
 } from '@/form-schema/userSchema'
-import { updateMyProfile } from '@/lib/users'
+import { updateMyAccount } from '@/lib/users'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,10 +59,10 @@ const PersonalDetailsForm = ({
 
   const onSubmit: SubmitHandler<PersonalDetailsFormValues> = async (data) => {
     setSubmitError(null)
-    const result = await updateMyProfile({
+    const result = await updateMyAccount({
       first_name: data.first_name,
       last_name: data.last_name,
-      phone_text: data.phone_text || undefined,
+      phone_text: data.phone_text || null,
     })
 
     if (!result.success) {

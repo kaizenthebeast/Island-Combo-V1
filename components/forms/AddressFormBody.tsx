@@ -6,7 +6,7 @@ import {
     checkoutAddressSchema,
     CheckoutAddressFormValues,
 } from "@/form-schema/addressSchema";
-import { insertAddressInfo, updateAddressInfo } from "@/lib/users";
+import { insertAddressInfo, updateAddressInfo } from "@/lib/address";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

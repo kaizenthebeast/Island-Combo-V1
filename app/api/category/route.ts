@@ -1,27 +1,23 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { NextRequest } from 'next/server'
+import { requireAdmin } from '@/lib/auth'
+import { getCategories } from '@/lib/category'
 import {
-  getCategories,
   createCategory,
   updateCategory,
-  softDeleteCategory, 
-  restoreCategory,    
-} from '@/lib/category'
+  softDeleteCategory,
+  restoreCategory,
+} from '@/lib/admin/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
-
-function apiError(message: string, status: number) {
-  return NextResponse.json({ success: false, message }, { status })
-}
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // ─── GET /api/category ────────────────────────────────────────────────────────
 
 export async function GET() {
   try {
     const data = await getCategories()
-    return NextResponse.json({ success: true, data }, { status: 200 })
+    return apiOk({ data })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return apiError(message, 500)
+    return toApiError(error)
   }
 }
 
@@ -29,19 +25,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser()
-    if (!user) return apiError('Unauthorized', 401)
+    const auth = await requireAdmin()
+    if (!auth.ok) return apiError(auth.message, auth.status)
 
     const body: AddCategoryFormValues = await req.json()
-    if (!body.name?.trim()) return apiError('Category name is required', 400)
+    if (!body.name?.trim()) return apiError('Category name is required', HTTP.BAD_REQUEST)
 
-    const result = await createCategory(body)
-    if (!result.success) return apiError(result.message, result.status)
-
-    return NextResponse.json({ success: true, message: result.message }, { status: result.status })
+    return apiResult(await createCategory(body))
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return apiError(message, 500)
+    return toApiError(error)
   }
 }
 
@@ -49,21 +41,17 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await requireUser()
-    if (!user) return apiError('Unauthorized', 401)
+    const auth = await requireAdmin()
+    if (!auth.ok) return apiError(auth.message, auth.status)
 
     const body: EditCategoryFormValues & { id: number } = await req.json()
-    if (!body.id)           return apiError('Category id is required', 400)
-    if (!body.name?.trim()) return apiError('Category name is required', 400)
+    if (!body.id)           return apiError('Category id is required',   HTTP.BAD_REQUEST)
+    if (!body.name?.trim()) return apiError('Category name is required', HTTP.BAD_REQUEST)
 
     const { id, ...rest } = body
-    const result = await updateCategory(id, rest)
-    if (!result.success) return apiError(result.message, result.status)
-
-    return NextResponse.json({ success: true, message: result.message }, { status: result.status })
+    return apiResult(await updateCategory(id, rest))
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return apiError(message, 500)
+    return toApiError(error)
   }
 }
 
@@ -71,18 +59,16 @@ export async function PATCH(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const user = await requireUser()
-    if (!user) return apiError('Unauthorized', 401)
+    const auth = await requireAdmin()
+    if (!auth.ok) return apiError(auth.message, auth.status)
 
     const body: { id: number } = await req.json()
-    if (!body.id) return apiError('Category id is required', 400)
+    if (!body.id) return apiError('Category id is required', HTTP.BAD_REQUEST)
 
     await restoreCategory(body.id)
-
-    return NextResponse.json({ success: true, message: 'Category restored' }, { status: 200 })
+    return apiOk({ message: 'Category restored' })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return apiError(message, 500)
+    return toApiError(error)
   }
 }
 
@@ -90,17 +76,15 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const user = await requireUser()
-    if (!user) return apiError('Unauthorized', 401)
+    const auth = await requireAdmin()
+    if (!auth.ok) return apiError(auth.message, auth.status)
 
     const body: { id: number } = await req.json()
-    if (!body.id) return apiError('Category id is required', 400)
+    if (!body.id) return apiError('Category id is required', HTTP.BAD_REQUEST)
 
-    await softDeleteCategory(body.id) // throws on error, returns id on success
-
-    return NextResponse.json({ success: true, message: 'Category archived' }, { status: 200 })
+    await softDeleteCategory(body.id)
+    return apiOk({ message: 'Category archived' })
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error'
-    return apiError(message, 500)
+    return toApiError(error)
   }
 }

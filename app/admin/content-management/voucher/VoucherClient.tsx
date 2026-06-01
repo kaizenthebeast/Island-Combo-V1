@@ -8,7 +8,7 @@ import EditVoucherDialog from '@/components/admin/voucher/EditVoucherDialog'
 import DeleteVoucherDialog from '@/components/admin/voucher/DeleteVoucherDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/hooks/useTableUrlState'
-import { archiveVoucher } from '@/lib/voucher'
+import { archiveVoucher } from '@/lib/admin/voucher'
 import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/types/voucher'
 
 // ─── table row shape ──────────────────────────────────────────────────────────

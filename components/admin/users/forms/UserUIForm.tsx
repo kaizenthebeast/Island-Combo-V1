@@ -78,43 +78,11 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
 
 // ─── UserFields ───────────────────────────────────────────────────────────────
 
-type UserFieldsProps = {
-  showAccount?: boolean
-}
-
-export function UserFields({ showAccount = false }: UserFieldsProps) {
+export function UserFields() {
   const { register, formState: { errors } } = useFormContext<any>()
 
   return (
     <div className="flex flex-col gap-5">
-
-      {/* ── Account (add only) ──────────────────────────────────────── */}
-      {showAccount && (
-        <>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
-            Account
-          </p>
-
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Email" required error={msg(errors.email)}>
-              <Input
-                {...register('email')}
-                type="email"
-                placeholder="user@example.com"
-              />
-            </Field>
-            <Field label="Password" required error={msg(errors.password)}>
-              <Input
-                {...register('password')}
-                type="password"
-                placeholder="Min. 8 characters"
-              />
-            </Field>
-          </div>
-
-          <div className="h-px bg-muted" />
-        </>
-      )}
 
       {/* ── Profile ─────────────────────────────────────────────────── */}
       <p className="text-[11px] font-semibold uppercase tracking-[0.07em] text-muted-foreground select-none">
@@ -137,15 +105,13 @@ export function UserFields({ showAccount = false }: UserFieldsProps) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {!showAccount && (
-          <Field label="Email" required error={msg(errors.email)}>
-            <Input
-              {...register('email')}
-              type="email"
-              placeholder="user@example.com"
-            />
-          </Field>
-        )}
+        <Field label="Email" required error={msg(errors.email)}>
+          <Input
+            {...register('email')}
+            type="email"
+            placeholder="user@example.com"
+          />
+        </Field>
         <Field label="Phone" error={msg(errors.phone_text)}>
           <Input
             {...register('phone_text')}

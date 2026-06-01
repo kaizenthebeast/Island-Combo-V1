@@ -6,7 +6,8 @@ import AddressFormBody from "@/components/forms/AddressFormBody"
 import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails"
 import MobileAddressSelector from "@/components/functional-ui/placeOrder/MobileAddressSelector"
 import PaymentMethod from "@/components/functional-ui/placeOrder/PaymentMethod"
-import { getUserAddress, getUserProfile } from "@/lib/users"
+import { getUserAddress } from "@/lib/address"
+import { getUserProfile } from "@/lib/users"
 import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
 import { useCartStore } from "@/store/cartStore"
@@ -129,11 +130,11 @@ const AddressContainer = () => {
             items: cart.map((i) => ({ weightKg: 1, qty: i.quantity })),
           }),
         })
-        const data = await res.json()
-        if (!res.ok || !data.success) {
-          throw new Error(data.message || "Failed to calculate shipping")
+        const json = await res.json()
+        if (!res.ok || !json.success) {
+          throw new Error(json.message || "Failed to calculate shipping")
         }
-        const quote = data as ShippingQuote
+        const quote = json.data as ShippingQuote
         setShippingQuote(quote)
         // Default to GCR when available, fall back to QPI
         if (quote.options.gcr) {

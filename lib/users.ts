@@ -1,142 +1,162 @@
 'use server'
 import { createClient } from "@/lib/supabase/server";
-import { AddressFormValues, Address} from '@/types/users';
-import {AddUserFormValues, EditUserFormValues} from '@/form-schema/userSchema'
+import type { Address } from '@/types/users';
 import { revalidatePath } from "next/cache";
 
-export const insertAddressInfo = async (addressInfo: AddressFormValues) => {
-  const supabase = await createClient();
+// ─────────────────────────────────────────────────────────────────────────────
+// Shared types
+// ─────────────────────────────────────────────────────────────────────────────
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+export type MyAccount = {
+  user_id: string
+  email: string | null
+  first_name: string | null
+  last_name: string | null
+  phone_text: string | null
+  sex: 'Male' | 'Female' | null
+  age: number | null
+  role: 'customer' | 'staff' | 'admin'
+  is_active: boolean
+  loyalty: { total_pts: number }
+  notifications: { order_updates: boolean; promotions: boolean }
+  default_address: Address | null
+}
 
-  // ── Check address limit ─────────────────────────────────────────────────
-  // Users are allowed a maximum of 3 saved addresses. If the limit is
-  // reached we return an error before touching the database.
-  const { count, error: countError } = await supabase
+export type NotificationPrefs = { order_updates: boolean; promotions: boolean }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOMER — PROFILE (self)
+// Aggregated read + scoped self-update + notification prefs. Email and role
+// are intentionally excluded — they have separate flows.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getMyAccount = async (): Promise<MyAccount> => {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: profile, error: profileErr } = await supabase
+    .from('profile')
+    .select('first_name, last_name, phone_text, sex, age, role, is_active, email, email_order_updates, email_promotions')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (profileErr) throw new Error(profileErr.message)
+
+  const { data: pts } = await supabase
+    .from('profile_pts')
+    .select('total_pts')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const { data: addr } = await supabase
     .from('addresses')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', user.id);
+    .select('id, address, postal_code, locality, country, make_default, profile(first_name, last_name, phone_text)')
+    .eq('user_id', user.id)
+    .eq('make_default', true)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
-  if (countError) return { success: false, status: 403, message: countError.message };
+  const defaultAddress = addr
+    ? ({
+        ...addr,
+        profile: Array.isArray(addr.profile) ? addr.profile[0] ?? null : addr.profile,
+      } as Address)
+    : null
 
-  if ((count ?? 0) >= 3) {
-    return {
-      success: false,
-      status: 400,
-      message: 'You can only save up to 3 addresses. Please remove one before adding a new one.',
-    };
-  }
-
-  if (addressInfo.makeDefault) {
-    await supabase.from("addresses").update({ make_default: false }).eq("user_id", user.id);
-  }
-
-  const { error: profileError } = await supabase.from("profile").upsert({
+  return {
     user_id: user.id,
-    email: user.email,
-    first_name: addressInfo.firstName,
-    last_name: addressInfo.lastName,
-    phone_text: addressInfo.phone,
-  }).eq("user_id", user.id);
-
-  if (profileError) return { success: false, status: 403, message: profileError.message };
-
-  const { error: addressError } = await supabase.from("addresses").insert({
-    user_id: user.id,
-    address: addressInfo.address,
-    postal_code: addressInfo.postalCode,
-    locality: addressInfo.locality,
-    country: addressInfo.country,
-    make_default: addressInfo.makeDefault,
-  });
-
-  if (addressError) return { success: false, status: 403, message: addressError.message };
-
-  revalidatePath("/checkout/address");
-  return { success: true, status: 201, message: 'Address successfully added' };
-};
-
-export const updateAddressInfo = async (addressId: number | undefined, addressInfo: AddressFormValues) => {
-  if (!addressId) return { success: false, status: 400, message: 'Address ID is required' };
-
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
-
-  if (addressInfo.makeDefault) {
-    await supabase.from("addresses").update({ make_default: false }).eq("user_id", user.id);
+    email: profile?.email ?? user.email ?? null,
+    first_name: profile?.first_name ?? null,
+    last_name: profile?.last_name ?? null,
+    phone_text: profile?.phone_text ?? null,
+    sex: (profile?.sex as 'Male' | 'Female' | null) ?? null,
+    age: profile?.age ?? null,
+    role: (profile?.role as MyAccount['role']) ?? 'customer',
+    is_active: profile?.is_active ?? true,
+    loyalty: { total_pts: pts?.total_pts ?? 0 },
+    notifications: {
+      order_updates: profile?.email_order_updates ?? true,
+      promotions: profile?.email_promotions ?? false,
+    },
+    default_address: defaultAddress,
   }
+}
 
-  const { error: profileError } = await supabase.from("profile").update({
-    first_name: addressInfo.firstName,
-    last_name: addressInfo.lastName,
-    phone_text: addressInfo.phone,
-  }).eq("user_id", user.id);
+export const getMyNotificationPrefs = async (): Promise<NotificationPrefs> => {
+  const supabase = await createClient()
 
-  if (profileError) return { success: false, status: 403, message: profileError.message };
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
 
-  const { error: updateError } = await supabase
-    .from("addresses")
-    .update({
-      address: addressInfo.address,
-      postal_code: addressInfo.postalCode,
-      locality: addressInfo.locality,
-      country: addressInfo.country,
-      make_default: addressInfo.makeDefault,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", addressId)
-    .eq("user_id", user.id);
+  const { data, error } = await supabase
+    .from('profile')
+    .select('email_order_updates, email_promotions')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (error) throw new Error(error.message)
 
-  if (updateError) return { success: false, status: 403, message: updateError.message };
+  return {
+    order_updates: data?.email_order_updates ?? true,
+    promotions: data?.email_promotions ?? false,
+  }
+}
 
-  revalidatePath("/checkout/address");
-  return { success: true, status: 200, message: 'Address successfully updated' };
-};
+export const updateMyNotificationPrefs = async (prefs: Partial<NotificationPrefs>) => {
+  const supabase = await createClient()
 
-export const deleteAddress = async (addressId: number) => {
-  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (prefs.order_updates !== undefined) patch.email_order_updates = prefs.order_updates
+  if (prefs.promotions    !== undefined) patch.email_promotions    = prefs.promotions
 
-  const { error: deleteError } = await supabase
-    .from("addresses")
-    .delete()
-    .eq("id", addressId)
-    .eq("user_id", user.id);
+  const { error } = await supabase
+    .from('profile')
+    .update(patch)
+    .eq('user_id', user.id)
 
-  if (deleteError) return { success: false, status: 403, message: deleteError.message };
+  if (error) return { success: false, status: 403, message: error.message }
 
-  revalidatePath("/checkout/address");
-  return { success: true, status: 200, message: 'Address successfully deleted' };
-};
+  revalidatePath('/user/details')
+  return { success: true, status: 200, message: 'Notification preferences updated' }
+}
 
-export const updateMyProfile = async (
-  data: { first_name: string; last_name: string; phone_text?: string },
-) => {
-  const supabase = await createClient();
+// Self-update for the authenticated user — non-address, non-role, non-email.
+export const updateMyAccount = async (data: {
+  first_name?: string | null
+  last_name?: string | null
+  phone_text?: string | null
+  sex?: 'Male' | 'Female' | null
+  age?: number | null
+}) => {
+  const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' };
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
-  const { error } = await supabase.from('profile').upsert({
-    user_id: user.id,
-    email: user.email,
-    first_name: data.first_name,
-    last_name: data.last_name,
-    phone_text: data.phone_text ?? null,
-    updated_at: new Date().toISOString(),
-  }).eq('user_id', user.id);
+  const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+  if (data.first_name !== undefined) patch.first_name = data.first_name
+  if (data.last_name  !== undefined) patch.last_name  = data.last_name
+  if (data.phone_text !== undefined) patch.phone_text = data.phone_text
+  if (data.sex        !== undefined) patch.sex        = data.sex
+  if (data.age        !== undefined) patch.age        = data.age
 
-  if (error) return { success: false, status: 403, message: error.message };
+  const { error } = await supabase
+    .from('profile')
+    .update(patch)
+    .eq('user_id', user.id)
 
-  revalidatePath('/user/details');
-  return { success: true, status: 200, message: 'Profile successfully updated' };
-};
+  if (error) return { success: false, status: 403, message: error.message }
 
+  revalidatePath('/user/details')
+  return { success: true, status: 200, message: 'Profile successfully updated' }
+}
+
+// Thin slice used by forms that only need first/last/phone to prefill.
+// Prefer getMyAccount() when you need the full snapshot.
 export const getUserProfile = async (): Promise<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null> => {
   const supabase = await createClient();
 
@@ -154,264 +174,3 @@ export const getUserProfile = async (): Promise<{ first_name: string | null; las
   return data ?? null;
 };
 
-export const getUserAddress = async (): Promise<Address[]> => {
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
-
-  const { data: addresses, error: addressError } = await supabase
-    .from("addresses")
-    .select("id, address, postal_code, locality, country, make_default, profile(first_name, last_name, phone_text)")
-    .eq("user_id", user.id)
-    .order("make_default", { ascending: false });
-
-  if (addressError) throw new Error(addressError.message);
-
-  return (addresses ?? []).map((a) => ({
-    ...a,
-    profile: Array.isArray(a.profile) ? a.profile[0] ?? null : a.profile,
-  })) as Address[];
-};
-
-
-// ADMIN SIDE
-
-export const getUsers = async () => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const { data, error } = await supabase
-    .from('admin_user_mv')
-    .select('*')
-    .order('member_since', { ascending: false })
-
-  if (error) return { success: false, status: 403, message: error.message }
-
-  return { success: true, status: 200, data }
-}
-
-export const getStaff = async () => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const { data, error } = await supabase
-    .from('admin_staff_mv')
-    .select('*')
-    .order('member_since', { ascending: false })
-
-  if (error) return { success: false, status: 403, message: error.message }
-
-  return { success: true, status: 200, data }
-}
-
-// ─── PAGINATED READS ──────────────────────────────────────────────────────────
-
-type PaginatedInput<TSortKey extends string> = {
-  page: number
-  pageSize: number
-  search?: string
-  filter?: string
-  sortKey?: TSortKey
-  sortDir?: 'asc' | 'desc'
-}
-
-type PaginatedResult<TRow> =
-  | { success: true; status: 200; rows: TRow[]; total: number }
-  | { success: false; status: number; message: string }
-
-const escapeIlike = (s: string) => s.replace(/[\\%_,]/g, (c) => `\\${c}`)
-
-export type UsersSortKey = 'full_name' | 'email' | 'role' | 'total_points' | 'member_since'
-
-export const getUsersPage = async (
-  input: PaginatedInput<UsersSortKey>,
-): Promise<PaginatedResult<unknown>> => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const {
-    page,
-    pageSize,
-    search,
-    filter,
-    sortKey = 'member_since',
-    sortDir = 'desc',
-  } = input
-
-  let query = supabase
-    .from('admin_user_mv')
-    .select('*', { count: 'exact' })
-
-  if (filter && filter !== 'All') {
-    query = query.eq('role', filter)
-  }
-
-  const q = search?.trim()
-  if (q) {
-    const safe = escapeIlike(q)
-    query = query.or(
-      `full_name.ilike.%${safe}%,email.ilike.%${safe}%,phone_text.ilike.%${safe}%`,
-    )
-  }
-
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  query = query.order(sortKey, { ascending: sortDir === 'asc' }).range(from, to)
-
-  const { data, error, count } = await query
-  if (error) return { success: false, status: 403, message: error.message }
-
-  return { success: true, status: 200, rows: data ?? [], total: count ?? 0 }
-}
-
-export type StaffSortKey = 'full_name' | 'email' | 'role' | 'member_since'
-
-export const getStaffPage = async (
-  input: PaginatedInput<StaffSortKey>,
-): Promise<PaginatedResult<unknown>> => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const {
-    page,
-    pageSize,
-    search,
-    filter,
-    sortKey = 'member_since',
-    sortDir = 'desc',
-  } = input
-
-  let query = supabase
-    .from('admin_staff_mv')
-    .select('*', { count: 'exact' })
-
-  // The status filter maps to is_active.
-  if (filter === 'ACTIVE')   query = query.eq('is_active', true)
-  if (filter === 'INACTIVE') query = query.eq('is_active', false)
-
-  const q = search?.trim()
-  if (q) {
-    const safe = escapeIlike(q)
-    query = query.or(
-      `full_name.ilike.%${safe}%,email.ilike.%${safe}%,phone_text.ilike.%${safe}%`,
-    )
-  }
-
-  const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  query = query.order(sortKey, { ascending: sortDir === 'asc' }).range(from, to)
-
-  const { data, error, count } = await query
-  if (error) return { success: false, status: 403, message: error.message }
-
-  return { success: true, status: 200, rows: data ?? [], total: count ?? 0 }
-}
-
-// export const createUser = async(data: AddUserFormValues) => {
-//   const supabase = await createClient();
-
-//   //Insert to the profile table at the same create a record in the authentication table with the same email and a default password.
-//   const {data: {user}, error} = await supabase.from('profile').insert({
-//     first_name: data.first_name,
-//     last_name: data.last_name,
-//     email: data.email,
-//     phone_text: data.phone_text ?? null,
-//     sex: data.sex ?? null,
-//     age: data.age ?? null,
-//     role: data.role,
-//   })
-
-//   if(error)
-// }
-
-export const updateUser = async (userId: string, data: EditUserFormValues) => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  
-
-  const { error } = await supabase
-    .from('profile')
-    .update({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      email: data.email,
-      phone_text: data.phone_text ?? null,
-      sex: data.sex ?? null,
-      age: data.age ?? null,
-      role: data.role,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('user_id', userId)
-
-  if (error) return { success: false, status: 403, message: error.message }   
-
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'User successfully updated' } 
-}
-
-export const deleteUser = async (userId: string) => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }  
-
-  const { error } = await supabase
-    .from('profile')
-    .delete()
-    .eq('user_id', userId)
-
-  if (error) return { success: false, status: 403, message: error.message }   
-
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'User successfully deleted' } 
-}
-
-// ─── SOFT DELETE ──────────────────────────────────────────────────────────────
-
-export const softDeleteUser = async (userId: string) => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const { error } = await supabase
-    .from('profile')
-    .update({ is_active: false, updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-
-  if (error) return { success: false, status: 403, message: error.message }
-
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'User successfully deactivated' }
-}
-
-// ─── RESTORE ─────────────────────────────────────────────────────────────────
-
-export const restoreUser = async (userId: string) => {
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
-
-  const { error } = await supabase
-    .from('profile')
-    .update({ is_active: true, updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
-
-  if (error) return { success: false, status: 403, message: error.message }
-
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'User successfully restored' }
-}
