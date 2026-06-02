@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     const { promoCode, totalQty, existingPromo } = await req.json()
 
-    if (!promoCode)    return apiError('Promo code is required',             HTTP.BAD_REQUEST)
+    if (!promoCode) return apiError('Promo code is required', HTTP.BAD_REQUEST)
     if (existingPromo) return apiError('Only one promo code can be applied', HTTP.BAD_REQUEST)
 
     const result = await applyVoucher(promoCode, Number(totalQty) || 0)
@@ -21,4 +21,17 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     return toApiError(error)
   }
+}
+
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const user = await requireUser()
+    if (!user) return apiError('Unauthorized access', HTTP.UNAUTHORIZED)
+    return apiOk({ data: { promo: null } })
+
+  } catch (error: unknown) {
+    return toApiError(error)
+  }
+
 }

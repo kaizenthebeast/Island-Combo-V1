@@ -57,12 +57,24 @@ const AddressFormBody = ({
 
     const onSubmit: SubmitHandler<CheckoutAddressFormValues> = async (data) => {
         try {
-            if (action === "add") {
-                await insertAddressInfo(data);
-                form.reset();
-            } else {
-                await updateAddressInfo(addressId, data);
+            // These server actions return { success, message } on a DB-level
+            // failure (e.g. an RLS denial) instead of throwing — so we MUST check
+            // the result, otherwise a rejected write looks like a success and the
+            // address silently never saves.
+            const result =
+                action === "add"
+                    ? await insertAddressInfo(data)
+                    : await updateAddressInfo(addressId, data);
+
+            if (!result?.success) {
+                customToast.error({
+                    title: "Couldn't save address",
+                    description: result?.message ?? "Something went wrong while saving your address.",
+                });
+                return;
             }
+
+            if (action === "add") form.reset();
             onSuccess?.();
             customToast.success(
                 action === "add"
@@ -79,7 +91,7 @@ const AddressFormBody = ({
             console.error("Error saving address:", error);
             customToast.error({
                 title: "An Error Occured",
-                description: "There's an error occured during the process.",
+                description: error instanceof Error ? error.message : "There's an error occured during the process.",
             });
         }
     };

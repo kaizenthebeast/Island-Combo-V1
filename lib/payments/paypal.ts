@@ -51,10 +51,12 @@ const getAccessToken = async (): Promise<string> => {
 // Creates a CAPTURE-intent order for the given amount. The amount is the
 // authoritative value the buyer will be charged. `requestId` is PayPal's
 // idempotency key (PayPal-Request-Id): retrying with the same key returns the
-// same order instead of creating a duplicate.
+// same order instead of creating a duplicate. `description` is what shows on the
+// PayPal order (defaults to the cash-voucher label for backwards compatibility).
 export const createPayPalOrder = async (
   amount: number,
   requestId?: string,
+  description = 'Island Combo Cash Voucher',
 ): Promise<{ id: string }> => {
   const token = await getAccessToken()
 
@@ -72,7 +74,7 @@ export const createPayPalOrder = async (
       purchase_units: [
         {
           amount: { currency_code: CURRENCY, value: amount.toFixed(2) },
-          description: 'Island Combo Cash Voucher',
+          description,
         },
       ],
     }),

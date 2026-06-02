@@ -1,14 +1,14 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { capturePayPalOrder } from '@/lib/payments/paypal'
-import { createCashVoucher } from '@/lib/cash-vouchers/cash-voucher'
-import { voucherValueFromTotal } from '@/lib/cash-vouchers/pricing'
+import { fulfillCheckout, resolveCheckoutAmount } from '@/lib/checkout/checkout'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 // POST /api/paypal/orders/:orderId/capture
-// Captures the approved PayPal order, then — only if the capture COMPLETED —
-// creates the cash voucher. The voucher's amount comes from PayPal's capture
-// response (not the client), and the capture id is stored as payment_reference.
+// Voucher-specific capture entrypoint (kept for the existing voucher UI). It
+// captures the approved PayPal order, then fulfils through the shared checkout
+// core — which, only after a confirmed capture, derives the voucher value from
+// the captured total and creates the voucher.
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ orderId: string }> },
@@ -28,29 +28,25 @@ export async function POST(
     // Capture the payment first — this is where the money actually moves.
     const payment = await capturePayPalOrder(orderId)
 
-    // Voucher value = captured total minus the convenience fee (server-derived,
-    // so the client can't inflate the redeemable value).
-    const voucherValue = voucherValueFromTotal(payment.amount)
-    if (voucherValue <= 0) {
-      return apiError('Captured amount is below the minimum.', HTTP.BAD_REQUEST)
-    }
-
-    // Fulfil only after a confirmed capture.
-    const result = await createCashVoucher({
-      amount: voucherValue,
+    const intent = {
+      kind: 'cash_voucher' as const,
+      amount: payment.amount, // unused for fulfilment; value derives from capture
       recipientName: recipientName.trim(),
       recipientEmail: typeof recipientEmail === 'string' ? recipientEmail.trim() : null,
-      paymentMethod: 'card',
-      paymentReference: payment.captureId,
+    }
+
+    const amount = await resolveCheckoutAmount(intent)
+    const result = await fulfillCheckout(intent, amount, {
+      method: 'card',
+      captureId: payment.captureId,
+      paypalOrderId: orderId,
+      amount: payment.amount,
     })
 
-    if (!result.success || !result.voucher) {
+    if (!result.voucher) {
       // Payment succeeded but fulfilment failed — surface it so it can be
-      // reconciled against capture id `payment.captureId`.
-      return apiError(
-        result.message ?? 'Payment captured but the voucher could not be created.',
-        HTTP.INTERNAL,
-      )
+      // reconciled against the capture id `payment.captureId`.
+      return apiError('Payment captured but the voucher could not be created.', HTTP.INTERNAL)
     }
 
     return apiOk({ data: { voucher: result.voucher } }, { status: HTTP.CREATED })

@@ -1,13 +1,30 @@
 'use client'
 
 import React from 'react'
+import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/lib/store/cart-store'
 import { useCheckoutStore } from '@/lib/store/checkout-store'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
+import { customToast } from '@/components/popup/ToastCustom'
+import type { ProductCheckoutIntent } from '@/lib/types/order'
 
 const AddressBillingSummary = () => {
+  const router = useRouter()
   const { totalQty, subtotal, cart, selectedIds } = useCartStore()
-  const { voucher, loyaltyPoints, loyaltyEnabled, shippingFee, shippingMethod } = useCheckoutStore()
+  const {
+    voucher,
+    loyaltyPoints,
+    loyaltyEnabled,
+    shippingFee,
+    shippingMethod,
+    paymentMethod,
+    fulfillment,
+    selectedAddressId,
+    placing,
+    submitCard,
+    setPlacing,
+    resetCheckout,
+  } = useCheckoutStore()
 
   // Vouchers can't combine with wholesale pricing.
   const hasWholesale = cart.some(
@@ -21,10 +38,61 @@ const AddressBillingSummary = () => {
     shippingFee: shippingFee ?? 0,
   })
 
-  // Called when the user clicks "Place Order".
-  // TODO: implement the order-placement logic here (left intentionally empty).
-  const handlePlaceOrder = () => {
-    // your logic goes here
+  const buildIntent = (): ProductCheckoutIntent => ({
+    kind: 'product',
+    selectedVariantIds: selectedIds,
+    fulfillment,
+    shippingAddressId: fulfillment === 'deliver' ? selectedAddressId : null,
+    paymentMethod,
+    promoCode: voucher?.code ?? null,
+    useLoyalty: loyaltyEnabled,
+  })
+
+  // COD places the order directly. Card delegates to the in-provider PayPal card
+  // submit registered by CardPaymentFields (the money moves there, then capture).
+  const handlePlaceOrder = async () => {
+    if (placing) return
+
+    if (selectedIds.length === 0) {
+      customToast.error({ title: 'No items selected', description: 'Select at least one item to check out.' })
+      return
+    }
+    if (fulfillment === 'deliver' && !selectedAddressId) {
+      customToast.error({ title: 'Delivery address required', description: 'Please select a delivery address to continue.' })
+      return
+    }
+
+    if (paymentMethod === 'card') {
+      if (!submitCard) {
+        customToast.error({ title: 'Card form not ready', description: 'Please wait a moment for the card form to load and try again.' })
+        return
+      }
+      await submitCard()
+      return
+    }
+
+    // Cash on delivery.
+    setPlacing(true)
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phase: 'create', intent: buildIntent() }),
+      })
+      const json = await res.json()
+      if (!json.success) throw new Error(json.message ?? 'Could not place your order.')
+
+      const orderId = json.data?.order?.order_id
+      useCartStore.getState().clearCart()
+      resetCheckout()
+      router.push(`/checkout/success${orderId ? `?order=${orderId}` : ''}`)
+    } catch (error) {
+      customToast.error({
+        title: 'Order failed',
+        description: error instanceof Error ? error.message : 'Something went wrong placing your order.',
+      })
+      setPlacing(false)
+    }
   }
 
   return (
@@ -53,8 +121,13 @@ const AddressBillingSummary = () => {
           <span>Total</span>
           <span className="text-brand">${total.toFixed(2)}</span>
         </div>
-        <button type='button' onClick={handlePlaceOrder} className="w-full bg-brand text-white py-3 rounded-full mt-2">
-          Place Order
+        <button
+          type='button'
+          onClick={handlePlaceOrder}
+          disabled={placing || selectedIds.length === 0}
+          className="w-full bg-brand text-white py-3 rounded-full mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {placing ? 'Placing order…' : 'Place Order'}
         </button>
       </div>
     </div>

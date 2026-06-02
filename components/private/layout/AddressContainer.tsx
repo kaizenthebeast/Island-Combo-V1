@@ -6,8 +6,6 @@ import AddressFormBody from "@/components/forms/AddressFormBody"
 import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails"
 import MobileAddressSelector from "@/components/functional-ui/placeOrder/MobileAddressSelector"
 import PaymentMethod from "@/components/functional-ui/placeOrder/PaymentMethod"
-import { getUserAddress } from "@/lib/account/address"
-import { getUserProfile } from "@/lib/account/profile"
 import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
 import { useCartStore } from "@/lib/store/cart-store"
@@ -52,10 +50,19 @@ const AddressFetchError = ({ message, onRetry }: { message: string; onRetry: () 
   </div>
 )
 
-const AddressContainer = () => {
+type ProfileLite = { first_name: string | null; last_name: string | null; phone_text: string | null } | null
+
+type Props = {
+  initialAddresses?: Address[]
+  initialProfile?: ProfileLite
+}
+
+const AddressContainer = ({ initialAddresses = [], initialProfile = null }: Props) => {
   const [fulfillmentMethod, setFulfillmentMethod] = useState<"deliver" | "pickup">("deliver")
-  const [addresses, setAddresses] = useState<Address[]>([])
-  const [isLoadingAddresses, setIsLoadingAddresses] = useState(true)
+  // Seeded from the SSR fetch (the page renders the list server-side); refreshed
+  // on the client via /api/address after a mutation.
+  const [addresses, setAddresses] = useState<Address[]>(initialAddresses)
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
@@ -70,22 +77,40 @@ const AddressContainer = () => {
   const [isLoadingShipping, setIsLoadingShipping] = useState(false)
   const [shippingError, setShippingError] = useState<string | null>(null)
 
-  // Account profile — used to pre-fill (and lock) the name + phone on the Add Address form.
-  const [profile, setProfile] = useState<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null>(null)
+  // Account profile (from SSR) — pre-fills (and locks) the name + phone on the Add Address form.
+  const [profile] = useState<ProfileLite>(initialProfile)
 
   const cart = useCartStore((state) => state.cart)
   const setShipping = useCheckoutStore((state) => state.setShipping)
+  const setSelectedAddressIdStore = useCheckoutStore((state) => state.setSelectedAddressId)
+  const setFulfillmentStore = useCheckoutStore((state) => state.setFulfillment)
 
+  // Mirror the selected address + fulfillment into the checkout store so the
+  // Place Order button and the card fields (rendered elsewhere) can read them.
+  useEffect(() => {
+    setSelectedAddressIdStore(fulfillmentMethod === "pickup" ? null : selectedAddressId)
+  }, [selectedAddressId, fulfillmentMethod, setSelectedAddressIdStore])
+
+  useEffect(() => {
+    setFulfillmentStore(fulfillmentMethod)
+  }, [fulfillmentMethod, setFulfillmentStore])
+
+  // Client refetch after a mutation — hits the GET /api/address route so the
+  // list stays in sync without a full navigation. The initial list comes from SSR.
   const fetchAddresses = useCallback(async () => {
     try {
       setFetchError(null)
-      const userAddresses = await getUserAddress()
+      setIsLoadingAddresses(true)
+      const response = await fetch('/api/address')
+      const payload = await response.json()
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || 'Failed to load addresses')
+      }
+      const userAddresses = payload.data as Address[]
       setAddresses(userAddresses)
 
       // Auto-select the default address only when nothing is selected yet.
-      // The functional update reads the current selection, so this callback
-      // doesn't need selectedAddressId as a dependency (keeps it stable).
-      const defaultAddress = userAddresses.find((address: Address) => address.make_default)
+      const defaultAddress = userAddresses.find((address) => address.make_default)
       if (defaultAddress) {
         setSelectedAddressId((current) => current ?? defaultAddress.id)
       }
@@ -96,20 +121,12 @@ const AddressContainer = () => {
     }
   }, [])
 
+  // Auto-select the default from the SSR-provided list on first render.
   useEffect(() => {
-    fetchAddresses()
-  }, [fetchAddresses])
-
-  useEffect(() => {
-    let cancelled = false
-    getUserProfile()
-      .then((p) => {
-        if (!cancelled) setProfile(p ? { first_name: p.first_name, last_name: p.last_name, phone_text: p.phone_text } : null)
-      })
-      .catch(() => {
-        // Ignore: the form just won't be pre-filled. The address fetch already surfaces auth issues.
-      })
-    return () => { cancelled = true }
+    const defaultAddress = initialAddresses.find((address) => address.make_default)
+    if (defaultAddress) setSelectedAddressId((current) => current ?? defaultAddress.id)
+    // Run once for the initial SSR data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Re-quote shipping whenever the user is delivering to a known address with a non-empty cart.
@@ -393,8 +410,7 @@ const AddressContainer = () => {
               <PaymentMethod />
             </>
           )}
-
-
+        </div>
 
         <AddressBillingSummary />
       </div>

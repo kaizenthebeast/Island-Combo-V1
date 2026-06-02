@@ -1,14 +1,15 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { createPayPalOrder } from '@/lib/payments/paypal'
-import { chargeTotal } from '@/lib/cash-vouchers/pricing'
+import { resolveCheckoutAmount } from '@/lib/checkout/checkout'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 const MAX_AMOUNT = 100_000
 
 // POST /api/paypal/orders → creates a PayPal order for a cash voucher purchase.
-// The amount is validated and rounded server-side; it is the value the buyer
-// will be charged and, after capture, the voucher's value.
+// This is the voucher-specific entrypoint kept for the existing voucher UI; the
+// amount is resolved through the shared checkout core (the same one /api/checkout
+// uses), so voucher and product pricing stay in one place.
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser()
@@ -23,10 +24,16 @@ export async function POST(req: NextRequest) {
       return apiError(`Amount cannot exceed ${MAX_AMOUNT}.`, HTTP.BAD_REQUEST)
     }
 
-    // Buyer is charged the voucher value plus the convenience fee.
-    // requestId is the client's idempotency key (stable per payment attempt).
+    // Buyer is charged the voucher value plus the convenience fee (computed by
+    // the shared core). requestId is the client's idempotency key.
+    const { total } = await resolveCheckoutAmount({
+      kind: 'cash_voucher',
+      amount,
+      recipientName: 'pending', // real recipient is captured at the capture step
+    })
+
     const order = await createPayPalOrder(
-      chargeTotal(amount),
+      total,
       typeof requestId === 'string' ? requestId : undefined,
     )
 
