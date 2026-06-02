@@ -24,7 +24,7 @@ export async function GET() {
     const user = await requireUser()
     if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
-    const addresses = await getUserAddress()
+    const addresses = await getUserAddress(user.id)
     return apiOk({ data: addresses })
   } catch (error: unknown) {
     return toApiError(error)
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
     const body = (await req.json()) as AddressFormValues
-    return apiResult(await insertAddressInfo(body))
+    return apiResult(await insertAddressInfo(user.id, user.email, body))
   } catch (error: unknown) {
     return toApiError(error)
   }
@@ -53,7 +53,7 @@ export async function PATCH(req: NextRequest) {
     const { addressId, ...data } = (await req.json()) ?? {}
     if (!addressId) return apiError('addressId is required', HTTP.BAD_REQUEST)
 
-    return apiResult(await updateAddressInfo(addressId, data as AddressFormValues))
+    return apiResult(await updateAddressInfo(user.id, addressId, data as AddressFormValues))
   } catch (error: unknown) {
     return toApiError(error)
   }
@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest) {
     const { addressId } = (await req.json()) ?? {}
     if (!addressId) return apiError('addressId is required', HTTP.BAD_REQUEST)
 
-    return apiResult(await deleteAddress(addressId))
+    return apiResult(await deleteAddress(user.id, addressId))
   } catch (error: unknown) {
     return toApiError(error)
   }

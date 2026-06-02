@@ -6,7 +6,6 @@ import {
     checkoutAddressSchema,
     CheckoutAddressFormValues,
 } from "@/lib/validators/address";
-import { insertAddressInfo, updateAddressInfo } from "@/lib/account/address";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,14 +56,23 @@ const AddressFormBody = ({
 
     const onSubmit: SubmitHandler<CheckoutAddressFormValues> = async (data) => {
         try {
-            // These server actions return { success, message } on a DB-level
-            // failure (e.g. an RLS denial) instead of throwing — so we MUST check
-            // the result, otherwise a rejected write looks like a success and the
-            // address silently never saves.
-            const result =
+            // Goes through the authenticated /api/address route (the JWT boundary);
+            // the route derives user_id server-side. The response is { success,
+            // message } — we MUST check it, otherwise a rejected write (e.g. an RLS
+            // denial) looks like a success and the address silently never saves.
+            const res =
                 action === "add"
-                    ? await insertAddressInfo(data)
-                    : await updateAddressInfo(addressId, data);
+                    ? await fetch("/api/address", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify(data),
+                      })
+                    : await fetch("/api/address", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ addressId, ...data }),
+                      });
+            const result = await res.json();
 
             if (!result?.success) {
                 customToast.error({

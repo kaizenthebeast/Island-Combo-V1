@@ -97,7 +97,7 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
   let shippingFee = 0
   let shippingMethod: 'GCR' | 'QPI' | null = null
   if (intent.fulfillment === 'deliver') {
-    const addresses = await getUserAddress()
+    const addresses = await getUserAddress(user.id)
     const address = addresses.find((a) => a.id === intent.shippingAddressId)
     if (!address) throw new Error('Select a delivery address to continue.')
 

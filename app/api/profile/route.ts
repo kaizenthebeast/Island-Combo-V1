@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { requireUser } from '@/lib/auth'
 import { getMyAccount, updateMyAccount } from '@/lib/account/profile'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
@@ -6,7 +7,10 @@ import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 // Returns identity + role + loyalty + default address for the signed-in user.
 export async function GET() {
   try {
-    const data = await getMyAccount()
+    const user = await requireUser()
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
+
+    const data = await getMyAccount(user.id, user.email)
     return apiOk({ data })
   } catch (error: unknown) {
     return toApiError(error)
@@ -19,6 +23,9 @@ export async function GET() {
 // Role changes go through /api/users (admin only).
 export async function PATCH(req: NextRequest) {
   try {
+    const user = await requireUser()
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
+
     const body = (await req.json()) ?? {}
     const { first_name, last_name, phone_text, sex, age } = body
 
@@ -29,7 +36,7 @@ export async function PATCH(req: NextRequest) {
       return apiError('age must be a non-negative integer', HTTP.BAD_REQUEST)
     }
 
-    const result = await updateMyAccount({ first_name, last_name, phone_text, sex, age })
+    const result = await updateMyAccount(user.id, { first_name, last_name, phone_text, sex, age })
     return apiResult(result)
   } catch (error: unknown) {
     return toApiError(error)

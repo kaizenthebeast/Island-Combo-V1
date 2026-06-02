@@ -1,5 +1,6 @@
-'use server'
-/** Customer profile & notification-preference access. */
+/** Customer profile & notification-preference access. Pure data-access: callers
+ *  pass the authenticated userId (derived from the JWT at the API-route
+ *  boundary); RLS on `profile`/`profile_pts` enforces the boundary. */
 import { createClient } from "@/lib/supabase/server";
 import type { Address } from '@/lib/types/users';
 import { revalidatePath } from "next/cache";
@@ -27,29 +28,26 @@ export type NotificationPrefs = { order_updates: boolean; promotions: boolean }
 // Aggregated read + scoped self-update + notification prefs. Email and role
 // are intentionally excluded — they have separate flows.
 
-export const getMyAccount = async (): Promise<MyAccount> => {
+export const getMyAccount = async (userId: string, email: string | null): Promise<MyAccount> => {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
 
   const { data: profile, error: profileErr } = await supabase
     .from('profile')
     .select('first_name, last_name, phone_text, sex, age, role, is_active, email, email_order_updates, email_promotions')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle()
   if (profileErr) throw new Error(profileErr.message)
 
   const { data: pts } = await supabase
     .from('profile_pts')
     .select('total_pts')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle()
 
   const { data: addr } = await supabase
     .from('addresses')
     .select('id, address, postal_code, locality, country, make_default, profile(first_name, last_name, phone_text)')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .eq('make_default', true)
     .order('updated_at', { ascending: false })
     .limit(1)
@@ -63,8 +61,8 @@ export const getMyAccount = async (): Promise<MyAccount> => {
     : null
 
   return {
-    user_id: user.id,
-    email: profile?.email ?? user.email ?? null,
+    user_id: userId,
+    email: profile?.email ?? email ?? null,
     first_name: profile?.first_name ?? null,
     last_name: profile?.last_name ?? null,
     phone_text: profile?.phone_text ?? null,
@@ -81,16 +79,13 @@ export const getMyAccount = async (): Promise<MyAccount> => {
   }
 }
 
-export const getMyNotificationPrefs = async (): Promise<NotificationPrefs> => {
+export const getMyNotificationPrefs = async (userId: string): Promise<NotificationPrefs> => {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
 
   const { data, error } = await supabase
     .from('profile')
     .select('email_order_updates, email_promotions')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle()
   if (error) throw new Error(error.message)
 
@@ -100,11 +95,8 @@ export const getMyNotificationPrefs = async (): Promise<NotificationPrefs> => {
   }
 }
 
-export const updateMyNotificationPrefs = async (prefs: Partial<NotificationPrefs>) => {
+export const updateMyNotificationPrefs = async (userId: string, prefs: Partial<NotificationPrefs>) => {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (prefs.order_updates !== undefined) patch.email_order_updates = prefs.order_updates
@@ -113,7 +105,7 @@ export const updateMyNotificationPrefs = async (prefs: Partial<NotificationPrefs
   const { error } = await supabase
     .from('profile')
     .update(patch)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
 
   if (error) return { success: false, status: 403, message: error.message }
 
@@ -122,7 +114,7 @@ export const updateMyNotificationPrefs = async (prefs: Partial<NotificationPrefs
 }
 
 // Self-update for the authenticated user — non-address, non-role, non-email.
-export const updateMyAccount = async (data: {
+export const updateMyAccount = async (userId: string, data: {
   first_name?: string | null
   last_name?: string | null
   phone_text?: string | null
@@ -130,9 +122,6 @@ export const updateMyAccount = async (data: {
   age?: number | null
 }) => {
   const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.first_name !== undefined) patch.first_name = data.first_name
@@ -144,7 +133,7 @@ export const updateMyAccount = async (data: {
   const { error } = await supabase
     .from('profile')
     .update(patch)
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
 
   if (error) return { success: false, status: 403, message: error.message }
 
@@ -154,16 +143,13 @@ export const updateMyAccount = async (data: {
 
 // Thin slice used by forms that only need first/last/phone to prefill.
 // Prefer getMyAccount() when you need the full snapshot.
-export const getUserProfile = async (): Promise<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null> => {
+export const getUserProfile = async (userId: string): Promise<{ first_name: string | null; last_name: string | null; phone_text: string | null } | null> => {
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Unauthorized');
 
   const { data, error } = await supabase
     .from("profile")
     .select("first_name, last_name, phone_text")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) throw new Error(error.message);

@@ -7,7 +7,6 @@ import {
   personalDetailsSchema,
   PersonalDetailsFormValues,
 } from '@/lib/validators/user'
-import { updateMyAccount } from '@/lib/account/profile'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,11 +58,16 @@ const PersonalDetailsForm = ({
 
   const onSubmit: SubmitHandler<PersonalDetailsFormValues> = async (data) => {
     setSubmitError(null)
-    const result = await updateMyAccount({
-      first_name: data.first_name,
-      last_name: data.last_name,
-      phone_text: data.phone_text || null,
+    const res = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone_text: data.phone_text || null,
+      }),
     })
+    const result = await res.json()
 
     if (!result.success) {
       setSubmitError(result.message)

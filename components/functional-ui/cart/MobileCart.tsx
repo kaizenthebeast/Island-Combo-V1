@@ -54,9 +54,12 @@ const MobileCart = () => {
         {cart.map((item) => {
           const isSelected = selectedIds.includes(item.variant_id)
           const isWholesale = item.applied_tier_label === 'wholesale'
-          const displayPrice = item.applied_price || item.final_price || item.price
+          // Pending items (just added, not yet backfilled by fetchCart) have no
+          // price fields, so fall back to 0 to avoid undefined.toFixed crashes.
+          const basePrice = item.price ?? 0
+          const displayPrice = item.applied_price || item.final_price || basePrice
           const hasDiscount = item.discount !== null && item.discount > 0
-          const priceIsReduced = displayPrice < item.price
+          const priceIsReduced = displayPrice < basePrice
 
           return (
             <div
@@ -125,7 +128,7 @@ const MobileCart = () => {
                     {priceIsReduced && (
                       <>
                         <span className="text-[11px] text-muted-foreground line-through">
-                          ${item.price.toFixed(2)}
+                          ${basePrice.toFixed(2)}
                         </span>
                         {isWholesale ? (
                           <span className="text-[10px] bg-success-tint text-success px-1 py-0.5 rounded">

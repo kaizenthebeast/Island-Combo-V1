@@ -1,5 +1,7 @@
 import React from 'react'
+import { redirect } from 'next/navigation'
 import AddressContainer from '@/components/private/layout/AddressContainer'
+import { requireUser } from '@/lib/auth'
 import { getUserAddress } from '@/lib/account/address'
 import { getUserProfile } from '@/lib/account/profile'
 
@@ -10,11 +12,16 @@ import { getUserProfile } from '@/lib/account/profile'
 export const dynamic = 'force-dynamic'
 
 const AddressPage = async () => {
+  // Trusted server-side boundary: verify the JWT here, then hand the derived id
+  // to the (pure) data-access helpers.
+  const user = await requireUser()
+  if (!user) redirect('/auth/login')
+
   // Fetched server-side (SSR). Fall back to empty/null so a transient read error
   // still renders the page; the client can retry via /api/address.
   const [addresses, profile] = await Promise.all([
-    getUserAddress().catch(() => []),
-    getUserProfile().catch(() => null),
+    getUserAddress(user.id).catch(() => []),
+    getUserProfile(user.id).catch(() => null),
   ])
 
   return (

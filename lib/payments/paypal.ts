@@ -23,9 +23,20 @@ export type CapturedPayment = {
   status: string
 }
 
+// PayPal OAuth tokens are valid for ~9 hours and are safe to reuse. Caching the
+// token in module scope avoids a redundant ~300-800ms auth round-trip on every
+// create/capture call (a single order otherwise fetched the token twice). Refresh
+// 60s before the real expiry to avoid racing the boundary.
+const TOKEN_EXPIRY_MARGIN_MS = 60_000
+let cachedToken: { value: string; expiresAt: number } | null = null
+
 const getAccessToken = async (): Promise<string> => {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error('PayPal is not configured (missing NEXT_PUBLIC_PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET).')
+  }
+
+  if (cachedToken && Date.now() < cachedToken.expiresAt) {
+    return cachedToken.value
   }
 
   const auth = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')
@@ -44,7 +55,11 @@ const getAccessToken = async (): Promise<string> => {
     throw new Error('Could not authenticate with PayPal.')
   }
 
-  const json = (await res.json()) as { access_token: string }
+  const json = (await res.json()) as { access_token: string; expires_in: number }
+  cachedToken = {
+    value: json.access_token,
+    expiresAt: Date.now() + json.expires_in * 1000 - TOKEN_EXPIRY_MARGIN_MS,
+  }
   return json.access_token
 }
 

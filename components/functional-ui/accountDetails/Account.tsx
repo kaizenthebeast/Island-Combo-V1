@@ -3,7 +3,6 @@
 import { User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Address } from '@/lib/types/users'
-import { deleteAddress } from '@/lib/account/address'
 import CheckoutAddress from '@/components/forms/CheckoutAddressForm'
 import PersonalDetailsForm from '@/components/forms/PersonalDetailsForm'
 import DeleteModal from '@/components/popup/DeleteModal'
@@ -21,7 +20,21 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
   const atAddressLimit = addresses.length >= 3
 
   const handleDeleteAddress = async (id: number) => {
-    await deleteAddress(id)
+    const res = await fetch('/api/address', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ addressId: id }),
+    })
+    const result = await res.json()
+
+    if (!result?.success) {
+      customToast.error({
+        title: "Couldn't delete address",
+        description: result?.message ?? 'Something went wrong while deleting the address.',
+      })
+      return
+    }
+
     customToast.success({
       title: 'Address successfully deleted!',
       description: 'The address has been removed from your account.',

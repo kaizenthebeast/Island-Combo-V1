@@ -3,7 +3,6 @@ import React from "react";
 import { Address } from "@/lib/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
-import { deleteAddress } from "@/lib/account/address";
 import DeleteModal from "../../popup/DeleteModal";
 import { customToast } from '@/components/popup/ToastCustom'
 
@@ -15,7 +14,21 @@ const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSu
 }) => {
 
     async function handleDeleteAdd(id: number) {
-        await deleteAddress(id);
+        const res = await fetch("/api/address", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ addressId: id }),
+        });
+        const result = await res.json();
+
+        if (!result?.success) {
+            customToast.error({
+                title: "Couldn't delete address",
+                description: result?.message ?? "Something went wrong while deleting the address.",
+            });
+            return;
+        }
+
         if (onSuccess) onSuccess();
         customToast.success({
             title: "Address sucessfully deleted!",

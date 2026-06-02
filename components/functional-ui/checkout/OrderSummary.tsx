@@ -48,9 +48,12 @@ const OrderSummary = ({ cartItems }: Props) => {
             <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
                     const isWholesale = item.applied_tier_label === 'wholesale'
-                    const displayPrice = item.applied_price || item.final_price || item.price
+                    // Pending items (just added, not yet backfilled by fetchCart) have no
+                    // price fields, so fall back to 0 to avoid undefined.toFixed crashes.
+                    const basePrice = item.price ?? 0
+                    const displayPrice = item.applied_price || item.final_price || basePrice
                     const hasDiscount = item.discount !== null && item.discount > 0
-                    const priceIsReduced = displayPrice < item.price
+                    const priceIsReduced = displayPrice < basePrice
 
                     return (
                         <div key={item.id} className="flex items-start gap-3 sm:gap-4">
@@ -114,7 +117,7 @@ const OrderSummary = ({ cartItems }: Props) => {
                                         {priceIsReduced && (
                                             <>
                                                 <span className="text-xs text-muted-foreground line-through">
-                                                    ${item.price.toFixed(2)}
+                                                    ${basePrice.toFixed(2)}
                                                 </span>
                                                 {isWholesale ? (
                                                     <span className="text-xs bg-success-tint text-success px-1.5 py-0.5 rounded">

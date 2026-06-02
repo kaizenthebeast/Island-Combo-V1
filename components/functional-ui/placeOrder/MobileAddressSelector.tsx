@@ -12,7 +12,6 @@ import { ArrowLeft, MapPin, ChevronRight, Pencil, Trash2, AlertCircle } from 'lu
 import { Address } from '@/lib/types/users'
 import AddressFormBody from '@/components/forms/AddressFormBody'
 import DeleteModal from '@/components/popup/DeleteModal'
-import { deleteAddress } from '@/lib/account/address'
 import { customToast } from '@/components/popup/ToastCustom'
 
 type Profile = { first_name: string | null; last_name: string | null; phone_text: string | null } | null
@@ -57,7 +56,21 @@ const MobileAddressSelector = ({
   }
 
   const handleDelete = async (id: number) => {
-    await deleteAddress(id)
+    const res = await fetch('/api/address', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ addressId: id }),
+    })
+    const result = await res.json()
+
+    if (!result?.success) {
+      customToast.error({
+        title: "Couldn't delete address",
+        description: result?.message ?? 'Something went wrong while deleting the address.',
+      })
+      return
+    }
+
     onChanged()
     customToast.success({
       title: 'Address successfully deleted!',
