@@ -1,6 +1,4 @@
 "use client";
-
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,23 +34,30 @@ export function ForgotPasswordForm() {
     defaultValues: { email: "" },
   });
 
-  const onSubmit: SubmitHandler<ForgotPasswordFormInput> = async (data) => {
-    const supabase = createClient();
+const onSubmit: SubmitHandler<ForgotPasswordFormInput> = async (data) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
-      });
-      if (error) throw error;
-      setSuccess(true);
+        const res = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: data.email }),
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            throw new Error(result.message || 'Something went wrong');
+        }
+
+        setSuccess(true);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+        setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6 flex flex-col justify-center">
