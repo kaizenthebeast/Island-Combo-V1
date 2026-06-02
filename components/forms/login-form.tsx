@@ -40,50 +40,36 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
-    setMessage("");
+const onSubmit: SubmitHandler<LoginFormInput> = async (data) => {
+    setMessage('');
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
-      const { data: { session: anonSession } } = await supabase.auth.getSession();
-      const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
+        // Capture guest session on the client BEFORE calling the API
+        const supabase = createClient();
+        const { data: { session: anonSession } } = await supabase.auth.getSession();
+        const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
 
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (error || !signInData.session) {
-        throw new Error(error?.message || "Login failed");
-      }
-
-      const authUserId = signInData.session.user.id;
-
-      if (guestUserId && guestUserId !== authUserId) {
-        const { error: mergeError } = await supabase.rpc("merge_cart", {
-          p_guest_user_id: guestUserId,
-          p_auth_user_id: authUserId,
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // Pass guestUserId so the server can handle the cart merge
+            body: JSON.stringify({ email: data.email, password: data.password, guestUserId }),
         });
-        if (mergeError) {
-          throw new Error(`Failed to merge cart: ${mergeError.message}`);
+
+        const result = await res.json();
+
+        if (!res.ok) {
+            throw new Error(result.message || 'Login failed');
         }
-      }
 
-      const { data: profile } = await supabase
-        .from("profile")
-        .select("role")
-        .eq("user_id", authUserId)
-        .single();
-
-      router.push(profile?.role === "admin" ? "/admin/products" : "/");
-
+        router.push(result.data.redirectTo);
     } catch (err: unknown) {
-      setMessage(err instanceof Error ? err.message : "An error occurred");
+        setMessage(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
-  };
+};
 
   const googleLogin = async () => {
     setMessage("");

@@ -25,7 +25,7 @@ export const HTTP = {
 export type HttpStatus = (typeof HTTP)[keyof typeof HTTP]
 
 export type ApiSuccess<Data> = { success: true; data?: Data; message?: string }
-export type ApiFailure    = { success: false; message: string }
+export type ApiFailure       = { success: false; message: string }
 export type ApiResponse<Data> = ApiSuccess<Data> | ApiFailure
 
 type InitOptions = {
@@ -59,18 +59,36 @@ export function apiError(message: string, status: number, init: Omit<InitOptions
 }
 
 // Pass-through for lib results
-// Many lib functions return { success, status, message, data? }. Forward them
-// to the client without rewriting each route by hand.
+// Accepts either:
+//   A) A LibResult  → { success, status, message?, data? }  (from lib functions)
+//   B) A plain data → any object                             (inline route returns)
 
 type LibResult<Data> =
   | { success: true;  status: number; message?: string; data?: Data }
   | { success: false; status: number; message:  string }
 
-export function apiResult<Data>(result: LibResult<Data>) {
-  if (!result.success) return apiError(result.message, result.status)
+type PlainData = Record<string, unknown>
+
+export function apiResult<Data>(result: LibResult<Data>): NextResponse
+export function apiResult<Data extends PlainData>(data: Data, status?: number): NextResponse
+export function apiResult<Data>(
+  resultOrData: LibResult<Data> | PlainData,
+  status: number = HTTP.OK,
+): NextResponse {
+  // LibResult branch — has an explicit `success` boolean
+  if ('success' in resultOrData) {
+    const result = resultOrData as LibResult<Data>
+    if (!result.success) return apiError(result.message, result.status)
+    return apiOk<Data>(
+      { data: result.data, message: result.message },
+      { status: result.status },
+    )
+  }
+
+  // Plain data branch — just wrap it
   return apiOk<Data>(
-    { data: result.data, message: result.message },
-    { status: result.status },
+    { data: resultOrData as Data },
+    { status },
   )
 }
 

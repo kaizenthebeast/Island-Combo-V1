@@ -45,30 +45,32 @@ export function SignUpForm() {
   const onSubmit: SubmitHandler<SignupFormInput> = async (data) => {
     setMessage("");
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
+      const supabase = createClient();
       const { data: { session: anonSession } } = await supabase.auth.getSession();
-      const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
+      const guestUserId = anonSession?.user.id;
 
-      if (guestUserId) {
-        document.cookie = `guest_user_id=${guestUserId}; path=/; max-age=600`;
-      }
-
-      const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/sign-up-success`,
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      });
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          guestUserId
+        })
+      })
 
-      if (error) {
-        throw new Error(error?.message || "Signup failed");
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Signup failed");
       }
 
       form.reset();
-      router.push("/auth/sign-up-success");
+      router.push(result.data.redirectTo);
     } catch (err: unknown) {
       setMessage(err instanceof Error ? err.message : "An error occurred");
     } finally {
