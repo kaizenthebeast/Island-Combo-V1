@@ -4,9 +4,9 @@ import React, { useMemo } from 'react'
 import { CircleDollarSign } from 'lucide-react'
 import VoucherCodeForm from '@/components/forms/PromoCodeForm'
 import { Switch } from '@/components/ui/switch'
-import { useCheckoutStore } from '@/store/useCheckoutStore'
-import { useCartStore } from '@/store/cartStore'
-import { calculateTotals } from '@/helper/pricing/calculateTotals'
+import { useCheckoutStore } from '@/lib/store/checkout-store'
+import { useCartStore } from '@/lib/store/cart-store'
+import { calculateTotals } from '@/lib/checkout/calculate-totals'
 import Link from 'next/link'
 
 type Props = {

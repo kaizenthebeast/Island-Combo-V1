@@ -1,7 +1,7 @@
 import React from 'react'
 import UsersClient from './UsersClient'
-import { getUsersPage, type UsersSortKey } from '@/lib/admin/users'
-import type { AdminUser } from '@/types/users'
+import { getUsersPage, type UsersSortKey } from '@/lib/admin/users/users'
+import type { AdminUser } from '@/lib/types/users'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

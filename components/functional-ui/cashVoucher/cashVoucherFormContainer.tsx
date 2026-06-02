@@ -3,7 +3,7 @@
 import React from 'react'
 import CashVoucherForm from '@/components/forms/CashVoucherForm'
 import CashVoucherPayment from '@/components/functional-ui/cashVoucher/CashVoucherPayment'
-import type { CashVoucher } from '@/types/cashVoucher'
+import type { CashVoucher } from '@/lib/types/cash-voucher'
 
 type Props = {
   step: number

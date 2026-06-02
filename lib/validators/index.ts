@@ -1,0 +1,11 @@
+/** Barrel for lib/validators. */
+export * from './address'
+export * from './cash-voucher'
+export * from './category'
+export * from './forgot-password'
+export * from './login'
+export * from './product'
+export * from './signup'
+export * from './update-password'
+export * from './user'
+export * from './voucher'

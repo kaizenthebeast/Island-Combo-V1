@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editUserSchema, type EditUserFormValues } from '@/form-schema/userSchema'
-import { updateUser, restoreUser } from '@/lib/admin/users'
+import { editUserSchema, type EditUserFormValues } from '@/lib/validators/user'
+import { updateUser, restoreUser } from '@/lib/admin/users/users'
 import { UserFields } from './UserUIForm'
 import { ArchiveRestore } from 'lucide-react'          
-import type { AdminStaff } from '@/types/users'
+import type { AdminStaff } from '@/lib/types/users'
 
 type Props = {
   user: AdminStaff

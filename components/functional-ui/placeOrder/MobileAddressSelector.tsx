@@ -9,10 +9,10 @@ import {
 } from '@/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ArrowLeft, MapPin, ChevronRight, Pencil, Trash2, AlertCircle } from 'lucide-react'
-import { Address } from '@/types/users'
+import { Address } from '@/lib/types/users'
 import AddressFormBody from '@/components/forms/AddressFormBody'
 import DeleteModal from '@/components/popup/DeleteModal'
-import { deleteAddress } from '@/lib/address'
+import { deleteAddress } from '@/lib/account/address'
 import { customToast } from '@/components/popup/ToastCustom'
 
 type Profile = { first_name: string | null; last_name: string | null; phone_text: string | null } | null

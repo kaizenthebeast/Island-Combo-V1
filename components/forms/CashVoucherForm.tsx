@@ -1,7 +1,7 @@
 'use client'
 
 import { useFormContext } from 'react-hook-form'
-import type { CashVoucherFormValues } from '@/form-schema/cashVoucherSchema'
+import type { CashVoucherFormValues } from '@/lib/validators/cash-voucher'
 
 export const PRESET_AMOUNTS = [50, 100, 500, 1000, 500, 2000]
 

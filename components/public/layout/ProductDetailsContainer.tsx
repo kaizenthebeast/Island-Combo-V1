@@ -1,4 +1,4 @@
-import { getProductBySlug } from '@/lib/product'
+import { getProductBySlug } from '@/lib/products/product'
 import { Suspense } from 'react'
 import ProductDetails from '@/components/functional-ui/product/ProductDetails'
 import ProductReview from '@/components/functional-ui/review/ProductReview'

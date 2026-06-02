@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { AddVoucherForm } from '@/components/admin/voucher/forms/AddVoucherForm'
-import type { AddVoucherFormValues } from '@/form-schema/voucherSchema'
+import type { AddVoucherFormValues } from '@/lib/validators/voucher'
 
 type Props = {
   open: boolean

@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   personalDetailsSchema,
   PersonalDetailsFormValues,
-} from '@/form-schema/userSchema'
-import { updateMyAccount } from '@/lib/users'
+} from '@/lib/validators/user'
+import { updateMyAccount } from '@/lib/account/profile'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

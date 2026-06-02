@@ -1,9 +1,9 @@
 'use client'
 import React from "react";
-import { Address } from "@/types/users";
+import { Address } from "@/lib/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../../forms/CheckoutAddressForm";
-import { deleteAddress } from "@/lib/address";
+import { deleteAddress } from "@/lib/account/address";
 import DeleteModal from "../../popup/DeleteModal";
 import { customToast } from '@/components/popup/ToastCustom'
 

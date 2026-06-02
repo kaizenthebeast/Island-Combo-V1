@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { capturePayPalOrder } from '@/lib/paypal'
-import { createCashVoucher } from '@/lib/cashVoucher'
-import { voucherValueFromTotal } from '@/lib/cashVoucherPricing'
+import { capturePayPalOrder } from '@/lib/payments/paypal'
+import { createCashVoucher } from '@/lib/cash-vouchers/cash-voucher'
+import { voucherValueFromTotal } from '@/lib/cash-vouchers/pricing'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 // POST /api/paypal/orders/:orderId/capture

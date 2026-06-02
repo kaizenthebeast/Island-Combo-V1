@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LayoutGrid, LucideIcon } from "lucide-react";
-import { getCategoryBySlug } from "@/lib/category";
-import { getAllProducts } from "@/lib/product";
+import { getCategoryBySlug } from "@/lib/categories/category";
+import { getAllProducts } from "@/lib/products/product";
 import ProductCard from "@/components/card/ProductCard";
 
 type Props = {

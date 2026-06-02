@@ -2,8 +2,8 @@
 
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addVoucherSchema, type AddVoucherFormValues } from '@/form-schema/voucherSchema'
-import { createVoucher } from '@/lib/admin/voucher'
+import { addVoucherSchema, type AddVoucherFormValues } from '@/lib/validators/voucher'
+import { createVoucher } from '@/lib/admin/vouchers/voucher'
 import { VoucherFields } from './VoucherUIForm'
 
 type Props = {

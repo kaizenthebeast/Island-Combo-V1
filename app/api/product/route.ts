@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
-import { getPublicProductsPage, type PublicProductSort } from '@/lib/product'
+import { getPublicProductsPage, type PublicProductSort } from '@/lib/products/product'
 import {
   addAdminProduct,
   updateAdminProduct,
@@ -8,7 +8,7 @@ import {
   restoreProduct,
   type AddProductPayload,
   type UpdateProductPayload,
-} from '@/lib/admin/product'
+} from '@/lib/admin/products/product'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 // GET /api/product — Public list (no auth)

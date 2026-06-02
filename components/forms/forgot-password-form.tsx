@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   forgotPasswordSchema,
   ForgotPasswordFormInput,
-} from "@/form-schema/forgotPasswordSchema";
+} from "@/lib/validators/forgot-password";
 
 export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);

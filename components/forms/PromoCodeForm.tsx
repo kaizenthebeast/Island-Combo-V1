@@ -6,11 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   applyVoucherSchema,
   ApplyVoucherFormValues,
-} from '@/form-schema/voucherSchema'
-import { applyVoucher } from '@/lib/voucher'
-import { useCartStore } from '@/store/cartStore'
+} from '@/lib/validators/voucher'
+import { applyVoucher } from '@/lib/promo-vouchers/apply-voucher'
+import { useCartStore } from '@/lib/store/cart-store'
 import { customToast } from '@/components/popup/ToastCustom'
-import type { Voucher } from '@/types/voucher'
+import type { Voucher } from '@/lib/types/voucher'
 
 import { Input } from '@/components/ui/input'
 import { AlertCircle } from 'lucide-react'

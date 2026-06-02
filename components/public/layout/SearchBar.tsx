@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Search, Loader2 } from 'lucide-react'
-import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
+import { getPublicImageUrl } from '@/lib/utils/image-url'
 
 type Suggestion = {
   product_id: number

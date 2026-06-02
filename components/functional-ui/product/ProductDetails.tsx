@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useFavoriteStore } from "@/store/favoriteStore";
-import { getPublicImageUrl } from '@/helper/getPublicImageUrl';
+import { useFavoriteStore } from "@/lib/store/favorite-store";
+import { getPublicImageUrl } from '@/lib/utils/image-url';
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductDetails } from '@/types/product'
-import { useCartStore } from '@/store/cartStore'
+import type { ProductDetails } from '@/lib/types/product'
+import { useCartStore } from '@/lib/store/cart-store'
 import { customToast } from '@/components/popup/ToastCustom'
 
 import {
@@ -20,7 +20,7 @@ import { ShoppingCart, Heart, Package } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
 import WholesaleCheckIcon from '@/components/icons/WholesaleCheckIcon'
-import { variantMatchesSelection } from '@/helper/variantSelection'
+import { variantMatchesSelection } from '@/lib/utils/variant-selection'
 
 const WHOLESALE_LABEL = 'wholesale'
 const PLACEHOLDER_IMAGE = '/images/placeholder.png'

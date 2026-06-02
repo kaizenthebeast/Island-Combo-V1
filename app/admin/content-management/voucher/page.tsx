@@ -1,6 +1,6 @@
 import React from 'react'
 import VoucherClient from './VoucherClient'
-import { getVouchersPage, type VouchersSortKey } from '@/lib/admin/voucher'
+import { getVouchersPage, type VouchersSortKey } from '@/lib/admin/vouchers/voucher'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

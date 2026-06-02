@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editVoucherSchema, type EditVoucherFormValues } from '@/form-schema/voucherSchema'
-import { updateVoucher, restoreVoucher } from '@/lib/admin/voucher'
+import { editVoucherSchema, type EditVoucherFormValues } from '@/lib/validators/voucher'
+import { updateVoucher, restoreVoucher } from '@/lib/admin/vouchers/voucher'
 import { VoucherFields } from './VoucherUIForm'
 import { ArchiveRestore } from 'lucide-react'
-import type { Voucher } from '@/types/voucher'
+import type { Voucher } from '@/lib/types/voucher'
 
 type Props = {
   voucher: Voucher

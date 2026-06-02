@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react'
-import { getProductReviews, getReviewStats } from '@/lib/review'
-import { REVIEW_CONFIG } from '@/types/review'
+import { getProductReviews, getReviewStats } from '@/lib/reviews/review'
+import { REVIEW_CONFIG } from '@/lib/types/review'
 import ReviewPagination from './ReviewPagination'
 
 const ProductReview = async ({ slug }: { slug: string }) => {

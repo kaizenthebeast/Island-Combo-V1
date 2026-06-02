@@ -1,4 +1,4 @@
-import { getSaleProducts } from '@/lib/product'
+import { getSaleProducts } from '@/lib/products/product'
 import ProductCard from '@/components/card/ProductCard'
 import {
   Carousel,

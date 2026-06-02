@@ -9,8 +9,8 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditVoucherForm } from '@/components/admin/voucher/forms/EditVoucherForm'
-import type { EditVoucherFormValues } from '@/form-schema/voucherSchema'
-import type { Voucher } from '@/types/voucher'
+import type { EditVoucherFormValues } from '@/lib/validators/voucher'
+import type { Voucher } from '@/lib/types/voucher'
 
 type Props = {
   open: boolean

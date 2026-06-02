@@ -1,4 +1,4 @@
-import { getRecommendedProducts } from '@/lib/product'
+import { getRecommendedProducts } from '@/lib/products/product'
 import ProductCard from '@/components/card/ProductCard'
 
 type Props = {

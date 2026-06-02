@@ -4,9 +4,9 @@ import { useMemo, useTransition, useState } from 'react'
 import { PageHeader } from '@/components/admin/Pageheader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { useTableUrlState } from '@/hooks/useTableUrlState'
-import { deleteUser } from '@/lib/admin/users'
-import type { AdminUser } from '@/types/users'
+import { useTableUrlState } from '@/lib/hooks/use-table-url-state'
+import { deleteUser } from '@/lib/admin/users/users'
+import type { AdminUser } from '@/lib/types/users'
 
 type Row = {
     user_id: string

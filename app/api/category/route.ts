@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
-import { getCategories } from '@/lib/category'
+import { getCategories } from '@/lib/categories/category'
 import {
   createCategory,
   updateCategory,
   softDeleteCategory,
   restoreCategory,
-} from '@/lib/admin/category'
-import type { AddCategoryFormValues, EditCategoryFormValues } from '@/form-schema/categorySchema'
+} from '@/lib/admin/categories/category'
+import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validators/category'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // GET /api/category

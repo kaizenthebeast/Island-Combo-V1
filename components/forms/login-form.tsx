@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, LoginFormInput } from "@/form-schema/loginSchema";
+import { loginSchema, LoginFormInput } from "@/lib/validators/login";
 
 import { createClient } from "@/lib/supabase/client";
-import { signInWithGoogle } from "@/helper/googleSignIn";
+import { signInWithGoogle } from "@/lib/auth/google-sign-in";
 import { Button } from "@/components/ui/button";
 import {
   Card,

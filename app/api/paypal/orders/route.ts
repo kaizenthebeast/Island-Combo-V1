@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { createPayPalOrder } from '@/lib/paypal'
-import { chargeTotal } from '@/lib/cashVoucherPricing'
+import { createPayPalOrder } from '@/lib/payments/paypal'
+import { chargeTotal } from '@/lib/cash-vouchers/pricing'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 const MAX_AMOUNT = 100_000

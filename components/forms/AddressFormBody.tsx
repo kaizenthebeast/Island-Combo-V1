@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
     checkoutAddressSchema,
     CheckoutAddressFormValues,
-} from "@/form-schema/addressSchema";
-import { insertAddressInfo, updateAddressInfo } from "@/lib/address";
+} from "@/lib/validators/address";
+import { insertAddressInfo, updateAddressInfo } from "@/lib/account/address";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

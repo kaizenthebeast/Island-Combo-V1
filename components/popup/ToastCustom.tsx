@@ -1,7 +1,7 @@
 // components/ui/toast-custom.tsx
 import { toast } from "sonner"
 import { CircleCheckIcon, OctagonXIcon, TriangleAlertIcon, InfoIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/cn"
 
 type ToastVariant = "success" | "error" | "warning" | "info"
 

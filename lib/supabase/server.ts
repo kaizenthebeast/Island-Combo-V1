@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { requireEnv } from "@/lib/env";
+import { requireEnv } from "@/lib/config/env";
 
 
 export async function createClient() {

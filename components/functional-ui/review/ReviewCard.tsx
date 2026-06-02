@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Star, Store } from 'lucide-react'
-import type { ProductReview } from '@/types/review'
-import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
+import type { ProductReview } from '@/lib/types/review'
+import { getPublicImageUrl } from '@/lib/utils/image-url'
 
 export const StarRating = ({ rating }: { rating: number }) => (
     <div className="flex items-center gap-0.5">

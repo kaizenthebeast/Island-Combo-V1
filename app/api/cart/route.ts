@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { waitUntil } from '@vercel/functions'
-import { ratelimit } from '@/redis/rateLimiter'
+import { ratelimit } from '@/lib/api/rate-limiter'
 import {
   getCart,
   addToCart,

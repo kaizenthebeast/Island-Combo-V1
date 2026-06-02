@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { useCartStore } from '@/store/cartStore'
-import { useCheckoutStore } from '@/store/useCheckoutStore'
-import { calculateTotals } from '@/helper/pricing/calculateTotals'
+import { useCartStore } from '@/lib/store/cart-store'
+import { useCheckoutStore } from '@/lib/store/checkout-store'
+import { calculateTotals } from '@/lib/checkout/calculate-totals'
 
 const AddressBillingSummary = () => {
   const { totalQty, subtotal, cart, selectedIds } = useCartStore()

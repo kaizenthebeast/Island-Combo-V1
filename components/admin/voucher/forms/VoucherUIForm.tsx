@@ -2,8 +2,8 @@
 
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
-import { cn } from '@/lib/utils'
-import type { AddVoucherFormValues } from '@/form-schema/voucherSchema'
+import { cn } from '@/lib/utils/cn'
+import type { AddVoucherFormValues } from '@/lib/validators/voucher'
 
 // helpers
 

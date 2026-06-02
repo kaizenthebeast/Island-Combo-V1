@@ -4,18 +4,17 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { PayPalScriptProvider } from '@paypal/react-paypal-js'
+import { PayPalSdk } from '@/components/functional-ui/PayPalSdk'
 import CashVoucherFormContainer from '@/components/functional-ui/cashVoucher/cashVoucherFormContainer'
 import CashVoucherSuccess from '@/components/functional-ui/cashVoucher/CashVoucherSuccess'
 import {
   cashVoucherSchema,
   CASH_VOUCHER_STEP_FIELDS,
   type CashVoucherFormValues,
-} from '@/form-schema/cashVoucherSchema'
-import type { CashVoucher } from '@/types/cashVoucher'
+} from '@/lib/validators/cash-voucher'
+import type { CashVoucher } from '@/lib/types/cash-voucher'
 
 const SUCCESS_STEP = 4
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID
 
 const CashVoucherContainer = () => {
   // Step + the created voucher live here so the whole layout can switch to the
@@ -139,24 +138,6 @@ const CashVoucherContainer = () => {
         </PayPalSdk>
       </FormProvider>
     </section>
-  )
-}
-
-// Loads the PayPal SDK once for the whole flow (preload). If the client id is
-// missing we just render children; CashVoucherPayment shows the config message.
-const PayPalSdk = ({ children }: { children: React.ReactNode }) => {
-  if (!PAYPAL_CLIENT_ID) return <>{children}</>
-  return (
-    <PayPalScriptProvider
-      options={{
-        clientId: PAYPAL_CLIENT_ID,
-        components: 'card-fields',
-        currency: 'USD',
-        intent: 'capture',
-      }}
-    >
-      {children}
-    </PayPalScriptProvider>
   )
 }
 

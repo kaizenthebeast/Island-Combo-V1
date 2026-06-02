@@ -1,6 +1,6 @@
 import React from 'react'
 import ProductsClient from './ProductsClient'
-import { getAdminProductsPage, type AdminProductsPageInput } from '@/lib/admin/product'
+import { getAdminProductsPage, type AdminProductsPageInput } from '@/lib/admin/products/product'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

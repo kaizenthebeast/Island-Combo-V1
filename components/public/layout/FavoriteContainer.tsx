@@ -1,7 +1,7 @@
 // components/public/layout/FavoriteContainer.tsx
 'use client'
 import { useEffect } from 'react'
-import { useFavoriteStore } from '@/store/favoriteStore'
+import { useFavoriteStore } from '@/lib/store/favorite-store'
 import Image from 'next/image'
 import Link from 'next/link'
 import FavoriteCard from '@/components/card/FavoriteCard'

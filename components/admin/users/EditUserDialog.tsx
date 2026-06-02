@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditUserForm } from '@/components/admin/users/forms/EditUserForm'
-import type { AdminStaff } from '@/types/users'
+import type { AdminStaff } from '@/lib/types/users'
 
 
 type Props = {

@@ -1,8 +1,8 @@
 'use client'
 
-import { CartItem } from '@/types/cart'
-import { useCartStore } from '@/store/cartStore'
-import { useCartQuantity } from '@/hooks/useCartQuantity'
+import { CartItem } from '@/lib/types/cart'
+import { useCartStore } from '@/lib/store/cart-store'
+import { useCartQuantity } from '@/lib/hooks/use-cart-quantity'
 import { customToast } from '@/components/popup/ToastCustom'
 import Image from 'next/image'
 import CartQuantityButton from '../cart/CartQuantityButton'

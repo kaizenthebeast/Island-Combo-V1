@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import AnonAuthProvider from "@/helper/AnonAuthProvider";
+import AnonAuthProvider from "@/lib/auth/anon-auth-provider";
 
 const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 

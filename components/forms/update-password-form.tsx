@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   updatePasswordSchema,
   UpdatePasswordFormInput,
-} from "@/form-schema/updatePasswordSchema";
+} from "@/lib/validators/update-password";
 
 export function UpdatePasswordForm({
   className,

@@ -1,17 +1,17 @@
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
-import { Address } from "@/types/users"
+import { Address } from "@/lib/types/users"
 import AddressFormBody from "@/components/forms/AddressFormBody"
 import AddressDetails from "@/components/functional-ui/placeOrder/AddressDetails"
 import MobileAddressSelector from "@/components/functional-ui/placeOrder/MobileAddressSelector"
 import PaymentMethod from "@/components/functional-ui/placeOrder/PaymentMethod"
-import { getUserAddress } from "@/lib/address"
-import { getUserProfile } from "@/lib/users"
+import { getUserAddress } from "@/lib/account/address"
+import { getUserProfile } from "@/lib/account/profile"
 import AddressBillingSummary from "@/components/functional-ui/placeOrder/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
-import { useCartStore } from "@/store/cartStore"
-import { useCheckoutStore } from "@/store/useCheckoutStore"
+import { useCartStore } from "@/lib/store/cart-store"
+import { useCheckoutStore } from "@/lib/store/checkout-store"
 import { getZoneFromAddress, type ShippingZone } from "@/lib/shipping/zone"
 
 const MAX_SAVED_ADDRESSES = 3
@@ -82,21 +82,23 @@ const AddressContainer = () => {
       const userAddresses = await getUserAddress()
       setAddresses(userAddresses)
 
-      // Auto-select the default address on first load only.
+      // Auto-select the default address only when nothing is selected yet.
+      // The functional update reads the current selection, so this callback
+      // doesn't need selectedAddressId as a dependency (keeps it stable).
       const defaultAddress = userAddresses.find((address: Address) => address.make_default)
-      if (defaultAddress && !selectedAddressId) {
-        setSelectedAddressId(defaultAddress.id)
+      if (defaultAddress) {
+        setSelectedAddressId((current) => current ?? defaultAddress.id)
       }
-    } catch (error: any) {
-      setFetchError(error.message ?? 'Failed to load addresses')
+    } catch (error: unknown) {
+      setFetchError(error instanceof Error ? error.message : 'Failed to load addresses')
     } finally {
       setIsLoadingAddresses(false)
     }
-  }, [selectedAddressId])
+  }, [])
 
   useEffect(() => {
     fetchAddresses()
-  }, [])
+  }, [fetchAddresses])
 
   useEffect(() => {
     let cancelled = false
@@ -169,9 +171,9 @@ const AddressContainer = () => {
         } else {
           setShipping(null, null)
         }
-      } catch (error: any) {
-        if (error?.name === "AbortError") return
-        setShippingError(error?.message ?? "Failed to calculate shipping")
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name === "AbortError") return
+        setShippingError(error instanceof Error ? error.message : "Failed to calculate shipping")
         setShippingQuote(null)
         setShipping(null, null)
       } finally {
@@ -182,7 +184,7 @@ const AddressContainer = () => {
     fetchShipping()
 
     return () => controller.abort()
-  }, [fulfillmentMethod, selectedAddressId, addresses, cart])
+  }, [fulfillmentMethod, selectedAddressId, addresses, cart, setShipping])
 
   return (
     <main className="max-w-7xl mx-auto p-4 md:p-6 flex flex-col gap-6">

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { getFavorite, addFavorite, removeFavorite } from '@/lib/favorite'
-import type { AddFavoritePayload } from '@/types/favorite'
+import { getFavorite, addFavorite, removeFavorite } from '@/lib/favorites/favorite'
+import type { AddFavoritePayload } from '@/lib/types/favorite'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // GET /api/favorite — Fetch the current user's favorites

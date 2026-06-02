@@ -5,7 +5,7 @@ import Account from '@/components/functional-ui/accountDetails/Account'
 import Loyalty from '@/components/functional-ui/accountDetails/Loyalty'
 import OrderTracking from '@/components/functional-ui/accountDetails/OrderTracking'
 import MyCards from '@/components/functional-ui/accountDetails/MyCards'
-import { Address } from '@/types/users'
+import { Address } from '@/lib/types/users'
 
 const navLinks = [
     { name: 'Account Details', icon: User },

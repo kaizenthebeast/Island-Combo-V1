@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useCartStore } from "@/store/cartStore";
-import { calculateCartTotals } from "@/helper/cartUtils";
+import { useCartStore } from "@/lib/store/cart-store";
+import { calculateCartTotals } from "@/lib/utils/cart-totals";
 
 const CartCount = () => {
   const cart = useCartStore((state) => state.cart);

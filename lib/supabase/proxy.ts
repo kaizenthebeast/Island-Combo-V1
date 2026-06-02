@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { requireEnv } from "@/lib/env";
+import { requireEnv } from "@/lib/config/env";
 
 
 const PROTECTED_ROUTES = ["/protected", "/checkout/address"];

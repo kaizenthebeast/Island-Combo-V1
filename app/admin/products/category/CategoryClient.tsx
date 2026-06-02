@@ -8,9 +8,9 @@ import EditCategoryDialog from '@/components/admin/category/EditCategoryDialog'
 import DeleteCategoryDialog from '@/components/admin/category/DeleteCategoryDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
-import { useTableUrlState } from '@/hooks/useTableUrlState'
-import type { Category } from '@/types/category'
-import { softDeleteCategory } from '@/lib/admin/category'
+import { useTableUrlState } from '@/lib/hooks/use-table-url-state'
+import type { Category } from '@/lib/types/category'
+import { softDeleteCategory } from '@/lib/admin/categories/category'
 
 type CategoryStatus = 'ACTIVE' | 'ARCHIVED'
 

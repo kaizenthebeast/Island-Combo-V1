@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { getAllParentCategories } from "@/lib/category"
+import { getAllParentCategories } from "@/lib/categories/category"
 import {
   Carousel,
   CarouselContent,

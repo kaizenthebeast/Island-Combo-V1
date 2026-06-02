@@ -1,5 +1,5 @@
 import React from 'react'
-import { getAllProducts } from '@/lib/product'
+import { getAllProducts } from '@/lib/products/product'
 import ProductCard from '@/components/card/ProductCard';
 
 const ProductContainer = async () => {

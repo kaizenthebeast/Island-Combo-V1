@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getMyAccount, updateMyAccount } from '@/lib/users'
+import { getMyAccount, updateMyAccount } from '@/lib/account/profile'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // GET /api/profile — authenticated aggregator

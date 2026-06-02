@@ -2,8 +2,8 @@
 
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import type { ProductCatalogItem } from '@/types/product'
-import { getPublicImageUrl } from '@/helper/getPublicImageUrl'
+import type { ProductCatalogItem } from '@/lib/types/product'
+import { getPublicImageUrl } from '@/lib/utils/image-url'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Package } from 'lucide-react'

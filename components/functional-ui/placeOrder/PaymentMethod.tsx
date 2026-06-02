@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
-import { useCheckoutStore, type PaymentMethod as PaymentMethodValue } from '@/store/useCheckoutStore'
+import { useCheckoutStore, type PaymentMethod as PaymentMethodValue } from '@/lib/store/checkout-store'
+import { PayPalSdk } from '@/components/functional-ui/PayPalSdk'
+import CardPaymentFields from '@/components/functional-ui/placeOrder/CardPaymentFields'
 
 const OPTIONS: { value: PaymentMethodValue; title: string; desc?: string }[] = [
   { value: 'cod', title: 'Cash On Delivery', desc: 'Pay to courier via cash upon delivery' },
@@ -44,6 +46,20 @@ const PaymentMethod = () => {
               </label>
             )
           })}
+
+          {/* Inline reveal under the options — mirrors the add-address form reveal */}
+          {paymentMethod === 'cod' && (
+            <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+              You’ll pay with cash to the courier when your order is delivered.
+            </div>
+          )}
+
+          {paymentMethod === 'card' && (
+            <div className="rounded-xl border border-border p-5 shadow-xs">
+              <h3 className="text-base font-bold text-foreground mb-4">Card details</h3>
+              <CardPaymentFields />
+            </div>
+          )}
         </div>
       </PayPalSdk>
     </div>

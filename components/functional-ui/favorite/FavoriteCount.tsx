@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useFavoriteStore } from "@/store/favoriteStore"; 
+import { useFavoriteStore } from "@/lib/store/favorite-store"; 
 
 const FavoriteCount = () => {
     const totalFavQty = useFavoriteStore((state) => state.totalFavQty); 

@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import BillingSummary from "@/components/functional-ui/checkout/BillingSummary"
 import OrderSummary from "@/components/functional-ui/checkout/OrderSummary"
 import MobileCart from "@/components/functional-ui/cart/MobileCart"
-import { useCartStore } from "@/store/cartStore"
+import { useCartStore } from "@/lib/store/cart-store"
 import Image from "next/image"
 import Link from "next/link"
 

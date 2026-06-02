@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/lib/users'
+import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/lib/account/profile'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // GET /api/profile/notifications

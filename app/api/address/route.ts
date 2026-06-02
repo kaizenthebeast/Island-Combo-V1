@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { insertAddressInfo, updateAddressInfo, deleteAddress } from '@/lib/address'
-import type { AddressFormValues } from '@/types/users'
+import { insertAddressInfo, updateAddressInfo, deleteAddress } from '@/lib/account/address'
+import type { AddressFormValues } from '@/lib/types/users'
 import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // All address mutations are self-scoped — the underlying lib functions derive

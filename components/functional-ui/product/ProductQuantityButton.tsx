@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useCartStore } from '@/store/cartStore'
+import { useCartStore } from '@/lib/store/cart-store'
 
 const ProductQuantityButton = () => {
     const {
