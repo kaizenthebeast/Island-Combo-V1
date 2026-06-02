@@ -19,7 +19,7 @@ const PaymentMethod = () => {
       <h2 className="title-header">How would you like to pay?</h2>
 
       <PayPalSdk>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 relative">
           {OPTIONS.map((opt) => {
             const selected = paymentMethod === opt.value
             return (
@@ -54,12 +54,24 @@ const PaymentMethod = () => {
             </div>
           )}
 
-          {paymentMethod === 'card' && (
+          {/* Card box stays mounted so the PayPal SDK + hosted-field iframes
+              preload during page idle — selecting "Card" then reveals an
+              already-initialized form instantly. When not selected it's parked
+              offscreen at full width (NOT display:none) so the iframes still
+              initialize at the correct size and don't render blank. */}
+          <div
+            aria-hidden={paymentMethod !== 'card'}
+            className={
+              paymentMethod === 'card'
+                ? ''
+                : 'pointer-events-none absolute inset-x-0 top-0 -z-10 opacity-0'
+            }
+          >
             <div className="rounded-xl border border-border p-5 shadow-xs">
               <h3 className="text-base font-bold text-foreground mb-4">Card details</h3>
               <CardPaymentFields />
             </div>
-          )}
+          </div>
         </div>
       </PayPalSdk>
     </div>

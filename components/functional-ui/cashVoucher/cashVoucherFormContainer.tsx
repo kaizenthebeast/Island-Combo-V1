@@ -14,7 +14,7 @@ type Props = {
 
 const CashVoucherFormContainer = ({ step, onNext, onBack, onPaid }: Props) => {
   return (
-    <div className="w-full max-w-md mx-auto lg:mx-0 p-5 sm:p-6 rounded-2xl shadow-lg border border-gray-100 bg-white">
+    <div className="w-full max-w-md mx-auto lg:mx-0 p-5 sm:p-6 rounded-2xl shadow-lg border border-gray-100 bg-white relative">
       {/* Step Indicator */}
       <div className="flex items-center mb-6">
         {[1, 2, 3].map((s, index) => (
@@ -34,10 +34,8 @@ const CashVoucherFormContainer = ({ step, onNext, onBack, onPaid }: Props) => {
         ))}
       </div>
 
-      {step === 3 ? (
-        // Step 3 is the PayPal card-fields payment, with its own Pay now button.
-        <CashVoucherPayment onPaid={onPaid} />
-      ) : (
+      {/* Steps 1–2: amount + recipient form with nav buttons. */}
+      {step !== 3 && (
         <>
           <CashVoucherForm currentStep={step} />
 
@@ -71,6 +69,21 @@ const CashVoucherFormContainer = ({ step, onNext, onBack, onPaid }: Props) => {
           </div>
         </>
       )}
+
+      {/* Step 3 (PayPal card-fields payment) stays mounted from the start so the
+          card fields preload while the user fills steps 1–2 — reaching the payment
+          step is then instant. Parked offscreen at the content width (NOT
+          display:none) until step 3 so the iframes initialize at the right size. */}
+      <div
+        aria-hidden={step !== 3}
+        className={
+          step === 3
+            ? ''
+            : 'pointer-events-none absolute left-5 right-5 top-0 -z-10 opacity-0 sm:left-6 sm:right-6'
+        }
+      >
+        <CashVoucherPayment onPaid={onPaid} />
+      </div>
     </div>
   )
 }
