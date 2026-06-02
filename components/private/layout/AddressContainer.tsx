@@ -317,9 +317,8 @@ const AddressContainer = () => {
                 {addresses.length < MAX_SAVED_ADDRESSES ? (
                   <div className="flex flex-col gap-4">
                     <label
-                      className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${
-                        isAddingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
-                      }`}
+                      className={`flex items-center justify-between gap-4 rounded-xl border p-4 cursor-pointer transition-colors ${isAddingNew ? "border-brand bg-brand-tint/40" : "border-border hover:border-brand/40"
+                        }`}
                     >
                       <div className="flex items-center gap-2">
                         <Plus className="w-4 h-4 text-brand" />
@@ -387,11 +386,15 @@ const AddressContainer = () => {
             </>
           )}
 
-          {/* Payment method */}
-          <div className="border-t border-border mt-2" />
-          <PaymentMethod />
+          {/* Payment method — only relevant for delivery */}
+          {fulfillmentMethod === "deliver" && (
+            <>
+              <div className="border-t border-border mt-2" />
+              <PaymentMethod />
+            </>
+          )}
 
-        </div>
+
 
         <AddressBillingSummary />
       </div>

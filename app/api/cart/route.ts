@@ -7,6 +7,7 @@ import {
   addToCart,
   updateCartQuantity,
   removeFromCart,
+  removeAllItemFromCart
 } from '@/lib/cart'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
@@ -94,7 +95,15 @@ export async function DELETE(req: NextRequest) {
     const blocked = await applyRateLimit(user.id)
     if (blocked) return blocked
 
-    const { variantId } = await req.json()
+    const body = await req.json()
+    const {variantId, clearAll} = body
+
+    if(clearAll === true){
+      await removeAllItemFromCart({userId: user.id})
+      return apiOk()
+    }
+
+
     if (!variantId) return apiError('variantId is required', HTTP.BAD_REQUEST)
 
     await removeFromCart({ userId: user.id, variantId })

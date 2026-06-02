@@ -49,14 +49,14 @@ const createPendingItem = (
   quantity: number,
   selectedOption: string | null,
 ): CartItem =>
-  ({
-    variant_id: variantId,
-    quantity,
-    selected_option: selectedOption,
-    pricing_tiers: [],
-    applied_price: 0,
-    applied_tier_label: DEFAULT_TIER_LABEL,
-  } as unknown as CartItem)
+({
+  variant_id: variantId,
+  quantity,
+  selected_option: selectedOption,
+  pricing_tiers: [],
+  applied_price: 0,
+  applied_tier_label: DEFAULT_TIER_LABEL,
+} as unknown as CartItem)
 
 type CartState = {
   cart: CartItem[]
@@ -79,6 +79,7 @@ type CartState = {
   updateItem: (variantId: number, qty: number) => Promise<void>
   setItemQuantityLocal: (variantId: number, qty: number) => void
   removeItem: (variantId: number) => Promise<void>
+  removeAllItem: () => Promise<void>
 
   toggleSelected: (variantId: number) => void
   setAllSelected: (selected: boolean) => void
@@ -225,10 +226,25 @@ export const useCartStore = create<CartState>((set, get) => {
       try {
         const response = await fetch("/api/cart", {
           method: "DELETE",
-          body: JSON.stringify({ variantId }),
+          body: JSON.stringify({ variantId, clearAll: false}),
           headers: { "Content-Type": "application/json" },
         })
         if (!response.ok) throw new Error("Remove failed")
+      } catch (error) {
+        rollback(previousCart, error)
+      }
+    },
+
+    removeAllItem: async () => {
+      const previousCart = applyOptimistic(() => [])
+
+      try {
+        const response = await fetch('/api/cart', {
+          method: "DELETE",
+          body: JSON.stringify({ variantId: null, clearAll: true}),
+          headers: { "Content-Type": "application/json" }
+        })
+        if (!response.ok) throw new Error('Remove all items failed')
       } catch (error) {
         rollback(previousCart, error)
       }

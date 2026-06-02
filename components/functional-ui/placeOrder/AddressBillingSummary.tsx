@@ -21,6 +21,12 @@ const AddressBillingSummary = () => {
     shippingFee: shippingFee ?? 0,
   })
 
+  // Called when the user clicks "Place Order".
+  // TODO: implement the order-placement logic here (left intentionally empty).
+  const handlePlaceOrder = () => {
+    // your logic goes here
+  }
+
   return (
     <div className="w-full md:w-[350px]">
       <div className="bg-surface-soft p-5 rounded-xl space-y-4 sticky top-4">
@@ -47,7 +53,7 @@ const AddressBillingSummary = () => {
           <span>Total</span>
           <span className="text-brand">${total.toFixed(2)}</span>
         </div>
-        <button className="w-full bg-brand text-white py-3 rounded-full mt-2">
+        <button type='button' onClick={handlePlaceOrder} className="w-full bg-brand text-white py-3 rounded-full mt-2">
           Place Order
         </button>
       </div>

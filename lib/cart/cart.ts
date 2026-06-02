@@ -1,4 +1,3 @@
-/** Customer cart data access (add/update/remove/read). */
 import { createClient } from '@/lib/supabase/server'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import type { CartItem, CartItemInput } from '@/lib/types/cart'
@@ -102,6 +101,20 @@ export const removeFromCart = async ({
     .delete()
     .eq('user_id', userId)
     .eq('variant_id', variantId)
+
+  if (error) throw error
+}
+
+
+export const removeAllItemFromCart = async ({
+   userId,
+}: { userId: string }) => {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('cart')
+    .delete()
+    .eq('user_id', userId)
 
   if (error) throw error
 }

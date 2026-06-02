@@ -16,7 +16,7 @@ type Props = {
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 const OrderSummary = ({ cartItems }: Props) => {
-    const { removeItem, selectedIds, toggleSelected } = useCartStore()
+    const { removeItem, selectedIds, toggleSelected, removeAllItem } = useCartStore()
     const changeQty = useCartQuantity()
 
     const handleRemove = (variantId: number) => {
@@ -27,9 +27,23 @@ const OrderSummary = ({ cartItems }: Props) => {
         })
     }
 
+    const handleClearCart = () => {
+        removeAllItem()
+        customToast.success({
+            title: 'Cart cleared!',
+            description: 'All items have been removed from your cart.',
+        })
+    }
+
     return (
         <div className="flex flex-col space-y-4 w-full">
-            <h2 className="title-header text-lg sm:text-xl md:text-2xl">Order Summary</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="title-header text-lg sm:text-xl md:text-2xl">Order Summary</h2>
+                <button type='button' onClick={handleClearCart} className="text-sm text-muted-foreground hover:text-foreground">
+                    Clear Cart
+                </button>
+            </div>
+
 
             <div className="flex flex-col gap-4">
                 {cartItems.map((item) => {
