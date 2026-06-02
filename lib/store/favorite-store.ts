@@ -11,6 +11,8 @@ type FavoriteState = {
     addFavorite: (productId: number) => Promise<void>;
     removeFavorite: (productId: number) => Promise<void>;
     isFavorite: (productId: number) => boolean;
+
+    clearFavorite: () => void ;
 }
 
 export const useFavoriteStore = create<FavoriteState>((set, get) => ({
@@ -87,6 +89,14 @@ export const useFavoriteStore = create<FavoriteState>((set, get) => ({
             // Rollback on network error
             set({ favorites: prevFavorites, totalFavQty: prevQty, error: message });
         }
+    },
+
+    clearFavorite: () => {
+      set({
+        favorites: [],
+        totalFavQty: 0,
+        error: null
+      })
     },
 
     isFavorite: (productId) => {

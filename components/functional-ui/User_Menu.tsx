@@ -12,17 +12,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useFavoriteStore } from "@/lib/store";
 
 export function UserMenu() {
   const router = useRouter();
   const { clearCart } = useCartStore();
+  const { clearFavorite } = useFavoriteStore();
 
   const logout = async () => {
     const supabase = createClient();
     try {
       clearCart();
+      clearFavorite();
       await supabase.auth.signOut({ scope: "local" });
-      router.push("/auth/login"); 
+      router.push("/auth/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }
