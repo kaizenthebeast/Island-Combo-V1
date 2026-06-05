@@ -1,5 +1,7 @@
 /** Shared order + unified-checkout types. */
 
+import type { TransactionEvent } from '@/lib/types/transaction-event'
+
 // A checkout is one of two "kinds" of purchase that flow through the same
 // pipeline (lib/checkout/checkout.ts + /api/checkout): a product order or a
 // cash voucher. Both are, at the end of the day, just products being bought.
@@ -58,11 +60,23 @@ export type FulfillmentPayment =
   | { method: 'cod' }
   | { method: 'card'; captureId: string; paypalOrderId: string; amount: number }
 
+// Canonical order-status lifecycle (lowercase in the DB; UI renders pretty
+// labels). `delivered` (card) and `completed` (COD cash collected) are the
+// terminal-success states that accrue loyalty points.
+export type OrderStatus =
+  | 'pending'
+  | 'paid'
+  | 'shipped'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'completed'
+  | 'cancelled'
+
 // A row of public.orders (after the 0007 migration adds shipping_fee/total_amount).
 export type Order = {
   order_id: number
   user_id: string
-  order_status: 'pending' | 'preparing' | 'completed'
+  order_status: OrderStatus
   shipping_address: string
   phone_number: string
   payment_method: string
@@ -76,4 +90,85 @@ export type Order = {
   total_amount: number | null
   created_at: string
   updated_at: string
+}
+
+// ── Admin order management ────────────────────────────────────────────────────
+
+// One row of the admin order list (public.admin_list_orders RPC).
+export type AdminOrderListRow = {
+  order_id: number
+  user_id: string | null
+  order_status: OrderStatus
+  payment_method: string
+  total_amount: number | null
+  shipping_fee: number | null
+  discount_amount: number | null
+  promo_code: string | null
+  created_at: string
+  updated_at: string
+  customer_name: string | null
+  email: string | null
+  phone_number: string | null
+  total_qty: number
+  item_count: number
+}
+
+// A resolved line item in the admin order detail.
+export type AdminOrderItem = {
+  id: number
+  variant_id: number | null
+  quantity: number
+  price: number
+  line_total: number
+  sku: string | null
+  product_name: string | null
+}
+
+// Full admin order detail (public.admin_get_order RPC) + timeline read alongside.
+export type AdminOrderDetail = {
+  order: Order
+  customer: {
+    user_id?: string | null
+    name?: string | null
+    email?: string | null
+    phone_text?: string | null
+  }
+  items: AdminOrderItem[]
+}
+
+// ── Customer-facing order reads (Order History + Order Details) ──────────────
+
+// One row of the buyer's own order history. High-level summary only; the full
+// breakdown lives in the order detail. Read straight from `orders` (RLS scopes
+// rows to the owner), with the item aggregates computed alongside.
+export type OrderHistoryRow = {
+  order_id: number
+  order_status: OrderStatus
+  payment_method: string
+  total_amount: number | null
+  shipping_fee: number | null
+  discount_amount: number | null
+  promo_code: string | null
+  created_at: string
+  updated_at: string
+  item_count: number
+  total_qty: number
+}
+
+// A page of order history, with the total count so the client can paginate.
+export type OrderHistoryPage = {
+  rows: OrderHistoryRow[]
+  total: number
+  page: number
+  pageSize: number
+}
+
+// The buyer's view of a single order: header, line items, and the
+// timeline/tracking updates (status changes + timestamps) from transaction_event.
+// Line items share the AdminOrderItem shape (same columns). Ownership is enforced
+// by RLS — a non-owned order simply isn't returned.
+export type CustomerOrderDetail = {
+  order: Order
+  items: AdminOrderItem[]
+  timeline: TransactionEvent[]
 }

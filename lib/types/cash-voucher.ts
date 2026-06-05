@@ -1,5 +1,6 @@
 /** Shared cash-voucher types. */
-export type CashVoucherStatus = 'pending' | 'claimed' | 'cancelled' | 'expired'
+// Matches the Digital Product spec vocabulary (see migration 0010).
+export type CashVoucherStatus = 'ACTIVE' | 'REDEEMED' | 'CANCELLED' | 'EXPIRED'
 
 // Mirrors a row of public.cash_voucher. The `code` is generated server-side and
 // is what the QR encodes; no card data is ever stored here.
@@ -8,12 +9,23 @@ export type CashVoucher = {
   code: string
   amount: number
   status: CashVoucherStatus
+  // The buyer's intended recipient, captured at purchase.
   recipient_name: string
   recipient_email: string | null
+  // The person who actually exchanged the voucher for cash, captured at
+  // redemption by the back-office staff (audit trail).
+  redeemed_recipient_name: string | null
+  // Optional link to an order (Digital Product Table); NULL for standalone buys.
+  order_id: number | null
+  // Cryptographically-unique redemption identifier, minted on demand by the
+  // Generate Id API. NULL until generated. Distinct from the display `code`.
+  redemption_uuid: string | null
   purchaser_id: string
   purchaser_email: string | null
   payment_method: string | null
   payment_reference: string | null
+  // claimed_at / claimed_by are the redemption timestamp and the back-office
+  // user who released the cash. Immutable once status is REDEEMED.
   claimed_at: string | null
   claimed_by: string | null
   created_at: string

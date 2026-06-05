@@ -1,2 +1,2 @@
 /** Barrel for lib/admin/cash-vouchers. */
-export * from './claim-voucher'
+export * from './redeem-voucher'

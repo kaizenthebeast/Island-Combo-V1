@@ -92,11 +92,24 @@ export function apiResult<Data>(
   )
 }
 
+// A lib error that already knows which HTTP status it should map to. Throw this
+// for expected failures (e.g. "out of stock") so toApiError surfaces the real
+// message and status instead of a generic 500.
+export class AppError extends Error {
+  status: number
+  constructor(message: string, status: number = HTTP.INTERNAL) {
+    super(message)
+    this.name = 'AppError'
+    this.status = status
+  }
+}
+
 // Catch-block helper
-// Maps thrown errors to a consistent failure response. `Unauthorized` thrown
-// by a lib (e.g. getMyAccount) becomes a 401 instead of a 500.
+// Maps thrown errors to a consistent failure response. An AppError carries its
+// own status; `Unauthorized` thrown by a lib (e.g. getMyAccount) becomes a 401.
 
 export function toApiError(error: unknown) {
+  if (error instanceof AppError) return apiError(error.message, error.status)
   const message = error instanceof Error ? error.message : 'Internal Server Error'
   if (message === 'Unauthorized') return apiError(message, HTTP.UNAUTHORIZED)
   return apiError(message, HTTP.INTERNAL)

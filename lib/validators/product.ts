@@ -1,5 +1,6 @@
 /** Zod schema for product forms. */
 import { z } from "zod";
+import { PRODUCT_TYPES } from "@/lib/types/product";
 
 // Shared: Product Status
 // Mirrors the `product_status` enum in the DB (is_active removed from products table)
@@ -175,7 +176,10 @@ export const productSchema = z.object({
   // Mirrors the `product_status` DB enum: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED'
   status: productStatusSchema.default("ACTIVE"),
 
-  type: z.string().min(1, "Product type is required"),
+  // Constrained to the canonical product types so a Digital product is always
+  // stored exactly as 'Digital' (the value the §3.9 payment rule keys on). The
+  // empty default in the form fails this until the admin picks one.
+  type: z.enum(PRODUCT_TYPES, { error: "Please choose a product type" }),
 
   // Unified field name — was `details` in add, `product_details` in edit
   product_details: z.array(productDetailSchema).default([]),

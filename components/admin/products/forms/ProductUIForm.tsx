@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
 import { cn } from '@/lib/utils/cn'
+import { PRODUCT_TYPES } from '@/lib/types/product'
 
 // Types
 
@@ -892,8 +893,9 @@ export function Step1BasicInfo({ categories }: { categories: Category[] }) {
               onChange={(e) => setValue('type', e.target.value, { shouldValidate: true })}
             >
               <option value="">Select…</option>
-              <option value="Physical">Physical</option>
-              <option value="Digital">Digital</option>
+              {PRODUCT_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
             </Select>
           </Field>
         </div>

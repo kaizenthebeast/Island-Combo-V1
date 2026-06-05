@@ -207,7 +207,7 @@ const CashVoucherSuccess = ({
             <p className="text-xs opacity-90">Redeemable as cash in store</p>
             <p className="text-2xl font-bold mt-1">${amount.toLocaleString()}</p>
             <span className="absolute top-3 right-3 text-[10px] bg-white text-brand rounded px-2 py-0.5 font-semibold">
-              Pending Claim
+              Active
             </span>
           </div>
 

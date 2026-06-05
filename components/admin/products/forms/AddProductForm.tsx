@@ -72,7 +72,9 @@ export const AddProductForm = ({ onSuccess, onCancel }: AddProductFormProps) => 
       description: '',
       status: 'ACTIVE',       // replaces is_active: true
       discount: null,
-      type: '',
+      // Left unset so the admin must pick a type; the enum validator rejects the
+      // empty selection until they do.
+      type: undefined,
       category_id: undefined,
       product_details: [],    // was `details`
       deleted_detail_ids: [],

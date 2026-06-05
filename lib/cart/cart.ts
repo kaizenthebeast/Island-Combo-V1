@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
+import { AppError, HTTP } from '@/lib/api/respond'
+import type { PostgrestError } from '@supabase/supabase-js'
 import type { CartItem, CartItemInput } from '@/lib/types/cart'
 
 
@@ -8,6 +10,23 @@ function mapCartItem(item: CartItem): CartItem {
     ...item,
     image_url: getPublicImageUrl(item.image_url),
   }
+}
+
+
+// Map the SQLSTATE codes cart_upsert_item raises to a clean message + status.
+// The DB messages ("Only N left in stock", …) are already user-facing, so we
+// keep them; only the HTTP status is decided here.
+const CART_ERROR_STATUS: Record<string, number> = {
+  '23514': HTTP.CONFLICT,      // requested quantity exceeds stock
+  'P0002': HTTP.NOT_FOUND,     // variant gone / inactive
+  '28000': HTTP.UNAUTHORIZED,  // not authenticated
+  '22023': HTTP.BAD_REQUEST,   // invalid arguments
+}
+
+function throwCartError(error: PostgrestError): never {
+  const status = CART_ERROR_STATUS[error.code]
+  if (status) throw new AppError(error.message, status)
+  throw error
 }
 
 
@@ -29,44 +48,25 @@ export const getCart = async (userId: string): Promise<CartItem[]> => {
 export const addToCart = async (item: CartItemInput) => {
   const supabase = await createClient()
 
-  // variant_id alone uniquely identifies the SKU — selected_option is display-only
-  const { data: existing, error: fetchError } = await supabase
-    .from('cart')
-    .select('id, quantity')
-    .eq('user_id', item.userId)
-    .eq('variant_id', item.variantId)
-    .maybeSingle()
-
-  if (fetchError) throw fetchError
-
-  if (existing) {
-    // Item already in cart — just bump the quantity
-    const { data, error } = await supabase
-      .from('cart')
-      .update({ quantity: existing.quantity + item.quantity })
-      .eq('id', existing.id)
-
-    if (error) throw error
-    return data
-  }
-
-  // New cart row — selected_option is nullable, null for no-attribute products
+  // Insert-or-increment is handled atomically server-side by cart_upsert_item.
+  // It locks the variant row before reading stock, so a concurrent checkout can
+  // never let us over-reserve, and it rejects quantities that exceed stock.
+  // user_id is taken from auth.uid() inside the function, not from the client.
   const { data, error } = await supabase
-    .from('cart')
-    .insert({
-      user_id: item.userId,
-      variant_id: item.variantId,
-      quantity: item.quantity,
-      selected_option: item.selectedOption ?? null,
+    .rpc('cart_upsert_item', {
+      p_variant_id: item.variantId,
+      p_quantity: item.quantity,
+      p_selected_option: item.selectedOption ?? null,
+      p_mode: 'add',
     })
+    .single()
 
-  if (error) throw error
+  if (error) throwCartError(error)
   return data
 }
 
 
 export const updateCartQuantity = async ({
-  userId,
   variantId,
   quantity,
 }: {
@@ -76,13 +76,17 @@ export const updateCartQuantity = async ({
 }) => {
   const supabase = await createClient()
 
+  // Same stock-safe path as addToCart, but 'set' replaces the line quantity
+  // instead of incrementing it.
   const { data, error } = await supabase
-    .from('cart')
-    .update({ quantity })
-    .eq('user_id', userId)
-    .eq('variant_id', variantId)
+    .rpc('cart_upsert_item', {
+      p_variant_id: variantId,
+      p_quantity: quantity,
+      p_mode: 'set',
+    })
+    .single()
 
-  if (error) throw error
+  if (error) throwCartError(error)
   return data
 }
 
