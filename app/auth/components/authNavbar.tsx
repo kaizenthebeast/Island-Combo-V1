@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { AuthButton } from "@/components/functional-ui/auth-button";
+import { AuthButton } from "@/components/features/auth/AuthButton";
 
 const AuthNavbar = () => {
   return (

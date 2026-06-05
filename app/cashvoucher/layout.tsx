@@ -1,5 +1,5 @@
-import CashVoucherNavbar from '@/components/public/layout/CashVoucherNavbar'
-import Footer from '@/components/public/layout/Footer'
+import CashVoucherNavbar from '@/components/features/cash-voucher/CashVoucherNavbar'
+import Footer from '@/components/layout/Footer'
 
 export default function CashVoucherLayout({ children }: { children: React.ReactNode }) {
   return (

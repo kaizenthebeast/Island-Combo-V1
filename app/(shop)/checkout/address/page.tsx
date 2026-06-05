@@ -1,6 +1,6 @@
 import React from 'react'
 import { redirect } from 'next/navigation'
-import AddressContainer from '@/components/private/layout/AddressContainer'
+import AddressContainer from '@/components/features/address/AddressContainer'
 import { requireUser } from '@/lib/auth'
 import { getUserAddress } from '@/lib/account/address'
 import { getUserProfile } from '@/lib/account/profile'

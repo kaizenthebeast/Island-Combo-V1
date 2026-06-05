@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useTransition, useState } from 'react'
-import { PageHeader } from '@/components/admin/Pageheader'
+import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/lib/hooks/use-table-url-state'

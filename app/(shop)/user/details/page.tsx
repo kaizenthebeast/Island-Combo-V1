@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import AccountContainer from '@/components/private/layout/AccountContainer'
+import AccountContainer from '@/components/features/account/AccountContainer'
 import { requireUser } from '@/lib/auth'
 import { getUserProfile } from '@/lib/account/profile'
 import { getUserAddress } from '@/lib/account/address'

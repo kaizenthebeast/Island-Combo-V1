@@ -1,4 +1,4 @@
-import CashVoucherContainer from '@/components/public/layout/CashVoucherContainer'
+import CashVoucherContainer from '@/components/features/cash-voucher/CashVoucherContainer'
 
 const CashVoucherPage = () => {
   return <CashVoucherContainer />

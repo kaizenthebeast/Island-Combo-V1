@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import { PageHeader } from '@/components/admin/Pageheader'
+import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import AddProductDialog from '@/components/admin/products/AddProductDialog'
 import EditProductDialog from '@/components/admin/products/EditProductDialog'

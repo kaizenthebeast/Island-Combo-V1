@@ -1,5 +1,5 @@
 import React from 'react'
-import FavoriteContainer from '@/components/public/layout/FavoriteContainer'
+import FavoriteContainer from '@/components/features/favorite/FavoriteContainer'
 
 const FavoritePage = () => {
   return (

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { LayoutGrid, LucideIcon } from "lucide-react";
 import { getCategoryBySlug } from "@/lib/categories/category";
 import { getAllProducts } from "@/lib/products/product";
-import ProductCard from "@/components/card/ProductCard";
+import ProductCard from "@/components/features/product/ProductCard";
 
 type Props = {
   params: Promise<{ slug: string }>;

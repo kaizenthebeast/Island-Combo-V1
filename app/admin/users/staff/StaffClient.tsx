@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import { PageHeader } from '@/components/admin/Pageheader'
+import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import EditUserDialog from '@/components/admin/users/EditUserDialog'
 import DeleteStaffDialog from '@/components/admin/users/DeleteStaffDialog'

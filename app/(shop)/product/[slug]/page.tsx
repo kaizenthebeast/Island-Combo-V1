@@ -1,4 +1,4 @@
-import ProductDetailsContainer from '@/components/public/layout/ProductDetailsContainer'
+import ProductDetailsContainer from '@/components/features/product/ProductDetailsContainer'
 
 type Props = {
     params: Promise<{ slug: string }>
