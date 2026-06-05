@@ -4,6 +4,7 @@ import {
   getUserAddress,
   insertAddressInfo,
   updateAddressInfo,
+  setDefaultAddress,
   deleteAddress,
 } from '@/lib/account/address'
 import type { AddressFormValues } from '@/lib/types/users'
@@ -12,9 +13,6 @@ import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 // All address operations are self-scoped — the underlying lib functions derive
 // user_id from the session and RLS enforces the boundary. requireUser is the
 // API-layer guard so unauthenticated callers fail fast with a clean 401.
-
-// Per-user, session-derived data — never cache this handler.
-export const dynamic = 'force-dynamic'
 
 // GET /api/address — list the current user's saved addresses. The page renders
 // the initial list via SSR; this endpoint is used to refetch on the client after
@@ -54,6 +52,23 @@ export async function PATCH(req: NextRequest) {
     if (!addressId) return apiError('addressId is required', HTTP.BAD_REQUEST)
 
     return apiResult(await updateAddressInfo(user.id, addressId, data as AddressFormValues))
+  } catch (error: unknown) {
+    return toApiError(error)
+  }
+}
+
+// PUT /api/address — set an address as the default. Single-purpose: takes only
+// addressId and flips make_default (clearing the previous default). Use this for
+// a one-click "Make default" from a list; PATCH remains the full edit path.
+export async function PUT(req: NextRequest) {
+  try {
+    const user = await requireUser()
+    if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
+
+    const { addressId } = (await req.json()) ?? {}
+    if (!addressId) return apiError('addressId is required', HTTP.BAD_REQUEST)
+
+    return apiResult(await setDefaultAddress(user.id, addressId))
   } catch (error: unknown) {
     return toApiError(error)
   }

@@ -122,6 +122,48 @@ export const updateAddressInfo = async (
   return { success: true, status: 200, message: 'Address successfully updated' }
 }
 
+// SET DEFAULT
+//
+// Focused single-purpose flip: mark one address as the default and clear the
+// flag on every other address the user owns. Unlike updateAddressInfo this
+// touches only `make_default` — no address fields, no profile — so a one-click
+// "Make default" from a list never has to round-trip (or clobber) other data.
+export const setDefaultAddress = async (userId: string, addressId: number) => {
+  const supabase = await createClient()
+
+  // Guard: the target must belong to the caller. RLS already blocks cross-user
+  // writes, but an explicit existence check turns a silent no-op into a clean 404.
+  const { data: target, error: lookupError } = await supabase
+    .from('addresses')
+    .select('id')
+    .eq('id', addressId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (lookupError) return { success: false, status: 403, message: lookupError.message }
+  if (!target) return { success: false, status: 404, message: 'Address not found' }
+
+  // Clear the previous default(s), then set the new one.
+  const { error: clearError } = await supabase
+    .from('addresses')
+    .update({ make_default: false })
+    .eq('user_id', userId)
+    .neq('id', addressId)
+
+  if (clearError) return { success: false, status: 403, message: clearError.message }
+
+  const { error: setError } = await supabase
+    .from('addresses')
+    .update({ make_default: true, updated_at: new Date().toISOString() })
+    .eq('id', addressId)
+    .eq('user_id', userId)
+
+  if (setError) return { success: false, status: 403, message: setError.message }
+
+  revalidatePath('/checkout/address')
+  return { success: true, status: 200, message: 'Default address updated' }
+}
+
 // DELETE
 
 export const deleteAddress = async (userId: string, addressId: number) => {
