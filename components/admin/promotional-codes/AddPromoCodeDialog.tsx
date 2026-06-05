@@ -8,18 +8,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { AddVoucherForm } from '@/components/admin/voucher/forms/AddVoucherForm'
-import type { AddVoucherFormValues } from '@/lib/validators/voucher'
+import { AddPromoCodeForm } from '@/components/admin/promotional-codes/forms/AddPromoCodeForm'
+import type { AddPromoCodeFormValues } from '@/lib/validators/promo-code'
 
 type Props = {
   open: boolean
   onClose: () => void
 }
 
-export default function AddVoucherDialog({ open, onClose }: Props) {
+export default function AddPromoCodeDialog({ open, onClose }: Props) {
   const router = useRouter()
 
-  const handleSuccess = (_data: AddVoucherFormValues) => {
+  const handleSuccess = (_data: AddPromoCodeFormValues) => {
     router.refresh()
     onClose()
   }
@@ -34,11 +34,11 @@ export default function AddVoucherDialog({ open, onClose }: Props) {
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create Voucher</DialogTitle>
+          <DialogTitle>Create Promo Code</DialogTitle>
           <DialogDescription>Fill in the details below.</DialogDescription>
         </DialogHeader>
 
-        <AddVoucherForm
+        <AddPromoCodeForm
           onSuccess={handleSuccess}
           onCancel={onClose}
         />

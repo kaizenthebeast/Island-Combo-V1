@@ -17,7 +17,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth'
 import { getCart } from '@/lib/cart/cart'
 import { getUserAddress } from '@/lib/account/address'
-import { applyVoucher } from '@/lib/promo-vouchers/apply-voucher'
+import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
 import { chargeTotal, voucherValueFromTotal } from '@/lib/cash-vouchers/pricing'
 import { createCashVoucher } from '@/lib/cash-vouchers/cash-voucher'
@@ -89,8 +89,8 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
   const hasWholesale = selected.some((item) => item.applied_tier_label === 'wholesale')
   let appliedPromo: { code: string; value: number } | null = null
   if (intent.promoCode && !hasWholesale) {
-    const result = await applyVoucher(intent.promoCode, totalQty)
-    if (result.success && result.voucher) appliedPromo = result.voucher
+    const result = await applyPromoCode(intent.promoCode, totalQty)
+    if (result.success && result.promoCode) appliedPromo = result.promoCode
   }
 
   // Shipping is re-quoted server-side from the (owned) address. Pickup ships free.
@@ -118,9 +118,9 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
 
   const loyaltyDiscount = intent.useLoyalty ? LOYALTY_DISCOUNT_USD : 0
 
-  const { voucherDiscount, total } = calculateTotals({
+  const { promoDiscount, total } = calculateTotals({
     subtotal,
-    voucher: appliedPromo,
+    promoCode: appliedPromo,
     loyaltyDiscount,
     shippingFee,
   })
@@ -129,7 +129,7 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
     total: round2(Math.max(0, total)),
     subtotal,
     shippingFee,
-    discountAmount: round2(voucherDiscount + loyaltyDiscount),
+    discountAmount: round2(promoDiscount + loyaltyDiscount),
     promoCode: appliedPromo?.code ?? null,
     shippingMethod,
     items,

@@ -1,12 +1,12 @@
-/** Zod schema for promo-voucher forms. */
+/** Zod schema for promo-code forms. */
 import { z } from 'zod'
 
 // Reusable field definitions
 
 const codeField = z
   .string()
-  .min(1, 'Voucher code is required')
-  .max(32, 'Voucher code must be 32 characters or less')
+  .min(1, 'Promo code is required')
+  .max(32, 'Promo code must be 32 characters or less')
   .regex(/^[A-Z0-9_-]+$/i, 'Only letters, numbers, hyphens, and underscores are allowed')
   .transform((v) => v.toUpperCase())
 
@@ -33,18 +33,18 @@ const expiresAtField = z
 
 // Add
 
-export const addVoucherSchema = z.object({
+export const addPromoCodeSchema = z.object({
   code:         codeField,
   value:        valueField,
   min_quantity: minQuantityField,
   expires_at:   expiresAtField,
   status:       z.enum(['DRAFT', 'ACTIVE']).default('DRAFT'),
 })
-export type AddVoucherFormValues = z.input<typeof addVoucherSchema>
+export type AddPromoCodeFormValues = z.input<typeof addPromoCodeSchema>
 
 // Edit
 
-export const editVoucherSchema = z.object({
+export const editPromoCodeSchema = z.object({
   code:         codeField,
   value:        valueField,
   min_quantity: minQuantityField,
@@ -52,15 +52,15 @@ export const editVoucherSchema = z.object({
   status:       z.enum(['DRAFT', 'ACTIVE', 'ARCHIVED']),
 })
 
-export type EditVoucherFormValues = z.infer<typeof editVoucherSchema>
+export type EditPromoCodeFormValues = z.infer<typeof editPromoCodeSchema>
 
 // Apply (customer-side promo code input)
 
-export const applyVoucherSchema = z.object({
-  voucherCode: z
+export const applyPromoCodeSchema = z.object({
+  promoCode: z
     .string()
-    .min(3, 'Voucher code must be at least 3 characters')
-    .max(32, 'Voucher code must be 32 characters or less'),
+    .min(3, 'Promo code must be at least 3 characters')
+    .max(32, 'Promo code must be 32 characters or less'),
 })
 
-export type ApplyVoucherFormValues = z.infer<typeof applyVoucherSchema>
+export type ApplyPromoCodeFormValues = z.infer<typeof applyPromoCodeSchema>

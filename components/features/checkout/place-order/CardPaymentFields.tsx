@@ -37,14 +37,14 @@ const FieldsSkeleton = () => (
 // Builds the product checkout intent from the live cart + checkout stores.
 const buildProductIntent = (): ProductCheckoutIntent => {
   const { selectedIds } = useCartStore.getState()
-  const { fulfillment, selectedAddressId, voucher, loyaltyEnabled } = useCheckoutStore.getState()
+  const { fulfillment, selectedAddressId, promoCode, loyaltyEnabled } = useCheckoutStore.getState()
   return {
     kind: 'product',
     selectedVariantIds: selectedIds,
     fulfillment,
     shippingAddressId: fulfillment === 'deliver' ? selectedAddressId : null,
     paymentMethod: 'card',
-    promoCode: voucher?.code ?? null,
+    promoCode: promoCode?.code ?? null,
     useLoyalty: loyaltyEnabled,
   }
 }

@@ -1,2 +1,2 @@
-/** Barrel for lib/admin/vouchers. */
-export * from './voucher'
+/** Barrel for lib/admin/promotional-codes. */
+export * from './promo-code'

@@ -2,18 +2,18 @@
 
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addVoucherSchema, type AddVoucherFormValues } from '@/lib/validators/voucher'
-import { createVoucher } from '@/lib/admin/vouchers/voucher'
-import { VoucherFields } from './VoucherUIForm'
+import { addPromoCodeSchema, type AddPromoCodeFormValues } from '@/lib/validators/promo-code'
+import { createPromoCode } from '@/lib/admin/promotional-codes/promo-code'
+import { PromoCodeFields } from './PromoCodeUIForm'
 
 type Props = {
-  onSuccess: (data: AddVoucherFormValues) => void
+  onSuccess: (data: AddPromoCodeFormValues) => void
   onCancel: () => void
 }
 
-export function AddVoucherForm({ onSuccess, onCancel }: Props) {
-  const methods = useForm<AddVoucherFormValues>({
-    resolver: zodResolver(addVoucherSchema),
+export function AddPromoCodeForm({ onSuccess, onCancel }: Props) {
+  const methods = useForm<AddPromoCodeFormValues>({
+    resolver: zodResolver(addPromoCodeSchema),
     defaultValues: {
       code: '',
       value: undefined,
@@ -29,8 +29,8 @@ export function AddVoucherForm({ onSuccess, onCancel }: Props) {
     formState: { isSubmitting, errors },
   } = methods
 
-  const onSubmit = async (values: AddVoucherFormValues) => {
-    const result = await createVoucher(values)
+  const onSubmit = async (values: AddPromoCodeFormValues) => {
+    const result = await createPromoCode(values)
     if (!result.success) {
       setError('root', { message: result.message })
       return
@@ -50,7 +50,7 @@ export function AddVoucherForm({ onSuccess, onCancel }: Props) {
           </div>
         )}
 
-        <VoucherFields />
+        <PromoCodeFields />
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <button
@@ -66,7 +66,7 @@ export function AddVoucherForm({ onSuccess, onCancel }: Props) {
             disabled={isSubmitting}
             className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
-            {isSubmitting ? 'Creating...' : 'Create Voucher'}
+            {isSubmitting ? 'Creating...' : 'Create Promo Code'}
           </button>
         </div>
 

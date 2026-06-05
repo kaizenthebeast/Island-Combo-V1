@@ -3,7 +3,7 @@
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils/cn'
-import type { AddVoucherFormValues } from '@/lib/validators/voucher'
+import type { AddPromoCodeFormValues } from '@/lib/validators/promo-code'
 
 // helpers
 
@@ -78,16 +78,16 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   )
 }
 
-// VoucherFields
+// PromoCodeFields
 
-export function VoucherFields() {
-  const { register, formState: { errors } } = useFormContext<AddVoucherFormValues>()
+export function PromoCodeFields() {
+  const { register, formState: { errors } } = useFormContext<AddPromoCodeFormValues>()
 
   return (
     <div className="flex flex-col gap-5">
 
       {/* Code */}
-      <Field label="Voucher Code" required error={msg(errors.code)}>
+      <Field label="Promo Code" required error={msg(errors.code)}>
         <Input
           {...register('code')}
           placeholder="e.g. SAVE20"
@@ -173,4 +173,4 @@ export function VoucherFields() {
 
 // default export for backwards compat
 
-export default VoucherFields
+export default PromoCodeFields

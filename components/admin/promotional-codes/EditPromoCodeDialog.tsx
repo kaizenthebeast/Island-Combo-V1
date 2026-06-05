@@ -8,20 +8,20 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { EditVoucherForm } from '@/components/admin/voucher/forms/EditVoucherForm'
-import type { EditVoucherFormValues } from '@/lib/validators/voucher'
-import type { Voucher } from '@/lib/types/voucher'
+import { EditPromoCodeForm } from '@/components/admin/promotional-codes/forms/EditPromoCodeForm'
+import type { EditPromoCodeFormValues } from '@/lib/validators/promo-code'
+import type { PromoCode } from '@/lib/types/promo-code'
 
 type Props = {
   open: boolean
   onClose: () => void
-  selectedVoucher: Voucher | null
+  selectedPromoCode: PromoCode | null
 }
 
-export default function EditVoucherDialog({ open, onClose, selectedVoucher }: Props) {
+export default function EditPromoCodeDialog({ open, onClose, selectedPromoCode }: Props) {
   const router = useRouter()
 
-  const handleSuccess = (_data: EditVoucherFormValues) => {
+  const handleSuccess = (_data: EditPromoCodeFormValues) => {
     router.refresh()
     onClose()
   }
@@ -36,13 +36,13 @@ export default function EditVoucherDialog({ open, onClose, selectedVoucher }: Pr
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Edit Voucher</DialogTitle>
-          <DialogDescription>Update the voucher details below.</DialogDescription>
+          <DialogTitle>Edit Promo Code</DialogTitle>
+          <DialogDescription>Update the promo code details below.</DialogDescription>
         </DialogHeader>
 
-        {selectedVoucher && (
-          <EditVoucherForm
-            voucher={selectedVoucher}
+        {selectedPromoCode && (
+          <EditPromoCodeForm
+            promoCode={selectedPromoCode}
             onSuccess={handleSuccess}
             onCancel={onClose}
           />

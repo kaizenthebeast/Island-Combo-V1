@@ -10,19 +10,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { Archive, AlertTriangle } from "lucide-react";
 
-interface DeleteVoucherDialogProps {
+interface DeletePromoCodeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  voucherCode: string;
+  promoCode: string;
   onConfirm: () => void | Promise<void>;
 }
 
-const DeleteVoucherDialog = ({
+const DeletePromoCodeDialog = ({
   open,
   onOpenChange,
-  voucherCode,
+  promoCode,
   onConfirm,
-}: DeleteVoucherDialogProps) => {
+}: DeletePromoCodeDialogProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
@@ -31,8 +31,8 @@ const DeleteVoucherDialog = ({
       await onConfirm();
       onOpenChange(false);
     } catch (error) {
-      // Error handled by parent via actionError banner in VoucherClient
-      console.error("Failed to archive voucher:", error);
+      // Error handled by parent via actionError banner in PromoCodeClient
+      console.error("Failed to archive promo code:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -53,11 +53,11 @@ const DeleteVoucherDialog = ({
 
             <div className="flex flex-col gap-1">
               <DialogTitle className="text-base leading-snug">
-                Archive voucher?
+                Archive promo code?
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">
-                  &quot;{voucherCode}&quot;
+                  &quot;{promoCode}&quot;
                 </span>{" "}
                 will be archived and can no longer be used at checkout. It can
                 be restored at any time from the edit panel.
@@ -87,7 +87,7 @@ const DeleteVoucherDialog = ({
             ) : (
               <>
                 <Archive className="h-4 w-4" />
-                Archive voucher
+                Archive promo code
               </>
             )}
           </Button>
@@ -97,4 +97,4 @@ const DeleteVoucherDialog = ({
   );
 };
 
-export default DeleteVoucherDialog;
+export default DeletePromoCodeDialog;

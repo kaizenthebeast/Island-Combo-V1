@@ -3,23 +3,23 @@
 import { useEffect, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editVoucherSchema, type EditVoucherFormValues } from '@/lib/validators/voucher'
-import { updateVoucher, restoreVoucher } from '@/lib/admin/vouchers/voucher'
-import { VoucherFields } from './VoucherUIForm'
+import { editPromoCodeSchema, type EditPromoCodeFormValues } from '@/lib/validators/promo-code'
+import { updatePromoCode, restorePromoCode } from '@/lib/admin/promotional-codes/promo-code'
+import { PromoCodeFields } from './PromoCodeUIForm'
 import { ArchiveRestore } from 'lucide-react'
-import type { Voucher } from '@/lib/types/voucher'
+import type { PromoCode } from '@/lib/types/promo-code'
 
 type Props = {
-  voucher: Voucher
-  onSuccess: (data: EditVoucherFormValues) => void
+  promoCode: PromoCode
+  onSuccess: (data: EditPromoCodeFormValues) => void
   onCancel: () => void
 }
 
-export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
+export function EditPromoCodeForm({ promoCode, onSuccess, onCancel }: Props) {
   const [isRestoring, setIsRestoring] = useState(false)
 
-  const methods = useForm<EditVoucherFormValues>({
-    resolver: zodResolver(editVoucherSchema),
+  const methods = useForm<EditPromoCodeFormValues>({
+    resolver: zodResolver(editPromoCodeSchema),
   })
 
   const {
@@ -31,16 +31,16 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
 
   useEffect(() => {
     reset({
-      code: voucher.code,
-      value: voucher.value,
-      min_quantity: voucher.min_quantity,
-      expires_at: voucher.expires_at ? voucher.expires_at.slice(0, 10) : null,
-      status: voucher.status, // ARCHIVED is now valid in editVoucherSchema
+      code: promoCode.code,
+      value: promoCode.value,
+      min_quantity: promoCode.min_quantity,
+      expires_at: promoCode.expires_at ? promoCode.expires_at.slice(0, 10) : null,
+      status: promoCode.status, // ARCHIVED is now valid in editPromoCodeSchema
     })
-  }, [voucher, reset])
+  }, [promoCode, reset])
 
-  const onSubmit = async (values: EditVoucherFormValues) => {
-    const result = await updateVoucher(voucher.id, values)
+  const onSubmit = async (values: EditPromoCodeFormValues) => {
+    const result = await updatePromoCode(promoCode.id, values)
     if (!result.success) {
       setError('root', { message: result.message })
       return
@@ -51,11 +51,11 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
   const handleRestore = async () => {
     setIsRestoring(true)
     try {
-      await restoreVoucher(voucher.id)
+      await restorePromoCode(promoCode.id)
       onSuccess({ ...methods.getValues() })
     } catch (err) {
       setError('root', {
-        message: err instanceof Error ? err.message : 'Failed to restore voucher',
+        message: err instanceof Error ? err.message : 'Failed to restore promo code',
       })
     } finally {
       setIsRestoring(false)
@@ -74,12 +74,12 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
           </div>
         )}
 
-        {voucher.status === 'ARCHIVED' && (
+        {promoCode.status === 'ARCHIVED' && (
           <div className="flex items-center justify-between gap-3 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
             <div className="flex items-center gap-2">
               <ArchiveRestore className="h-4 w-4 shrink-0 text-warning" />
               <p className="text-[12px] text-warning font-medium">
-                This voucher is archived and cannot be used at checkout.
+                This promo code is archived and cannot be used at checkout.
               </p>
             </div>
             <button
@@ -93,7 +93,7 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
           </div>
         )}
 
-        <VoucherFields />
+        <PromoCodeFields />
 
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
           <button
@@ -106,7 +106,7 @@ export function EditVoucherForm({ voucher, onSuccess, onCancel }: Props) {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting || voucher.status === 'ARCHIVED'}
+            disabled={isSubmitting || promoCode.status === 'ARCHIVED'}
             className="rounded-lg bg-primary px-4 py-2 text-[13px] font-medium text-white hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {isSubmitting ? 'Saving...' : 'Save Changes'}

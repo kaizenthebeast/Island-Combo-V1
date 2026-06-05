@@ -3,13 +3,13 @@
 import { useState, useMemo, useTransition } from 'react'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import AddVoucherDialog from '@/components/admin/voucher/AddVoucherDialog'
-import EditVoucherDialog from '@/components/admin/voucher/EditVoucherDialog'
-import DeleteVoucherDialog from '@/components/admin/voucher/DeleteVoucherDialog'
+import AddPromoCodeDialog from '@/components/admin/promotional-codes/AddPromoCodeDialog'
+import EditPromoCodeDialog from '@/components/admin/promotional-codes/EditPromoCodeDialog'
+import DeletePromoCodeDialog from '@/components/admin/promotional-codes/DeletePromoCodeDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/lib/hooks/use-table-url-state'
-import { archiveVoucher } from '@/lib/admin/vouchers/voucher'
-import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/lib/types/voucher'
+import { archivePromoCode } from '@/lib/admin/promotional-codes/promo-code'
+import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/lib/types/promo-code'
 
 // table row shape
 
@@ -19,13 +19,13 @@ type TableRow = {
   value: string               // formatted: "10%"
   min_quantity: string        // formatted: "5 items" | "—"
   expires_at: string          // formatted: "Dec 31, 2025" | "—"
-  effective_status: VoucherEffectiveStatus
-  raw: Voucher
+  effective_status: PromoCodeEffectiveStatus
+  raw: PromoCode
 }
 
 // status badge config
 
-const STATUS_BADGE: Record<VoucherEffectiveStatus, { label: string; variant: BadgeVariant }> = {
+const STATUS_BADGE: Record<PromoCodeEffectiveStatus, { label: string; variant: BadgeVariant }> = {
   ACTIVE:   { label: 'Active',   variant: 'success' },
   DRAFT:    { label: 'Draft',    variant: 'warning' },
   EXPIRED:  { label: 'Expired',  variant: 'error'   },
@@ -46,15 +46,15 @@ const formatDate = (iso: string | null): string => {
 // component
 
 interface Props {
-  voucher: VoucherRow[]
+  promoCodes: PromoCodeRow[]
   total: number
   page: number
   pageSize: number
 }
 
-export default function VoucherClient({ voucher, total, page, pageSize }: Props) {
+export default function PromoCodeClient({ promoCodes, total, page, pageSize }: Props) {
   const [addOpen, setAddOpen] = useState(false)
-  const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null)
+  const [editingPromoCode, setEditingPromoCode] = useState<PromoCode | null>(null)
   const [deletingRow, setDeletingRow] = useState<TableRow | null>(null)
   const [, setRestoringRow] = useState<TableRow | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -84,12 +84,12 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     return new Promise<void>((resolve, reject) => {
       startTransition(async () => {
         try {
-          await archiveVoucher(deletingRow.id)
+          await archivePromoCode(deletingRow.id)
           setActionError(null)
           setDeletingRow(null)
           resolve()
         } catch (err) {
-          const message = err instanceof Error ? err.message : 'Failed to archive voucher'
+          const message = err instanceof Error ? err.message : 'Failed to archive promo code'
           setActionError(message)
           reject(err)
         }
@@ -101,16 +101,16 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
 
   const rows: TableRow[] = useMemo(
     () =>
-      voucher.map((voucherItem) => ({
-        id: voucherItem.id,
-        code: voucherItem.code,
-        value: `${voucherItem.value}%`,
-        min_quantity: voucherItem.min_quantity != null ? `${voucherItem.min_quantity} items` : '—',
-        expires_at: formatDate(voucherItem.expires_at),
-        effective_status: voucherItem.effective_status,
-        raw: voucherItem,
+      promoCodes.map((promoCodeItem) => ({
+        id: promoCodeItem.id,
+        code: promoCodeItem.code,
+        value: `${promoCodeItem.value}%`,
+        min_quantity: promoCodeItem.min_quantity != null ? `${promoCodeItem.min_quantity} items` : '—',
+        expires_at: formatDate(promoCodeItem.expires_at),
+        effective_status: promoCodeItem.effective_status,
+        raw: promoCodeItem,
       })),
-    [voucher],
+    [promoCodes],
   )
 
   // columns
@@ -126,7 +126,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
       label: 'Status',
       sortable: false,
       render: (value) => {
-        const { label, variant } = STATUS_BADGE[value as VoucherEffectiveStatus] ?? STATUS_BADGE.DRAFT
+        const { label, variant } = STATUS_BADGE[value as PromoCodeEffectiveStatus] ?? STATUS_BADGE.DRAFT
         return <StatusBadge status={label} variant={variant} />
       },
     },
@@ -138,10 +138,10 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
     <section className="min-h-full bg-muted px-6 py-10">
       <PageHeader
         eyebrow="Promotions"
-        title="Vouchers"
-        subtitle="Manage discount vouchers and promo codes"
+        title="Promo Codes"
+        subtitle="Manage discount promo codes"
         actions={[
-          { label: 'Add Voucher', onClick: () => setAddOpen(true), variant: 'primary' },
+          { label: 'Add Promo Code', onClick: () => setAddOpen(true), variant: 'primary' },
         ]}
       />
 
@@ -151,20 +151,20 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
         </div>
       )}
 
-      <AddVoucherDialog
+      <AddPromoCodeDialog
         open={addOpen}
         onClose={() => setAddOpen(false)}
       />
 
-      <EditVoucherDialog
-        open={!!editingVoucher}
-        onClose={() => setEditingVoucher(null)}
-        selectedVoucher={editingVoucher}
+      <EditPromoCodeDialog
+        open={!!editingPromoCode}
+        onClose={() => setEditingPromoCode(null)}
+        selectedPromoCode={editingPromoCode}
       />
 
-      <DeleteVoucherDialog
+      <DeletePromoCodeDialog
         open={!!deletingRow}
-        voucherCode={deletingRow?.code ?? ''}
+        promoCode={deletingRow?.code ?? ''}
         onConfirm={handleArchiveConfirm}
         onOpenChange={(open) => { if (!open) setDeletingRow(null) }}
       />
@@ -193,7 +193,7 @@ export default function VoucherClient({ voucher, total, page, pageSize }: Props)
         onSortChange={(key, dir) => setSort(String(key), dir)}
 
         getRowId={(row) => row.id}
-        onEdit={(row) => setEditingVoucher(row.raw)}
+        onEdit={(row) => setEditingPromoCode(row.raw)}
         onDelete={(row) => {
           if (row.effective_status === 'ARCHIVED') {
             setRestoringRow(row)

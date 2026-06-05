@@ -4,13 +4,13 @@ import React, { useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  applyVoucherSchema,
-  ApplyVoucherFormValues,
-} from '@/lib/validators/voucher'
-import { applyVoucher } from '@/lib/promo-vouchers/apply-voucher'
+  applyPromoCodeSchema,
+  ApplyPromoCodeFormValues,
+} from '@/lib/validators/promo-code'
+import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
 import { useCartStore } from '@/lib/store/cart-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { Voucher } from '@/lib/types/voucher'
+import type { PromoCode } from '@/lib/types/promo-code'
 
 import { Input } from '@/components/ui/input'
 import { AlertCircle } from 'lucide-react'
@@ -22,70 +22,70 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 
-type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
+type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 
 type Props = {
-  setVoucher: (voucher: AppliedVoucher | null) => void
-  activeVoucher: AppliedVoucher | null
+  setPromoCode: (promoCode: AppliedPromoCode | null) => void
+  activePromoCode: AppliedPromoCode | null
 }
 
-const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
+const PromoCodeForm = ({ setPromoCode, activePromoCode }: Props) => {
   const { totalQty, cart, selectedIds } = useCartStore()
 
-  // A voucher can't be combined with wholesale pricing. Block it whenever any
+  // A promo code can't be combined with wholesale pricing. Block it whenever any
   // selected item is currently getting the wholesale tier.
   const hasWholesale = cart.some(
     (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
   )
 
-  const form = useForm<ApplyVoucherFormValues>({
-    resolver: zodResolver(applyVoucherSchema),
-    defaultValues: { voucherCode: '' },
+  const form = useForm<ApplyPromoCodeFormValues>({
+    resolver: zodResolver(applyPromoCodeSchema),
+    defaultValues: { promoCode: '' },
   })
 
-  // If an item becomes wholesale-priced after a voucher was applied, drop it.
+  // If an item becomes wholesale-priced after a promo code was applied, drop it.
   useEffect(() => {
-    if (hasWholesale && activeVoucher) {
-      setVoucher(null)
+    if (hasWholesale && activePromoCode) {
+      setPromoCode(null)
       form.reset()
       customToast.warning({
-        title: 'Voucher removed',
-        description: 'Discount vouchers can’t be combined with wholesale-priced items.',
+        title: 'Promo code removed',
+        description: 'Promo codes can’t be combined with wholesale-priced items.',
       })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasWholesale, activeVoucher])
+  }, [hasWholesale, activePromoCode])
 
-  const onSubmit: SubmitHandler<ApplyVoucherFormValues> = async (data) => {
+  const onSubmit: SubmitHandler<ApplyPromoCodeFormValues> = async (data) => {
     if (hasWholesale) {
       customToast.warning({
-        title: 'Cannot apply voucher',
+        title: 'Cannot apply promo code',
         description: 'Discounts can’t be combined with wholesale-priced items.',
       })
       return
     }
 
-    const result = await applyVoucher(data.voucherCode, totalQty)
+    const result = await applyPromoCode(data.promoCode, totalQty)
 
     if (!result.success) {
-      setVoucher(null)
-      form.setError('voucherCode', {
-        message: result.message ?? 'Invalid voucher code',
+      setPromoCode(null)
+      form.setError('promoCode', {
+        message: result.message ?? 'Invalid promo code',
       })
       return
     }
 
-    form.clearErrors('voucherCode')
-    setVoucher(result.voucher ?? null)
+    form.clearErrors('promoCode')
+    setPromoCode(result.promoCode ?? null)
     form.reset()
   }
 
-  const removeVoucher = () => {
-    setVoucher(null)
+  const removePromoCode = () => {
+    setPromoCode(null)
     form.reset()
   }
 
-  const disabled = !!activeVoucher || hasWholesale
+  const disabled = !!activePromoCode || hasWholesale
 
   return (
     <div className="space-y-3">
@@ -95,7 +95,7 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
-            name="voucherCode"
+            name="promoCode"
             render={({ field }) => (
               <FormItem className="space-y-2">
                 <div className="flex items-center gap-3">
@@ -128,21 +128,21 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
         <div className="flex items-start gap-2 rounded-md border border-warning/30 bg-warning-tint px-3 py-2.5">
           <AlertCircle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
           <p className="text-xs text-warning font-medium">
-            Discount vouchers can’t be combined with wholesale-priced items.
+            Promo codes can’t be combined with wholesale-priced items.
           </p>
         </div>
       )}
 
-      {/* ACTIVE VOUCHER */}
-      {activeVoucher && !hasWholesale && (
+      {/* ACTIVE PROMO CODE */}
+      {activePromoCode && !hasWholesale && (
         <div className="rounded-xl border border-success/30 bg-success-tint px-4 py-3 text-sm text-success flex justify-between items-center">
           <div>
-            <p className="font-medium">{activeVoucher.code} applied</p>
-            <p>{activeVoucher.value}% discount applied</p>
+            <p className="font-medium">{activePromoCode.code} applied</p>
+            <p>{activePromoCode.value}% discount applied</p>
           </div>
           <button
             type="button"
-            onClick={removeVoucher}
+            onClick={removePromoCode}
             className="text-xs text-danger font-medium"
           >
             Remove
@@ -153,4 +153,4 @@ const VoucherCodeForm = ({ setVoucher, activeVoucher }: Props) => {
   )
 }
 
-export default VoucherCodeForm
+export default PromoCodeForm

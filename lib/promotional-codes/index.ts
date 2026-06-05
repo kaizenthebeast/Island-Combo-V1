@@ -1,2 +1,2 @@
-/** Barrel for lib/promo-vouchers. */
-export * from './apply-voucher'
+/** Barrel for lib/promotional-codes. */
+export * from './apply-promo-code'

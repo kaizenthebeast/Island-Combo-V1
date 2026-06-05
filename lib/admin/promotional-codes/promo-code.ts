@@ -1,23 +1,23 @@
 'use server'
-/** Admin promo-voucher CRUD. */
+/** Admin promo-code CRUD. */
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { Voucher, VoucherRow, VoucherEffectiveStatus } from '@/lib/types/voucher'
-import type { AddVoucherFormValues, EditVoucherFormValues } from '@/lib/validators/voucher'
+import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/lib/types/promo-code'
+import type { AddPromoCodeFormValues, EditPromoCodeFormValues } from '@/lib/validators/promo-code'
 
 // helpers
 
-const deriveEffectiveStatus = (voucher: Voucher): VoucherEffectiveStatus => {
-  if (voucher.status === 'ARCHIVED') return 'ARCHIVED'
-  if (voucher.expires_at && new Date(voucher.expires_at) < new Date()) return 'EXPIRED'
-  if (voucher.status === 'DRAFT') return 'DRAFT'
+const deriveEffectiveStatus = (promoCode: PromoCode): PromoCodeEffectiveStatus => {
+  if (promoCode.status === 'ARCHIVED') return 'ARCHIVED'
+  if (promoCode.expires_at && new Date(promoCode.expires_at) < new Date()) return 'EXPIRED'
+  if (promoCode.status === 'DRAFT') return 'DRAFT'
   return 'ACTIVE'
 }
 
 // READ (all)
 
-export const getVouchers = async (): Promise<VoucherRow[]> => {
+export const getPromoCodes = async (): Promise<PromoCodeRow[]> => {
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -28,7 +28,7 @@ export const getVouchers = async (): Promise<VoucherRow[]> => {
   if (error) throw new Error(error.message)
 
   return (data ?? []).map((item) => {
-    const voucher: Voucher = {
+    const promoCode: PromoCode = {
       id: item.id,
       code: item.code,
       value: item.value,
@@ -38,29 +38,29 @@ export const getVouchers = async (): Promise<VoucherRow[]> => {
       created_at: item.created_at,
       updated_at: item.updated_at,
     }
-    return { ...voucher, effective_status: deriveEffectiveStatus(voucher) }
+    return { ...promoCode, effective_status: deriveEffectiveStatus(promoCode) }
   })
 }
 
 // READ (paginated)
 
-export type VouchersSortKey = 'id' | 'code' | 'value' | 'expires_at' | 'created_at'
+export type PromoCodesSortKey = 'id' | 'code' | 'value' | 'expires_at' | 'created_at'
 
-export type VouchersPageInput = {
+export type PromoCodesPageInput = {
   page: number
   pageSize: number
   search?: string                          // matches code
-  filter?: string                          // VoucherEffectiveStatus or 'All'
-  sortKey?: VouchersSortKey
+  filter?: string                          // PromoCodeEffectiveStatus or 'All'
+  sortKey?: PromoCodesSortKey
   sortDir?: 'asc' | 'desc'
 }
 
-export type VouchersPageResult = {
-  rows: VoucherRow[]
+export type PromoCodesPageResult = {
+  rows: PromoCodeRow[]
   total: number
 }
 
-export const getVouchersPage = async (input: VouchersPageInput): Promise<VouchersPageResult> => {
+export const getPromoCodesPage = async (input: PromoCodesPageInput): Promise<PromoCodesPageResult> => {
   const supabase = await createClient()
 
   const {
@@ -115,8 +115,8 @@ export const getVouchersPage = async (input: VouchersPageInput): Promise<Voucher
   const { data, error, count } = await query
   if (error) throw new Error(error.message)
 
-  const rows: VoucherRow[] = (data ?? []).map((item) => {
-    const voucher: Voucher = {
+  const rows: PromoCodeRow[] = (data ?? []).map((item) => {
+    const promoCode: PromoCode = {
       id: item.id,
       code: item.code,
       value: item.value,
@@ -126,7 +126,7 @@ export const getVouchersPage = async (input: VouchersPageInput): Promise<Voucher
       created_at: item.created_at,
       updated_at: item.updated_at,
     }
-    return { ...voucher, effective_status: deriveEffectiveStatus(voucher) }
+    return { ...promoCode, effective_status: deriveEffectiveStatus(promoCode) }
   })
 
   return { rows, total: count ?? 0 }
@@ -134,7 +134,7 @@ export const getVouchersPage = async (input: VouchersPageInput): Promise<Voucher
 
 // CREATE
 
-export const createVoucher = async (data: AddVoucherFormValues) => {
+export const createPromoCode = async (data: AddPromoCodeFormValues) => {
   const supabase = await createClient()
 
   const { error } = await supabase.from('promo').insert({
@@ -147,17 +147,17 @@ export const createVoucher = async (data: AddVoucherFormValues) => {
 
   if (error) {
     if (error.code === '23505')
-      return { success: false, status: 409, message: 'A voucher with this code already exists.' }
+      return { success: false, status: 409, message: 'A promo code with this code already exists.' }
     return { success: false, status: 403, message: error.message }
   }
 
-  revalidatePath('/admin/vouchers')
-  return { success: true, status: 201, message: 'Voucher successfully created' }
+  revalidatePath('/admin/content-management/promotional-codes')
+  return { success: true, status: 201, message: 'Promo code successfully created' }
 }
 
 // UPDATE
 
-export const updateVoucher = async (id: number, data: EditVoucherFormValues) => {
+export const updatePromoCode = async (id: number, data: EditPromoCodeFormValues) => {
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -173,17 +173,17 @@ export const updateVoucher = async (id: number, data: EditVoucherFormValues) => 
 
   if (error) {
     if (error.code === '23505')
-      return { success: false, status: 409, message: 'A voucher with this code already exists.' }
+      return { success: false, status: 409, message: 'A promo code with this code already exists.' }
     return { success: false, status: 403, message: error.message }
   }
 
-  revalidatePath('/admin/vouchers')
-  return { success: true, status: 200, message: 'Voucher successfully updated' }
+  revalidatePath('/admin/content-management/promotional-codes')
+  return { success: true, status: 200, message: 'Promo code successfully updated' }
 }
 
 // ARCHIVE
 
-export const archiveVoucher = async (id: number) => {
+export const archivePromoCode = async (id: number) => {
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -193,13 +193,13 @@ export const archiveVoucher = async (id: number) => {
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/admin/vouchers')
+  revalidatePath('/admin/content-management/promotional-codes')
   return id
 }
 
 // RESTORE
 
-export const restoreVoucher = async (id: number) => {
+export const restorePromoCode = async (id: number) => {
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -209,6 +209,6 @@ export const restoreVoucher = async (id: number) => {
 
   if (error) throw new Error(error.message)
 
-  revalidatePath('/admin/vouchers')
+  revalidatePath('/admin/content-management/promotional-codes')
   return id
 }

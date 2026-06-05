@@ -1,14 +1,14 @@
 /** Zustand store for checkout state. */
 import { create } from 'zustand'
-import type { Voucher } from '@/lib/types/voucher'
+import type { PromoCode } from '@/lib/types/promo-code'
 
-type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
+type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 
 export type PaymentMethod = "cod" | "card"
 export type Fulfillment = "deliver" | "pickup"
 
 type CheckoutState = {
-  voucher: AppliedVoucher | null
+  promoCode: AppliedPromoCode | null
   loyaltyEnabled: boolean
   loyaltyPoints: number
   shippingFee: number | null
@@ -27,7 +27,7 @@ type CheckoutState = {
   // trigger the in-provider PayPal card submit. Null until the card form mounts.
   submitCard: (() => Promise<void>) | null
 
-  setVoucher: (voucher: AppliedVoucher | null) => void
+  setPromoCode: (promoCode: AppliedPromoCode | null) => void
   setLoyaltyPoints: (pts: number) => void
   toggleLoyalty: () => void
   setShipping: (fee: number | null, method: "GCR" | "QPI" | null) => void
@@ -40,7 +40,7 @@ type CheckoutState = {
 }
 
 export const useCheckoutStore = create<CheckoutState>((set) => ({
-  voucher: null,
+  promoCode: null,
   loyaltyEnabled: true,
   loyaltyPoints: 3,
   shippingFee: null,
@@ -51,7 +51,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
   placing: false,
   submitCard: null,
 
-  setVoucher: (voucher) => set({ voucher }),
+  setPromoCode: (promoCode) => set({ promoCode }),
   setLoyaltyPoints: (pts) => set({ loyaltyPoints: pts }),
 
   toggleLoyalty: () => set((state) => ({ loyaltyEnabled: !state.loyaltyEnabled })),
@@ -66,7 +66,7 @@ export const useCheckoutStore = create<CheckoutState>((set) => ({
 
   resetCheckout: () =>
     set({
-      voucher: null,
+      promoCode: null,
       loyaltyEnabled: true,
       loyaltyPoints: 0,
       shippingFee: null,

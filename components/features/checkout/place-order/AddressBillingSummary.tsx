@@ -12,7 +12,7 @@ const AddressBillingSummary = () => {
   const router = useRouter()
   const { totalQty, subtotal, cart, selectedIds } = useCartStore()
   const {
-    voucher,
+    promoCode,
     loyaltyPoints,
     loyaltyEnabled,
     shippingFee,
@@ -26,14 +26,14 @@ const AddressBillingSummary = () => {
     resetCheckout,
   } = useCheckoutStore()
 
-  // Vouchers can't combine with wholesale pricing.
+  // Promo codes can't combine with wholesale pricing.
   const hasWholesale = cart.some(
     (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
   )
 
-  const { voucherDiscount, total } = calculateTotals({
+  const { promoDiscount, total } = calculateTotals({
     subtotal,
-    voucher: hasWholesale ? null : voucher,
+    promoCode: hasWholesale ? null : promoCode,
     loyaltyDiscount: loyaltyEnabled ? loyaltyPoints : 0,
     shippingFee: shippingFee ?? 0,
   })
@@ -44,7 +44,7 @@ const AddressBillingSummary = () => {
     fulfillment,
     shippingAddressId: fulfillment === 'deliver' ? selectedAddressId : null,
     paymentMethod,
-    promoCode: voucher?.code ?? null,
+    promoCode: promoCode?.code ?? null,
     useLoyalty: loyaltyEnabled,
   })
 
@@ -105,7 +105,7 @@ const AddressBillingSummary = () => {
         </div>
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Discount</span>
-          <span className="text-success">-${voucherDiscount.toFixed(2)}</span>
+          <span className="text-success">-${promoDiscount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Loyalty points</span>

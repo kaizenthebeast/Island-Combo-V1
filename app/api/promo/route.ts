@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { applyVoucher } from '@/lib/promo-vouchers/apply-voucher'
+import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 
 export async function POST(req: NextRequest) {
@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
     if (!promoCode) return apiError('Promo code is required', HTTP.BAD_REQUEST)
     if (existingPromo) return apiError('Only one promo code can be applied', HTTP.BAD_REQUEST)
 
-    const result = await applyVoucher(promoCode, Number(totalQty) || 0)
+    const result = await applyPromoCode(promoCode, Number(totalQty) || 0)
     if (!result.success)
       return apiError(result.message ?? 'Invalid or expired promo code', HTTP.BAD_REQUEST)
 
-    return apiOk({ data: { promo: result.voucher } })
+    return apiOk({ data: { promo: result.promoCode } })
   } catch (error: unknown) {
     return toApiError(error)
   }

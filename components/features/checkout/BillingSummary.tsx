@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react'
 import { CircleDollarSign } from 'lucide-react'
-import VoucherCodeForm from '@/components/features/promo/PromoCodeForm'
+import PromoCodeForm from '@/components/features/promo/PromoCodeForm'
 import { Switch } from '@/components/ui/switch'
 import { useCheckoutStore } from '@/lib/store/checkout-store'
 import { useCartStore } from '@/lib/store/cart-store'
@@ -15,32 +15,32 @@ type Props = {
 }
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
-  const { voucher, loyaltyEnabled, setVoucher, toggleLoyalty, loyaltyPoints } = useCheckoutStore()
+  const { promoCode, loyaltyEnabled, setPromoCode, toggleLoyalty, loyaltyPoints } = useCheckoutStore()
   const { cart, selectedIds } = useCartStore()
   const loyaltyDiscount = loyaltyEnabled ? loyaltyPoints : 0
 
-  // Vouchers can't combine with wholesale pricing — ignore any applied voucher
-  // when a selected item is wholesale-priced.
+  // Promo codes can't combine with wholesale pricing — ignore any applied promo
+  // code when a selected item is wholesale-priced.
   const hasWholesale = cart.some(
     (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
   )
-  const effectiveVoucher = hasWholesale ? null : voucher
+  const effectivePromoCode = hasWholesale ? null : promoCode
 
-  const { voucherDiscount, total } = useMemo(() => {
+  const { promoDiscount, total } = useMemo(() => {
     return calculateTotals({
       subtotal,
-      voucher: effectiveVoucher,
+      promoCode: effectivePromoCode,
       loyaltyDiscount,
     })
-  }, [subtotal, effectiveVoucher, loyaltyDiscount])
+  }, [subtotal, effectivePromoCode, loyaltyDiscount])
 
   return (
     <div className="bg-surface-soft rounded-2xl p-5 space-y-6">
 
-      {/* VOUCHER */}
-      <VoucherCodeForm
-        setVoucher={setVoucher}
-        activeVoucher={voucher}
+      {/* PROMO CODE */}
+      <PromoCodeForm
+        setPromoCode={setPromoCode}
+        activePromoCode={promoCode}
       />
 
       {/* LOYALTY */}
@@ -71,7 +71,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
 
           <div className="flex justify-between text-success">
             <span>Discount</span>
-            <span>- ${voucherDiscount.toFixed(2)}</span>
+            <span>- ${promoDiscount.toFixed(2)}</span>
           </div>
 
           <div className="flex justify-between text-success">

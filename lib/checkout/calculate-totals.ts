@@ -1,19 +1,19 @@
 /** Pure checkout total calculation. */
-import type { Voucher } from '@/lib/types/voucher'
+import type { PromoCode } from '@/lib/types/promo-code'
 
-type AppliedVoucher = Pick<Voucher, 'code' | 'value'>
+type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 
-export function calculateTotals({ subtotal, voucher, loyaltyDiscount, shippingFee = 0 }: {
+export function calculateTotals({ subtotal, promoCode, loyaltyDiscount, shippingFee = 0 }: {
   subtotal: number
-  voucher: AppliedVoucher | null
+  promoCode: AppliedPromoCode | null
   loyaltyDiscount: number
   shippingFee?: number
 }) {
-  const voucherDiscount = voucher ? (subtotal * voucher.value) / 100 : 0
-  const total = subtotal - voucherDiscount - loyaltyDiscount + shippingFee
+  const promoDiscount = promoCode ? (subtotal * promoCode.value) / 100 : 0
+  const total = subtotal - promoDiscount - loyaltyDiscount + shippingFee
 
   return {
-    voucherDiscount,
+    promoDiscount,
     total,
   }
 }
