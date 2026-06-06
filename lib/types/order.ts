@@ -75,7 +75,8 @@ export type OrderStatus =
 
 // A row of public.orders (after the 0007 migration adds shipping_fee/total_amount).
 export type Order = {
-  order_id: number
+  order_id: number          // internal id — never shown to customers
+  public_ref: string        // unguessable UUID used in all customer-facing URLs
   user_id: string
   order_status: OrderStatus
   shipping_address: string
@@ -144,6 +145,7 @@ export type AdminOrderDetail = {
 // rows to the owner), with the item aggregates computed alongside.
 export type OrderHistoryRow = {
   order_id: number
+  public_ref: string
   order_status: OrderStatus
   payment_method: string
   total_amount: number | null

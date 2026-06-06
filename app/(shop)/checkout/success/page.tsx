@@ -29,10 +29,8 @@ const CheckoutSuccessPage = async ({
 }: {
   searchParams: Promise<{ order?: string }>
 }) => {
-  const { order } = await searchParams
-  const orderId = Number(order)
-  const detail =
-    Number.isInteger(orderId) && orderId > 0 ? await getMyOrderDetail(orderId) : null
+  const { order } = await searchParams // the public UUID ref
+  const detail = order ? await getMyOrderDetail(order) : null
 
   const isCod = detail?.order.payment_method === 'cod'
   // Pickup orders have their shipping_address set to "Store Pickup — …" by create_order.
@@ -84,10 +82,10 @@ const CheckoutSuccessPage = async ({
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">{subtitle}</p>
 
           <Link
-            href={orderId ? `/orders/${orderId}` : '/'}
+            href={order ? `/orders/${order}` : '/'}
             className="mt-6 inline-block rounded-full border border-brand px-10 py-2.5 text-sm font-medium text-brand transition-colors hover:bg-brand hover:text-white"
           >
-            {orderId ? 'View Order' : 'Continue shopping'}
+            {order ? 'View Order' : 'Continue shopping'}
           </Link>
         </div>
       </div>

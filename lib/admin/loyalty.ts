@@ -11,7 +11,49 @@ type Result =
   | { success: true; status: number; message: string; data?: unknown }
   | { success: false; status: number; message: string }
 
-// LINK — attach a physical loyalty card to a customer; flips has_perks on.
+// ADMIN CUSTOMER SEARCH (Flow D, step 1) — find a customer by exact email.
+export type AdminCustomer = {
+  user_id: string
+  email: string | null
+  name: string
+  cardNumber: string | null
+  verified: boolean
+}
+
+export const findCustomerByEmail = async (
+  email: string,
+): Promise<{ success: true; customer: AdminCustomer | null } | { success: false; status: number; message: string }> => {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
+
+  const e = (email ?? '').trim().toLowerCase()
+  if (!e) return { success: false, status: 400, message: 'Enter an email to search.' }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('profile')
+    .select('user_id, email, first_name, last_name, loyalty_card_number, loyalty_card_linked_at')
+    .eq('email', e)
+    .maybeSingle()
+
+  if (error) return { success: false, status: 400, message: error.message }
+  if (!data) return { success: true, customer: null }
+
+  return {
+    success: true,
+    customer: {
+      user_id: data.user_id,
+      email: data.email,
+      name: [data.first_name, data.last_name].filter(Boolean).join(' ') || '—',
+      cardNumber: data.loyalty_card_number,
+      verified: !!data.loyalty_card_linked_at,
+    },
+  }
+}
+
+// LINK (Flow D, steps 2–3) — set the physical card ID on the profile and mark the
+// customer a Verified Cardholder (has_perks on). The entered physical card number
+// becomes the member's loyalty_card_number.
 export const linkLoyaltyCard = async (userId: string, cardNumber: string): Promise<Result> => {
   const auth = await requireAdmin()
   if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
@@ -29,16 +71,17 @@ export const linkLoyaltyCard = async (userId: string, cardNumber: string): Promi
 
   if (error) {
     if (error.code === '23505') {
-      return { success: false, status: 409, message: 'That loyalty card is already linked to another customer.' }
+      return { success: false, status: 409, message: 'That card number is already assigned to another customer.' }
     }
     return { success: false, status: 400, message: error.message }
   }
 
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'Loyalty card linked.' }
+  revalidatePath('/admin/customer-management/loyalty')
+  return { success: true, status: 200, message: 'Card linked — customer is now a Verified Cardholder.' }
 }
 
-// UNLINK — detach the card; has_perks goes back off.
+// UNLINK — revoke Verified Cardholder status. The permanent loyalty_card_number
+// stays (it's NOT NULL); only the linked timestamp is cleared.
 export const unlinkLoyaltyCard = async (userId: string): Promise<Result> => {
   const auth = await requireAdmin()
   if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
@@ -47,79 +90,84 @@ export const unlinkLoyaltyCard = async (userId: string): Promise<Result> => {
   const supabase = await createClient()
   const { error } = await supabase
     .from('profile')
-    .update({ loyalty_card_number: null, loyalty_card_linked_at: null })
+    .update({ loyalty_card_linked_at: null })
     .eq('user_id', userId)
 
   if (error) return { success: false, status: 400, message: error.message }
 
-  revalidatePath('/admin/users')
-  return { success: true, status: 200, message: 'Loyalty card unlinked.' }
+  revalidatePath('/admin/customer-management/loyalty')
+  return { success: true, status: 200, message: 'Cardholder status revoked.' }
 }
 
-// LOYVERSE IMPORT — credit legacy POS balances exactly once per customer.
-// Matches each entry to a profile by loyalty card number (preferred) or email,
-// and skips anyone who already has a 'loyverse_import' ledger row, so re-running
-// is safe (idempotent). All accrued points are preserved with no expiry (§3.8).
-export type LoyverseImportEntry = { cardNumber?: string | null; email?: string | null; points: number }
+// LOYVERSE CARD MIGRATION — bulk-import the store's already-generated cards and
+// their balances into the staging table. Customers later CLAIM a card from the
+// web app (claim_loyverse_card), which credits the points exactly once. Safe to
+// re-run: upserts by card_number and never touches a card's claimed state.
+export type LoyverseCardEntry = { cardNumber: string; points: number; name?: string | null; email?: string | null }
 
-export const importLoyaltyPoints = async (entries: LoyverseImportEntry[]): Promise<Result> => {
+export const importLoyverseCards = async (entries: LoyverseCardEntry[]): Promise<Result> => {
   const auth = await requireAdmin()
   if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
   if (!Array.isArray(entries) || entries.length === 0) {
-    return { success: false, status: 400, message: 'No entries to import.' }
+    return { success: false, status: 400, message: 'No cards to import.' }
   }
+
+  const seen = new Set<string>()
+  const rows: { card_number: string; points: number; customer_name: string | null; email: string | null }[] = []
+  let skipped = 0
+  for (const e of entries) {
+    const card = (e.cardNumber ?? '').trim()
+    const points = Math.floor(Number(e.points))
+    if (!card || !Number.isFinite(points) || points < 0 || seen.has(card)) { skipped++; continue }
+    seen.add(card)
+    rows.push({
+      card_number: card,
+      points,
+      customer_name: e.name?.trim() || null,
+      email: e.email?.trim().toLowerCase() || null,
+    })
+  }
+  if (rows.length === 0) return { success: false, status: 400, message: 'No valid cards to import.' }
 
   const supabase = await createClient()
-  let imported = 0
-  let skipped = 0
-  let unmatched = 0
+  const { error } = await supabase
+    .from('loyverse_card')
+    .upsert(rows, { onConflict: 'card_number' }) // updates points/name/email; preserves claimed_*
+  if (error) return { success: false, status: 400, message: error.message }
 
-  for (const entry of entries) {
-    const points = Math.floor(Number(entry.points))
-    if (!Number.isFinite(points) || points <= 0) { skipped++; continue }
-
-    // Resolve the customer: card number first, then email.
-    let userId: string | null = null
-    const card = entry.cardNumber?.trim()
-    if (card) {
-      const { data } = await supabase.from('profile').select('user_id').eq('loyalty_card_number', card).maybeSingle()
-      userId = data?.user_id ?? null
-    }
-    const email = entry.email?.trim().toLowerCase()
-    if (!userId && email) {
-      const { data } = await supabase.from('profile').select('user_id').eq('email', email).maybeSingle()
-      userId = data?.user_id ?? null
-    }
-    if (!userId) { unmatched++; continue }
-
-    // Idempotency: one import credit per customer.
-    const { data: existing } = await supabase
-      .from('profile_pts_transaction_records')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('reason', 'loyverse_import')
-      .limit(1)
-      .maybeSingle()
-    if (existing) { skipped++; continue }
-
-    const { error: ledgerErr } = await supabase
-      .from('profile_pts_transaction_records')
-      .insert({ user_id: userId, points, reason: 'loyverse_import' })
-    if (ledgerErr) { skipped++; continue }
-
-    const { data: bal } = await supabase.from('profile_pts').select('total_pts').eq('user_id', userId).maybeSingle()
-    if (bal) {
-      await supabase.from('profile_pts').update({ total_pts: (bal.total_pts ?? 0) + points }).eq('user_id', userId)
-    } else {
-      await supabase.from('profile_pts').insert({ user_id: userId, total_pts: points })
-    }
-    imported++
-  }
-
+  revalidatePath('/admin/customer-management/loyalty')
   return {
     success: true,
     status: 200,
-    message: `Imported ${imported}, skipped ${skipped}, unmatched ${unmatched}.`,
-    data: { imported, skipped, unmatched },
+    message: `Imported ${rows.length} card${rows.length === 1 ? '' : 's'}${skipped ? `, skipped ${skipped}` : ''}.`,
+    data: { imported: rows.length, skipped },
   }
+}
+
+// LIST — the migrated cards for the admin migration screen.
+export type LoyverseCardRow = {
+  id: number
+  card_number: string
+  points: number
+  customer_name: string | null
+  email: string | null
+  claimed_by: string | null
+  claimed_at: string | null
+  created_at: string
+}
+
+export const getLoyverseCards = async (): Promise<
+  { success: true; rows: LoyverseCardRow[] } | { success: false; status: number; message: string }
+> => {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('loyverse_card')
+    .select('id, card_number, points, customer_name, email, claimed_by, claimed_at, created_at')
+    .order('created_at', { ascending: false })
+    .limit(500)
+  if (error) return { success: false, status: 400, message: error.message }
+  return { success: true, rows: (data ?? []) as LoyverseCardRow[] }
 }

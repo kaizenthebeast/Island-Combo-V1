@@ -84,12 +84,12 @@ const AddressBillingSummary = () => {
       const json = await res.json()
       if (!json.success) throw new Error(json.message ?? 'Could not place your order.')
 
-      const orderId = json.data?.order?.order_id
+      const orderRef = json.data?.order?.public_ref
       // Re-sync from the server (create_order removed only the ordered lines) so
       // any unselected items — and the cart count — stay correct.
       await useCartStore.getState().fetchCart()
       resetCheckout()
-      router.push(`/checkout/success${orderId ? `?order=${orderId}` : ''}`)
+      router.push(`/checkout/success${orderRef ? `?order=${orderRef}` : ''}`)
     } catch (error) {
       customToast.error({
         title: 'Order failed',

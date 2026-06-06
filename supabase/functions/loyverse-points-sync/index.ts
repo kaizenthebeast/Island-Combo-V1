@@ -32,42 +32,29 @@ Deno.serve(async () => {
   )
 
   // Loyverse customers carry `total_points` and `customer_code`, which we map to
-  // profile.loyalty_card_number. (Paginate via `cursor` for >250 customers.)
+  // profile.loyverse_customer_code. (Paginate via `cursor` for >250 customers.)
   const res = await fetch('https://api.loyverse.com/v1.0/customers?limit=250', {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!res.ok) return json({ ok: false, error: `Loyverse ${res.status}` }, 502)
 
   const { customers = [] } = await res.json()
-  let imported = 0, skipped = 0, unmatched = 0
+  const rows: { card_number: string; points: number; customer_name: string | null; email: string | null }[] = []
+  let skipped = 0
 
   for (const c of customers) {
     const card = String(c.customer_code ?? '').trim()
     const points = Math.floor(Number(c.total_points ?? 0))
-    if (!card || points <= 0) { skipped++; continue }
-
-    const { data: profile } = await supabase
-      .from('profile').select('user_id').eq('loyalty_card_number', card).maybeSingle()
-    if (!profile) { unmatched++; continue }
-
-    const { data: existing } = await supabase
-      .from('profile_pts_transaction_records')
-      .select('id').eq('user_id', profile.user_id).eq('reason', 'loyverse_import').limit(1).maybeSingle()
-    if (existing) { skipped++; continue }
-
-    await supabase.from('profile_pts_transaction_records')
-      .insert({ user_id: profile.user_id, points, reason: 'loyverse_import' })
-
-    const { data: bal } = await supabase.from('profile_pts')
-      .select('total_pts').eq('user_id', profile.user_id).maybeSingle()
-    if (bal) {
-      await supabase.from('profile_pts')
-        .update({ total_pts: (bal.total_pts ?? 0) + points }).eq('user_id', profile.user_id)
-    } else {
-      await supabase.from('profile_pts').insert({ user_id: profile.user_id, total_pts: points })
-    }
-    imported++
+    if (!card || points < 0) { skipped++; continue }
+    rows.push({ card_number: card, points, customer_name: c.name ?? null, email: c.email ?? null })
   }
 
-  return json({ ok: true, imported, skipped, unmatched })
+  // Stage the cards into loyverse_card; customers claim them in-app, which credits
+  // the points exactly once. Upsert by card_number keeps this re-runnable.
+  if (rows.length) {
+    const { error } = await supabase.from('loyverse_card').upsert(rows, { onConflict: 'card_number' })
+    if (error) return json({ ok: false, error: error.message }, 500)
+  }
+
+  return json({ ok: true, staged: rows.length, skipped })
 })

@@ -101,12 +101,12 @@ const CardFieldsInner = () => {
     const json = await res.json()
     if (!json.success) throw new Error(json.message ?? 'Payment could not be completed.')
 
-    const orderId = json.data?.order?.order_id
+    const orderRef = json.data?.order?.public_ref
     // Re-sync from the server (create_order removed only the ordered lines) so
     // any unselected items — and the cart count — stay correct.
     await useCartStore.getState().fetchCart()
     useCheckoutStore.getState().resetCheckout()
-    router.push(`/checkout/success${orderId ? `?order=${orderId}` : ''}`)
+    router.push(`/checkout/success${orderRef ? `?order=${orderRef}` : ''}`)
   }
 
   const onError = (err: Record<string, unknown>) => {

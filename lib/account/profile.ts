@@ -33,7 +33,7 @@ export const getMyAccount = async (userId: string, email: string | null): Promis
 
   const { data: profile, error: profileErr } = await supabase
     .from('profile')
-    .select('first_name, last_name, phone_text, sex, age, role, is_active, email, email_order_updates, email_promotions, loyalty_card_number')
+    .select('first_name, last_name, phone_text, sex, age, role, is_active, email, email_order_updates, email_promotions, loyalty_card_linked_at')
     .eq('user_id', userId)
     .maybeSingle()
   if (profileErr) throw new Error(profileErr.message)
@@ -70,7 +70,7 @@ export const getMyAccount = async (userId: string, email: string | null): Promis
     age: profile?.age ?? null,
     role: (profile?.role as MyAccount['role']) ?? 'customer',
     is_active: profile?.is_active ?? true,
-    loyalty: { total_pts: pts?.total_pts ?? 0, has_perks: !!profile?.loyalty_card_number },
+    loyalty: { total_pts: pts?.total_pts ?? 0, has_perks: !!profile?.loyalty_card_linked_at },
     notifications: {
       order_updates: profile?.email_order_updates ?? true,
       promotions: profile?.email_promotions ?? false,

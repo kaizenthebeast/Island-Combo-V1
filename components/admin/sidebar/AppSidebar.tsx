@@ -55,7 +55,7 @@ const navMain = [
     url: "#",
     icon: Crown,
     items: [
-      { title: "Customer Loyalty", url: "#", icon: Star },
+      { title: "Customer Loyalty", url: "/admin/customer-management/loyalty", icon: Star },
     ],
   },
   {

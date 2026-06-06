@@ -26,11 +26,10 @@ const CustomerOrderPage = async ({
 }: {
   params: Promise<{ orderId: string }>
 }) => {
-  const { orderId } = await params
-  const id = Number(orderId)
-  if (!Number.isInteger(id) || id <= 0) notFound()
+  const { orderId } = await params // the public UUID ref
+  if (!orderId) notFound()
 
-  const detail = await getMyOrderDetail(id)
+  const detail = await getMyOrderDetail(orderId)
   if (!detail) notFound()
 
   const { order, items } = detail
@@ -38,6 +37,8 @@ const CustomerOrderPage = async ({
   const itemsSubtotal = items.reduce((sum, i) => sum + i.line_total, 0)
   const isCod = order.payment_method === 'cod'
   const isPickup = order.shipping_address?.startsWith('Store Pickup') ?? false
+  // Short, non-sequential order number shown to the customer (from public_ref).
+  const orderNo = order.public_ref.replace(/-/g, '').slice(0, 8).toUpperCase()
 
   return (
     <section className="section-container max-w-3xl space-y-6 py-8">
@@ -48,7 +49,7 @@ const CustomerOrderPage = async ({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Order #{order.order_id}</h1>
+          <h1 className="text-2xl font-bold">Order #{orderNo}</h1>
           <p className="text-sm text-muted-foreground">Placed {formatDate(order.created_at)}</p>
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>

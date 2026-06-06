@@ -1,15 +1,17 @@
 'use client'
 import { useState } from 'react'
-import { User, Star, PackageSearch, CreditCard } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { User, Star, Ticket, PackageSearch, CreditCard } from 'lucide-react'
 import Account from '@/components/features/account/Account'
 import Loyalty from '@/components/features/account/Loyalty'
 import OrderTracking from '@/components/features/account/OrderTracking'
 import MyCards from '@/components/features/account/MyCards'
 import { Address } from '@/lib/types/users'
 
-const navLinks = [
+const navLinks: { name: string; icon: typeof User; href?: string }[] = [
     { name: 'Account Details', icon: User },
     { name: 'Loyalty Points', icon: Star },
+    { name: 'Buy Cash Voucher', icon: Ticket, href: '/cashvoucher' },
     { name: 'Orders & Tracking', icon: PackageSearch },
     { name: 'My Cards', icon: CreditCard },
 ]
@@ -21,10 +23,15 @@ type AccountContainerProps = {
 }
 
 const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) => {
+    const router = useRouter()
     const [activeLink, setActiveLink] = useState('Account Details')
 
-    const handleLinkClick = (linkName: string) => {
-        setActiveLink(linkName)
+    const handleLinkClick = (link: { name: string; href?: string }) => {
+        if (link.href) {
+            router.push(link.href)
+            return
+        }
+        setActiveLink(link.name)
     }
 
     return (
@@ -38,7 +45,7 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                         return (
                             <button
                                 key={link.name}
-                                onClick={() => handleLinkClick(link.name)}
+                                onClick={() => handleLinkClick(link)}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-md w-full text-left text-sm font-medium transition-colors
                                     ${active
                                         ? 'text-brand bg-brand-tint'

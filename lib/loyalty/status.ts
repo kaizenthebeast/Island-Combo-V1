@@ -5,9 +5,10 @@ import { createClient } from '@/lib/supabase/server'
 import { pointsToCash } from '@/lib/cart/loyalty-config'
 
 export type LoyaltyStatus = {
-  points: number      // accumulated balance (profile_pts.total_pts)
-  cashValue: number   // dollar value of the balance (100 pts = $1)
-  hasPerks: boolean   // a loyalty card is linked → loyalty-only sales / early access
+  points: number             // accumulated balance (profile_pts.total_pts)
+  cashValue: number          // dollar value of the balance (100 pts = $1)
+  cardNumber: string | null  // the member's permanent loyalty card number
+  hasPerks: boolean          // a card is LINKED/activated → loyalty-only sales / early access
 }
 
 export const getLoyaltyStatus = async (userId: string): Promise<LoyaltyStatus> => {
@@ -15,13 +16,14 @@ export const getLoyaltyStatus = async (userId: string): Promise<LoyaltyStatus> =
 
   const [{ data: pts }, { data: profile }] = await Promise.all([
     supabase.from('profile_pts').select('total_pts').eq('user_id', userId).maybeSingle(),
-    supabase.from('profile').select('loyalty_card_number').eq('user_id', userId).maybeSingle(),
+    supabase.from('profile').select('loyalty_card_number, loyalty_card_linked_at').eq('user_id', userId).maybeSingle(),
   ])
 
   const points = pts?.total_pts ?? 0
   return {
     points,
     cashValue: pointsToCash(points),
-    hasPerks: !!profile?.loyalty_card_number,
+    cardNumber: profile?.loyalty_card_number ?? null,
+    hasPerks: !!profile?.loyalty_card_linked_at,
   }
 }

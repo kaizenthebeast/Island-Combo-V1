@@ -15,13 +15,12 @@ export async function GET(
     const user = await requireUser()
     if (!user) return apiError('Unauthorized', HTTP.UNAUTHORIZED)
 
-    const { orderId } = await params
-    const id = Number(orderId)
-    if (!Number.isInteger(id) || id <= 0) {
+    const { orderId } = await params // the public UUID ref, not the internal id
+    if (!orderId) {
       return apiError('A valid order id is required.', HTTP.BAD_REQUEST)
     }
 
-    const detail = await getMyOrderDetail(id)
+    const detail = await getMyOrderDetail(orderId)
     if (!detail) return apiError('Order not found.', HTTP.NOT_FOUND)
 
     return apiOk({ data: detail })

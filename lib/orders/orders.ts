@@ -42,7 +42,7 @@ export const getMyOrdersPage = async (input: {
   let query = supabase
     .from('orders')
     .select(
-      'order_id, order_status, payment_method, total_amount, shipping_fee, discount_amount, promo_code, created_at, updated_at, order_items(quantity)',
+      'order_id, public_ref, order_status, payment_method, total_amount, shipping_fee, discount_amount, promo_code, created_at, updated_at, order_items(quantity)',
       { count: 'exact' },
     )
     // RLS already restricts to the caller; the explicit filter keeps the query
@@ -64,6 +64,7 @@ export const getMyOrdersPage = async (input: {
     const items = o.order_items ?? []
     return {
       order_id: Number(o.order_id),
+      public_ref: o.public_ref,
       order_status: o.order_status,
       payment_method: o.payment_method,
       total_amount: o.total_amount,
@@ -83,8 +84,10 @@ export const getMyOrdersPage = async (input: {
 // Order Details: a single order's header, line items, and timeline/tracking
 // updates. Returns null when the order doesn't exist OR isn't the caller's
 // (RLS makes those indistinguishable, which is the desired behavior).
+// Looked up by the public UUID ref (what customer URLs carry) — never the
+// internal order_id. RLS still scopes to the owner.
 export const getMyOrderDetail = async (
-  orderId: number,
+  publicRef: string,
 ): Promise<CustomerOrderDetail | null> => {
   const user = await requireUser()
   if (!user) throw new Error('Unauthorized')
@@ -94,11 +97,13 @@ export const getMyOrderDetail = async (
   const { data: order, error } = await supabase
     .from('orders')
     .select('*')
-    .eq('order_id', orderId)
+    .eq('public_ref', publicRef)
     .maybeSingle<Order>()
 
   if (error) throw new Error(error.message)
   if (!order) return null
+
+  const orderId = order.order_id
 
   // Line items with the product name + SKU (FKs: order_items → product_variants
   // → products), ordered for a stable display.
