@@ -192,6 +192,33 @@ async function fulfillVoucher(
   return { kind: 'cash_voucher', voucher: result.voucher }
 }
 
+// Records the server-trusted create_order args keyed by the PayPal order id, so
+// the paypal-webhook can fulfill if the buyer's browser never reaches the capture
+// step. Non-fatal: a failure here just means we fall back to the browser path.
+export async function savePendingCheckout(
+  paypalOrderId: string,
+  userId: string,
+  intent: ProductCheckoutIntent,
+  amount: CheckoutAmount,
+): Promise<void> {
+  const supabase = await createClient()
+  await supabase.from('pending_checkout').insert({
+    paypal_order_id: paypalOrderId,
+    user_id: userId,
+    payload: {
+      items: amount.items ?? [],
+      address_id: intent.fulfillment === 'deliver' ? intent.shippingAddressId : null,
+      fulfillment: intent.fulfillment,
+      payment_method: intent.paymentMethod,
+      shipping_fee: amount.shippingFee,
+      discount_amount: amount.discountAmount,
+      promo_code: amount.promoCode,
+      total_amount: amount.total,
+      points_redeemed: amount.pointsRedeemed,
+    },
+  })
+}
+
 async function fulfillProductOrder(
   intent: ProductCheckoutIntent,
   amount: CheckoutAmount,

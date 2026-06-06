@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
-import { resolveCheckoutAmount, fulfillCheckout } from '@/lib/checkout/checkout'
+import { resolveCheckoutAmount, fulfillCheckout, savePendingCheckout } from '@/lib/checkout/checkout'
 import { createPayPalOrder, capturePayPalOrder } from '@/lib/payments/paypal'
 import type { CheckoutIntent } from '@/lib/types/order'
 
@@ -48,6 +48,11 @@ export async function POST(req: NextRequest) {
         typeof requestId === 'string' ? requestId : undefined,
         checkoutIntent.kind === 'product' ? 'Island Combo Order' : 'Island Combo Cash Voucher',
       )
+      // Stash the resolved product order so the paypal-webhook can fulfill it even
+      // if the buyer's browser never completes the capture step. Non-fatal.
+      if (checkoutIntent.kind === 'product') {
+        await savePendingCheckout(order.id, user.id, checkoutIntent, amount).catch(() => {})
+      }
       return apiOk({ data: { id: order.id } }, { status: HTTP.CREATED })
     }
 
