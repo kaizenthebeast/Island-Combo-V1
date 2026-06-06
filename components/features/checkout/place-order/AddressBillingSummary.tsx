@@ -10,10 +10,9 @@ import type { ProductCheckoutIntent } from '@/lib/types/order'
 
 const AddressBillingSummary = () => {
   const router = useRouter()
-  const { totalQty, subtotal, cart, selectedIds } = useCartStore()
+  const { totalQty, subtotal, cart, selectedIds, serverTotals } = useCartStore()
   const {
     promoCode,
-    loyaltyPoints,
     loyaltyEnabled,
     shippingFee,
     shippingMethod,
@@ -31,10 +30,13 @@ const AddressBillingSummary = () => {
     (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
   )
 
+  // Loyalty discount comes from the authoritative server totals (persisted points
+  // redemption on the cart), not a client guess.
+  const loyaltyDiscount = serverTotals?.pointsDiscount ?? 0
   const { promoDiscount, total } = calculateTotals({
     subtotal,
     promoCode: hasWholesale ? null : promoCode,
-    loyaltyDiscount: loyaltyEnabled ? loyaltyPoints : 0,
+    loyaltyDiscount,
     shippingFee: shippingFee ?? 0,
   })
 
@@ -109,7 +111,7 @@ const AddressBillingSummary = () => {
         </div>
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Loyalty points</span>
-          <span>-${loyaltyPoints.toFixed(2)}</span>
+          <span>-${loyaltyDiscount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Shipping fee{shippingMethod ? ` (${shippingMethod})` : ""}</span>

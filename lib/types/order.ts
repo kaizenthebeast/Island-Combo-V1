@@ -49,6 +49,7 @@ export type CheckoutAmount = {
   shippingFee: number
   discountAmount: number // promo + loyalty combined
   promoCode: string | null
+  pointsRedeemed: number // loyalty points consumed at checkout (debited atomically)
   shippingMethod: 'GCR' | 'QPI' | null
   // Product only — the resolved, tier-priced line items.
   items?: ResolvedOrderItem[]

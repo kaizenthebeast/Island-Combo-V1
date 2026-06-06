@@ -19,6 +19,7 @@ import { getCart } from '@/lib/cart/cart'
 import { getUserAddress } from '@/lib/account/address'
 import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
+import { pointsToCash } from '@/lib/cart/loyalty-config'
 import { chargeTotal, voucherValueFromTotal } from '@/lib/cash-vouchers/pricing'
 import { createCashVoucher } from '@/lib/cash-vouchers/cash-voucher'
 import { getZoneFromAddress } from '@/lib/shipping/zone'
@@ -33,10 +34,6 @@ import type {
   ResolvedOrderItem,
   Order,
 } from '@/lib/types/order'
-
-// Loyalty discount in dollars when the buyer opts in (matches the "$3" the
-// checkout-store applies on the client).
-const LOYALTY_DISCOUNT_USD = 3
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
@@ -61,6 +58,7 @@ function resolveVoucherAmount(intent: VoucherCheckoutIntent): CheckoutAmount {
     shippingFee: 0,
     discountAmount: 0,
     promoCode: null,
+    pointsRedeemed: 0,
     shippingMethod: null,
   }
 }
@@ -116,12 +114,24 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
     shippingMethod = selectedShipping.method
   }
 
-  const loyaltyDiscount = intent.useLoyalty ? LOYALTY_DISCOUNT_USD : 0
+  // Loyalty redemption: consume the points the cart reserved (server truth, from
+  // cart_meta — never the client), as cash, capped so it can't exceed the
+  // post-promo subtotal. create_order debits exactly `pointsRedeemed` atomically.
+  const supabase = await createClient()
+  const { data: meta } = await supabase
+    .from('cart_meta')
+    .select('points_redeemed')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  const heldPoints = meta?.points_redeemed ?? 0
+  const promoDiscountPreview = appliedPromo ? round2((subtotal * appliedPromo.value) / 100) : 0
+  const pointsCash = Math.min(pointsToCash(heldPoints), Math.max(0, subtotal - promoDiscountPreview))
+  const pointsRedeemed = Math.round(pointsCash * 100)
 
   const { promoDiscount, total } = calculateTotals({
     subtotal,
     promoCode: appliedPromo,
-    loyaltyDiscount,
+    loyaltyDiscount: pointsCash,
     shippingFee,
   })
 
@@ -129,8 +139,9 @@ async function resolveProductAmount(intent: ProductCheckoutIntent): Promise<Chec
     total: round2(Math.max(0, total)),
     subtotal,
     shippingFee,
-    discountAmount: round2(promoDiscount + loyaltyDiscount),
+    discountAmount: round2(promoDiscount + pointsCash),
     promoCode: appliedPromo?.code ?? null,
+    pointsRedeemed,
     shippingMethod,
     items,
   }
@@ -200,6 +211,7 @@ async function fulfillProductOrder(
       p_total_amount: amount.total,
       p_paypal_order_id: payment.method === 'card' ? payment.paypalOrderId : null,
       p_paypal_capture_id: payment.method === 'card' ? payment.captureId : null,
+      p_points_redeemed: amount.pointsRedeemed,
     })
     .single<Order>()
 

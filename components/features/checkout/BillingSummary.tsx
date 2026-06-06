@@ -1,12 +1,14 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { CircleDollarSign } from 'lucide-react'
 import PromoCodeForm from '@/components/features/promo/PromoCodeForm'
 import { Switch } from '@/components/ui/switch'
 import { useCheckoutStore } from '@/lib/store/checkout-store'
 import { useCartStore } from '@/lib/store/cart-store'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
+import { MIN_REDEEM_POINTS, maxRedeemablePoints } from '@/lib/cart/loyalty-config'
+import { customToast } from '@/components/shared/modals/ToastCustom'
 import Link from 'next/link'
 
 type Props = {
@@ -15,24 +17,74 @@ type Props = {
 }
 
 const BillingSummary = ({ totalQty, subtotal }: Props) => {
-  const { promoCode, loyaltyEnabled, setPromoCode, toggleLoyalty, loyaltyPoints } = useCheckoutStore()
-  const { cart, selectedIds } = useCartStore()
-  const loyaltyDiscount = loyaltyEnabled ? loyaltyPoints : 0
+  const { promoCode, setPromoCode } = useCheckoutStore()
+  const { cart, selectedIds, serverTotals, fetchCart } = useCartStore()
 
-  // Promo codes can't combine with wholesale pricing — ignore any applied promo
-  // code when a selected item is wholesale-priced.
+  const [balance, setBalance] = useState<{ points: number; cashValue: number }>({ points: 0, cashValue: 0 })
+  const [redeeming, setRedeeming] = useState(false)
+
+  // Load the loyalty balance so we know how many points can be redeemed.
+  const loadBalance = useCallback(async () => {
+    try {
+      const res = await fetch('/api/loyalty')
+      const payload = await res.json()
+      if (res.ok && payload.success) {
+        setBalance({ points: payload.data.points ?? 0, cashValue: payload.data.cashValue ?? 0 })
+      }
+    } catch {
+      /* non-fatal: loyalty just stays unavailable */
+    }
+  }, [])
+  useEffect(() => { loadBalance() }, [loadBalance])
+
+  // Promo codes can't combine with wholesale pricing.
   const hasWholesale = cart.some(
     (i) => selectedIds.includes(i.variant_id) && i.applied_tier_label === 'wholesale'
   )
   const effectivePromoCode = hasWholesale ? null : promoCode
 
-  const { promoDiscount, total } = useMemo(() => {
-    return calculateTotals({
-      subtotal,
-      promoCode: effectivePromoCode,
-      loyaltyDiscount,
-    })
-  }, [subtotal, effectivePromoCode, loyaltyDiscount])
+  // Client preview, used only until the server-side totals arrive.
+  const preview = useMemo(
+    () => calculateTotals({ subtotal, promoCode: effectivePromoCode, loyaltyDiscount: 0 }),
+    [subtotal, effectivePromoCode],
+  )
+
+  // Prefer the authoritative server totals (reflect persisted promo + points).
+  const promoDiscount   = serverTotals?.promoDiscount  ?? preview.promoDiscount
+  const loyaltyDiscount = serverTotals?.pointsDiscount  ?? 0
+  const total           = serverTotals?.total ?? preview.total
+  const pointsRedeemed  = serverTotals?.pointsRedeemed ?? 0
+
+  // How many points this cart could absorb right now (capped at the post-promo
+  // subtotal), bounded by the user's balance.
+  const maxPoints = Math.min(balance.points, maxRedeemablePoints(Math.max(0, subtotal - promoDiscount)))
+  const canRedeem = maxPoints >= MIN_REDEEM_POINTS
+
+  const onToggleLoyalty = async (checked: boolean) => {
+    if (redeeming) return
+    setRedeeming(true)
+    try {
+      if (checked) {
+        const res = await fetch('/api/cart/points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ points: maxPoints }),
+        })
+        const payload = await res.json()
+        if (!res.ok || !payload.success) {
+          customToast.warning({ title: 'Could not redeem points', description: payload.message ?? 'Please try again.' })
+          return
+        }
+      } else {
+        await fetch('/api/cart/points', { method: 'DELETE' })
+      }
+      await Promise.all([fetchCart(), loadBalance()])
+    } catch {
+      customToast.error({ title: 'Loyalty error', description: 'Could not update your points redemption.' })
+    } finally {
+      setRedeeming(false)
+    }
+  }
 
   return (
     <div className="bg-surface-soft rounded-2xl p-5 space-y-6">
@@ -50,11 +102,21 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
             <CircleDollarSign className="text-warning" size={18} />
           </div>
           <div>
-            <p className="text-sm font-medium">300 Loyalty Points ($3)</p>
-            <p className="text-xs text-brand">Custom loyalty points to use</p>
+            <p className="text-sm font-medium">
+              {balance.points.toLocaleString()} Loyalty Points (${balance.cashValue.toFixed(2)})
+            </p>
+            <p className="text-xs text-brand">
+              {canRedeem || pointsRedeemed > 0
+                ? 'Redeem points for a discount'
+                : `Need at least ${MIN_REDEEM_POINTS} points to redeem`}
+            </p>
           </div>
         </div>
-        <Switch checked={loyaltyEnabled} onCheckedChange={toggleLoyalty} />
+        <Switch
+          checked={pointsRedeemed > 0}
+          onCheckedChange={onToggleLoyalty}
+          disabled={redeeming || (pointsRedeemed === 0 && !canRedeem)}
+        />
       </div>
 
       <hr />
@@ -75,7 +137,7 @@ const BillingSummary = ({ totalQty, subtotal }: Props) => {
           </div>
 
           <div className="flex justify-between text-success">
-            <span>Loyalty points</span>
+            <span>Loyalty points{pointsRedeemed > 0 ? ` (${pointsRedeemed.toLocaleString()})` : ''}</span>
             <span>- ${loyaltyDiscount.toFixed(2)}</span>
           </div>
 
