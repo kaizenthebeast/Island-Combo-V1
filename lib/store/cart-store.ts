@@ -1,6 +1,6 @@
 /** Zustand store for the shopping cart. */
 import { create } from "zustand"
-import { CartItem } from "@/lib/types/cart"
+import { CartItem, CartTotals } from "@/lib/types/cart"
 import { calculateCartTotals } from "@/lib/utils/cart-totals"
 
 // Default tier label for a brand-new item before the server backfills real data.
@@ -63,6 +63,7 @@ type CartState = {
   error: string | null
   totalQty: number      // total items across all cart rows
   subtotal: number      // sum of applied_price * quantity for all items
+  serverTotals: CartTotals | null // server-side totals from Fetch Cart (promo + points)
   quantityInput: number // controlled quantity selector on product pages
 
   // Selection: which rows are checked for checkout. Defaults to all selected.
@@ -144,6 +145,7 @@ export const useCartStore = create<CartState>((set, get) => {
     error: null,
     totalQty: 0,
     subtotal: 0,
+    serverTotals: null,
     quantityInput: 1,
     selectedIds: [],
     selectedQty: 0,
@@ -161,7 +163,11 @@ export const useCartStore = create<CartState>((set, get) => {
         const response = await fetch("/api/cart")
         const payload = await response.json()
         if (!response.ok || !payload.success) throw new Error(payload.message || "Fetch failed")
-        commitCart(payload.data)
+        // Fetch Cart returns { items, totals }; tolerate a bare array too.
+        const data = payload.data
+        const items = Array.isArray(data) ? data : (data?.items ?? [])
+        commitCart(items)
+        set({ serverTotals: Array.isArray(data) ? null : (data?.totals ?? null) })
       } catch (error) {
         set({ error: error instanceof Error ? error.message : "Unknown error" })
       }
@@ -291,6 +297,7 @@ export const useCartStore = create<CartState>((set, get) => {
         error: null,
         totalQty: 0,
         subtotal: 0,
+        serverTotals: null,
         quantityInput: 1,
         selectedIds: [],
         selectedQty: 0,

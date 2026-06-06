@@ -3,6 +3,7 @@
  *  inside the SECURITY DEFINER RPCs (is_staff()) as the real boundary. */
 
 import { createClient } from '@/lib/supabase/server'
+import { requireStaff } from '@/lib/auth'
 import { getOrderEvents } from '@/lib/payments/transaction-events'
 import type { PaginatedInput, PaginatedResult } from '@/lib/admin/_shared'
 import type { AdminOrderListRow, AdminOrderDetail } from '@/lib/types/order'
@@ -31,6 +32,8 @@ export const getOrdersPage = async (
     sortDir = 'desc',
   } = input
 
+  const auth = await requireStaff()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('admin_list_orders', {
     p_search: search ?? null,
@@ -75,6 +78,8 @@ export type OrderDetailResult =
 // Full order detail (header, customer, line items) + chronological timeline.
 // Authz enforced by the RPC's is_staff() (see note above).
 export const getOrderDetail = async (orderId: number): Promise<OrderDetailResult> => {
+  const auth = await requireStaff()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('admin_get_order', { p_order_id: orderId })
 
@@ -83,4 +88,29 @@ export const getOrderDetail = async (orderId: number): Promise<OrderDetailResult
 
   const timeline = await getOrderEvents(orderId)
   return { success: true, status: 200, detail: data as AdminOrderDetail, timeline }
+}
+
+// MUTATION — push an order through its lifecycle. The status whitelist is checked
+// by the route; staff authorization is enforced here AND inside the RPC (is_staff).
+export type UpdateOrderStatusResult =
+  | { success: true; status: 200; data: unknown }
+  | { success: false; status: number; message: string }
+
+export const updateOrderStatus = async (
+  orderId: number,
+  status: string,
+  deliveryNotes: string | null,
+): Promise<UpdateOrderStatusResult> => {
+  const auth = await requireStaff()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('admin_update_order_status', {
+    p_order_id: orderId,
+    p_status: status,
+    p_delivery_notes: deliveryNotes,
+  })
+
+  if (error) return { success: false, status: 400, message: error.message }
+  return { success: true, status: 200, data }
 }

@@ -2,6 +2,7 @@
 /** Admin promo-code CRUD. */
 
 import { createClient } from '@/lib/supabase/server'
+import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/lib/types/promo-code'
 import type { AddPromoCodeFormValues, EditPromoCodeFormValues } from '@/lib/validators/promo-code'
@@ -18,6 +19,7 @@ const deriveEffectiveStatus = (promoCode: PromoCode): PromoCodeEffectiveStatus =
 // READ (all)
 
 export const getPromoCodes = async (): Promise<PromoCodeRow[]> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -61,6 +63,7 @@ export type PromoCodesPageResult = {
 }
 
 export const getPromoCodesPage = async (input: PromoCodesPageInput): Promise<PromoCodesPageResult> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const {
@@ -135,6 +138,7 @@ export const getPromoCodesPage = async (input: PromoCodesPageInput): Promise<Pro
 // CREATE
 
 export const createPromoCode = async (data: AddPromoCodeFormValues) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase.from('promo').insert({
@@ -158,6 +162,7 @@ export const createPromoCode = async (data: AddPromoCodeFormValues) => {
 // UPDATE
 
 export const updatePromoCode = async (id: number, data: EditPromoCodeFormValues) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -184,6 +189,7 @@ export const updatePromoCode = async (id: number, data: EditPromoCodeFormValues)
 // ARCHIVE
 
 export const archivePromoCode = async (id: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -200,6 +206,7 @@ export const archivePromoCode = async (id: number) => {
 // RESTORE
 
 export const restorePromoCode = async (id: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase

@@ -7,7 +7,6 @@ import {
   applyPromoCodeSchema,
   ApplyPromoCodeFormValues,
 } from '@/lib/validators/promo-code'
-import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
 import { useCartStore } from '@/lib/store/cart-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 import type { PromoCode } from '@/lib/types/promo-code'
@@ -30,7 +29,7 @@ type Props = {
 }
 
 const PromoCodeForm = ({ setPromoCode, activePromoCode }: Props) => {
-  const { totalQty, cart, selectedIds } = useCartStore()
+  const { cart, selectedIds, fetchCart } = useCartStore()
 
   // A promo code can't be combined with wholesale pricing. Block it whenever any
   // selected item is currently getting the wholesale tier.
@@ -43,9 +42,11 @@ const PromoCodeForm = ({ setPromoCode, activePromoCode }: Props) => {
     defaultValues: { promoCode: '' },
   })
 
-  // If an item becomes wholesale-priced after a promo code was applied, drop it.
+  // If an item becomes wholesale-priced after a promo code was applied, drop it
+  // (client rule). Also clear the persisted code so server totals agree.
   useEffect(() => {
     if (hasWholesale && activePromoCode) {
+      void fetch('/api/cart/discount', { method: 'DELETE' }).then(() => fetchCart())
       setPromoCode(null)
       form.reset()
       customToast.warning({
@@ -56,6 +57,8 @@ const PromoCodeForm = ({ setPromoCode, activePromoCode }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasWholesale, activePromoCode])
 
+  // Apply Discount Code: persists to the cart header via the dedicated API and
+  // refreshes the cart so the server-side totals reflect the discount.
   const onSubmit: SubmitHandler<ApplyPromoCodeFormValues> = async (data) => {
     if (hasWholesale) {
       customToast.warning({
@@ -65,24 +68,38 @@ const PromoCodeForm = ({ setPromoCode, activePromoCode }: Props) => {
       return
     }
 
-    const result = await applyPromoCode(data.promoCode, totalQty)
-
-    if (!result.success) {
-      setPromoCode(null)
-      form.setError('promoCode', {
-        message: result.message ?? 'Invalid promo code',
+    try {
+      const res = await fetch('/api/cart/discount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: data.promoCode }),
       })
-      return
-    }
+      const payload = await res.json()
 
-    form.clearErrors('promoCode')
-    setPromoCode(result.promoCode ?? null)
-    form.reset()
+      if (!res.ok || !payload.success) {
+        setPromoCode(null)
+        form.setError('promoCode', { message: payload.message ?? 'Invalid promo code' })
+        return
+      }
+
+      form.clearErrors('promoCode')
+      setPromoCode(payload.data?.promo ?? null)
+      await fetchCart()
+      form.reset()
+    } catch {
+      form.setError('promoCode', { message: 'Could not apply promo code. Please try again.' })
+    }
   }
 
-  const removePromoCode = () => {
-    setPromoCode(null)
-    form.reset()
+  // Remove Discount Code: clears the cart header and recalculates.
+  const removePromoCode = async () => {
+    try {
+      await fetch('/api/cart/discount', { method: 'DELETE' })
+    } finally {
+      setPromoCode(null)
+      await fetchCart()
+      form.reset()
+    }
   }
 
   const disabled = !!activePromoCode || hasWholesale

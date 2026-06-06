@@ -13,6 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { requireStaff } from '@/lib/auth'
 import type { CashVoucher } from '@/lib/types/cash-voucher'
 
 type VoucherResult = { success: boolean; voucher?: CashVoucher; message?: string }
@@ -25,6 +26,8 @@ export const findCashVoucherByCode = async (code: string): Promise<VoucherResult
   const trimmed = normalizeCode(code)
   if (!trimmed) return { success: false, message: 'Enter a voucher code to search.' }
 
+  const auth = await requireStaff()
+  if (!auth.ok) return { success: false, message: auth.message }
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -44,6 +47,8 @@ export const redeemCashVoucher = async (
   code: string,
   redeemerName: string,
 ): Promise<VoucherResult> => {
+  const auth = await requireStaff()
+  if (!auth.ok) return { success: false, message: auth.message }
   const supabase = await createClient()
 
   const { data, error } = await supabase

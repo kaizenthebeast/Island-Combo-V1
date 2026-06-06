@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import { AppError, HTTP } from '@/lib/api/respond'
 import type { PostgrestError } from '@supabase/supabase-js'
-import type { CartItem, CartItemInput } from '@/lib/types/cart'
+import type { CartItem, CartItemInput, CartResponse } from '@/lib/types/cart'
+import { computeCartTotals, round2, unitPriceOf } from './totals'
+import { promoUnusableReason, type PromoRow } from './promo-rules'
 
 
 function mapCartItem(item: CartItem): CartItem {
@@ -121,4 +123,84 @@ export const removeAllItemFromCart = async ({
     .eq('user_id', userId)
 
   if (error) throw error
+
+  // Emptying the cart drops its header too (applied promo + points reservation).
+  await clearCartMeta(userId)
+}
+
+
+// Removes the cart header (applied promo code + points reservation). Holds do
+// not touch the points balance, so this is a plain delete.
+export const clearCartMeta = async (userId: string) => {
+  const supabase = await createClient()
+  const { error } = await supabase.from('cart_meta').delete().eq('user_id', userId)
+  if (error) throw new AppError(error.message, HTTP.INTERNAL)
+}
+
+
+// Cart facts derived once and reused by Fetch Cart + the discount/points logic:
+// the line items, whether any line is a digital product (§3.9 exclusion), the
+// total quantity (promo min-quantity) and the server-side subtotal.
+export type CartFacts = {
+  items: CartItem[]
+  hasDigital: boolean
+  totalQty: number
+  subtotal: number
+}
+
+export const loadCartFacts = async (userId: string): Promise<CartFacts> => {
+  const items = await getCart(userId)
+  const totalQty = items.reduce((sum, i) => sum + i.quantity, 0)
+  const subtotal = round2(items.reduce((sum, i) => sum + unitPriceOf(i) * i.quantity, 0))
+
+  let hasDigital = false
+  const productIds = [...new Set(items.map((i) => i.product_id))]
+  if (productIds.length) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('products')
+      .select('type')
+      .in('product_id', productIds)
+    if (error) throw new AppError(error.message, HTTP.INTERNAL)
+    hasDigital = (data ?? []).some((p) => p.type === 'Digital')
+  }
+
+  return { items, hasDigital, totalQty, subtotal }
+}
+
+
+// Fetch Cart (§3.3): line items + server-side calculated totals reflecting the
+// applied promo code and the loyalty-point redemption stored on the cart header.
+// A stored promo that is no longer usable (expired, archived, digital cart, …)
+// is simply ignored in the totals rather than erroring.
+export const getCartWithTotals = async (userId: string): Promise<CartResponse> => {
+  const facts = await loadCartFacts(userId)
+  const supabase = await createClient()
+
+  const { data: meta } = await supabase
+    .from('cart_meta')
+    .select('promo_code, points_redeemed')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  let promo: { code: string; value: number } | null = null
+  if (meta?.promo_code) {
+    const { data: row } = await supabase
+      .from('promo')
+      .select('code, value, status, expires_at, min_quantity, max_uses, used_count')
+      .eq('code', meta.promo_code)
+      .maybeSingle<PromoRow>()
+    if (row && !promoUnusableReason(row, { totalQty: facts.totalQty, hasDigital: facts.hasDigital })) {
+      promo = { code: row.code, value: Number(row.value) }
+    }
+  }
+
+  const totals = computeCartTotals({
+    items: facts.items,
+    promo,
+    pointsRedeemed: meta?.points_redeemed ?? 0,
+    hasDigital: facts.hasDigital,
+  })
+
+  return { items: facts.items, totals }
 }

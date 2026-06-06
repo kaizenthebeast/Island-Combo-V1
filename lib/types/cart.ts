@@ -51,3 +51,27 @@ export type CartItemInput = {
   quantity: number
   selectedOption?: string | null
 }
+
+// The cart "header" record (lib/cart + cart_meta table): the applied promo code
+// and the loyalty-point reservation persisted for the cart.
+export type CartMeta = {
+  promo_code: string | null
+  points_redeemed: number
+}
+
+// Server-side calculated totals returned by Fetch Cart (§3.3).
+export type CartTotals = {
+  subtotal: number
+  promoCode: string | null
+  promoValue: number | null   // discount percentage of the applied code
+  promoDiscount: number       // dollar value of the promo discount
+  pointsRedeemed: number      // points held against this cart
+  pointsDiscount: number      // dollar value of the points redemption
+  total: number               // subtotal − promoDiscount − pointsDiscount (≥ 0)
+  hasDigital: boolean         // cart contains a digital product (discounts excluded)
+}
+
+export type CartResponse = {
+  items: CartItem[]
+  totals: CartTotals
+}

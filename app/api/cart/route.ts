@@ -3,7 +3,7 @@ import { requireUser } from '@/lib/auth'
 import { waitUntil } from '@vercel/functions'
 import { ratelimit } from '@/lib/api/rate-limiter'
 import {
-  getCart,
+  getCartWithTotals,
   addToCart,
   updateCartQuantity,
   removeFromCart,
@@ -32,7 +32,8 @@ export async function GET() {
     const blocked = await applyRateLimit(user.id)
     if (blocked) return blocked
 
-    const data = await getCart(user.id)
+    // Fetch Cart (§3.3): items + server-side totals (promo + points reflected).
+    const data = await getCartWithTotals(user.id)
     return apiOk({ data })
   } catch (error: unknown) {
     return toApiError(error)

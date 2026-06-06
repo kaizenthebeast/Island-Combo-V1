@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requestPasswordReset } from '@/lib/auth';
 import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond';
-
-
 
 export async function POST(request: NextRequest) {
     const { email } = await request.json();
@@ -10,19 +8,12 @@ export async function POST(request: NextRequest) {
     if (!email) {
         return apiError('Email is required', HTTP.BAD_REQUEST);
     }
-    try {
-        const supabase = await createClient();
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/update-password`,
-        });
-        if (error){
-            return apiError(error.message, HTTP.INTERNAL);
-        }
 
-        return apiResult({
-            message: 'Password reset email sent successfully'
-        })
-       
+    try {
+        const result = await requestPasswordReset(email);
+        if (!result.success) return apiError(result.message, result.status);
+
+        return apiResult({ message: 'Password reset email sent successfully' });
     } catch (error) {
         return toApiError(error);
     }

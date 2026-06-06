@@ -1,6 +1,7 @@
 'use server'
 /** Admin category CRUD. */
 import { createClient } from '@/lib/supabase/server'
+import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import type { Category } from '@/lib/types/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validators/category'
@@ -27,6 +28,7 @@ export type CategoriesPageResult = {
 export const getCategoriesPage = async (
   input: CategoriesPageInput,
 ): Promise<CategoriesPageResult> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const {
@@ -98,6 +100,7 @@ export const getCategoriesPage = async (
 // CREATE
 
 export const createCategory = async (data: AddCategoryFormValues) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data: result, error } = await supabase.rpc('admin_create_category', {
@@ -115,6 +118,7 @@ export const createCategory = async (data: AddCategoryFormValues) => {
 // UPDATE
 
 export const updateCategory = async (id: number, data: EditCategoryFormValues) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data: result, error } = await supabase.rpc('admin_update_category', {
@@ -134,6 +138,7 @@ export const updateCategory = async (id: number, data: EditCategoryFormValues) =
 // SOFT DELETE
 
 export const softDeleteCategory = async (id: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -150,6 +155,7 @@ export const softDeleteCategory = async (id: number) => {
 // RESTORE
 
 export const restoreCategory = async (id: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase

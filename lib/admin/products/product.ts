@@ -1,6 +1,7 @@
 'use server'
 /** Admin product CRUD + stock management. */
 import { createClient } from '@/lib/supabase/server'
+import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import type { AdminProduct } from '@/lib/types/product'
 import type { VariantWithUploadedImages } from '@/lib/admin/products/product-upload'
@@ -69,6 +70,7 @@ export type AdminProductsPageResult = {
 export const getAdminProductsPage = async (
   input: AdminProductsPageInput,
 ): Promise<AdminProductsPageResult> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const {
@@ -117,6 +119,7 @@ export const getAdminProductsPage = async (
 // CREATE
 
 export const addAdminProduct = async (data: AddProductPayload) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const payload = {
@@ -144,6 +147,7 @@ export const updateAdminProduct = async (
   productId: number,
   data: UpdateProductPayload,
 ) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const payload = {
@@ -191,6 +195,7 @@ export const updateAdminProduct = async (
 // RESTORE
 
 export const restoreProduct = async (productId: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { error } = await supabase
@@ -207,6 +212,7 @@ export const restoreProduct = async (productId: number) => {
 // SOFT DELETE
 
 export const softDeleteProduct = async (productId: number) => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { count, error: countError } = await supabase

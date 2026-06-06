@@ -2,6 +2,7 @@
 /** Admin banner & promotion-ad mutations. */
 
 import { createClient } from '@/lib/supabase/server'
+import { assertAdmin } from '@/lib/auth'
 import { requireEnv } from '@/lib/config/env'
 import { revalidatePath } from 'next/cache'
 import type {
@@ -19,6 +20,7 @@ const BANNER_BUCKET = 'banners' as const
 // ════════════════════════════════════════════════════════════════
 
 export const createBanner = async (payload: BannerInsert): Promise<Banner> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -33,6 +35,7 @@ export const createBanner = async (payload: BannerInsert): Promise<Banner> => {
 }
 
 export const updateBanner = async (id: string, payload: BannerUpdate): Promise<Banner> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -48,6 +51,7 @@ export const updateBanner = async (id: string, payload: BannerUpdate): Promise<B
 }
 
 export const removeBanner = async (id: string, imageUrl?: string | null): Promise<void> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   if (imageUrl) {
@@ -66,6 +70,7 @@ export const removeBanner = async (id: string, imageUrl?: string | null): Promis
 // ════════════════════════════════════════════════════════════════
 
 export const createPromotionAds = async (payload: PromotionAdInsert): Promise<PromotionAd> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -83,6 +88,7 @@ export const updatePromotionAds = async (
   id: string,
   payload: PromotionAdUpdate,
 ): Promise<PromotionAd> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   const { data, error } = await supabase
@@ -101,6 +107,7 @@ export const removePromotionAds = async (
   id: string,
   imageUrl?: string | null,
 ): Promise<void> => {
+  await assertAdmin()
   const supabase = await createClient()
 
   if (imageUrl) {

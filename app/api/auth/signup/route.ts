@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { signUpWithEmail } from '@/lib/auth';
 import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond';
-
-
 
 export async function POST(request: NextRequest) {
     const { email, password, guestUserId } = await request.json();
@@ -11,37 +9,28 @@ export async function POST(request: NextRequest) {
         return apiError('Email and password are required', HTTP.BAD_REQUEST);
     }
 
-    const supabase = await createClient();
-
     try {
-        const { error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/sign-up-success`
-            }
-        })
+        const result = await signUpWithEmail({ email, password, guestUserId });
+        if (!result.success) return apiError(result.message, result.status);
 
-        if (error) {
-            return apiError(error.message, HTTP.BAD_REQUEST);
-        }
+        const response = apiResult({
+            message: 'Signup successful.',
+            redirectTo: result.redirectTo,
+        });
 
-        if (guestUserId) {
-            const response = apiResult({ redictTo: '/auth/sign-up-success' });
+        // Fallback for when email confirmation IS enabled (no session yet): stash
+        // the guest id so CartMerger can finish the merge after confirmation.
+        // Readable by the client (not httpOnly) so CartMerger can pick it up.
+        if (!result.sessionCreated && guestUserId) {
             response.cookies.set('guest_user_id', guestUserId, {
                 path: '/',
                 maxAge: 600, // 10 minutes
-                httpOnly: true,
-                sameSite: 'lax'
+                httpOnly: false,
+                sameSite: 'lax',
             });
-            return response;
         }
 
-        return apiResult({
-            message: 'Signup successful, please check your email to confirm your account.',
-            redirectTo: '/auth/sign-up-success'
-        });
-
+        return response;
     } catch (error) {
         return toApiError(error);
     }

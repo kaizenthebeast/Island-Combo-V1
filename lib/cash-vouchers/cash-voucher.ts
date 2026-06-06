@@ -36,6 +36,30 @@ export const createCashVoucher = async (
   return { success: true, voucher: data }
 }
 
+// GENERATE REDEMPTION ID
+// Mints a unique redemption UUID and stores it on the voucher. Ownership (caller
+// owns the voucher, or is staff/admin) and the ACTIVE-only rule are enforced
+// inside generate_cash_voucher_redemption_id(). Idempotent.
+export const generateRedemptionId = async (
+  voucherId: string,
+): Promise<
+  | { success: true; redemptionId: string | null; voucher: CashVoucher }
+  | { success: false; status: number; message: string }
+> => {
+  const user = await requireUser()
+  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .rpc('generate_cash_voucher_redemption_id', { p_voucher_id: voucherId })
+    .single<CashVoucher>()
+
+  if (error || !data) {
+    return { success: false, status: 400, message: error?.message ?? 'Could not generate a redemption id.' }
+  }
+  return { success: true, redemptionId: data.redemption_uuid, voucher: data }
+}
+
 // READ (current user's vouchers)
 export const getMyCashVouchers = async (): Promise<CashVoucher[]> => {
   const supabase = await createClient()

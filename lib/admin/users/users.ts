@@ -1,6 +1,7 @@
 'use server'
 /** Admin user & staff management. */
 import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { EditUserFormValues } from '@/lib/validators/user'
 import { escapeIlike, type PaginatedInput, type PaginatedResult } from '@/lib/admin/_shared'
@@ -14,8 +15,8 @@ export const getUsersPage = async (
 ): Promise<PaginatedResult<unknown>> => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const {
     page,
@@ -60,8 +61,8 @@ export const getStaffPage = async (
 ): Promise<PaginatedResult<unknown>> => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const {
     page,
@@ -106,8 +107,8 @@ export const getStaffPage = async (
 export const updateUser = async (userId: string, data: EditUserFormValues) => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const { error } = await supabase
     .from('profile')
@@ -132,8 +133,8 @@ export const updateUser = async (userId: string, data: EditUserFormValues) => {
 export const deleteUser = async (userId: string) => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const { error } = await supabase
     .from('profile')
@@ -149,8 +150,8 @@ export const deleteUser = async (userId: string) => {
 export const softDeleteUser = async (userId: string) => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const { error } = await supabase
     .from('profile')
@@ -166,8 +167,8 @@ export const softDeleteUser = async (userId: string) => {
 export const restoreUser = async (userId: string) => {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, status: 401, message: 'Unauthorized' }
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
   const { error } = await supabase
     .from('profile')

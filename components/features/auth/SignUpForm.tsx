@@ -47,9 +47,12 @@ export function SignUpForm() {
     setIsLoading(true);
 
     try {
+      // Capture the anonymous (guest) session id BEFORE signing up so the server
+      // can merge the guest cart into the new account. Only pass it when the
+      // session is actually anonymous (mirrors LoginForm).
       const supabase = createClient();
       const { data: { session: anonSession } } = await supabase.auth.getSession();
-      const guestUserId = anonSession?.user.id;
+      const guestUserId = anonSession?.user?.is_anonymous ? anonSession.user.id : null;
 
       const response = await fetch("/api/auth/signup", {
         method: "POST",

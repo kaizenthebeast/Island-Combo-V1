@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { loginWithEmail } from '@/lib/auth';
 import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond';
 
 export async function POST(request: NextRequest) {
@@ -10,40 +10,10 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const supabase = await createClient();
+        const result = await loginWithEmail({ email, password, guestUserId });
+        if (!result.success) return apiError(result.message, result.status);
 
-        const { data: signInData, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-
-        if (error) {
-            return apiError(error.message, HTTP.BAD_REQUEST);
-        }
-
-        const authUserId = signInData.session.user.id;
-
-        // Merge cart if a guest user ID was passed from the client
-        if (guestUserId && guestUserId !== authUserId) {
-            const { error: mergeError } = await supabase.rpc('merge_cart', {
-                p_guest_user_id: guestUserId,
-                p_auth_user_id: authUserId,
-            });
-            if (mergeError) {
-                throw new Error(`Failed to merge cart: ${mergeError.message}`);
-            }
-        }
-
-        const { data: profile } = await supabase
-            .from('profile')
-            .select('role')
-            .eq('user_id', authUserId)
-            .single();
-
-        return apiResult({
-            role: profile?.role ?? 'user',
-            redirectTo: profile?.role === 'admin' ? '/admin/products' : '/',
-        });
+        return apiResult({ role: result.role, redirectTo: result.redirectTo });
     } catch (error) {
         return toApiError(error);
     }

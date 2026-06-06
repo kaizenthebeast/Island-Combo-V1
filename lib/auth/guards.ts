@@ -1,6 +1,7 @@
-/** Auth guards: requireUser / requireAdmin. */
+/** Auth guards: requireUser / requireAdmin / requireStaff. */
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { AppError } from "@/lib/api/respond";
 
 // The authenticated identity, read straight from the verified JWT claims.
 export type AuthUser = {
@@ -73,4 +74,49 @@ export const requireAdmin = async (): Promise<AdminCheck> => {
     return { ok: false, status: 403, message: "Forbidden: admin access required" };
   }
   return { ok: true, userId };
+};
+
+// Verifies the caller is staff OR admin (admin inherits staff authority, mirroring
+// the DB's is_staff()). Same JWT-claim-then-profile-fallback strategy as
+// requireAdmin, so a legitimate staff/admin whose `user_role` claim is missing or
+// stale is still authorized off their DB role.
+export const requireStaff = async (): Promise<AdminCheck> => {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims) return { ok: false, status: 401, message: "Unauthorized" };
+
+  const userId = claims.sub as string;
+  const claimRole = (claims as { user_role?: string }).user_role;
+
+  if (claimRole === "admin" || claimRole === "staff") return { ok: true, userId };
+  if (claimRole) return { ok: false, status: 403, message: "Forbidden: staff access required" };
+
+  // Fallback (claim missing): query the profile.
+  const { data: profile } = await supabase
+    .from("profile")
+    .select("role")
+    .eq("user_id", userId)
+    .single();
+
+  if (profile?.role !== "admin" && profile?.role !== "staff") {
+    return { ok: false, status: 403, message: "Forbidden: staff access required" };
+  }
+  return { ok: true, userId };
+};
+
+// Throwing variants for server actions (which return varied shapes, not a
+// NextResponse). They raise an AppError carrying the right status so the caller's
+// toApiError / error boundary surfaces a clean 401/403. Returns the user id.
+export const assertAdmin = async (): Promise<string> => {
+  const auth = await requireAdmin();
+  if (!auth.ok) throw new AppError(auth.message, auth.status);
+  return auth.userId;
+};
+
+export const assertStaff = async (): Promise<string> => {
+  const auth = await requireStaff();
+  if (!auth.ok) throw new AppError(auth.message, auth.status);
+  return auth.userId;
 };
