@@ -19,7 +19,7 @@ export default function MobileBottomNav({ isAuthenticated }: Props) {
   const tabs = [
     { label: 'Home', icon: Home, href: '/' },
     { label: 'Cart', icon: ShoppingBag, href: '/checkout' },
-    { label: 'Favorites', icon: Heart, href: '/product/favorites' },
+    { label: 'Wishlist', icon: Heart, href: '/product/wishlist' },
     { label: 'Me', icon: User, href: meHref },
   ]
 

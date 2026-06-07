@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetDescription } from "@/components/ui/sheet"
 import Image from 'next/image'
-import { FavoriteView } from '@/lib/types/favorite'
+import { WishlistView } from '@/lib/types/wishlist'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ShoppingBag, Package } from 'lucide-react'
@@ -12,6 +12,7 @@ import WholesaleCheckIcon from '@/components/shared/icons/WholesaleCheckIcon'
 import ProductQuantityButton from '@/components/features/product/ProductQuantityButton'
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
 import { useCartStore } from '@/lib/store/cart-store'
+import { useWishlistStore } from '@/lib/store/wishlist-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 import { variantMatchesSelection } from '@/lib/utils/variant-selection'
 
@@ -27,15 +28,16 @@ const parseLeadingNumber = (value: string): number => {
 }
 
 type Props = {
-  product: FavoriteView
+  product: WishlistView
 }
 
-const FavoriteCard: React.FC<Props> = ({ product }) => {
+const WishlistCard: React.FC<Props> = ({ product }) => {
   const hasDiscount = product.discount !== null && product.discount > 0
   const [isAdding, setIsAdding] = useState(false)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   const { addItem, quantityInput, resetQuantity } = useCartStore()
+  const { removeFromWishlist } = useWishlistStore()
 
   const attributeKeys: string[] = useMemo(
     () =>
@@ -178,9 +180,12 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
         return
       }
 
+      // Move-to-cart: once it's in the cart, take it out of the wishlist.
+      await removeFromWishlist(product.product_id)
+
       customToast.success({
-        title: 'Added to cart',
-        description: `${product.product_name} has been added to your cart.`,
+        title: 'Moved to cart',
+        description: `${product.product_name} has been moved from your wishlist to the cart.`,
       })
       setIsSheetOpen(false)
     } finally {
@@ -436,4 +441,4 @@ const FavoriteCard: React.FC<Props> = ({ product }) => {
   )
 }
 
-export default FavoriteCard
+export default WishlistCard

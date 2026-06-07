@@ -1,6 +1,6 @@
 /** Pure variant attribute-matching helpers. */
 // A product variant carries a list of {name, value} attribute pairs (e.g.
-// color / size). Both the product page and the favorites card match a user's
+// color / size). Both the product page and the wishlist card match a user's
 // current selection against these.
 type VariantWithAttributes = {
   attributes?: { name: string; value: string }[] | null

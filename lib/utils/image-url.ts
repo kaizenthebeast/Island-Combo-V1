@@ -5,7 +5,7 @@ const SUPABASE_URL = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBL
 
 export function getPublicImageUrl(
   path: string | null | undefined,
-  bucket: 'product-images' | 'banners' = 'product-images'  
+  bucket: 'product-images' | 'banners' | 'review-media' = 'product-images'
 ): string {
   if (!path || typeof path !== 'string' || path.trim() === '') {
     return '/images/placeholder.png'

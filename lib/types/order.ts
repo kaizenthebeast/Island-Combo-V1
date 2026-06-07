@@ -140,6 +140,19 @@ export type AdminOrderDetail = {
 
 // ── Customer-facing order reads (Order History + Order Details) ──────────────
 
+// The lead item shown on an order-history card (image, variant, price).
+export type OrderItemSummary = {
+  product_id: number | null
+  slug: string | null
+  product_name: string
+  variant_label: string | null    // e.g. "US: 10.5, Black"
+  quantity: number
+  unit_price: number
+  original_price: number | null   // pre-discount unit price, when discounted
+  discount_percent: number | null
+  image_url: string | null
+}
+
 // One row of the buyer's own order history. High-level summary only; the full
 // breakdown lives in the order detail. Read straight from `orders` (RLS scopes
 // rows to the owner), with the item aggregates computed alongside.
@@ -156,6 +169,13 @@ export type OrderHistoryRow = {
   updated_at: string
   item_count: number
   total_qty: number
+
+  // Card display + tracking
+  primary_item: OrderItemSummary | null
+  delivered_at: string | null       // when it was delivered (tracking badge)
+  expected_delivery: string | null  // estimated arrival while in transit
+  my_rating: number | null          // the buyer's existing rating for the lead item
+  can_review: boolean               // delivered/completed + not yet reviewed
 }
 
 // A page of order history, with the total count so the client can paginate.
@@ -166,6 +186,16 @@ export type OrderHistoryPage = {
   pageSize: number
 }
 
+// Shipment/tracking facts for the order-tracking sheet (from order_fulfillment).
+export type OrderTrackingInfo = {
+  status: string
+  carrier: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  shipped_at: string | null
+  delivered_at: string | null
+}
+
 // The buyer's view of a single order: header, line items, and the
 // timeline/tracking updates (status changes + timestamps) from transaction_event.
 // Line items share the AdminOrderItem shape (same columns). Ownership is enforced
@@ -174,4 +204,5 @@ export type CustomerOrderDetail = {
   order: Order
   items: AdminOrderItem[]
   timeline: TransactionEvent[]
+  fulfillment: OrderTrackingInfo | null
 }

@@ -42,6 +42,7 @@ export type AddReviewPayload = {
   rating: number;
   title?: string;
   body?: string;
+  mediaPaths?: string[]; // storage paths in the review-media bucket (photos/videos)
 };
 
 export type UpdateReviewPayload = {

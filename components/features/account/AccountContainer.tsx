@@ -65,7 +65,11 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                     <Account email={email} profile={profile} addresses={addresses} />
                 )}
                 {activeLink === 'Loyalty Points' && <Loyalty />}
-                {activeLink === 'Orders & Tracking' && <OrderTracking />}
+                {activeLink === 'Orders & Tracking' && (
+                    <OrderTracking
+                        customerName={[profile?.first_name, profile?.last_name].filter(Boolean).join(' ')}
+                    />
+                )}
                 {activeLink === 'My Cards' && <MyCards />}
             </section>
         </div>

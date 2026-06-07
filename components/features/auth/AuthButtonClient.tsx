@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import CartCount from "@/components/features/cart/CartCount";
-import FavoriteCount from "@/components/features/favorite/FavoriteCount";
+import WishlistCount from "@/components/features/wishlist/WishlistCount";
 import { UserMenu } from "./UserMenu";
 import { ShoppingCart, Heart } from "lucide-react";
 
@@ -16,10 +16,10 @@ export function AuthButtonClient({ isAuthenticated }: { isAuthenticated: boolean
         </span>
       </Link>
 
-      <Link href="/product/favorites" className="relative flex items-center">
+      <Link href="/product/wishlist" className="relative flex items-center">
         <Heart size={22} />
         <span className="absolute -top-2 -right-2 text-xs bg-brand text-white rounded-full px-1.5">
-          <FavoriteCount />
+          <WishlistCount />
         </span>
       </Link>
 

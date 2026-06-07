@@ -148,7 +148,8 @@ export const addProductReview = async (payload: AddReviewPayload) => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, status: 401, message: 'Unauthorized' }
 
-  const { error } = await supabase
+  // Save the review first so we have its id for the media rows.
+  const { data: review, error } = await supabase
     .from('reviews')
     .insert({
       user_id: user.id,
@@ -158,8 +159,21 @@ export const addProductReview = async (payload: AddReviewPayload) => {
       title: payload.title ?? null,
       body: payload.body ?? null,
     })
+    .select('id')
+    .single()
 
   if (error) return { success: false, status: 403, message: error.message }
+
+  // Attach already-uploaded media: the files are in the review-media bucket
+  // (see lib/reviews/review-upload); here we only record their storage paths.
+  const paths = payload.mediaPaths ?? []
+  if (paths.length && review?.id) {
+    const rows = paths.map((image_path, i) => ({ review_id: review.id, image_path, sort_order: i }))
+    const { error: mediaErr } = await supabase.from('review_images').insert(rows)
+    if (mediaErr) {
+      return { success: true, status: 201, message: 'Review submitted, but some media could not be attached.' }
+    }
+  }
 
   return { success: true, status: 201, message: 'Review successfully submitted' }
 }

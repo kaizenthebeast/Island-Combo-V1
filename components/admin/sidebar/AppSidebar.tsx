@@ -5,7 +5,7 @@ import {
   Users, Package, ShoppingCart, Crown, Megaphone,
   LayoutDashboard, Tag, ListOrdered, Star,
   Percent, ImagePlay, ShieldAlert, ScrollText,
-  Banknote, QrCode,
+  Banknote, QrCode, Undo2,
 } from "lucide-react"
 import { NavMain } from "@/components/admin/sidebar/NavMain"
 import { NavUser } from "@/components/admin/sidebar/NavUser"
@@ -40,6 +40,7 @@ const navMain = [
     icon: ShoppingCart,
     items: [
       { title: "Order List", url: "/admin/orders", icon: ListOrdered },
+      { title: "Refunds", url: "/admin/refunds", icon: Undo2 },
     ],
   },
   {

@@ -166,6 +166,10 @@ export default function OrdersClient({ orders, total, page, pageSize, payment }:
           setSort(rpcKey, dir)
         }}
 
+        // Edit → the order detail page, where the status is changed through the
+        // password-confirmed, audited update form.
+        onEdit={(row) => router.push(`/admin/orders/${row.order_id}`)}
+
         getRowId={(row) => row.order_id}
       />
     </section>

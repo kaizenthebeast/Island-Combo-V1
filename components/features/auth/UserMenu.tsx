@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/lib/store/cart-store";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Package } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,18 +12,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useFavoriteStore } from "@/lib/store";
+import { useWishlistStore } from "@/lib/store";
 
 export function UserMenu() {
   const router = useRouter();
   const { clearCart } = useCartStore();
-  const { clearFavorite } = useFavoriteStore();
+  const { clearWishlist } = useWishlistStore();
 
   const logout = async () => {
     const supabase = createClient();
     try {
       clearCart();
-      clearFavorite();
+      clearWishlist();
       await supabase.auth.signOut({ scope: "local" });
       router.push("/auth/login");
     } catch (error) {
@@ -43,6 +43,12 @@ export function UserMenu() {
           <Link href="/user/details" className="flex items-center gap-2 cursor-pointer">
             <Settings size={15} />
             Account
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/orders" className="flex items-center gap-2 cursor-pointer">
+            <Package size={15} />
+            My Orders
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useFavoriteStore } from "@/lib/store/favorite-store";
+import { useWishlistStore } from "@/lib/store/wishlist-store";
 import { getPublicImageUrl } from '@/lib/utils/image-url';
 
 import Image from 'next/image'
@@ -34,9 +34,9 @@ type Props = {
 const ProductDetails = ({ product }: Props) => {
 
     const { addItem, quantityInput, resetQuantity } = useCartStore()
-    const { addFavorite, removeFavorite, isFavorite } = useFavoriteStore();
+    const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlistStore();
 
-    const isFavorited = isFavorite(product.product_id)
+    const inWishlist = isWishlisted(product.product_id)
 
     // A product is sold through its variants, so a variant-less product (an admin
     // data error) is treated as unavailable: the page still renders with safe
@@ -191,17 +191,17 @@ const ProductDetails = ({ product }: Props) => {
         })
     }
 
-    async function handleFavoriteToggle(productId: number) {
-        if (isFavorited) {
-            await removeFavorite(productId)
-            const removeError = useFavoriteStore.getState().error
-            if (removeError) { customToast.error({ title: 'Failed to remove favorite', description: removeError }); return }
-            customToast.success({ title: 'Removed from favorites', description: 'Product has been removed from your favorites.' })
+    async function handleWishlistToggle(productId: number) {
+        if (inWishlist) {
+            await removeFromWishlist(productId)
+            const removeError = useWishlistStore.getState().error
+            if (removeError) { customToast.error({ title: 'Failed to remove from wishlist', description: removeError }); return }
+            customToast.success({ title: 'Removed from wishlist', description: 'Product has been removed from your wishlist.' })
         } else {
-            await addFavorite(productId)
-            const addError = useFavoriteStore.getState().error
-            if (addError) { customToast.error({ title: 'Failed to add favorite', description: addError }); return }
-            customToast.success({ title: 'Added to favorites', description: 'Product has been added to your favorites.' })
+            await addToWishlist(productId)
+            const addError = useWishlistStore.getState().error
+            if (addError) { customToast.error({ title: 'Failed to add to wishlist', description: addError }); return }
+            customToast.success({ title: 'Added to wishlist', description: 'Product has been added to your wishlist.' })
         }
     }
 
@@ -358,7 +358,7 @@ const ProductDetails = ({ product }: Props) => {
                         )}
                     </div>
 
-                    {/* ADD TO CART / BUY NOW / FAVORITE */}
+                    {/* ADD TO CART / BUY NOW / WISHLIST */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <div className="flex gap-3 sm:contents">
                             <Button type="button" onClick={handleAddToCart} disabled={!canAddToCart}
@@ -371,8 +371,8 @@ const ProductDetails = ({ product }: Props) => {
                                 asChild={canAddToCart}>
                                 {canAddToCart ? <Link href="/checkout">Buy Now</Link> : <span>Buy Now</span>}
                             </Button>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => handleFavoriteToggle(product.product_id)} className="shrink-0">
-                                <Heart className={`w-5 h-5 transition-colors ${isFavorited ? 'fill-brand text-brand' : 'text-muted-foreground'}`} />
+                            <Button type="button" variant="ghost" size="icon" onClick={() => handleWishlistToggle(product.product_id)} className="shrink-0">
+                                <Heart className={`w-5 h-5 transition-colors ${inWishlist ? 'fill-brand text-brand' : 'text-muted-foreground'}`} />
                             </Button>
                         </div>
                     </div>
