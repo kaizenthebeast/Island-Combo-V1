@@ -39,6 +39,7 @@ export async function GET(request: Request) {
     .eq("user_id", authUserId)
     .single();
 
-  const redirectTo = profile?.role === "admin" ? "/admin/products" : "/";
+  const isBackOffice = profile?.role === "admin" || profile?.role === "staff";
+  const redirectTo = isBackOffice ? "/admin/dashboard" : "/";
   return NextResponse.redirect(`${siteUrl}${redirectTo}`);
 }

@@ -95,7 +95,12 @@ export default function RefundsClient({ initialRows }: { initialRows: AdminRefun
                     {r.customer_email && <div className="text-xs text-muted-foreground">{r.customer_email}</div>}
                   </td>
                   <td className="px-5 py-3 text-right font-semibold">{money(r.amount)}</td>
-                  <td className="px-5 py-3 max-w-[220px] text-muted-foreground"><span className="line-clamp-2">{r.reason ?? '—'}</span></td>
+                  <td className="px-5 py-3 max-w-[220px] text-muted-foreground">
+                    <span className="line-clamp-2">{r.reason ?? '—'}</span>
+                    {r.media.length > 0 && (
+                      <span className="mt-0.5 block text-[10px] font-medium text-brand">{r.media.length} file{r.media.length > 1 ? 's' : ''} attached</span>
+                    )}
+                  </td>
                   <td className="px-5 py-3 text-muted-foreground">{fmtDate(r.requested_at)}</td>
                   <td className="px-5 py-3 text-center">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_BADGE[r.status]}`}>{r.status}</span>
@@ -164,6 +169,24 @@ function ActionDialog({
           Order #{orderNo(row.public_ref)} · {money(row.amount)} · {row.customer_name ?? '—'}
         </p>
         {row.reason && <p className="mt-2 rounded-lg bg-muted px-3 py-2 text-xs text-foreground">“{row.reason}”</p>}
+
+        {row.media.length > 0 && (
+          <div className="mt-3">
+            <p className="text-xs font-medium text-muted-foreground">Customer evidence ({row.media.length})</p>
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              {row.media.map((m, i) =>
+                m.isVideo ? (
+                  <video key={i} src={m.url} controls className="h-20 w-20 rounded-md border border-border object-cover" />
+                ) : (
+                  <a key={i} href={m.url} target="_blank" rel="noreferrer" className="block h-20 w-20 overflow-hidden rounded-md border border-border">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={m.url} alt="evidence" className="h-full w-full object-cover" />
+                  </a>
+                ),
+              )}
+            </div>
+          </div>
+        )}
 
         {action === 'approve' && (
           <>

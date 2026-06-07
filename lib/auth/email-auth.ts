@@ -47,7 +47,8 @@ export const loginWithEmail = async ({
     .single()
 
   const role = profile?.role ?? 'user'
-  return { success: true, role, redirectTo: role === 'admin' ? '/admin/products' : '/' }
+  const isBackOffice = role === 'admin' || role === 'staff'
+  return { success: true, role, redirectTo: isBackOffice ? '/admin/dashboard' : '/' }
 }
 
 export type SignUpResult =

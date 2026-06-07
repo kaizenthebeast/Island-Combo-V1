@@ -16,6 +16,11 @@ import {
 
 const navMain = [
   {
+    title: "Dashboard",
+    url: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
     title: "Users",
     url: "/admin/users",
     icon: Users,

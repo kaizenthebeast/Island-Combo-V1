@@ -21,7 +21,7 @@ export const getRefunds = async (
   let query = supabase
     .from('refunds')
     .select(
-      'id, order_id, amount, reason, status, paypal_capture_id, paypal_refund_id, staff_note, requested_at, processed_at, processed_by, orders(public_ref, payment_method, user_id)',
+      'id, order_id, amount, reason, status, paypal_capture_id, paypal_refund_id, staff_note, requested_at, processed_at, processed_by, media_paths, orders(public_ref, payment_method, user_id)',
     )
     .order('requested_at', { ascending: false })
   if (status && status !== 'all') query = query.eq('status', status)
@@ -32,10 +32,19 @@ export const getRefunds = async (
   type Raw = {
     id: number; order_id: number; amount: number; reason: string | null; status: RefundStatus
     paypal_capture_id: string | null; paypal_refund_id: string | null; staff_note: string | null
-    requested_at: string; processed_at: string | null; processed_by: string | null
+    requested_at: string; processed_at: string | null; processed_by: string | null; media_paths: string[] | null
     orders: { public_ref: string; payment_method: string; user_id: string } | null
   }
   const raw = (data ?? []) as unknown as Raw[]
+
+  // Resolve the (private) refund evidence to short-lived signed URLs in one batch.
+  const allPaths = [...new Set(raw.flatMap((r) => r.media_paths ?? []))]
+  const signedByPath = new Map<string, string>()
+  if (allPaths.length) {
+    const { data: signed } = await supabase.storage.from('refund-media').createSignedUrls(allPaths, 60 * 30)
+    for (const s of signed ?? []) if (s.signedUrl && s.path) signedByPath.set(s.path, s.signedUrl)
+  }
+  const isVideo = (p: string) => /\.(mp4|mov|webm|quicktime)$/i.test(p)
 
   // Resolve names for both the customer (order owner) and the staff who processed
   // it — admin RLS lets these through. One profile query covers both (audit).
@@ -74,6 +83,9 @@ export const getRefunds = async (
       requested_at: r.requested_at,
       processed_at: r.processed_at,
       processed_by_name: r.processed_by ? byId.get(r.processed_by)?.name ?? null : null,
+      media: (r.media_paths ?? [])
+        .map((p) => ({ url: signedByPath.get(p) ?? '', isVideo: isVideo(p) }))
+        .filter((m) => m.url),
     }
   })
   return { success: true, rows }

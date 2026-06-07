@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
-import { ArrowLeft, Copy, Check, CheckCircle2, Circle } from 'lucide-react'
+import { ArrowLeft, Copy, Check, CheckCircle2, Circle, ImagePlus, X, Video } from 'lucide-react'
 import { cancelMyOrder } from '@/lib/orders/orders'
+import { uploadRefundMedia } from '@/lib/orders/refund-upload'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 import type { OrderHistoryRow, CustomerOrderDetail } from '@/lib/types/order'
 
@@ -65,10 +66,24 @@ export default function OrderDetailSheet({
   const [cancelOpen, setCancelOpen] = useState(false)
   const [reason, setReason] = useState('')
   const [otherText, setOtherText] = useState('')
+  const [files, setFiles] = useState<File[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const tracked = TRACKED.has(order.order_status)
   const cancellable = CANCELLABLE.has(order.order_status)
+  const isPaid = order.order_status === 'paid'
   const canConfirm = reason !== '' && (reason !== 'Other' || otherText.trim() !== '')
+
+  const previews = useMemo(
+    () => files.map((f) => ({ url: URL.createObjectURL(f), isVideo: f.type.startsWith('video') })),
+    [files],
+  )
+  useEffect(() => () => previews.forEach((p) => URL.revokeObjectURL(p.url)), [previews])
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFiles((prev) => [...prev, ...Array.from(e.target.files ?? [])].slice(0, 6))
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+  const removeFile = (i: number) => setFiles((prev) => prev.filter((_, idx) => idx !== i))
 
   useEffect(() => {
     let active = true
@@ -83,7 +98,17 @@ export default function OrderDetailSheet({
     const finalReason = reason === 'Other' ? otherText.trim() : reason
     if (!finalReason) return
     startCancel(async () => {
-      const res = await cancelMyOrder(order.order_id, finalReason)
+      // Paid orders → upload the evidence first, then raise the refund request.
+      let mediaPaths: string[] = []
+      if (isPaid && files.length) {
+        try {
+          mediaPaths = await uploadRefundMedia(files)
+        } catch (e) {
+          customToast.error({ title: 'Upload failed', description: e instanceof Error ? e.message : 'Could not upload your evidence.' })
+          return
+        }
+      }
+      const res = await cancelMyOrder(order.order_id, finalReason, mediaPaths)
       if (!res.success) { customToast.error({ title: "Couldn't cancel", description: res.message }); return }
       if (res.refundRequested) {
         customToast.success({
@@ -211,10 +236,37 @@ export default function OrderDetailSheet({
                     className="w-full rounded-lg border border-border px-3 py-2 text-sm outline-none focus:border-brand"
                   />
                 )}
-                {order.order_status === 'paid' && (
-                  <p className="text-xs text-muted-foreground">
-                    This order is paid — your request will be reviewed by our team before the refund is issued.
-                  </p>
+                {isPaid && (
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      This order is paid — your request will be reviewed before the refund is issued.
+                    </p>
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Attach photos / video (recommended)</p>
+                      <p className="mb-2 text-[11px] text-muted-foreground">
+                        Evidence of the item&apos;s condition (ideally your unboxing video) helps us approve your refund faster.
+                      </p>
+                      <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden" onChange={onPick} />
+                      <div className="flex flex-wrap gap-2">
+                        {previews.map((p, i) => (
+                          <div key={i} className="relative h-14 w-14 overflow-hidden rounded-md border border-border bg-muted">
+                            {p.isVideo ? (
+                              <div className="flex h-full w-full items-center justify-center"><Video size={16} className="text-muted-foreground" /></div>
+                            ) : (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={p.url} alt="" className="h-full w-full object-cover" />
+                            )}
+                            <button type="button" onClick={() => removeFile(i)} className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-white" aria-label="Remove"><X size={10} /></button>
+                          </div>
+                        ))}
+                        {files.length < 6 && (
+                          <button type="button" onClick={() => fileInputRef.current?.click()} className="flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-md border border-dashed border-border text-[9px] font-medium text-muted-foreground hover:border-brand hover:text-brand">
+                            <ImagePlus size={14} /> Add
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 )}
                 <div className="flex gap-2">
                   <button

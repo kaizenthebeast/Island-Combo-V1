@@ -248,6 +248,7 @@ export const getMyOrderDetail = async (
 export const cancelMyOrder = async (
   orderId: number,
   reason: string,
+  mediaPaths: string[] = [],
 ): Promise<
   | { success: true; orderStatus: string; refundRequested: boolean }
   | { success: false; message: string }
@@ -260,6 +261,7 @@ export const cancelMyOrder = async (
   const { data, error } = await supabase.rpc('cancel_my_order', {
     p_order_id: orderId,
     p_reason: reason.trim(),
+    p_media: mediaPaths,
   })
 
   if (error) return { success: false, message: error.message }
