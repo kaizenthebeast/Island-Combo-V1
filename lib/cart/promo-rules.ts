@@ -12,12 +12,10 @@ export type PromoRow = {
 }
 
 // Returns a user-facing reason the code can't be used, or null when it's valid.
-// §3.9: a cart containing a digital product can never take a discount.
 export function promoUnusableReason(
   promo: PromoRow,
-  opts: { totalQty: number; hasDigital: boolean },
+  opts: { totalQty: number },
 ): string | null {
-  if (opts.hasDigital) return 'Promo codes cannot be applied to a cart containing digital products'
   if (promo.status !== 'ACTIVE') return 'This promo code is not active'
   if (promo.expires_at && new Date(promo.expires_at) < new Date()) return 'This promo code has expired'
   if (promo.max_uses != null && promo.used_count >= promo.max_uses) return 'This promo code has reached its usage limit'

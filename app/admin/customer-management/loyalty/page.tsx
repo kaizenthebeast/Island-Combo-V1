@@ -1,12 +1,12 @@
 import { getLoyverseCards } from '@/lib/admin/loyalty'
-import LoyverseCardsClient from './LoyverseCardsClient'
+import LoyaltyClient from './LoyaltyClient'
 
-// Admin: migrate the store's existing (already-generated) Loyverse loyalty cards
-// + balances. Customers later claim a card from the web app to credit the points.
-const LoyaltyCardsPage = async () => {
+// Combined Loyalty back office: member points/profile (Members tab) + physical
+// card linking and Loyverse migration (Cards tab).
+const LoyaltyPage = async () => {
   const result = await getLoyverseCards()
   const rows = result.success ? result.rows : []
-  return <LoyverseCardsClient initialRows={rows} />
+  return <LoyaltyClient initialCards={rows} />
 }
 
-export default LoyaltyCardsPage
+export default LoyaltyPage

@@ -68,7 +68,6 @@ export type CartTotals = {
   pointsRedeemed: number      // points held against this cart
   pointsDiscount: number      // dollar value of the points redemption
   total: number               // subtotal − promoDiscount − pointsDiscount (≥ 0)
-  hasDigital: boolean         // cart contains a digital product (discounts excluded)
 }
 
 export type CartResponse = {

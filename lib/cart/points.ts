@@ -21,8 +21,6 @@ export const applyCartPoints = async (
   const supabase = await createClient()
   const facts = await loadCartFacts(userId)
 
-  if (facts.hasDigital)
-    throw new AppError('Points cannot be redeemed on a cart containing digital products', HTTP.BAD_REQUEST)
   if (facts.subtotal <= 0) throw new AppError('Your cart is empty', HTTP.BAD_REQUEST)
 
   const { data: pts, error } = await supabase

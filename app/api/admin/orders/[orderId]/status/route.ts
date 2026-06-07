@@ -24,7 +24,9 @@ export async function POST(
     }
 
     const body = (await req.json()) ?? {}
-    const { status, delivery_notes } = body as { status?: string; delivery_notes?: string }
+    const { status, delivery_notes, password } = body as {
+      status?: string; delivery_notes?: string; password?: string
+    }
 
     if (!status || !VALID_STATUSES.includes(status as OrderStatus)) {
       return apiError('A valid status is required.', HTTP.BAD_REQUEST)
@@ -32,8 +34,11 @@ export async function POST(
     if (delivery_notes !== undefined && delivery_notes !== null && typeof delivery_notes !== 'string') {
       return apiError('delivery_notes must be a string.', HTTP.BAD_REQUEST)
     }
+    if (!password || typeof password !== 'string') {
+      return apiError('Your password is required to confirm the change.', HTTP.BAD_REQUEST)
+    }
 
-    const result = await updateOrderStatus(id, status, delivery_notes ?? null)
+    const result = await updateOrderStatus(id, status, delivery_notes ?? null, password)
     if (!result.success) return apiError(result.message, result.status)
 
     // Refresh the admin list + this order's detail so the new status/timeline show.

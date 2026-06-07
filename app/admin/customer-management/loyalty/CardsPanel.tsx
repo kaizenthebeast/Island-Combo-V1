@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { PageHeader } from '@/components/admin/PageHeader'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 import VerifyCardholder from './VerifyCardholder'
 import type { LoyverseCardRow } from '@/lib/admin/loyalty'
@@ -10,7 +9,6 @@ import type { LoyverseCardRow } from '@/lib/admin/loyalty'
 type Entry = { cardNumber: string; points: number; name?: string | null; email?: string | null }
 
 // Parse pasted CSV: one card per line — "card_number, points, name?, email?".
-// Lines whose points column isn't a number (e.g. a header row) are ignored.
 const parseCsv = (text: string): Entry[] => {
   const entries: Entry[] = []
   for (const raw of text.split(/\r?\n/)) {
@@ -27,7 +25,8 @@ const parseCsv = (text: string): Entry[] => {
 const formatDate = (iso: string | null) =>
   iso ? new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'
 
-export default function LoyverseCardsClient({ initialRows }: { initialRows: LoyverseCardRow[] }) {
+// Link a physical card to a member, and migrate existing Loyverse cards/balances.
+export default function CardsPanel({ initialRows }: { initialRows: LoyverseCardRow[] }) {
   const router = useRouter()
   const [csv, setCsv] = useState('')
   const [importing, setImporting] = useState(false)
@@ -63,13 +62,7 @@ export default function LoyverseCardsClient({ initialRows }: { initialRows: Loyv
   const claimed = initialRows.filter((r) => r.claimed_by).length
 
   return (
-    <section className="min-h-full bg-muted px-6 py-10">
-      <PageHeader
-        eyebrow="Customer Management"
-        title="Customer Loyalty"
-        subtitle="Verify cardholders and migrate existing loyalty cards."
-      />
-
+    <div>
       {/* Flow D: link a physical card to a customer (Verified Cardholder) */}
       <VerifyCardholder />
 
@@ -147,6 +140,6 @@ export default function LoyverseCardsClient({ initialRows }: { initialRows: Loyv
           </div>
         )}
       </div>
-    </section>
+    </div>
   )
 }

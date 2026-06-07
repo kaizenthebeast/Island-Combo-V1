@@ -20,7 +20,27 @@ export type PaymentMethodOption = {
 // The Fetch Available Payment Methods response.
 export type AvailablePaymentMethods = {
   methods: PaymentMethodOption[]
-  // Convenience flag mirroring the §3.9 rule (cart holds a digital product),
-  // so a client doesn't have to re-derive it from the methods array.
-  hasDigitalProduct: boolean
+}
+
+// ── public.payments — one row per order payment ──────────────────────────────
+// Payment facts normalized out of `orders` (migration 0027). create_order writes
+// one row per order; refunds / extra attempts get their own rows later.
+
+export type PaymentMethodKind = 'cod' | 'card'
+export type PaymentProvider   = 'cod' | 'paypal'
+export type PaymentStatus     = 'pending' | 'completed' | 'cancelled' | 'refunded'
+
+export type Payment = {
+  id: number
+  order_id: number
+  method: PaymentMethodKind
+  provider: PaymentProvider
+  amount: number
+  currency: string
+  status: PaymentStatus
+  paypal_order_id: string | null
+  paypal_capture_id: string | null
+  payer_email: string | null
+  captured_at: string | null
+  created_at: string
 }

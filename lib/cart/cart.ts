@@ -139,11 +139,10 @@ export const clearCartMeta = async (userId: string) => {
 
 
 // Cart facts derived once and reused by Fetch Cart + the discount/points logic:
-// the line items, whether any line is a digital product (§3.9 exclusion), the
-// total quantity (promo min-quantity) and the server-side subtotal.
+// the line items, the total quantity (promo min-quantity) and the server-side
+// subtotal.
 export type CartFacts = {
   items: CartItem[]
-  hasDigital: boolean
   totalQty: number
   subtotal: number
 }
@@ -152,27 +151,14 @@ export const loadCartFacts = async (userId: string): Promise<CartFacts> => {
   const items = await getCart(userId)
   const totalQty = items.reduce((sum, i) => sum + i.quantity, 0)
   const subtotal = round2(items.reduce((sum, i) => sum + unitPriceOf(i) * i.quantity, 0))
-
-  let hasDigital = false
-  const productIds = [...new Set(items.map((i) => i.product_id))]
-  if (productIds.length) {
-    const supabase = await createClient()
-    const { data, error } = await supabase
-      .from('products')
-      .select('type')
-      .in('product_id', productIds)
-    if (error) throw new AppError(error.message, HTTP.INTERNAL)
-    hasDigital = (data ?? []).some((p) => p.type === 'Digital')
-  }
-
-  return { items, hasDigital, totalQty, subtotal }
+  return { items, totalQty, subtotal }
 }
 
 
 // Fetch Cart (§3.3): line items + server-side calculated totals reflecting the
 // applied promo code and the loyalty-point redemption stored on the cart header.
-// A stored promo that is no longer usable (expired, archived, digital cart, …)
-// is simply ignored in the totals rather than erroring.
+// A stored promo that is no longer usable (expired, archived, …) is simply
+// ignored in the totals rather than erroring.
 export const getCartWithTotals = async (userId: string): Promise<CartResponse> => {
   const facts = await loadCartFacts(userId)
   const supabase = await createClient()
@@ -190,7 +176,7 @@ export const getCartWithTotals = async (userId: string): Promise<CartResponse> =
       .select('code, value, status, expires_at, min_quantity, max_uses, used_count')
       .eq('code', meta.promo_code)
       .maybeSingle<PromoRow>()
-    if (row && !promoUnusableReason(row, { totalQty: facts.totalQty, hasDigital: facts.hasDigital })) {
+    if (row && !promoUnusableReason(row, { totalQty: facts.totalQty })) {
       promo = { code: row.code, value: Number(row.value) }
     }
   }
@@ -199,7 +185,6 @@ export const getCartWithTotals = async (userId: string): Promise<CartResponse> =
     items: facts.items,
     promo,
     pointsRedeemed: meta?.points_redeemed ?? 0,
-    hasDigital: facts.hasDigital,
   })
 
   return { items: facts.items, totals }

@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   Users, Package, ShoppingCart, Crown, Megaphone,
   LayoutDashboard, Tag, ListOrdered, Star,
-  Percent, ShieldX, ImagePlay, ShieldAlert, ScrollText,
+  Percent, ImagePlay, ShieldAlert, ScrollText,
   Banknote, QrCode,
 } from "lucide-react"
 import { NavMain } from "@/components/admin/sidebar/NavMain"
@@ -55,7 +55,7 @@ const navMain = [
     url: "#",
     icon: Crown,
     items: [
-      { title: "Customer Loyalty", url: "/admin/customer-management/loyalty", icon: Star },
+      { title: "Loyalty", url: "/admin/customer-management/loyalty", icon: Star },
     ],
   },
   {
@@ -64,7 +64,6 @@ const navMain = [
     icon: Megaphone,
     items: [
       { title: "Promo Codes", url: "/admin/content-management/promotional-codes", icon: Percent },
-      { title: "Exclusion Management", url: "#", icon: ShieldX },
       { title: "Banner Management", url: "#", icon: ImagePlay },
       {
         title: "Security Audit",

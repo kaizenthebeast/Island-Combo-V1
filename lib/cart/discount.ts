@@ -5,8 +5,8 @@ import { loadCartFacts } from './cart'
 import { promoUnusableReason, type PromoRow } from './promo-rules'
 
 // Validates a promo code against the caller's actual cart (existence, ACTIVE
-// status, expiry, usage limit, min-quantity, digital-product exclusion) and,
-// when valid, saves it to cart_meta for Fetch Cart to recalculate from.
+// status, expiry, usage limit, min-quantity) and, when valid, saves it to
+// cart_meta for Fetch Cart to recalculate from.
 export const applyCartDiscount = async (userId: string, code: string) => {
   const trimmed = (code ?? '').trim()
   if (!trimmed) throw new AppError('Promo code is required', HTTP.BAD_REQUEST)
@@ -23,7 +23,7 @@ export const applyCartDiscount = async (userId: string, code: string) => {
   if (error) throw new AppError(error.message, HTTP.INTERNAL)
   if (!promo) throw new AppError('Promo code not found', HTTP.NOT_FOUND)
 
-  const reason = promoUnusableReason(promo, { totalQty: facts.totalQty, hasDigital: facts.hasDigital })
+  const reason = promoUnusableReason(promo, { totalQty: facts.totalQty })
   if (reason) throw new AppError(reason, HTTP.BAD_REQUEST)
 
   const { error: upErr } = await supabase

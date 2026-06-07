@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { getMyOrderDetail } from '@/lib/orders/orders'
+import { getReviewableProductsForOrder } from '@/lib/reviews/review'
+import ReviewableProducts from './ReviewableProducts'
 import type { OrderStatus } from '@/lib/types/order'
 
 const formatUsd = (n: number) =>
@@ -33,6 +35,11 @@ const CustomerOrderPage = async ({
   if (!detail) notFound()
 
   const { order, items } = detail
+  // Once an order is completed the buyer can review each product they bought.
+  const reviewable =
+    order.order_status === 'completed'
+      ? await getReviewableProductsForOrder(order.order_id)
+      : []
   const status = STATUS_STYLE[order.order_status] ?? STATUS_STYLE.pending
   const itemsSubtotal = items.reduce((sum, i) => sum + i.line_total, 0)
   const isCod = order.payment_method === 'cod'
@@ -121,6 +128,9 @@ const CustomerOrderPage = async ({
           </p>
         </div>
       </div>
+
+      {/* Leave a review — completed orders only */}
+      <ReviewableProducts products={reviewable} />
     </section>
   )
 }

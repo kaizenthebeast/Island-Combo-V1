@@ -10,6 +10,7 @@ export type TransactionEvent = {
   status: string
   note: string | null
   actor_id: string | null
+  actor_name?: string | null   // resolved staff/admin name (audit display); null for customers/system
   source: TransactionEventSource
   metadata: Record<string, unknown> | null
   created_at: string

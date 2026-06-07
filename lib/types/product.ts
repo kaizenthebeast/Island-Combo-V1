@@ -2,17 +2,12 @@
 export type ProductStatus = 'ACTIVE' | 'DRAFT' | 'HIDDEN' | 'ARCHIVED'
 
 // Canonical product types — the single source of truth shared by the Zod
-// validator, the admin product form, and the checkout's digital-product rule.
-// 'Digital' is the spec's `type=dp`: it MUST be stored exactly like this because
-// the §3.9 payment rule (no COD for digital products) keys on this literal, so
-// everything references these constants instead of free-form strings to prevent
-// drift. The DB enforces the same set via a CHECK constraint on products.type.
+// validator and the admin product form. A 'Digital' tag is just product
+// metadata; the cart/checkout no longer special-cases it (digital goods are sold
+// through the separate cash-voucher flow). The DB enforces the set via a CHECK
+// constraint on products.type.
 export const PRODUCT_TYPES = ['Physical', 'Digital'] as const
 export type ProductType = (typeof PRODUCT_TYPES)[number]
-
-// The value the digital-product rules key on (kept as a named constant so a
-// rename surfaces as a compile error everywhere it's used).
-export const DIGITAL_PRODUCT_TYPE: ProductType = 'Digital'
 
 export type PricingTier = {
   label: string

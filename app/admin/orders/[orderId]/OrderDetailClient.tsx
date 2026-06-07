@@ -29,17 +29,25 @@ export default function OrderDetailClient({ detail, timeline }: Props) {
 
   const [status, setStatus] = useState<OrderStatus>(order.order_status)
   const [notes, setNotes] = useState('')
+  const [password, setPassword] = useState('')
   const [saving, setSaving] = useState(false)
 
   const subtotal = items.reduce((sum, i) => sum + Number(i.line_total ?? 0), 0)
 
   const handleUpdate = async () => {
+    if (!password.trim()) {
+      customToast.error({
+        title: 'Password required',
+        description: 'Enter your password to confirm the status change.',
+      })
+      return
+    }
     setSaving(true)
     try {
       const res = await fetch(`/api/admin/orders/${order.order_id}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, delivery_notes: notes || null }),
+        body: JSON.stringify({ status, delivery_notes: notes || null, password }),
       })
       const result = await res.json()
 
@@ -52,6 +60,7 @@ export default function OrderDetailClient({ detail, timeline }: Props) {
       }
 
       setNotes('')
+      setPassword('')
       customToast.success({
         title: 'Order updated',
         description: `Status set to “${orderStatusLabel(status)}”.`,
@@ -140,7 +149,9 @@ export default function OrderDetailClient({ detail, timeline }: Props) {
                       <span className="text-xs text-muted-foreground">{dateTime(ev.created_at)}</span>
                     </div>
                     {ev.note && <p className="mt-1 text-sm">{ev.note}</p>}
-                    <p className="mt-0.5 text-xs text-muted-foreground">via {ev.source}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {ev.actor_name ? `by ${ev.actor_name} · ` : ''}via {ev.source}
+                    </p>
                   </li>
                 ))}
               </ol>
@@ -207,10 +218,27 @@ export default function OrderDetailClient({ detail, timeline }: Props) {
               </p>
             )}
 
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">
+                Confirm with your password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                placeholder="Your account password"
+                className="mt-1 w-full px-3 py-2 text-sm rounded-xl border border-border"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Required to confirm it&apos;s you. This change is recorded against your account.
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={handleUpdate}
-              disabled={saving}
+              disabled={saving || !password.trim()}
               className="w-full rounded-full bg-brand hover:bg-brand-hover text-white py-2.5 text-sm font-medium disabled:opacity-50 cursor-pointer"
             >
               {saving ? 'Updating…' : 'Update order'}

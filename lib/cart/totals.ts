@@ -13,33 +13,28 @@ export function computeCartTotals({
   items,
   promo,
   pointsRedeemed,
-  hasDigital,
 }: {
   items: CartItem[]
   promo: { code: string; value: number } | null
   pointsRedeemed: number
-  hasDigital: boolean
 }): CartTotals {
   const subtotal = round2(items.reduce((sum, i) => sum + unitPriceOf(i) * i.quantity, 0))
 
-  // Digital carts can take neither a promo discount nor a points redemption.
-  const effectivePromo = hasDigital ? null : promo
-  const promoDiscount = effectivePromo ? round2((subtotal * effectivePromo.value) / 100) : 0
+  const promoDiscount = promo ? round2((subtotal * promo.value) / 100) : 0
 
   // Points redemption is capped so the order total can never go negative.
-  const pointsCash = hasDigital ? 0 : pointsToCash(pointsRedeemed)
+  const pointsCash = pointsToCash(pointsRedeemed)
   const pointsDiscount = round2(Math.min(pointsCash, Math.max(0, subtotal - promoDiscount)))
 
   const total = round2(Math.max(0, subtotal - promoDiscount - pointsDiscount))
 
   return {
     subtotal,
-    promoCode: effectivePromo?.code ?? null,
-    promoValue: effectivePromo?.value ?? null,
+    promoCode: promo?.code ?? null,
+    promoValue: promo?.value ?? null,
     promoDiscount,
-    pointsRedeemed: hasDigital ? 0 : pointsRedeemed,
+    pointsRedeemed,
     pointsDiscount,
     total,
-    hasDigital,
   }
 }

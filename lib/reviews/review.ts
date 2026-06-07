@@ -93,6 +93,35 @@ export const getReviewStats = async (slug: string): Promise<ReviewStats> => {
   return { avgRating, ratingCounts, total }
 }
 
+// The products in a given (completed) order the current user can still review —
+// backs the "leave a review" widget on the order-tracking page. RLS scopes the
+// underlying view to the caller's own orders, so a non-owned order yields [].
+export type ReviewableProduct = {
+  product_id: number
+  order_id: number
+  product_name: string
+  slug: string
+  ordered_at: string
+}
+
+export const getReviewableProductsForOrder = async (
+  orderId: number,
+): Promise<ReviewableProduct[]> => {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('reviewable_products')
+    .select('product_id, order_id, product_name, slug, ordered_at')
+    .eq('user_id', user.id)
+    .eq('order_id', orderId)
+    .order('product_name')
+
+  if (error) throw new Error(error.message)
+  return (data ?? []) as ReviewableProduct[]
+}
+
 export const getReviewEligibility = async (product_id: number, order_id: number) => {
   const supabase = await createClient()
 

@@ -10,7 +10,7 @@ export const getAllProducts = async (
 ): Promise<ProductCatalogItem[]> => {
   const supabase = await createClient()
 
-  let query = supabase.from('product_catalog_mv').select('*')
+  let query = supabase.from('product_catalog').select('*')
 
   if (opts?.categoryId) {
     const { data: cats, error: catErr } = await supabase
@@ -27,7 +27,7 @@ export const getAllProducts = async (
 
   if (opts?.sort === 'latest') {
     // product_id is an IDENTITY column, so DESC == newest-first without
-    // needing created_at in the materialized view.
+    // needing created_at in the view.
     query = query.order('product_id', { ascending: false })
   }
 
@@ -97,7 +97,7 @@ export const getPublicProductsPage = async (
   const limit = Math.min(Math.max(1, Math.floor(input.limit ?? 20)), MAX_PAGE_SIZE)
   const sort: PublicProductSort = input.sort ?? 'date_desc'
 
-  let query = supabase.from('product_catalog_mv').select('*', { count: 'exact' })
+  let query = supabase.from('product_catalog').select('*', { count: 'exact' })
 
   if (input.categoryId) {
     const { data: cats, error: catErr } = await supabase
@@ -115,7 +115,7 @@ export const getPublicProductsPage = async (
   if (typeof input.minPrice === 'number') query = query.gte('final_price', input.minPrice)
   if (typeof input.maxPrice === 'number') query = query.lte('final_price', input.maxPrice)
 
-  // The MV has no created_at, so product_id (IDENTITY = monotonic) proxies "date".
+  // The view has no created_at, so product_id (IDENTITY = monotonic) proxies "date".
   switch (sort) {
     case 'price_asc':  query = query.order('final_price', { ascending: true }); break
     case 'price_desc': query = query.order('final_price', { ascending: false }); break
@@ -146,7 +146,7 @@ export const getSaleProducts = async (
 ): Promise<ProductCatalogItem[]> => {
   const supabase = await createClient()
   const { data, error } = await supabase
-    .from('product_catalog_mv')
+    .from('product_catalog')
     .select('*')
     .gt('discount', 0)
     .order('discount', { ascending: false })
@@ -176,7 +176,7 @@ export const getRecommendedProducts = async (
 
   if (categoryId) {
     const { data, error } = await supabase
-      .from('product_catalog_mv')
+      .from('product_catalog')
       .select('*')
       .eq('category_id', categoryId)
       .neq('product_id', productId)
@@ -189,7 +189,7 @@ export const getRecommendedProducts = async (
   // Backfill with newest products when the category doesn't have enough.
   if (collected.length < limit) {
     const { data, error } = await supabase
-      .from('product_catalog_mv')
+      .from('product_catalog')
       .select('*')
       .neq('product_id', productId)
       .order('product_id', { ascending: false })

@@ -105,11 +105,12 @@ export const getMyOrderDetail = async (
 
   const orderId = order.order_id
 
-  // Line items with the product name + SKU (FKs: order_items → product_variants
-  // → products), ordered for a stable display.
+  // Line items read straight from the order_items snapshot (product_name + sku
+  // are frozen at purchase time — migration 0026), so renames/deletes never
+  // rewrite history. Ordered for a stable display.
   const { data: itemRows, error: itemErr } = await supabase
     .from('order_items')
-    .select('id, variant_id, quantity, price, product_variants(sku, products(name))')
+    .select('id, variant_id, quantity, price, product_name, sku')
     .eq('order_id', orderId)
     .order('id', { ascending: true })
 
@@ -120,19 +121,18 @@ export const getMyOrderDetail = async (
     variant_id: number | null
     quantity: number
     price: number
-    product_variants: { sku: string | null; products: { name: string | null } | null } | null
+    product_name: string | null
+    sku: string | null
   }
 
-  // Cast through unknown: variant_id/product_id are to-one FKs, so PostgREST
-  // returns nested objects at runtime even though supabase-js infers arrays.
-  const items: AdminOrderItem[] = ((itemRows ?? []) as unknown as RawItem[]).map((r) => ({
+  const items: AdminOrderItem[] = ((itemRows ?? []) as RawItem[]).map((r) => ({
     id: Number(r.id),
     variant_id: r.variant_id,
     quantity: r.quantity,
     price: r.price,
     line_total: r.price * r.quantity,
-    sku: r.product_variants?.sku ?? null,
-    product_name: r.product_variants?.products?.name ?? null,
+    sku: r.sku,
+    product_name: r.product_name,
   }))
 
   // Timeline/tracking updates (status changes + timestamps). transaction_event's

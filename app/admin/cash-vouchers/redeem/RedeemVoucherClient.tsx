@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, type ComponentType } from 'react'
 import { Search, ShieldCheck, BadgeCheck, AlertCircle, RotateCcw } from 'lucide-react'
 import { PageHeader } from '@/components/admin/PageHeader'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
@@ -16,16 +16,22 @@ const STATUS_BADGE: Record<CashVoucherStatus, { label: string; variant: BadgeVar
 }
 
 const money = (n: number) =>
-  new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(n)
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)
 
 const formatDateTime = (iso: string | null) => {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('en-PH', {
+  return new Date(iso).toLocaleString('en-US', {
     year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   })
 }
 
-export default function RedeemVoucherClient() {
+// The team's QR scanner plugs in here: a component that calls `onScan(code)` with
+// the decoded voucher code. Left optional so manual entry works without it.
+export type VoucherScanner = ComponentType<{ onScan: (code: string) => void }>
+
+export default function RedeemVoucherClient(
+  { ScannerComponent }: { ScannerComponent?: VoucherScanner } = {},
+) {
   // search
   const [codeInput, setCodeInput] = useState('')
   const [voucher, setVoucher] = useState<CashVoucher | null>(null)
@@ -48,15 +54,16 @@ export default function RedeemVoucherClient() {
     setJustRedeemed(false)
   }
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!codeInput.trim()) return
+  // Single lookup path used by both the manual form and the QR scanner.
+  const runSearch = (rawCode: string) => {
+    const code = rawCode.trim()
+    if (!code) return
     setSearchError(null)
     setRedeemError(null)
     setVoucher(null)
     setJustRedeemed(false)
     startSearch(async () => {
-      const res = await findCashVoucherByCode(codeInput)
+      const res = await findCashVoucherByCode(code)
       if (!res.success || !res.voucher) {
         setSearchError(res.message ?? 'Voucher not found.')
         return
@@ -66,6 +73,20 @@ export default function RedeemVoucherClient() {
       setRedeemerName(res.voucher.recipient_name ?? '')
       setIdVerified(false)
     })
+  }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    runSearch(codeInput)
+  }
+
+  // ── QR scanner integration point ────────────────────────────────────────────
+  // The team's QR scanner only needs to call this with the decoded value: it
+  // mirrors the field and runs the same lookup the manual form does. Pass the
+  // scanner in via the `ScannerComponent` prop (it's rendered in the slot below).
+  const handleScannedCode = (code: string) => {
+    setCodeInput(code)
+    runSearch(code)
   }
 
   const handleRedeem = () => {
@@ -124,6 +145,14 @@ export default function RedeemVoucherClient() {
               {searching ? 'Searching…' : 'Search'}
             </button>
           </div>
+
+          {/* QR scanner slot — the team's scanner renders here and calls
+              handleScannedCode(code) on a successful decode. */}
+          {ScannerComponent && (
+            <div className="mt-3">
+              <ScannerComponent onScan={handleScannedCode} />
+            </div>
+          )}
 
           {searchError && (
             <div className="mt-3 flex items-center gap-2 rounded-lg border border-danger/30 bg-danger-tint px-3 py-2">
