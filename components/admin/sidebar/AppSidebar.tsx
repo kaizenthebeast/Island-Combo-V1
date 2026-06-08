@@ -71,14 +71,20 @@ const navMain = [
     items: [
       { title: "Promo Codes", url: "/admin/content-management/promotional-codes", icon: Percent },
       { title: "Banner Management", url: "#", icon: ImagePlay },
-      {
-        title: "Security Audit",
-        url: "#",
-        icon: ShieldAlert,
-        items: [
-          { title: "Logs", url: "#", icon: ScrollText },
-        ],
-      },
+    ],
+  },
+  {
+    // Admin-only audit log. The whole /admin area is already admin-gated by
+    // proxy.ts, so every item here is implicitly admin-only.
+    title: "Audit Logs",
+    url: "/admin/audit/users",
+    icon: ShieldAlert,
+    items: [
+      { title: "User Activity", url: "/admin/audit/users", icon: Users },
+      { title: "Orders", url: "/admin/audit/orders", icon: ListOrdered },
+      { title: "Products & Inventory", url: "/admin/audit/products", icon: Package },
+      { title: "Payments", url: "/admin/audit/payments", icon: Banknote },
+      { title: "Admin Actions", url: "/admin/audit/admins", icon: ScrollText },
     ],
   },
 ]

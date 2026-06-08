@@ -24,6 +24,16 @@ export interface ColumnDef<Row> {
   sortable?: boolean
 }
 
+// A dropdown filter rendered inside the table toolbar. Tables can have several;
+// each owns its own URL param via the parent (keeps filtering server-side / SSR).
+export interface TableFilter {
+  key: string
+  label?: string
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+}
+
 export interface DataTableProps<Row extends Record<string, unknown>> {
   // Data (already paginated by the server)
   rows: Row[]
@@ -43,10 +53,12 @@ export interface DataTableProps<Row extends Record<string, unknown>> {
   onSearchChange: (q: string) => void
   searchPlaceholder?: string
 
-  // Filter dropdown
+  // Filter dropdown — legacy single filter (first item = "show all").
   filterValue?: string
   onFilterChange?: (v: string) => void
-  filterOptions?: string[]                          // first item = "show all"
+  filterOptions?: string[]
+  // Multiple filters — each rendered as a labelled dropdown in the toolbar.
+  filters?: TableFilter[]
 
   // Sort
   sortKey?: keyof Row
@@ -167,6 +179,7 @@ export function DataTable<Row extends Record<string, unknown>>({
   filterValue,
   onFilterChange,
   filterOptions = [],
+  filters = [],
 
   sortKey,
   sortDir = 'asc',
@@ -233,6 +246,19 @@ export function DataTable<Row extends Record<string, unknown>>({
             {filterOptions.map((opt) => <option key={opt}>{opt}</option>)}
           </select>
         )}
+
+        {/* Multiple filters — all live inside the toolbar for a consistent look. */}
+        {filters.map((f) => (
+          <select
+            key={f.key}
+            value={f.value}
+            onChange={(e) => f.onChange(e.target.value)}
+            aria-label={f.label ?? f.key}
+            className="px-3 py-2 text-sm rounded-xl border border-border"
+          >
+            {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        ))}
 
         <span className="ml-auto text-xs text-muted-foreground">
           {total} {total === 1 ? 'result' : 'results'}

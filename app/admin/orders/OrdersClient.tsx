@@ -46,8 +46,8 @@ export default function OrdersClient({ orders, total, page, pageSize, payment }:
     sortDir: 'desc',
   })
 
-  // Payment-method filter lives outside DataTable's single filter slot, so it
-  // manages its own URL param (preserving the others).
+  // The payment-method filter is rendered inside the DataTable toolbar (via the
+  // `filters` prop) but manages its own URL param so it composes with the others.
   const setPayment = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
     if (!value || value === 'All') params.delete('payment')
@@ -126,19 +126,6 @@ export default function OrdersClient({ orders, total, page, pageSize, payment }:
         subtitle="Track and update orders as they move through fulfillment"
       />
 
-      <div className="mb-4 flex items-center gap-2">
-        <label className="text-xs font-medium text-muted-foreground">Payment</label>
-        <select
-          value={payment}
-          onChange={(e) => setPayment(e.target.value)}
-          className="px-3 py-2 text-sm rounded-xl border border-border bg-white"
-        >
-          <option value="All">All payments</option>
-          <option value="cod">COD</option>
-          <option value="card">PayPal</option>
-        </select>
-      </div>
-
       <DataTable<Row>
         rows={rows}
         total={total}
@@ -154,9 +141,29 @@ export default function OrdersClient({ orders, total, page, pageSize, payment }:
         onSearchChange={setSearchInput}
         searchPlaceholder="Search by order #, name, or email…"
 
-        filterValue={state.filter || 'All'}
-        onFilterChange={setFilter}
-        filterOptions={['All', ...ORDER_STATUSES]}
+        filters={[
+          {
+            key: 'status',
+            label: 'Status',
+            value: state.filter || 'All',
+            onChange: setFilter,
+            options: [
+              { value: 'All', label: 'All statuses' },
+              ...ORDER_STATUSES.map((st) => ({ value: st, label: orderStatusLabel(st) })),
+            ],
+          },
+          {
+            key: 'payment',
+            label: 'Payment',
+            value: payment || 'All',
+            onChange: setPayment,
+            options: [
+              { value: 'All', label: 'All payments' },
+              { value: 'cod', label: 'COD' },
+              { value: 'card', label: 'PayPal' },
+            ],
+          },
+        ]}
 
         sortKey={sortKeyForTable as keyof Row | undefined}
         sortDir={state.sortDir}

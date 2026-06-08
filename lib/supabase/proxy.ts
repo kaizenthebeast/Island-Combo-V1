@@ -5,6 +5,7 @@ import { requireEnv } from "@/lib/config/env";
 
 const PROTECTED_ROUTES = ["/protected", "/checkout/address"];
 const ADMIN_ROUTES = ["/admin"];
+const AUDIT_ROUTES = ["/admin/audit"];
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({ request });
@@ -53,5 +54,25 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return response;  
+  // Explicit guard for the admin-only Security Audit Log. /admin/audit is already
+  // covered by the /admin admin check above; this dedicated block enforces the
+  // audit subtree's admin-only requirement using the SAME client, role lookup,
+  // and redirect as the existing admin guard.
+  const isAuditRoute = AUDIT_ROUTES.some((route) => path.startsWith(route));
+  if (isAuditRoute) {
+    if (!user || user.is_anonymous) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+
+    const { data: auditProfile, error: auditError } = await supabase.from('profile').select('role').eq('user_id', user.id).single()
+    if (auditError || auditProfile?.role !== 'admin') {
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  return response;
 }
