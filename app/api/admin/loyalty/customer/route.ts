@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { findCustomerByEmail } from '@/lib/admin/loyalty'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/admin/loyalty/customer?email= — Admin Customer Search (Flow D).
 // Returns the matched customer (or null) with their card + verified status.

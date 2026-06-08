@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ArrowLeft, Copy, Check, CheckCircle2, Circle, ImagePlus, X, Video } from 'lucide-react'
 import { cancelMyOrder } from '@/lib/orders/orders'
 import { uploadRefundMedia } from '@/lib/orders/refund-upload'
-import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { OrderHistoryRow, CustomerOrderDetail } from '@/types/order'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
+import type { OrderHistoryRow, CustomerOrderDetail } from '@/shared/types/order'
 
 const TRACKED = new Set(['shipped', 'out_for_delivery', 'delivered', 'completed'])
 const CANCELLABLE = new Set(['pending', 'paid'])

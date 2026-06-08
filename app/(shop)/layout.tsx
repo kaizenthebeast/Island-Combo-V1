@@ -1,7 +1,7 @@
-import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
-import NavbarGate from "@/components/layout/NavbarGate";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import Footer from "@/shared/components/layout/Footer";
+import Navbar from "@/shared/components/layout/Navbar";
+import NavbarGate from "@/shared/components/layout/NavbarGate";
+import MobileBottomNav from "@/shared/components/layout/MobileBottomNav";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ShopLayout({

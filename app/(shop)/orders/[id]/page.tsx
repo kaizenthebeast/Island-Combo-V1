@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { getMyOrderDetail } from '@/lib/orders/orders'
 import { getReviewableProductsForOrder } from '@/lib/reviews/review'
 import ReviewableProducts from './ReviewableProducts'
-import type { OrderStatus } from '@/types/order'
+import type { OrderStatus } from '@/shared/types/order'
 
 const formatUsd = (n: number) =>
   `$${Number(n ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

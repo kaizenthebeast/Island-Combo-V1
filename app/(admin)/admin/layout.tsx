@@ -1,4 +1,4 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/shared/components/ui/sidebar"
 import { AppSidebarServer } from "@/components/admin/sidebar/AppSidebarServer"
 
 

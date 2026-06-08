@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/shared/components/ui/dialog'
 import { AddCategoryForm } from '@/components/admin/category/forms/AddCategoryForm'
 import { AddCategoryFormValues } from '@/lib/validations/category'
 

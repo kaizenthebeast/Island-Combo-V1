@@ -7,7 +7,7 @@ import { editPromoCodeSchema, type EditPromoCodeFormValues } from '@/lib/validat
 import { updatePromoCode, restorePromoCode } from '@/lib/admin/promotional-codes/promo-code'
 import { PromoCodeFields } from './PromoCodeUIForm'
 import { ArchiveRestore } from 'lucide-react'
-import type { PromoCode } from '@/types/promo-code'
+import type { PromoCode } from '@/shared/types/promo-code'
 
 type Props = {
   promoCode: PromoCode

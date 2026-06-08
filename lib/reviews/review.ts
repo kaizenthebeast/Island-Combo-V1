@@ -2,7 +2,7 @@
 /** Product-review reads & customer mutations. */
 
 import { createClient } from '@/lib/supabase/server'
-import type { ProductReview, PaginatedReviews, AddReviewPayload, UpdateReviewPayload, ReviewStats } from '@/types/review'
+import type { ProductReview, PaginatedReviews, AddReviewPayload, UpdateReviewPayload, ReviewStats } from '@/shared/types/review'
 
 export const getProductReviews = async (
   slug: string,

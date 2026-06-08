@@ -3,13 +3,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { CircleDollarSign } from 'lucide-react'
 import PromoCodeForm from '@/components/features/promo/PromoCodeForm'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Switch } from '@/shared/components/ui/switch'
+import { Input } from '@/shared/components/ui/input'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { useCheckoutStore } from '@/stores/checkout-store'
 import { useCartStore } from '@/stores/cart-store'
 import { MIN_REDEEM_POINTS, maxRedeemablePoints, pointsToCash } from '@/lib/cart/loyalty-config'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import Link from 'next/link'
 
 type Props = {

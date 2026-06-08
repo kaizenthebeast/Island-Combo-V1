@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { linkLoyaltyCard, unlinkLoyaltyCard } from '@/lib/admin/loyalty'
-import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/admin/loyalty-card — Link Loyalty Card Number API (§3.8, back office)
 // Admin links a physical card to a customer profile; has_perks flips on. Admin

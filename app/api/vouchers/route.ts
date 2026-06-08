@@ -1,5 +1,5 @@
 import { requireUser } from '@/lib/auth'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import { getMyCashVouchers } from '@/lib/cash-vouchers/cash-voucher'
 
 // GET /api/vouchers

@@ -6,9 +6,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge from '@/components/admin/StatusBadge'
-import { useTableUrlState } from '@/hooks/use-table-url-state'
+import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
 import { ORDER_STATUSES, orderStatusLabel, orderStatusVariant } from '@/lib/orders/order-status'
-import type { AdminOrderListRow } from '@/types/order'
+import type { AdminOrderListRow } from '@/shared/types/order'
 
 type Row = {
   order_id: number

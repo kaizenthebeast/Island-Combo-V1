@@ -7,10 +7,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/shared/components/ui/dialog'
 import { EditCategoryForm } from '@/components/admin/category/forms/EditCategoryForm'
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
-import type { Category } from '@/types/category'
+import type { Category } from '@/shared/types/category'
 
 type Props = {
   selectedCategory: Category | null   // the category being edited

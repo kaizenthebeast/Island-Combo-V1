@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { updateOrderStatus } from '@/lib/admin/orders/orders'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
-import type { OrderStatus } from '@/types/order'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
+import type { OrderStatus } from '@/shared/types/order'
 
 const VALID_STATUSES: OrderStatus[] = [
   'pending', 'paid', 'shipped', 'out_for_delivery', 'delivered', 'completed', 'cancelled',

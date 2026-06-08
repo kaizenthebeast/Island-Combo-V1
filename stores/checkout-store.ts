@@ -1,6 +1,6 @@
 /** Zustand store for checkout state. */
 import { create } from 'zustand'
-import type { PromoCode } from '@/types/promo-code'
+import type { PromoCode } from '@/shared/types/promo-code'
 
 type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 

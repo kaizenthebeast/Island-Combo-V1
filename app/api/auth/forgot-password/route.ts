@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requestPasswordReset } from '@/lib/auth';
-import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond';
+import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond';
 
 export async function POST(request: NextRequest) {
     const { email } = await request.json();

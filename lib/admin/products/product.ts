@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import type { AdminProduct } from '@/types/product'
+import type { AdminProduct } from '@/shared/types/product'
 import type { VariantWithUploadedImages } from '@/lib/admin/products/product-upload'
 import type { ProductFormValues } from '@/lib/validations/product'
 

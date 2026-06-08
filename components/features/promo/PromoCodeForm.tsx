@@ -8,10 +8,10 @@ import {
   ApplyPromoCodeFormValues,
 } from '@/lib/validations/promo-code'
 import { useCartStore } from '@/stores/cart-store'
-import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { PromoCode } from '@/types/promo-code'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
+import type { PromoCode } from '@/shared/types/promo-code'
 
-import { Input } from '@/components/ui/input'
+import { Input } from '@/shared/components/ui/input'
 import { AlertCircle } from 'lucide-react'
 import {
   Form,
@@ -19,7 +19,7 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/shared/components/ui/form'
 
 type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 

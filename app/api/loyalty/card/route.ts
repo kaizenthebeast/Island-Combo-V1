@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { linkMyLoyaltyCard } from '@/lib/loyalty/card'
 import { getLoyaltyStatus } from '@/lib/loyalty/status'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/loyalty/card — "Retrieve my points": claim my Loyverse card. Credits
 // the migrated balance and links the card to my account.

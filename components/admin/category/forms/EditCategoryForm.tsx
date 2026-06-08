@@ -7,7 +7,7 @@ import { editCategorySchema, EditCategoryFormValues } from '@/lib/validations/ca
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
 import { restoreCategory } from '@/lib/admin/categories/category'
 import { ArchiveRestore } from 'lucide-react'     
-import type { Category } from '@/types/category'
+import type { Category } from '@/shared/types/category'
 
 type Props = {
   selectedCategory: Category

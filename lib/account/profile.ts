@@ -2,7 +2,7 @@
  *  pass the authenticated userId (derived from the JWT at the API-route
  *  boundary); RLS on `profile`/`profile_pts` enforces the boundary. */
 import { createClient } from "@/lib/supabase/server";
-import type { Address } from '@/types/users';
+import type { Address } from '@/shared/types/users';
 import { revalidatePath } from "next/cache";
 
 // Shared types

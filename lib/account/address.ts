@@ -3,7 +3,7 @@
  *  on `addresses` enforces the security boundary. No auth happens here. */
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import type { AddressFormValues, Address } from '@/types/users'
+import type { AddressFormValues, Address } from '@/shared/types/users'
 
 const MAX_ADDRESSES_PER_USER = 3
 

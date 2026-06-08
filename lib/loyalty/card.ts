@@ -4,7 +4,7 @@
  *  card to my profile, and marks the card claimed (so it can't be claimed twice).
  *  It does NOT touch my permanent system loyalty_card_number. */
 import { createClient } from '@/lib/supabase/server'
-import { AppError, HTTP } from '@/lib/api/respond'
+import { AppError, HTTP } from '@/shared/lib/http/respond'
 
 const ERRCODE_STATUS: Record<string, number> = {
   '28000': HTTP.UNAUTHORIZED,

@@ -12,7 +12,7 @@ import { NavUser } from "@/components/admin/sidebar/NavUser"
 import Image from "next/image"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@/shared/components/ui/sidebar"
 
 const navMain = [
   {

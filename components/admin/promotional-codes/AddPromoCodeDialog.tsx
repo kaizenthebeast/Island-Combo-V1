@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/shared/components/ui/dialog'
 import { AddPromoCodeForm } from '@/components/admin/promotional-codes/forms/AddPromoCodeForm'
 import type { AddPromoCodeFormValues } from '@/lib/validations/promo-code'
 

@@ -6,13 +6,13 @@ import {
   SheetContent,
   SheetTitle,
   SheetDescription,
-} from '@/components/ui/sheet'
+} from '@/shared/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ArrowLeft, MapPin, ChevronRight, Pencil, Trash2, AlertCircle } from 'lucide-react'
-import { Address } from '@/types/users'
+import { Address } from '@/shared/types/users'
 import AddressFormBody from '@/components/features/address/AddressFormBody'
-import DeleteModal from '@/components/shared/modals/DeleteModal'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import DeleteModal from '@/shared/components/common/modals/DeleteModal'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 type Profile = { first_name: string | null; last_name: string | null; phone_text: string | null } | null
 

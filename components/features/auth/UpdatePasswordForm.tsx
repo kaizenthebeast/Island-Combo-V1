@@ -1,16 +1,16 @@
 "use client";
 
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/shared/utils/cn";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
 import {
   Form,
   FormControl,
@@ -18,7 +18,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/shared/components/ui/form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";

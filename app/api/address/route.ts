@@ -7,8 +7,8 @@ import {
   setDefaultAddress,
   deleteAddress,
 } from '@/lib/account/address'
-import type { AddressFormValues } from '@/types/users'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import type { AddressFormValues } from '@/shared/types/users'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // All address operations are self-scoped — the underlying lib functions derive
 // user_id from the session and RLS enforces the boundary. requireUser is the

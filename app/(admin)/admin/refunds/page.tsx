@@ -1,6 +1,6 @@
 import { getRefunds } from '@/lib/admin/refunds'
 import RefundsClient from './RefundsClient'
-import type { RefundStatus } from '@/types/refund'
+import type { RefundStatus } from '@/shared/types/refund'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

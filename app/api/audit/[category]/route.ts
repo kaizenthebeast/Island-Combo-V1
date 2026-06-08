@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
-import { HTTP, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiError, toApiError } from '@/shared/lib/http/respond'
 import { getAuditLogs } from '@/lib/audit'
 import { isAuditCategory } from '@/lib/audit-config'
 

@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { PayPalSdk } from '@/components/shared/PayPalSdk'
+import { PayPalSdk } from '@/shared/components/common/PayPalSdk'
 import CashVoucherFormContainer from '@/components/features/cash-voucher/CashVoucherFormContainer'
 import CashVoucherSuccess from '@/components/features/cash-voucher/CashVoucherSuccess'
 import {
@@ -12,7 +12,7 @@ import {
   CASH_VOUCHER_STEP_FIELDS,
   type CashVoucherFormValues,
 } from '@/lib/validations/cash-voucher'
-import type { CashVoucher } from '@/types/cash-voucher'
+import type { CashVoucher } from '@/shared/types/cash-voucher'
 
 const SUCCESS_STEP = 4
 

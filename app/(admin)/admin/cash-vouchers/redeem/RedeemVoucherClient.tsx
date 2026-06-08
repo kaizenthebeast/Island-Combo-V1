@@ -5,7 +5,7 @@ import { Search, ShieldCheck, BadgeCheck, AlertCircle, RotateCcw } from 'lucide-
 import { PageHeader } from '@/components/admin/PageHeader'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
 import { findCashVoucherByCode, redeemCashVoucher } from '@/lib/admin/cash-vouchers'
-import type { CashVoucher, CashVoucherStatus } from '@/types/cash-voucher'
+import type { CashVoucher, CashVoucherStatus } from '@/shared/types/cash-voucher'
 
 // status → badge styling
 const STATUS_BADGE: Record<CashVoucherStatus, { label: string; variant: BadgeVariant }> = {

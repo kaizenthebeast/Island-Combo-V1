@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { getMyAccount, updateMyAccount } from '@/lib/account/profile'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/profile — authenticated aggregator
 // Returns identity + role + loyalty + default address for the signed-in user.

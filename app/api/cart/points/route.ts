@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { applyCartPoints, removeCartPoints, getCartWithTotals } from '@/lib/cart'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // Apply Points (§3.3) — authenticated, non-anonymous only. Reserves loyalty
 // points as a cash discount on the cart; balance/min/max/digital are validated.

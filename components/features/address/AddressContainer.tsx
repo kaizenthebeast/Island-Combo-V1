@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
-import { Address } from "@/types/users"
+import { Address } from "@/shared/types/users"
 import AddressFormBody from "@/components/features/address/AddressFormBody"
 import AddressDetails from "@/components/features/checkout/place-order/AddressDetails"
 import MobileAddressSelector from "@/components/features/checkout/place-order/MobileAddressSelector"

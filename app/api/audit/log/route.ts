@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import { insertAuditLog } from '@/lib/audit'
 
 // POST /api/audit/log — internal endpoint to record an app-level audit entry

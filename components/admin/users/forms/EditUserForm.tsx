@@ -7,7 +7,7 @@ import { editUserSchema, type EditUserFormValues } from '@/lib/validations/user'
 import { updateUser, restoreUser } from '@/lib/admin/users/users'
 import { UserFields } from './UserUIForm'
 import { ArchiveRestore } from 'lucide-react'          
-import type { AdminStaff } from '@/types/users'
+import type { AdminStaff } from '@/shared/types/users'
 
 type Props = {
   user: AdminStaff

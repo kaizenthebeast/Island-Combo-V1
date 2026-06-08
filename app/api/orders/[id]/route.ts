@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import { getMyOrderDetail } from '@/lib/orders/orders'
 
 // GET /api/orders/:id

@@ -1,6 +1,6 @@
 import OrdersClient from './OrdersClient'
 import { getOrdersPage, type OrdersSortKey } from '@/lib/admin/orders'
-import type { AdminOrderListRow } from '@/types/order'
+import type { AdminOrderListRow } from '@/shared/types/order'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

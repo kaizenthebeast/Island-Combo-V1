@@ -8,7 +8,7 @@ import {
   restoreCategory,
 } from '@/lib/admin/categories/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validations/category'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/category
 

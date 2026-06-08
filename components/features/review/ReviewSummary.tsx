@@ -1,5 +1,5 @@
 import { StarRating } from './ReviewCard'
-import type { ReviewStats } from '@/types/review'
+import type { ReviewStats } from '@/shared/types/review'
 
 export type ReviewFilter = 'all' | 'media'
 

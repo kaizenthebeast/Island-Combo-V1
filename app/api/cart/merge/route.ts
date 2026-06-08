@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { mergeGuestCart, getCartWithTotals } from '@/lib/cart'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // Cart Merge (§3.3) — authenticated. Folds the guest cart (identified by the
 // guestUserId from the just-ended anonymous session) into the user's cart,

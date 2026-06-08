@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { importLoyverseCards, type LoyverseCardEntry } from '@/lib/admin/loyalty'
-import { HTTP, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/admin/loyalty/import — migrate existing Loyverse cards (§3.8).
 // Body: { entries: [{ cardNumber, points, name?, email? }] }. Bulk-upserts into

@@ -2,8 +2,8 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useFormContext, useFieldArray } from 'react-hook-form'
-import { cn } from '@/lib/utils/cn'
-import { PRODUCT_TYPES } from '@/types/product'
+import { cn } from '@/shared/utils/cn'
+import { PRODUCT_TYPES } from '@/shared/types/product'
 
 // Types
 

@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import { getMyOrdersPage } from '@/lib/orders/orders'
 import { ORDER_STATUSES } from '@/lib/orders/order-status'
-import type { OrderStatus } from '@/types/order'
+import type { OrderStatus } from '@/shared/types/order'
 
 // GET /api/orders?page=1&pageSize=10&status=shipped
 // Fetch Order History: a paginated list of the caller's own past orders with

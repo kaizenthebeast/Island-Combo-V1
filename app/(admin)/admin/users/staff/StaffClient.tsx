@@ -6,9 +6,9 @@ import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import EditUserDialog from '@/components/admin/users/EditUserDialog'
 import DeleteStaffDialog from '@/components/admin/users/DeleteStaffDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { useTableUrlState } from '@/hooks/use-table-url-state'
+import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
 import { softDeleteUser } from '@/lib/admin/users/users'
-import type { AdminStaff } from '@/types/users'
+import type { AdminStaff } from '@/shared/types/users'
 
 type StaffStatus = 'ACTIVE' | 'INACTIVE'
 

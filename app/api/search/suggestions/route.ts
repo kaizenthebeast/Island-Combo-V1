@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getProductSuggestions } from '@/lib/products/search'
-import { apiOk, apiError, HTTP } from '@/lib/api/respond'
+import { apiOk, apiError, HTTP } from '@/shared/lib/http/respond'
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get('q') ?? ''

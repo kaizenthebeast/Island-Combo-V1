@@ -4,7 +4,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from '@/components/ui/carousel'
+} from '@/shared/components/ui/carousel'
 
 const SaleAndPromos = async () => {
   const products = await getSaleProducts(12)

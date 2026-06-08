@@ -3,12 +3,12 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { assertAdmin } from '@/lib/auth'
-import { requireEnv } from '@/lib/config/env'
+import { requireEnv } from '@/shared/config/env'
 import { revalidatePath } from 'next/cache'
 import type {
   Banner, BannerInsert, BannerUpdate,
   PromotionAd, PromotionAdInsert, PromotionAdUpdate,
-} from '@/types/banner'
+} from '@/shared/types/banner'
 
 const REVALIDATE    = '/admin/content-management/banner'
 const SUPABASE_URL  = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')

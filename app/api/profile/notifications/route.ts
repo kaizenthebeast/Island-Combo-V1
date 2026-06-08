@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/lib/account/profile'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/profile/notifications
 // Returns the signed-in user's email-notification opt-in flags.

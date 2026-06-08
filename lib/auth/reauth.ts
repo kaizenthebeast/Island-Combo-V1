@@ -4,7 +4,7 @@
 
 import { createServerClient } from '@supabase/ssr'
 import { requireUser } from '@/lib/auth/guards'
-import { requireEnv } from '@/lib/config/env'
+import { requireEnv } from '@/shared/config/env'
 
 // Verifies the signed-in user's password WITHOUT touching their session: a
 // throwaway client with no-op cookies signs in only to validate the credential,

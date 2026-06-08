@@ -7,8 +7,8 @@ import AddProductDialog from '@/components/admin/products/AddProductDialog'
 import EditProductDialog from '@/components/admin/products/EditProductDialog'
 import DeleteProductDialog from '@/components/admin/products/DeleteProductDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { useTableUrlState } from '@/hooks/use-table-url-state'
-import type { AdminProduct, ProductStatus } from '@/types/product'
+import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
+import type { AdminProduct, ProductStatus } from '@/shared/types/product'
 import { softDeleteProduct } from '@/lib/admin/products/product'
 
 type Row = {

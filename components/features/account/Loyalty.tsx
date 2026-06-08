@@ -6,9 +6,9 @@ import {
   Info, CircleDollarSign, ShoppingBag, Infinity as InfinityIcon, BadgePercent,
   CalendarClock, Percent, Wallet,
 } from 'lucide-react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
+import { Input } from '@/shared/components/ui/input'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import { pointsToCash } from '@/lib/cart/loyalty-config'
 import type { LoyaltyHistoryEntry } from '@/lib/loyalty/history'
 

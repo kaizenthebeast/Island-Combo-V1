@@ -1,4 +1,4 @@
-import { apiOk, toApiError } from '@/lib/api/respond'
+import { apiOk, toApiError } from '@/shared/lib/http/respond'
 import { getAvailablePaymentMethods } from '@/lib/payments/payment-methods'
 
 // GET /api/payment-methods

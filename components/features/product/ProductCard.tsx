@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
-import type { ProductCatalogItem } from '@/types/product'
-import { getPublicImageUrl } from '@/lib/utils/image-url'
+import { Card, CardContent } from '@/shared/components/ui/card'
+import type { ProductCatalogItem } from '@/shared/types/product'
+import { getPublicImageUrl } from '@/shared/utils/image-url'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Package } from 'lucide-react'

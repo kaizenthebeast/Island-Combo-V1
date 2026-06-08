@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 import { getProductReviews, addProductReview } from '@/lib/reviews/index'
 
 // GET /api/review?slug=<product-slug>&page=&limit=

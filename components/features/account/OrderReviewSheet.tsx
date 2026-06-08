@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/shared/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ArrowLeft, CheckCircle2, Star, ImagePlus, X, Video } from 'lucide-react'
 import { addProductReview } from '@/lib/reviews/review'
 import { uploadReviewMedia } from '@/lib/reviews/review-upload'
-import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { OrderHistoryRow } from '@/types/order'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
+import type { OrderHistoryRow } from '@/shared/types/order'
 
 const PLACEHOLDER = '/images/placeholder.png'
 const MAX_FILES = 6

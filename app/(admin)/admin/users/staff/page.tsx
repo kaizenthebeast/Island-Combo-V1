@@ -1,7 +1,7 @@
 import React from 'react'
 import StaffClient from './StaffClient'
 import { getStaffPage, type StaffSortKey } from '@/lib/admin/users/users'
-import type { AdminStaff } from '@/types/users'
+import type { AdminStaff } from '@/shared/types/users'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

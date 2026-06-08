@@ -5,7 +5,7 @@ import {
     SheetContent,
     SheetTitle,
     SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/shared/components/ui/sheet";
 import AddressFormBody from "@/components/features/address/AddressFormBody";
 
 type Props = {

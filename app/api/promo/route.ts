@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { applyPromoCode } from '@/lib/promotional-codes/apply-promo-code'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 export async function POST(req: NextRequest) {
   try {

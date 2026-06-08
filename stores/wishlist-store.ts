@@ -1,6 +1,6 @@
 /** Zustand store for the wishlist. */
 import { create } from 'zustand';
-import { WishlistView } from '@/types/wishlist';
+import { WishlistView } from '@/shared/types/wishlist';
 
 type WishlistState = {
     wishlist: WishlistView[];

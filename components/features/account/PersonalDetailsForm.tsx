@@ -8,9 +8,9 @@ import {
   PersonalDetailsFormValues,
 } from '@/lib/validations/user'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Button } from '@/shared/components/ui/button'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
 import {
   Form,
   FormControl,
@@ -18,14 +18,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/shared/components/ui/form'
 import {
   Sheet,
   SheetContent,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+} from '@/shared/components/ui/sheet'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 type Props = {
   children: React.ReactNode

@@ -7,9 +7,9 @@ import {
     CheckoutAddressFormValues,
 } from "@/lib/validations/address";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Switch } from "@/shared/components/ui/switch";
 import {
     Form,
     FormControl,
@@ -17,8 +17,8 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form";
-import { customToast } from "@/components/shared/modals/ToastCustom";
+} from "@/shared/components/ui/form";
+import { customToast } from "@/shared/components/common/modals/ToastCustom";
 
 type Props = {
     action: "add" | "edit";

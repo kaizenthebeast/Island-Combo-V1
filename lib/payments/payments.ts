@@ -4,7 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth'
-import type { Payment } from '@/types/payment'
+import type { Payment } from '@/shared/types/payment'
 
 export const getOrderPayments = async (orderId: number): Promise<Payment[]> => {
   const user = await requireUser()

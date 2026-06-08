@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 type Customer = {
   user_id: string

@@ -7,9 +7,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/shared/components/ui/dialog'
 import { EditProductForm } from '@/components/admin/products/forms/EditProductForm'
-import type { AdminProduct } from '@/types/product'
+import type { AdminProduct } from '@/shared/types/product'
 
 type Props = {
   product: AdminProduct | null

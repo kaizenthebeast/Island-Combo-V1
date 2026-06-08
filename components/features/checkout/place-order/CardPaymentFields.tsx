@@ -13,7 +13,7 @@ import {
 } from '@paypal/react-paypal-js'
 import { useCartStore } from '@/stores/cart-store'
 import { useCheckoutStore } from '@/stores/checkout-store'
-import type { ProductCheckoutIntent } from '@/types/order'
+import type { ProductCheckoutIntent } from '@/shared/types/order'
 
 // Public by design — the PayPal SDK needs the client id in the browser.
 const CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID

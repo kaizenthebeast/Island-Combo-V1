@@ -1,6 +1,6 @@
 /** Zod schema for product forms. */
 import { z } from "zod";
-import { PRODUCT_TYPES } from "@/types/product";
+import { PRODUCT_TYPES } from "@/shared/types/product";
 
 // Shared: Product Status
 // Mirrors the `product_status` enum in the DB (is_active removed from products table)

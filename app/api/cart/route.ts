@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { waitUntil } from '@vercel/functions'
-import { ratelimit } from '@/lib/api/rate-limiter'
+import { ratelimit } from '@/shared/lib/http/rate-limiter'
 import {
   getCartWithTotals,
   addToCart,
@@ -9,7 +9,7 @@ import {
   removeFromCart,
   removeAllItemFromCart
 } from '@/lib/cart'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // 429 is special-cased here so we can attach a Retry-After header.
 async function applyRateLimit(userId: string) {

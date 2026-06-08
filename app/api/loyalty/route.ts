@@ -1,6 +1,6 @@
 import { requireUser } from '@/lib/auth'
 import { getLoyaltyStatus } from '@/lib/loyalty/status'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/loyalty — Loyalty Status & Balance API (§3.8)
 // Returns the signed-in user's points balance, its cash value, and has_perks.

@@ -2,21 +2,21 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { signInWithGoogle } from "@/lib/auth/google-sign-in";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+} from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/shared/components/ui/form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

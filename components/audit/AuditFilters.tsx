@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import type { AuditCategory } from '@/types/audit'
+import type { AuditCategory } from '@/shared/types/audit'
 
 // Filter bar for an audit category. Owns the date range, action type, and actor
 // email search. Applying pushes the values into the URL searchParams, which

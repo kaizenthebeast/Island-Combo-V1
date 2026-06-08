@@ -1,7 +1,7 @@
 'use server'
 /** Customer category reads. */
 import { createClient } from '@/lib/supabase/server'
-import type { Category } from '@/types/category'
+import type { Category } from '@/shared/types/category'
 
 // READ
 

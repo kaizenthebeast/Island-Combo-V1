@@ -6,7 +6,7 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/ui/carousel";
+} from "@/shared/components/ui/carousel";
 
 const slides = [
   {

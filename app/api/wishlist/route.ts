@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { getWishlist, addToWishlist, removeFromWishlist } from '@/lib/wishlist/wishlist'
-import type { AddWishlistPayload } from '@/types/wishlist'
-import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
+import type { AddWishlistPayload } from '@/shared/types/wishlist'
+import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/wishlist — Fetch the current user's wishlist.
 // Auth required — wishlists are user-scoped.

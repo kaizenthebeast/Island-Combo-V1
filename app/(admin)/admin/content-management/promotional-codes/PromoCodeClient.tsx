@@ -7,9 +7,9 @@ import AddPromoCodeDialog from '@/components/admin/promotional-codes/AddPromoCod
 import EditPromoCodeDialog from '@/components/admin/promotional-codes/EditPromoCodeDialog'
 import DeletePromoCodeDialog from '@/components/admin/promotional-codes/DeletePromoCodeDialog'
 import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { useTableUrlState } from '@/hooks/use-table-url-state'
+import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
 import { archivePromoCode } from '@/lib/admin/promotional-codes/promo-code'
-import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/types/promo-code'
+import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/shared/types/promo-code'
 
 // table row shape
 

@@ -1,7 +1,7 @@
 'use server'
 /** Public product catalog queries & detail reads. */
 import { createClient } from '@/lib/supabase/server'
-import type { ProductCatalogItem, ProductDetails } from '@/types/product'
+import type { ProductCatalogItem, ProductDetails } from '@/shared/types/product'
 
 // PUBLIC
 

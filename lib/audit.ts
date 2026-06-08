@@ -16,7 +16,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth'
 import { ENTITY_BY_CATEGORY } from '@/lib/audit-config'
-import type { AuditLog, AuditQuery } from '@/types/audit'
+import type { AuditLog, AuditQuery } from '@/shared/types/audit'
 
 // Expand a bare YYYY-MM-DD into a full-day UTC bound so the `to` day is inclusive.
 const dayStart = (d: string) => (/^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d}T00:00:00.000Z` : d)

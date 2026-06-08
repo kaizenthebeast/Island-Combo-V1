@@ -6,7 +6,7 @@ import Account from '@/components/features/account/Account'
 import Loyalty from '@/components/features/account/Loyalty'
 import OrderTracking from '@/components/features/account/OrderTracking'
 import MyCards from '@/components/features/account/MyCards'
-import { Address } from '@/types/users'
+import { Address } from '@/shared/types/users'
 
 const navLinks: { name: string; icon: typeof User; href?: string }[] = [
     { name: 'Account Details', icon: User },

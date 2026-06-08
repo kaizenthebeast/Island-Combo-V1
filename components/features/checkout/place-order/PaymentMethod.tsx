@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useCheckoutStore, type PaymentMethod as PaymentMethodValue } from '@/stores/checkout-store'
-import { PayPalSdk } from '@/components/shared/PayPalSdk'
+import { PayPalSdk } from '@/shared/components/common/PayPalSdk'
 import CardPaymentFields from '@/components/features/checkout/place-order/CardPaymentFields'
 
 const OPTIONS: { value: PaymentMethodValue; title: string; desc?: string }[] = [

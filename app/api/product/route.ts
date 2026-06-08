@@ -9,7 +9,7 @@ import {
   type AddProductPayload,
   type UpdateProductPayload,
 } from '@/lib/admin/products/product'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/product — Public list (no auth)
 // Query params:

@@ -1,7 +1,7 @@
 /** Zustand store for the shopping cart. */
 import { create } from "zustand"
-import { CartItem, CartTotals } from "@/types/cart"
-import { calculateCartTotals } from "@/lib/utils/cart-totals"
+import { CartItem, CartTotals } from "@/shared/types/cart"
+import { calculateCartTotals } from "@/shared/utils/cart-totals"
 
 // Default tier label for a brand-new item before the server backfills real data.
 const DEFAULT_TIER_LABEL = "retail"

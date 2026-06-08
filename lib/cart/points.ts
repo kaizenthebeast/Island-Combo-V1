@@ -1,6 +1,6 @@
 /** Apply / Remove Points (§3.3), held as a reservation on the cart header. */
 import { createClient } from '@/lib/supabase/server'
-import { AppError, HTTP } from '@/lib/api/respond'
+import { AppError, HTTP } from '@/shared/lib/http/respond'
 import { loadCartFacts } from './cart'
 import { MIN_REDEEM_POINTS, maxRedeemablePoints, pointsToCash } from './loyalty-config'
 

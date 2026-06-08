@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import VerifyCardholder from './VerifyCardholder'
 import type { LoyverseCardRow } from '@/lib/admin/loyalty'
 

@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { capturePayPalOrder } from '@/lib/paypal'
+import { capturePayPalOrder } from '@/shared/lib/paypal'
 import { fulfillCheckout, resolveCheckoutAmount } from '@/lib/checkout/checkout'
-import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
+import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/paypal/orders/:id/capture
 // Voucher-specific capture entrypoint (kept for the existing voucher UI). It

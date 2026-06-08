@@ -1,7 +1,7 @@
 'use server'
 /** Customer wishlist data access. */
 import { createClient } from '@/lib/supabase/server'
-import type { WishlistView } from '@/types/wishlist'
+import type { WishlistView } from '@/shared/types/wishlist'
 
 export const getWishlist = async (userId: string): Promise<WishlistView[]> => {
   const supabase = await createClient()

@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Package, CheckCircle2, Truck, Star } from 'lucide-react'
 import OrderDetailSheet from './OrderDetailSheet'
 import OrderReviewSheet from './OrderReviewSheet'
-import type { OrderHistoryRow } from '@/types/order'
+import type { OrderHistoryRow } from '@/shared/types/order'
 
 const PLACEHOLDER = '/images/placeholder.png'
 const money = (n: number | null) =>

@@ -1,5 +1,5 @@
 /** Pure checkout total calculation. */
-import type { PromoCode } from '@/types/promo-code'
+import type { PromoCode } from '@/shared/types/promo-code'
 
 type AppliedPromoCode = Pick<PromoCode, 'code' | 'value'>
 

@@ -1,7 +1,7 @@
 /** Auth guards: requireUser / requireAdmin / requireStaff. */
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { AppError } from "@/lib/api/respond";
+import { AppError } from "@/shared/lib/http/respond";
 
 // The authenticated identity, read straight from the verified JWT claims.
 export type AuthUser = {

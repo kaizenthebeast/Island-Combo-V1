@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog'
+} from '@/shared/components/ui/dialog'
 import { AddProductForm } from '@/components/admin/products/forms/AddProductForm'
 import type { ProductFormValues } from '@/lib/validations/product'
 

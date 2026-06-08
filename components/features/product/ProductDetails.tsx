@@ -2,25 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { useWishlistStore } from "@/stores/wishlist-store";
-import { getPublicImageUrl } from '@/lib/utils/image-url';
+import { getPublicImageUrl } from '@/shared/utils/image-url';
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductDetails } from '@/types/product'
+import type { ProductDetails } from '@/shared/types/product'
 import { useCartStore } from '@/stores/cart-store'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
     type CarouselApi,
-} from "@/components/ui/carousel";
+} from "@/shared/components/ui/carousel";
 import { ShoppingCart, Heart, Package } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/shared/components/ui/button'
 import ProductQuantityButton from './ProductQuantityButton'
-import WholesaleCheckIcon from '@/components/shared/icons/WholesaleCheckIcon'
-import { variantMatchesSelection } from '@/lib/utils/variant-selection'
+import WholesaleCheckIcon from '@/shared/components/common/icons/WholesaleCheckIcon'
+import { variantMatchesSelection } from '@/shared/utils/variant-selection'
 
 const WHOLESALE_LABEL = 'wholesale'
 const PLACEHOLDER_IMAGE = '/images/placeholder.png'

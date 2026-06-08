@@ -13,7 +13,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth'
 import { getOrderEvents } from '@/lib/payments/transaction-events'
-import { getPublicImageUrl } from '@/lib/utils/image-url'
+import { getPublicImageUrl } from '@/shared/utils/image-url'
 import type {
   Order,
   AdminOrderItem,
@@ -22,7 +22,7 @@ import type {
   OrderHistoryPage,
   CustomerOrderDetail,
   OrderTrackingInfo,
-} from '@/types/order'
+} from '@/shared/types/order'
 
 // PostgREST returns a to-one embed as an object, but its types often widen it to
 // an array; normalize to the single related row (or null).

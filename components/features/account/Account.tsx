@@ -2,11 +2,11 @@
 
 import { User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Address } from '@/types/users'
+import { Address } from '@/shared/types/users'
 import CheckoutAddress from '@/components/features/checkout/CheckoutAddressForm'
 import PersonalDetailsForm from '@/components/features/account/PersonalDetailsForm'
-import DeleteModal from '@/components/shared/modals/DeleteModal'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import DeleteModal from '@/shared/components/common/modals/DeleteModal'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 type AccountProps = {
   email: string

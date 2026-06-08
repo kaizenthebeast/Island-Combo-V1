@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import type { Category } from '@/types/category'
+import type { Category } from '@/shared/types/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validations/category'
 
 // READ (paginated parents + their children)

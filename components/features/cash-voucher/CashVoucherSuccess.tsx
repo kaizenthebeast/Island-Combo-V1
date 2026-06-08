@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Copy, Download, Link as LinkIcon } from 'lucide-react'
-import { useQRCode } from '@/hooks/use-qr-code'
+import { useQRCode } from '@/shared/hooks/use-qr-code'
 
 type Props = {
   code: string

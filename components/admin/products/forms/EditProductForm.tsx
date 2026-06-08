@@ -7,8 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, type ProductFormValues } from '@/lib/validations/product'
 import { uploadVariantImages } from '@/lib/admin/products/product-upload'
 import { restoreProduct } from '@/lib/admin/products/product'
-import type { AdminProduct } from '@/types/product'
-import { getPublicImageUrl } from '@/lib/utils/image-url'
+import type { AdminProduct } from '@/shared/types/product'
+import { getPublicImageUrl } from '@/shared/utils/image-url'
 import { ArchiveRestore } from 'lucide-react' 
 
 import {

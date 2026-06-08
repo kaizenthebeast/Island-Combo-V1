@@ -1,10 +1,10 @@
 'use client'
 import React from "react";
-import { Address } from "@/types/users";
+import { Address } from "@/shared/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../CheckoutAddressForm";
-import DeleteModal from "@/components/shared/modals/DeleteModal";
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import DeleteModal from "@/shared/components/common/modals/DeleteModal";
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
 const AddressDetails = ({ address, selectedAddressId, setSelectedAddressId, onSuccess, }: {
     address: Address;

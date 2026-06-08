@@ -1,5 +1,5 @@
 import AuthNavbar from "@/components/features/auth/AuthNavbar";
-import Footer from "@/components/layout/Footer";
+import Footer from "@/shared/components/layout/Footer";
 
 export default function ShopLayout({
   children,

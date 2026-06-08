@@ -5,14 +5,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import StatusBadge from '@/components/admin/StatusBadge'
-import { customToast } from '@/components/shared/modals/ToastCustom'
+import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import {
   ORDER_STATUSES,
   orderStatusLabel,
   orderStatusVariant,
 } from '@/lib/orders/order-status'
-import type { AdminOrderDetail, OrderStatus } from '@/types/order'
-import type { TransactionEvent } from '@/types/transaction-event'
+import type { AdminOrderDetail, OrderStatus } from '@/shared/types/order'
+import type { TransactionEvent } from '@/shared/types/transaction-event'
 
 const money = (n: number | null | undefined) => `$${Number(n ?? 0).toFixed(2)}`
 const paymentLabel = (m: string) => (m === 'cod' ? 'COD (Cash on Delivery)' : m === 'card' ? 'PayPal' : m)
