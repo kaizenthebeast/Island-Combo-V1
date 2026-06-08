@@ -11,8 +11,8 @@ import {
   cashVoucherSchema,
   CASH_VOUCHER_STEP_FIELDS,
   type CashVoucherFormValues,
-} from '@/lib/validators/cash-voucher'
-import type { CashVoucher } from '@/lib/types/cash-voucher'
+} from '@/lib/validations/cash-voucher'
+import type { CashVoucher } from '@/types/cash-voucher'
 
 const SUCCESS_STEP = 4
 

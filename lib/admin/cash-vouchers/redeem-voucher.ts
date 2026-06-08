@@ -14,7 +14,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requireStaff } from '@/lib/auth'
-import type { CashVoucher } from '@/lib/types/cash-voucher'
+import type { CashVoucher } from '@/types/cash-voucher'
 
 type VoucherResult = { success: boolean; voucher?: CashVoucher; message?: string }
 

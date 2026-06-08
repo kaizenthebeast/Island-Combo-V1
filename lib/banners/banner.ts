@@ -2,7 +2,7 @@
 /** Storefront banner & promotion-ad reads. */
 
 import { createClient } from '@/lib/supabase/server'
-import type { Banner, PromotionAd, AdPlacement } from '@/lib/types/banner'
+import type { Banner, PromotionAd, AdPlacement } from '@/types/banner'
 
 // Reads only — admin mutations live in lib/admin/banner.ts.
 // Reads stay here because both the storefront and admin pages use them.

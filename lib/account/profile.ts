@@ -2,7 +2,7 @@
  *  pass the authenticated userId (derived from the JWT at the API-route
  *  boundary); RLS on `profile`/`profile_pts` enforces the boundary. */
 import { createClient } from "@/lib/supabase/server";
-import type { Address } from '@/lib/types/users';
+import type { Address } from '@/types/users';
 import { revalidatePath } from "next/cache";
 
 // Shared types
@@ -109,7 +109,7 @@ export const updateMyNotificationPrefs = async (userId: string, prefs: Partial<N
 
   if (error) return { success: false, status: 403, message: error.message }
 
-  revalidatePath('/user/details')
+  revalidatePath('/account')
   return { success: true, status: 200, message: 'Notification preferences updated' }
 }
 
@@ -137,7 +137,7 @@ export const updateMyAccount = async (userId: string, data: {
 
   if (error) return { success: false, status: 403, message: error.message }
 
-  revalidatePath('/user/details')
+  revalidatePath('/account')
   return { success: true, status: 200, message: 'Profile successfully updated' }
 }
 

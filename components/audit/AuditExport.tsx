@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { AuditCategory, AuditLog } from '@/lib/types/audit'
+import type { AuditCategory, AuditLog } from '@/types/audit'
 
 const CSV_COLUMNS: { key: keyof AuditLog; header: string }[] = [
   { key: 'created_at',  header: 'Timestamp' },

@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { AddPromoCodeForm } from '@/components/admin/promotional-codes/forms/AddPromoCodeForm'
-import type { AddPromoCodeFormValues } from '@/lib/validators/promo-code'
+import type { AddPromoCodeFormValues } from '@/lib/validations/promo-code'
 
 type Props = {
   open: boolean

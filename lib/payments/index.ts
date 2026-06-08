@@ -1,3 +1,3 @@
 /** Barrel for lib/payments. */
-export * from './paypal'
+export * from '@/lib/paypal'
 export * from './transaction-events'

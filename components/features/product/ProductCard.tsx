@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import type { ProductCatalogItem } from '@/lib/types/product'
+import type { ProductCatalogItem } from '@/types/product'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -16,7 +16,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
   const hasDiscount = product.discount !== null && product.discount > 0
 
   return (
-    <Link href={`/product/${product.slug}`} className="w-full">
+    <Link href={`/products/${product.slug}`} className="w-full">
       <Card className="w-full border-none shadow-none relative overflow-hidden flex flex-col cursor-pointer group">
 
         {product.has_wholesale && (

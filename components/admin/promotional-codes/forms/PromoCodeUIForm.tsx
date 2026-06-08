@@ -3,7 +3,7 @@
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils/cn'
-import type { AddPromoCodeFormValues } from '@/lib/validators/promo-code'
+import type { AddPromoCodeFormValues } from '@/lib/validations/promo-code'
 
 // helpers
 

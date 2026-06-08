@@ -6,10 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   applyPromoCodeSchema,
   ApplyPromoCodeFormValues,
-} from '@/lib/validators/promo-code'
-import { useCartStore } from '@/lib/store/cart-store'
+} from '@/lib/validations/promo-code'
+import { useCartStore } from '@/stores/cart-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { PromoCode } from '@/lib/types/promo-code'
+import type { PromoCode } from '@/types/promo-code'
 
 import { Input } from '@/components/ui/input'
 import { AlertCircle } from 'lucide-react'

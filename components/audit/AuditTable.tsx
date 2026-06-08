@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import type { AuditCategory, AuditLog } from '@/lib/types/audit'
+import type { AuditCategory, AuditLog } from '@/types/audit'
 
 // ── value helpers ────────────────────────────────────────────────────────────
 const get = (r: AuditLog, side: 'old' | 'new', key: string): unknown => {

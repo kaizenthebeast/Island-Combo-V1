@@ -7,9 +7,9 @@ import { requireStaff } from '@/lib/auth'
 import { verifyCurrentUserPassword } from '@/lib/auth/reauth'
 import { getOrderEvents } from '@/lib/payments/transaction-events'
 import type { PaginatedInput, PaginatedResult } from '@/lib/admin/_shared'
-import type { AdminOrderListRow, AdminOrderDetail } from '@/lib/types/order'
-import type { TransactionEvent } from '@/lib/types/transaction-event'
-import type { OrderFulfillment, OrderFulfillmentInput } from '@/lib/types/fulfillment'
+import type { AdminOrderListRow, AdminOrderDetail } from '@/types/order'
+import type { TransactionEvent } from '@/types/transaction-event'
+import type { OrderFulfillment, OrderFulfillmentInput } from '@/types/fulfillment'
 
 export type OrdersSortKey = 'created_at' | 'total_amount' | 'order_status'
 

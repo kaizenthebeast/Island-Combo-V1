@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useWishlistStore } from "@/lib/store/wishlist-store";
+import { useWishlistStore } from "@/stores/wishlist-store";
 
 const WishlistCount = () => {
     const totalWishlistQty = useWishlistStore((state) => state.totalWishlistQty);

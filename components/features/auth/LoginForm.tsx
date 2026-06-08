@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, LoginFormInput } from "@/lib/validators/login";
+import { loginSchema, LoginFormInput } from "@/lib/validations/login";
 
 import { createClient } from "@/lib/supabase/client";
 import { signInWithGoogle } from "@/lib/auth/google-sign-in";

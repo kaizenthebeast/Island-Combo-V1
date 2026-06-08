@@ -24,7 +24,7 @@ import { chargeTotal, voucherValueFromTotal } from '@/lib/cash-vouchers/pricing'
 import { createCashVoucher } from '@/lib/cash-vouchers/cash-voucher'
 import { getZoneFromAddress } from '@/lib/shipping/zone'
 import { quoteShipping, selectShippingFee } from '@/lib/shipping/quote'
-import type { CartItem } from '@/lib/types/cart'
+import type { CartItem } from '@/types/cart'
 import type {
   CheckoutIntent,
   ProductCheckoutIntent,
@@ -33,7 +33,7 @@ import type {
   FulfillmentPayment,
   ResolvedOrderItem,
   Order,
-} from '@/lib/types/order'
+} from '@/types/order'
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 

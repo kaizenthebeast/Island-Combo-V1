@@ -7,7 +7,7 @@ import {
   softDeleteCategory,
   restoreCategory,
 } from '@/lib/admin/categories/category'
-import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validators/category'
+import type { AddCategoryFormValues, EditCategoryFormValues } from '@/lib/validations/category'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/lib/api/respond'
 
 // GET /api/category

@@ -4,7 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requireUser } from '@/lib/auth'
-import type { CashVoucher, CreateCashVoucherInput } from '@/lib/types/cash-voucher'
+import type { CashVoucher, CreateCashVoucherInput } from '@/types/cash-voucher'
 
 // CREATE
 // Creates a cash voucher after payment has succeeded. The code, status and

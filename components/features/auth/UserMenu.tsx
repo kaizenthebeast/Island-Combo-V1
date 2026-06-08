@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useCartStore } from "@/lib/store/cart-store";
+import { useCartStore } from "@/stores/cart-store";
 import { User, Settings, LogOut, Package } from "lucide-react";
 import {
   DropdownMenu,
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useWishlistStore } from "@/lib/store";
+import { useWishlistStore } from "@/stores";
 
 export function UserMenu() {
   const router = useRouter();
@@ -40,13 +40,13 @@ export function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem asChild>
-          <Link href="/user/details" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/account" className="flex items-center gap-2 cursor-pointer">
             <Settings size={15} />
             Account
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/user/details?tab=orders" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/account?tab=orders" className="flex items-center gap-2 cursor-pointer">
             <Package size={15} />
             My Orders
           </Link>

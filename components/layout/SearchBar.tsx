@@ -112,7 +112,7 @@ export function SearchBar({
     close()
     setQuery('')
     onNavigate?.()
-    router.push(`/product/${s.slug}`)
+    router.push(`/products/${s.slug}`)
   }
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

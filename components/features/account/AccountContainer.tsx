@@ -6,7 +6,7 @@ import Account from '@/components/features/account/Account'
 import Loyalty from '@/components/features/account/Loyalty'
 import OrderTracking from '@/components/features/account/OrderTracking'
 import MyCards from '@/components/features/account/MyCards'
-import { Address } from '@/lib/types/users'
+import { Address } from '@/types/users'
 
 const navLinks: { name: string; icon: typeof User; href?: string }[] = [
     { name: 'Account Details', icon: User },
@@ -22,7 +22,7 @@ type AccountContainerProps = {
     addresses: Address[]
 }
 
-// Deep-link slugs (e.g. /user/details?tab=orders) → sidebar entry.
+// Deep-link slugs (e.g. /account?tab=orders) → sidebar entry.
 const TAB_BY_SLUG: Record<string, string> = {
     account: 'Account Details',
     loyalty: 'Loyalty Points',

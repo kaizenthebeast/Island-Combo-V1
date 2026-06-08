@@ -2,11 +2,11 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartStore } from '@/lib/store/cart-store'
-import { useCheckoutStore } from '@/lib/store/checkout-store'
+import { useCartStore } from '@/stores/cart-store'
+import { useCheckoutStore } from '@/stores/checkout-store'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { ProductCheckoutIntent } from '@/lib/types/order'
+import type { ProductCheckoutIntent } from '@/types/order'
 
 const AddressBillingSummary = () => {
   const router = useRouter()

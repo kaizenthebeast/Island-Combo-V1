@@ -1,6 +1,6 @@
 'use client'
 import { useEffect } from 'react'
-import { useWishlistStore } from '@/lib/store/wishlist-store'
+import { useWishlistStore } from '@/stores/wishlist-store'
 import Image from 'next/image'
 import Link from 'next/link'
 import WishlistCard from '@/components/features/wishlist/WishlistCard'

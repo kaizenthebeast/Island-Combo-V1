@@ -1,5 +1,5 @@
 /** Pure helpers for cart totals. */
-import type { CartItem } from "@/lib/types/cart";
+import type { CartItem } from "@/types/cart";
 
 export const calculateCartTotals = (cart: CartItem[]) => {
   return {

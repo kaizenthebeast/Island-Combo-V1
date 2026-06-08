@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   updatePasswordSchema,
   UpdatePasswordFormInput,
-} from "@/lib/validators/update-password";
+} from "@/lib/validations/update-password";
 
 export function UpdatePasswordForm({
   className,

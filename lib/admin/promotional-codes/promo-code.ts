@@ -4,8 +4,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { assertAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/lib/types/promo-code'
-import type { AddPromoCodeFormValues, EditPromoCodeFormValues } from '@/lib/validators/promo-code'
+import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/types/promo-code'
+import type { AddPromoCodeFormValues, EditPromoCodeFormValues } from '@/lib/validations/promo-code'
 
 // helpers
 

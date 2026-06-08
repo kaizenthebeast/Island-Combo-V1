@@ -8,7 +8,7 @@ import { ArrowLeft, CheckCircle2, Star, ImagePlus, X, Video } from 'lucide-react
 import { addProductReview } from '@/lib/reviews/review'
 import { uploadReviewMedia } from '@/lib/reviews/review-upload'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { OrderHistoryRow } from '@/lib/types/order'
+import type { OrderHistoryRow } from '@/types/order'
 
 const PLACEHOLDER = '/images/placeholder.png'
 const MAX_FILES = 6

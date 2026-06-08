@@ -2,7 +2,7 @@
 // client filter/export components. Runtime constants live here instead of in
 // lib/audit.ts because that module imports the server-only Supabase client.
 
-import type { AuditCategory, AuditEntityType } from '@/lib/types/audit'
+import type { AuditCategory, AuditEntityType } from '@/types/audit'
 
 export const AUDIT_CATEGORIES: { key: AuditCategory; label: string; description: string }[] = [
   { key: 'users',    label: 'User Activity',      description: 'Logins, profile changes, and role changes' },

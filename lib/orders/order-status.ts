@@ -1,5 +1,5 @@
 /** Order-status presentation helpers (pure; safe for client or server). */
-import type { OrderStatus } from '@/lib/types/order'
+import type { OrderStatus } from '@/types/order'
 import type { BadgeVariant } from '@/components/admin/StatusBadge'
 
 export const ORDER_STATUSES: OrderStatus[] = [

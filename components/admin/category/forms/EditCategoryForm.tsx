@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editCategorySchema, EditCategoryFormValues } from '@/lib/validators/category'
+import { editCategorySchema, EditCategoryFormValues } from '@/lib/validations/category'
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
 import { restoreCategory } from '@/lib/admin/categories/category'
 import { ArchiveRestore } from 'lucide-react'     
-import type { Category } from '@/lib/types/category'
+import type { Category } from '@/types/category'
 
 type Props = {
   selectedCategory: Category

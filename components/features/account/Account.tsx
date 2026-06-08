@@ -2,7 +2,7 @@
 
 import { User, MapPin } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Address } from '@/lib/types/users'
+import { Address } from '@/types/users'
 import CheckoutAddress from '@/components/features/checkout/CheckoutAddressForm'
 import PersonalDetailsForm from '@/components/features/account/PersonalDetailsForm'
 import DeleteModal from '@/components/shared/modals/DeleteModal'

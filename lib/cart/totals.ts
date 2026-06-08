@@ -1,5 +1,5 @@
 /** Pure, server-side cart total calculation (§3.3 Fetch Cart / §3.9 pricing). */
-import type { CartItem, CartTotals } from '@/lib/types/cart'
+import type { CartItem, CartTotals } from '@/types/cart'
 import { pointsToCash } from './loyalty-config'
 
 export const round2 = (n: number) => Math.round(n * 100) / 100

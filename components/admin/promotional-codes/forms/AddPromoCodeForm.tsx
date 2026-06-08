@@ -2,7 +2,7 @@
 
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addPromoCodeSchema, type AddPromoCodeFormValues } from '@/lib/validators/promo-code'
+import { addPromoCodeSchema, type AddPromoCodeFormValues } from '@/lib/validations/promo-code'
 import { createPromoCode } from '@/lib/admin/promotional-codes/promo-code'
 import { PromoCodeFields } from './PromoCodeUIForm'
 

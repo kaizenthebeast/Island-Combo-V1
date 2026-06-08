@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useWishlistStore } from "@/lib/store/wishlist-store";
+import { useWishlistStore } from "@/stores/wishlist-store";
 import { getPublicImageUrl } from '@/lib/utils/image-url';
 
 import Image from 'next/image'
 import Link from 'next/link'
-import type { ProductDetails } from '@/lib/types/product'
-import { useCartStore } from '@/lib/store/cart-store'
+import type { ProductDetails } from '@/types/product'
+import { useCartStore } from '@/stores/cart-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 
 import {

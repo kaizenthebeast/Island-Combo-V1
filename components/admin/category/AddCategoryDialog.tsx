@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { AddCategoryForm } from '@/components/admin/category/forms/AddCategoryForm'
-import { AddCategoryFormValues } from '@/lib/validators/category'
+import { AddCategoryFormValues } from '@/lib/validations/category'
 
 
 type Props = {

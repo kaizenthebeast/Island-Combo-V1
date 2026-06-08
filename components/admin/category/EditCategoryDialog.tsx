@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { EditCategoryForm } from '@/components/admin/category/forms/EditCategoryForm'
 import { CategoryOption } from '@/components/admin/category/forms/CategoryUIForm'
-import type { Category } from '@/lib/types/category'
+import type { Category } from '@/types/category'
 
 type Props = {
   selectedCategory: Category | null   // the category being edited

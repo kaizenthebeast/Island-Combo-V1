@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useEffect, useCallback } from "react"
-import { Address } from "@/lib/types/users"
+import { Address } from "@/types/users"
 import AddressFormBody from "@/components/features/address/AddressFormBody"
 import AddressDetails from "@/components/features/checkout/place-order/AddressDetails"
 import MobileAddressSelector from "@/components/features/checkout/place-order/MobileAddressSelector"
 import PaymentMethod from "@/components/features/checkout/place-order/PaymentMethod"
 import AddressBillingSummary from "@/components/features/checkout/place-order/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
-import { useCartStore } from "@/lib/store/cart-store"
-import { useCheckoutStore } from "@/lib/store/checkout-store"
+import { useCartStore } from "@/stores/cart-store"
+import { useCheckoutStore } from "@/stores/checkout-store"
 import { getZoneFromAddress, type ShippingZone } from "@/lib/shipping/zone"
 
 const MAX_SAVED_ADDRESSES = 3

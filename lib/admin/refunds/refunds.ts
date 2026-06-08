@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { requireStaff } from '@/lib/auth'
 import { verifyCurrentUserPassword } from '@/lib/auth/reauth'
 import { revalidatePath } from 'next/cache'
-import type { AdminRefundRow, RefundStatus } from '@/lib/types/refund'
+import type { AdminRefundRow, RefundStatus } from '@/types/refund'
 
 const firstOf = <T>(x: T | T[] | null | undefined): T | null =>
   Array.isArray(x) ? (x[0] ?? null) : (x ?? null)

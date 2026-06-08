@@ -20,6 +20,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Preserve old URLs after the App Router route renames (Batch 3) so existing
+  // links/bookmarks/SEO keep working instead of 404-ing.
+  async redirects() {
+    return [
+      { source: '/product/:path*',  destination: '/products/:path*',   permanent: true },
+      { source: '/category/:path*', destination: '/categories/:path*', permanent: true },
+      { source: '/user/details',    destination: '/account',           permanent: true },
+    ]
+  },
 }
 
 export default withSentryConfig(nextConfig, {

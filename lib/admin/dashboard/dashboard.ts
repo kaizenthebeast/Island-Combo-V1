@@ -4,7 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { requireStaff } from '@/lib/auth'
-import type { DashboardStats } from '@/lib/types/dashboard'
+import type { DashboardStats } from '@/types/dashboard'
 
 export const getDashboardStats = async (): Promise<
   { success: true; stats: DashboardStats } | { success: false; status: number; message: string }

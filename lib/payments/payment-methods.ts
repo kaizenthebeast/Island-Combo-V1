@@ -9,7 +9,7 @@
  * rule to apply here.)
  */
 
-import type { AvailablePaymentMethods } from '@/lib/types/payment'
+import type { AvailablePaymentMethods } from '@/types/payment'
 
 export const getAvailablePaymentMethods = async (): Promise<AvailablePaymentMethods> => {
   return {

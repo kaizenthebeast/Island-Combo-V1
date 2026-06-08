@@ -10,7 +10,7 @@ type Props = {
 
 export default function MobileBottomNav({ isAuthenticated }: Props) {
   const pathname = usePathname()
-  const meHref = isAuthenticated ? '/user/details' : '/auth/login'
+  const meHref = isAuthenticated ? '/account' : '/auth/login'
 
   // The checkout flow has its own fixed bottom bar (Total + Checkout/Place Order),
   // so the global tab bar would collide with it.
@@ -19,7 +19,7 @@ export default function MobileBottomNav({ isAuthenticated }: Props) {
   const tabs = [
     { label: 'Home', icon: Home, href: '/' },
     { label: 'Cart', icon: ShoppingBag, href: '/checkout' },
-    { label: 'Wishlist', icon: Heart, href: '/product/wishlist' },
+    { label: 'Wishlist', icon: Heart, href: '/products/wishlist' },
     { label: 'Me', icon: User, href: meHref },
   ]
 

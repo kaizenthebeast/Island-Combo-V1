@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/sheet'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { ArrowLeft, MapPin, ChevronRight, Pencil, Trash2, AlertCircle } from 'lucide-react'
-import { Address } from '@/lib/types/users'
+import { Address } from '@/types/users'
 import AddressFormBody from '@/components/features/address/AddressFormBody'
 import DeleteModal from '@/components/shared/modals/DeleteModal'
 import { customToast } from '@/components/shared/modals/ToastCustom'

@@ -4,15 +4,15 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetTitle, SheetHeader, SheetDescription } from "@/components/ui/sheet"
 import Image from 'next/image'
-import { WishlistView } from '@/lib/types/wishlist'
+import { WishlistView } from '@/types/wishlist'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ShoppingBag, Package } from 'lucide-react'
 import WholesaleCheckIcon from '@/components/shared/icons/WholesaleCheckIcon'
 import ProductQuantityButton from '@/components/features/product/ProductQuantityButton'
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import { useCartStore } from '@/lib/store/cart-store'
-import { useWishlistStore } from '@/lib/store/wishlist-store'
+import { useCartStore } from '@/stores/cart-store'
+import { useWishlistStore } from '@/stores/wishlist-store'
 import { customToast } from '@/components/shared/modals/ToastCustom'
 import { variantMatchesSelection } from '@/lib/utils/variant-selection'
 

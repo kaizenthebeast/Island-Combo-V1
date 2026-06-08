@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { createPayPalOrder } from '@/lib/payments/paypal'
+import { createPayPalOrder } from '@/lib/paypal'
 import { resolveCheckoutAmount } from '@/lib/checkout/checkout'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 

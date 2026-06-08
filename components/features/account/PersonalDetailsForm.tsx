@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import {
   personalDetailsSchema,
   PersonalDetailsFormValues,
-} from '@/lib/validators/user'
+} from '@/lib/validations/user'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

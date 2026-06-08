@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import type { Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { productSchema, type ProductFormValues } from '@/lib/validators/product'
+import { productSchema, type ProductFormValues } from '@/lib/validations/product'
 import { uploadVariantImages } from '@/lib/admin/products/product-upload'
 
 import {

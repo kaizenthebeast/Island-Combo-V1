@@ -2,8 +2,8 @@ import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { HTTP, apiOk, apiError, toApiError } from '@/lib/api/respond'
 import { resolveCheckoutAmount, fulfillCheckout, savePendingCheckout } from '@/lib/checkout/checkout'
-import { createPayPalOrder, capturePayPalOrder } from '@/lib/payments/paypal'
-import type { CheckoutIntent } from '@/lib/types/order'
+import { createPayPalOrder, capturePayPalOrder } from '@/lib/paypal'
+import type { CheckoutIntent } from '@/types/order'
 
 // Amounts are settled in money; allow a one-cent rounding tolerance when
 // matching a PayPal capture against the server-computed total.

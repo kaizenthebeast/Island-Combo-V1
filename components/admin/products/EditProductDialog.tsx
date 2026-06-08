@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { EditProductForm } from '@/components/admin/products/forms/EditProductForm'
-import type { AdminProduct } from '@/lib/types/product'
+import type { AdminProduct } from '@/types/product'
 
 type Props = {
   product: AdminProduct | null

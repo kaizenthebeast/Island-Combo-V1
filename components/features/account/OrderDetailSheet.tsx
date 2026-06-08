@@ -7,7 +7,7 @@ import { ArrowLeft, Copy, Check, CheckCircle2, Circle, ImagePlus, X, Video } fro
 import { cancelMyOrder } from '@/lib/orders/orders'
 import { uploadRefundMedia } from '@/lib/orders/refund-upload'
 import { customToast } from '@/components/shared/modals/ToastCustom'
-import type { OrderHistoryRow, CustomerOrderDetail } from '@/lib/types/order'
+import type { OrderHistoryRow, CustomerOrderDetail } from '@/types/order'
 
 const TRACKED = new Set(['shipped', 'out_for_delivery', 'delivered', 'completed'])
 const CANCELLABLE = new Set(['pending', 'paid'])

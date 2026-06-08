@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { ReviewCard } from './ReviewCard'
 import { ReviewSummary, type ReviewFilter } from './ReviewSummary'
 import { getProductReviews } from '@/lib/reviews/review'
-import type { ProductReview, ReviewStats } from '@/lib/types/review'
+import type { ProductReview, ReviewStats } from '@/types/review'
 
 type Props = {
     slug: string

@@ -11,9 +11,9 @@ import {
   usePayPalCardFields,
   usePayPalScriptReducer,
 } from '@paypal/react-paypal-js'
-import type { CashVoucherFormValues } from '@/lib/validators/cash-voucher'
+import type { CashVoucherFormValues } from '@/lib/validations/cash-voucher'
 import { CONVENIENCE_FEE, chargeTotal } from '@/lib/cash-vouchers/pricing'
-import type { CashVoucher } from '@/lib/types/cash-voucher'
+import type { CashVoucher } from '@/types/cash-voucher'
 
 // Must be NEXT_PUBLIC_: this runs in the browser, where only NEXT_PUBLIC_ vars
 // exist. The PayPal client id is public by design (the SDK needs it client-side).

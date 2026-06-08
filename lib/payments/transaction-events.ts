@@ -2,7 +2,7 @@
 /** Read transaction (audit) events for orders & vouchers. */
 
 import { createClient } from '@/lib/supabase/server'
-import type { TransactionEvent } from '@/lib/types/transaction-event'
+import type { TransactionEvent } from '@/types/transaction-event'
 
 // Chronological audit trail for a cash voucher.
 export const getCashVoucherEvents = async (

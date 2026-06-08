@@ -22,7 +22,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signupSchema, SignupFormInput } from "@/lib/validators/signup";
+import { signupSchema, SignupFormInput } from "@/lib/validations/signup";
 import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 

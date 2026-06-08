@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getPublicImageUrl } from '@/lib/utils/image-url'
 import { AppError, HTTP } from '@/lib/api/respond'
 import type { PostgrestError } from '@supabase/supabase-js'
-import type { CartItem, CartItemInput, CartResponse } from '@/lib/types/cart'
+import type { CartItem, CartItemInput, CartResponse } from '@/types/cart'
 import { computeCartTotals, round2, unitPriceOf } from './totals'
 import { promoUnusableReason, type PromoRow } from './promo-rules'
 

@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editPromoCodeSchema, type EditPromoCodeFormValues } from '@/lib/validators/promo-code'
+import { editPromoCodeSchema, type EditPromoCodeFormValues } from '@/lib/validations/promo-code'
 import { updatePromoCode, restorePromoCode } from '@/lib/admin/promotional-codes/promo-code'
 import { PromoCodeFields } from './PromoCodeUIForm'
 import { ArchiveRestore } from 'lucide-react'
-import type { PromoCode } from '@/lib/types/promo-code'
+import type { PromoCode } from '@/types/promo-code'
 
 type Props = {
   promoCode: PromoCode

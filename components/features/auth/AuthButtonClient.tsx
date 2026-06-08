@@ -16,7 +16,7 @@ export function AuthButtonClient({ isAuthenticated }: { isAuthenticated: boolean
         </span>
       </Link>
 
-      <Link href="/product/wishlist" className="relative flex items-center">
+      <Link href="/products/wishlist" className="relative flex items-center">
         <Heart size={22} />
         <span className="absolute -top-2 -right-2 text-xs bg-brand text-white rounded-full px-1.5">
           <WishlistCount />

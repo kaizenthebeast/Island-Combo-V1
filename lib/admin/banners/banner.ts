@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 import type {
   Banner, BannerInsert, BannerUpdate,
   PromotionAd, PromotionAdInsert, PromotionAdUpdate,
-} from '@/lib/types/banner'
+} from '@/types/banner'
 
 const REVALIDATE    = '/admin/content-management/banner'
 const SUPABASE_URL  = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')

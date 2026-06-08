@@ -22,7 +22,7 @@ import type {
   OrderHistoryPage,
   CustomerOrderDetail,
   OrderTrackingInfo,
-} from '@/lib/types/order'
+} from '@/types/order'
 
 // PostgREST returns a to-one embed as an object, but its types often widen it to
 // an array; normalize to the single related row (or null).

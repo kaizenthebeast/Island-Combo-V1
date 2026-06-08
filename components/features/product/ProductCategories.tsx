@@ -58,7 +58,7 @@ export const ProductCategory = async () => {
             return (
               <CarouselItem key={cat.category_id} className="basis-auto px-3">
                 <Link
-                  href={`/category/${cat.slug}`}
+                  href={`/categories/${cat.slug}`}
                   className="flex flex-col items-center gap-2 group cursor-pointer"
                 >
                   <div

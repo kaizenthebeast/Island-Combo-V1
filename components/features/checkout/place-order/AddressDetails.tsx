@@ -1,6 +1,6 @@
 'use client'
 import React from "react";
-import { Address } from "@/lib/types/users";
+import { Address } from "@/types/users";
 import { MapPin } from 'lucide-react';
 import CheckoutAddress from "../CheckoutAddressForm";
 import DeleteModal from "@/components/shared/modals/DeleteModal";

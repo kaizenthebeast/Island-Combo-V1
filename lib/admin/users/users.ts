@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
-import { EditUserFormValues } from '@/lib/validators/user'
+import { EditUserFormValues } from '@/lib/validations/user'
 import { escapeIlike, type PaginatedInput, type PaginatedResult } from '@/lib/admin/_shared'
 
 // PAGINATED READS (users + staff)
