@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { User, Star, Ticket, PackageSearch, CreditCard } from 'lucide-react'
 import Account from '@/components/features/account/Account'
 import Loyalty from '@/components/features/account/Loyalty'
@@ -22,9 +22,20 @@ type AccountContainerProps = {
     addresses: Address[]
 }
 
+// Deep-link slugs (e.g. /user/details?tab=orders) → sidebar entry.
+const TAB_BY_SLUG: Record<string, string> = {
+    account: 'Account Details',
+    loyalty: 'Loyalty Points',
+    orders: 'Orders & Tracking',
+    cards: 'My Cards',
+}
+
 const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) => {
     const router = useRouter()
-    const [activeLink, setActiveLink] = useState('Account Details')
+    const searchParams = useSearchParams()
+    const [activeLink, setActiveLink] = useState(
+        TAB_BY_SLUG[searchParams.get('tab') ?? ''] ?? 'Account Details',
+    )
 
     const handleLinkClick = (link: { name: string; href?: string }) => {
         if (link.href) {

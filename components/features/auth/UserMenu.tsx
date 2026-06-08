@@ -46,7 +46,7 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/orders" className="flex items-center gap-2 cursor-pointer">
+          <Link href="/user/details?tab=orders" className="flex items-center gap-2 cursor-pointer">
             <Package size={15} />
             My Orders
           </Link>
