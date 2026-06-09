@@ -1,5 +1,5 @@
 /** Apply / Remove Discount Code (§3.3), persisted to the cart header. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { AppError, HTTP } from '@/shared/lib/http/respond'
 import { loadCartFacts } from './cart'
 import { promoUnusableReason, type PromoRow } from './promo-rules'

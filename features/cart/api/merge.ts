@@ -1,5 +1,5 @@
 /** Cart Merge (§3.3): fold a guest cart into the signed-in user's cart. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { AppError, HTTP } from '@/shared/lib/http/respond'
 
 // Delegates to the merge_cart RPC (atomic + cross-user, so it must run

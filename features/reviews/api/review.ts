@@ -1,7 +1,7 @@
 'use server'
 /** Product-review reads & customer mutations. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import type { ProductReview, PaginatedReviews, AddReviewPayload, UpdateReviewPayload, ReviewStats } from '@/shared/types/review'
 
 export const getProductReviews = async (

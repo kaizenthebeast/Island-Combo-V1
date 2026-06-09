@@ -1,7 +1,7 @@
 'use server'
 /** Storefront banner & promotion-ad reads. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import type { Banner, PromotionAd, AdPlacement } from '@/shared/types/banner'
 
 // Reads only — admin mutations live in lib/admin/banner.ts.

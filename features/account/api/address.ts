@@ -1,7 +1,7 @@
 /** Customer address CRUD (self-scoped). Pure data-access: the caller passes the
  *  authenticated userId (derived from the JWT at the API-route boundary) and RLS
  *  on `addresses` enforces the security boundary. No auth happens here. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { revalidatePath } from 'next/cache'
 import type { AddressFormValues, Address } from '@/shared/types/users'
 

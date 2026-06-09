@@ -1,6 +1,6 @@
 'use server'
 /** Admin category CRUD. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { assertAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import type { Category } from '@/shared/types/category'

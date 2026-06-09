@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/shared/lib/db/client";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/features/cart/stores/cart-store";
 import { User, Settings, LogOut, Package } from "lucide-react";

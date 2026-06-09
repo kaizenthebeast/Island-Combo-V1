@@ -6,7 +6,7 @@
  * Not a 'use server' module: these are called only from the auth route handlers,
  * never directly from the client, so they are not exposed as server actions.
  */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 
 type Fail = { success: false; status: number; message: string }
 

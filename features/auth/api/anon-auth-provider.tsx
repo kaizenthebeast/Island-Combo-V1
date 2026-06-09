@@ -3,8 +3,8 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { ensureAnonymousUser } from '@/lib/supabase/anon-user';
-import { createClient } from "@/lib/supabase/client";
+import { ensureAnonymousUser } from '@/shared/lib/db/anon-user';
+import { createClient } from "@/shared/lib/db/client";
 
 export default function AnonAuthProvider({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();

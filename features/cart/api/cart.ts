@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { getPublicImageUrl } from '@/shared/utils/image-url'
 import { AppError, HTTP } from '@/shared/lib/http/respond'
 import type { PostgrestError } from '@supabase/supabase-js'

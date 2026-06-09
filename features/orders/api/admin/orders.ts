@@ -2,7 +2,7 @@
 /** Admin order fulfillment reads. Staff-only — enforced both here (fast 403) and
  *  inside the SECURITY DEFINER RPCs (is_staff()) as the real boundary. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
 import { verifyCurrentUserPassword } from '@/features/auth/api/reauth'
 import { getOrderEvents } from '@/features/payments/api/transaction-events'

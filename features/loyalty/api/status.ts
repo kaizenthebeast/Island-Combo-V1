@@ -1,7 +1,7 @@
 /** Loyalty Status & Balance (§3.8). Pure data-access: the caller passes the
  *  authenticated userId (derived from the JWT at the route boundary); RLS on
  *  profile_pts / profile enforces the ownership boundary. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { pointsToCash } from '@/features/cart/api/loyalty-config'
 
 export type LoyaltyStatus = {

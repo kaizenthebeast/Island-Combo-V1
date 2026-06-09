@@ -32,6 +32,7 @@ routing          domain logic          cross-cutting infra
     components/layout/    Navbar, Footer, MobileBottomNav, SearchBar
     components/common/    cross-feature widgets, modals, icons
     components/admin/     shared admin UI: DataTable, PageHeader, AdminButton, charts, sidebar
+    lib/db/              Supabase DB clients (browser / server / middleware / anon)
     lib/http/            base API client + route-handler helpers (apiOk/apiError, rate-limiter)
     lib/paypal/          PayPal SDK helpers
     lib/admin/           admin pagination helpers (pure)
@@ -62,24 +63,23 @@ routing          domain logic          cross-cutting infra
 - **Naming:** route segments and shadcn files keep their existing casing; new
   shared/feature folders are kebab-case.
 
-## Frozen boundaries (do not edit)
+## Frozen boundary (do not edit)
 
-- **`supabase/`** (top-level: migrations + edge functions) — frozen.
-- **`lib/supabase/`** — the Supabase client wrapper. Kept at `@/lib/supabase`
-  (not relocated) because a frozen file self-imports `@/lib/supabase/client`;
-  moving it would require editing frozen content or duplicating the folder.
-  Contents are frozen **except `proxy.ts`** (the middleware), which may have its
-  import paths / route references updated to stay correct.
-- **`lib/config/`** — a thin re-export **shim** to `@/shared/config` so the frozen
-  client files (which import `@/lib/config/env`) keep resolving after config moved.
-- `lib/admin/index.ts`, `lib/validations/index.ts`, `stores/index.ts` are
-  **compatibility aggregator barrels** that re-export from the new feature/shared
-  locations, so any lingering legacy imports keep working.
+- **`supabase/`** (top-level: migrations + edge functions) — the Supabase CLI
+  project. The name is mandated by the CLI; it owns the database schema and the
+  deployed edge functions, and must not be renamed or edited.
+
+The app's Supabase **client** code is a separate concern and lives in
+**`shared/lib/db/`** (`client` = browser, `server` = server components,
+`proxy` = middleware, `anon-user` = anonymous helper) — named `db`, not
+`supabase`, so it doesn't collide with the project folder above. There is no
+top-level `lib/` and no compatibility shims: every module resolves directly to
+its real `@/features/*` or `@/shared/*` home.
 
 ## Route security
 
 `proxy.ts` (root) is the middleware (the project uses `proxy.ts`, not
-`middleware.ts`); it delegates to `updateSession` in `lib/supabase/proxy.ts`.
+`middleware.ts`); it delegates to `updateSession` in `shared/lib/db/proxy.ts`.
 Guarded routes (unchanged by this restructure — URLs come from `app/`):
 
 | Class      | Routes                          | Rule                                  |

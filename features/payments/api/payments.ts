@@ -2,7 +2,7 @@
 /** Payment reads for an order. RLS scopes rows to the order's owner (or staff),
  *  so a non-owned order id simply returns nothing. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireUser } from '@/features/auth/api'
 import type { Payment } from '@/shared/types/payment'
 

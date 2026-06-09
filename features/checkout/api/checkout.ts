@@ -13,7 +13,7 @@ import 'server-only'
  *     PayPal capture id.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireUser } from '@/features/auth/api'
 import { getCart } from '@/features/cart/api/cart'
 import { getUserAddress } from '@/features/account/api/address'

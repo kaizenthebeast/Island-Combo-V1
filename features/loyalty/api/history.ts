@@ -1,6 +1,6 @@
 /** Loyalty points history — the caller's earn/redeem ledger (§3.8). RLS scopes
  *  profile_pts_transaction_records to the owner; the caller passes their userId. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 
 export type LoyaltyHistoryEntry = {
   id: number

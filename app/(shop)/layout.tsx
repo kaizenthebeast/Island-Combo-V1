@@ -2,7 +2,7 @@ import Footer from "@/shared/components/layout/Footer";
 import Navbar from "@/shared/components/layout/Navbar";
 import NavbarGate from "@/shared/components/layout/NavbarGate";
 import MobileBottomNav from "@/shared/components/layout/MobileBottomNav";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/shared/lib/db/server";
 
 export default async function ShopLayout({
   children,

@@ -13,7 +13,7 @@
 // This module imports the server-only Supabase client, so it must only be used
 // from Server Components / route handlers (never imported into a client bundle).
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireAdmin } from '@/features/auth/api'
 import { ENTITY_BY_CATEGORY } from '@/features/audit/api/audit-config'
 import type { AuditLog, AuditQuery } from '@/shared/types/audit'

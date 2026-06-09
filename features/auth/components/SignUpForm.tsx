@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/shared/lib/db/client";
 import { signInWithGoogle } from "@/features/auth/api/google-sign-in";
 import { Button } from "@/shared/components/ui/button";
 import {

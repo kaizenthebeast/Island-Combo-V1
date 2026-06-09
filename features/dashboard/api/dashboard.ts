@@ -2,7 +2,7 @@
 /** Admin analytics dashboard read. Staff-gated here (fast 403) and inside the
  *  admin_dashboard_stats RPC (is_staff). */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
 import type { DashboardStats } from '@/shared/types/dashboard'
 

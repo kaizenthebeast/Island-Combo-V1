@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/shared/lib/db/server"
 import { AppSidebar } from "@/shared/components/admin/sidebar/AppSidebar"
 
 export async function AppSidebarServer({ ...props }: Omit<React.ComponentProps<typeof AppSidebar>, "user">) {

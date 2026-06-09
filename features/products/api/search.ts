@@ -1,6 +1,6 @@
 'use server'
 /** Product search-suggestion queries. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 
 export type ProductSuggestion = {
   product_id: number

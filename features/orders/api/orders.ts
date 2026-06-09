@@ -10,7 +10,7 @@
  * boundary — a non-owned order id simply yields no row (→ 404 at the route).
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireUser } from '@/features/auth/api'
 import { getOrderEvents } from '@/features/payments/api/transaction-events'
 import { getPublicImageUrl } from '@/shared/utils/image-url'

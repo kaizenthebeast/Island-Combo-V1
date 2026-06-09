@@ -12,7 +12,7 @@
  *     immutability of the audit fields, so this server action stays thin.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
 import type { CashVoucher } from '@/shared/types/cash-voucher'
 

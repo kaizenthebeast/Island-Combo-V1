@@ -6,7 +6,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginFormInput } from "@/features/auth/validations/login";
 
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/shared/lib/db/client";
 import { signInWithGoogle } from "@/features/auth/api/google-sign-in";
 import { Button } from "@/shared/components/ui/button";
 import {

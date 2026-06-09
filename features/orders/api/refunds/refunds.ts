@@ -2,7 +2,7 @@
 /** Admin refund queue — list refund requests and approve/reject them.
  *  Staff-gated here (fast 403) and inside process_order_refund (is_staff). */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
 import { verifyCurrentUserPassword } from '@/features/auth/api/reauth'
 import { revalidatePath } from 'next/cache'

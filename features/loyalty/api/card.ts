@@ -3,7 +3,7 @@
  *  claim_loyverse_card RPC atomically credits the migrated balance, links the
  *  card to my profile, and marks the card claimed (so it can't be claimed twice).
  *  It does NOT touch my permanent system loyalty_card_number. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { AppError, HTTP } from '@/shared/lib/http/respond'
 
 const ERRCODE_STATUS: Record<string, number> = {

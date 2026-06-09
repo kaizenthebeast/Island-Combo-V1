@@ -2,7 +2,7 @@
  *  bucket, separate from saving the request. Flow: upload → Storage returns the
  *  path → that path is stored on the refund request (refunds.media_paths).
  *  Filename: {userId}/{timestamp}-{number}.ext */
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/shared/lib/db/client'
 
 export const REFUND_MEDIA_BUCKET = 'refund-media'
 const MAX_FILES = 6

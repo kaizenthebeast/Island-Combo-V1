@@ -1,7 +1,7 @@
 'use server'
 /** Admin banner & promotion-ad mutations. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { assertAdmin } from '@/features/auth/api'
 import { requireEnv } from '@/shared/config/env'
 import { revalidatePath } from 'next/cache'

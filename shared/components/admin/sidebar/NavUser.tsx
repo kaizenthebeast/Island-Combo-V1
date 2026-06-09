@@ -1,5 +1,5 @@
 "use client"
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/shared/lib/db/client";
 import { useRouter } from "next/navigation";
 import {
   BadgeCheck,

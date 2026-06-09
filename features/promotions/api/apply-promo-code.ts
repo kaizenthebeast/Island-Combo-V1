@@ -1,7 +1,7 @@
 'use server'
 /** Customer-facing promo-code validation at checkout. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 
 // APPLY (lookup by code)
 // Customer-facing: validates a code at checkout. Admin CRUD lives in

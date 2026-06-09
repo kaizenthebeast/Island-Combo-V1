@@ -1,7 +1,7 @@
 /** Upload review photos/videos to Storage, separate from saving the review.
  *  Flow: upload file → Storage returns the path → that path is stored in the DB
  *  (review_images) by addProductReview. Filename: {userId}/{timestamp}-{number}.ext */
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/shared/lib/db/client'
 
 export const REVIEW_MEDIA_BUCKET = 'review-media'
 const MAX_FILES = 6

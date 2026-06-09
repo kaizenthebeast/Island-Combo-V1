@@ -1,7 +1,7 @@
 'use server'
 /** Admin promo-code CRUD. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { assertAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/shared/types/promo-code'

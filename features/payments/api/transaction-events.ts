@@ -1,7 +1,7 @@
 'use server'
 /** Read transaction (audit) events for orders & vouchers. */
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import type { TransactionEvent } from '@/shared/types/transaction-event'
 
 // Chronological audit trail for a cash voucher.

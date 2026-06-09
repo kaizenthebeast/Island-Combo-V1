@@ -1,6 +1,6 @@
 'use server'
 /** Admin user & staff management. */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import { EditUserFormValues } from '@/features/account/validations/user'

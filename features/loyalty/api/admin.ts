@@ -3,7 +3,7 @@
  *  and the idempotent Loyverse points importer (§3.8 migration). All writes are
  *  authorized by is_admin RLS on profile / profile_pts / the points ledger; the
  *  requireAdmin guard gives a clean 403 (these are 'use server' entry points). */
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/shared/lib/db/server'
 import { requireAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 

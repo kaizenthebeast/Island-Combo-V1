@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/shared/lib/db/server";
 import { AuthButtonClient } from "./AuthButtonClient";
 
 export async function AuthButton() {

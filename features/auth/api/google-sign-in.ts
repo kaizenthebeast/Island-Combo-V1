@@ -1,5 +1,5 @@
 /** Starts the Google OAuth sign-in flow. */
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/shared/lib/db/client'
 
 /**
  * Starts the Google OAuth flow for both login and sign-up.
