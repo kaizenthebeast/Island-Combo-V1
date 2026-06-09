@@ -3,6 +3,7 @@ import AccountContainer from '@/features/account/components/AccountContainer'
 import { requireUser } from '@/features/auth/api'
 import { getUserProfile } from '@/features/account/api/profile'
 import { getUserAddress } from '@/features/account/api/address'
+import { getMyCards } from '@/features/account/api/cards'
 
 const UserDetailsPage = async () => {
   // The page is the trusted server-side boundary: verify the JWT here and pass
@@ -10,9 +11,10 @@ const UserDetailsPage = async () => {
   const user = await requireUser()
   if (!user) redirect('/auth/login')
 
-  const [profile, addresses] = await Promise.all([
+  const [profile, addresses, cards] = await Promise.all([
     getUserProfile(user.id).catch(() => null),
     getUserAddress(user.id).catch(() => []),
+    getMyCards().catch(() => []),
   ])
 
   return (
@@ -21,6 +23,7 @@ const UserDetailsPage = async () => {
         email={user.email ?? ''}
         profile={profile}
         addresses={addresses ?? []}
+        cards={cards ?? []}
       />
     </main>
   )

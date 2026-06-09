@@ -7,6 +7,7 @@ import Loyalty from '@/features/account/components/Loyalty'
 import OrderTracking from '@/features/account/components/OrderTracking'
 import MyCards from '@/features/account/components/MyCards'
 import { Address } from '@/shared/types/users'
+import type { SavedCard } from '@/features/account/api/cards'
 
 const navLinks: { name: string; icon: typeof User; href?: string }[] = [
     { name: 'Account Details', icon: User },
@@ -20,6 +21,7 @@ type AccountContainerProps = {
     email: string
     profile: { first_name: string | null; last_name: string | null; phone_text: string | null } | null
     addresses: Address[]
+    cards: SavedCard[]
 }
 
 // Deep-link slugs (e.g. /account?tab=orders) → sidebar entry.
@@ -30,7 +32,7 @@ const TAB_BY_SLUG: Record<string, string> = {
     cards: 'My Cards',
 }
 
-const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) => {
+const AccountContainer = ({ email, profile, addresses, cards }: AccountContainerProps) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [activeLink, setActiveLink] = useState(
@@ -88,7 +90,7 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
                         customerName={[profile?.first_name, profile?.last_name].filter(Boolean).join(' ')}
                     />
                 )}
-                {activeLink === 'My Cards' && <MyCards />}
+                {activeLink === 'My Cards' && <MyCards cards={cards} />}
             </section>
         </div>
     )
