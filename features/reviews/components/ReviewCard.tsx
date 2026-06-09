@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Star, Store } from 'lucide-react'
 import type { ProductReview } from '@/shared/types/review'
-import { getPublicImageUrl } from '@/shared/utils/image-url'
+import { getReviewMediaUrl, isVideoPath } from '@/shared/utils/image-url'
 
 export const StarRating = ({ rating }: { rating: number }) => (
     <div className="flex items-center gap-0.5">
@@ -52,19 +52,30 @@ export const ReviewCard = ({ review }: { review: ProductReview }) => {
                     {review.review_images
                         .slice()
                         .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((img) => (
-                            <div
-                                key={img.id}
-                                className="relative w-16 h-16 rounded-md overflow-hidden border bg-muted"
-                            >
-                                <Image
-                                    src={getPublicImageUrl(img.image_path)}
-                                    alt="Review image"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                        ))}
+                        .map((img) => {
+                            const url = getReviewMediaUrl(img.image_path)
+                            return (
+                                <div
+                                    key={img.id}
+                                    className="relative w-16 h-16 rounded-md overflow-hidden border bg-muted"
+                                >
+                                    {isVideoPath(img.image_path) ? (
+                                        <video
+                                            src={url}
+                                            controls
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <Image
+                                            src={url}
+                                            alt="Review image"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    )}
+                                </div>
+                            )
+                        })}
                 </div>
             )}
 
