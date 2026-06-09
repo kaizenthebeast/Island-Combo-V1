@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { useWishlistStore } from "@/stores";
+import { useWishlistStore } from "@/features/wishlist/stores/wishlist-store";
 
 export function UserMenu() {
   const router = useRouter();
