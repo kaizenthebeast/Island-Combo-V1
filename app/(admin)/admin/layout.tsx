@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/shared/components/ui/sidebar"
-import { AppSidebarServer } from "@/components/admin/sidebar/AppSidebarServer"
+import { AppSidebarServer } from "@/shared/components/admin/sidebar/AppSidebarServer"
 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

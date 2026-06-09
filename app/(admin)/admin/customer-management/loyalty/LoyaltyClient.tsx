@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { Star, Users } from 'lucide-react'
-import { PageHeader } from '@/components/admin/PageHeader'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
 import MembersPanel from './MembersPanel'
 import CardsPanel from './CardsPanel'
-import type { LoyverseCardRow } from '@/lib/admin/loyalty'
+import type { LoyverseCardRow } from '@/features/loyalty/api/admin'
 
 type Tab = 'members' | 'cards'
 

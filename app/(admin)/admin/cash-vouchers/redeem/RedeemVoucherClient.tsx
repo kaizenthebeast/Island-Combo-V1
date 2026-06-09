@@ -2,9 +2,9 @@
 
 import { useState, useTransition, type ComponentType } from 'react'
 import { Search, ShieldCheck, BadgeCheck, AlertCircle, RotateCcw } from 'lucide-react'
-import { PageHeader } from '@/components/admin/PageHeader'
-import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
-import { findCashVoucherByCode, redeemCashVoucher } from '@/lib/admin/cash-vouchers'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
+import { findCashVoucherByCode, redeemCashVoucher } from '@/features/cash-vouchers/api/admin'
 import type { CashVoucher, CashVoucherStatus } from '@/shared/types/cash-voucher'
 
 // status → badge styling

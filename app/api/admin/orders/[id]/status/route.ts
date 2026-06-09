@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { updateOrderStatus } from '@/lib/admin/orders/orders'
+import { updateOrderStatus } from '@/features/orders/api/admin/orders'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import type { OrderStatus } from '@/shared/types/order'
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import PromoCodeClient from './PromoCodeClient'
-import { getPromoCodesPage, type PromoCodesSortKey } from '@/lib/admin/promotional-codes/promo-code'
+import { getPromoCodesPage, type PromoCodesSortKey } from '@/features/promotions/api/admin/promo-code'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

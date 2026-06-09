@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { linkLoyaltyCard, unlinkLoyaltyCard } from '@/lib/admin/loyalty'
+import { linkLoyaltyCard, unlinkLoyaltyCard } from '@/features/loyalty/api/admin'
 import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/admin/loyalty-card — Link Loyalty Card Number API (§3.8, back office)

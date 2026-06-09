@@ -1,10 +1,10 @@
 import {
   DollarSign, ShoppingCart, Users, TrendingUp, Undo2, Package, Ticket, AlertTriangle,
 } from 'lucide-react'
-import { PageHeader } from '@/components/admin/PageHeader'
-import RevenueAreaChart from '@/components/admin/charts/RevenueAreaChart'
-import StatusDonut from '@/components/admin/charts/StatusDonut'
-import { getDashboardStats } from '@/lib/admin/dashboard'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import RevenueAreaChart from '@/shared/components/admin/charts/RevenueAreaChart'
+import StatusDonut from '@/shared/components/admin/charts/StatusDonut'
+import { getDashboardStats } from '@/features/dashboard/api'
 
 const money = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n ?? 0)

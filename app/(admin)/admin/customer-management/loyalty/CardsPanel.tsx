@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import VerifyCardholder from './VerifyCardholder'
-import type { LoyverseCardRow } from '@/lib/admin/loyalty'
+import type { LoyverseCardRow } from '@/features/loyalty/api/admin'
 
 type Entry = { cardNumber: string; points: number; name?: string | null; email?: string | null }
 

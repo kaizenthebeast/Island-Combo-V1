@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { importLoyverseCards, type LoyverseCardEntry } from '@/lib/admin/loyalty'
+import { importLoyverseCards, type LoyverseCardEntry } from '@/features/loyalty/api/admin'
 import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/admin/loyalty/import — migrate existing Loyverse cards (§3.8).

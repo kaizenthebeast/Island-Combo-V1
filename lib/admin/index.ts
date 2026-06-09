@@ -1,2 +1,2 @@
-/** Barrel for lib/admin. */
-export * from './_shared'
+/** Compatibility barrel — admin helpers moved to shared/lib/admin. */
+export * from '@/shared/lib/admin/shared'

@@ -1,4 +1,4 @@
-import { getRefunds } from '@/lib/admin/refunds'
+import { getRefunds } from '@/features/orders/api/refunds'
 import RefundsClient from './RefundsClient'
 import type { RefundStatus } from '@/shared/types/refund'
 

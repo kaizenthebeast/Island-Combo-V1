@@ -1,4 +1,4 @@
-import { getLoyverseCards } from '@/lib/admin/loyalty'
+import { getLoyverseCards } from '@/features/loyalty/api/admin'
 import LoyaltyClient from './LoyaltyClient'
 
 // Combined Loyalty back office: member points/profile (Members tab) + physical

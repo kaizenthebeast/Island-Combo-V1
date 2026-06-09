@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { PageHeader } from '@/components/admin/PageHeader'
-import { DataTable, type ColumnDef } from '@/components/admin/DataTable'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import { DataTable, type ColumnDef } from '@/shared/components/admin/DataTable'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
-import { processRefund } from '@/lib/admin/refunds'
+import { processRefund } from '@/features/orders/api/refunds'
 import type { AdminRefundRow, RefundStatus } from '@/shared/types/refund'
 
 const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n)

@@ -1,15 +1,15 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import { PageHeader } from '@/components/admin/PageHeader'
-import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import AddProductDialog from '@/components/admin/products/AddProductDialog'
-import EditProductDialog from '@/components/admin/products/EditProductDialog'
-import DeleteProductDialog from '@/components/admin/products/DeleteProductDialog'
-import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
+import AddProductDialog from '@/features/products/components/admin/AddProductDialog'
+import EditProductDialog from '@/features/products/components/admin/EditProductDialog'
+import DeleteProductDialog from '@/features/products/components/admin/DeleteProductDialog'
+import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
 import type { AdminProduct, ProductStatus } from '@/shared/types/product'
-import { softDeleteProduct } from '@/lib/admin/products/product'
+import { softDeleteProduct } from '@/features/products/api/admin/product'
 
 type Row = {
     product_id: number

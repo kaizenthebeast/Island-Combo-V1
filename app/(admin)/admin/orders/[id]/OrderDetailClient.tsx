@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
-import StatusBadge from '@/components/admin/StatusBadge'
+import StatusBadge from '@/shared/components/admin/StatusBadge'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import {
   ORDER_STATUSES,

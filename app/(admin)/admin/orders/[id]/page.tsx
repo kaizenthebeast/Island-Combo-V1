@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getOrderDetail } from '@/lib/admin/orders'
+import { getOrderDetail } from '@/features/orders/api/admin'
 import OrderDetailClient from './OrderDetailClient'
 
 type Params = Promise<{ id: string }>

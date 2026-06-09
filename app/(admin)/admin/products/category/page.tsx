@@ -1,7 +1,7 @@
 import React from 'react'
 import CategoryClient from './CategoryClient'
 import { getAllParentCategories } from '@/features/categories/api/category'
-import { getCategoriesPage, type CategoriesSortKey } from '@/lib/admin/categories/category'
+import { getCategoriesPage, type CategoriesSortKey } from '@/features/categories/api/admin/category'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

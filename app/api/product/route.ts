@@ -8,7 +8,7 @@ import {
   restoreProduct,
   type AddProductPayload,
   type UpdateProductPayload,
-} from '@/lib/admin/products/product'
+} from '@/features/products/api/admin/product'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/product — Public list (no auth)

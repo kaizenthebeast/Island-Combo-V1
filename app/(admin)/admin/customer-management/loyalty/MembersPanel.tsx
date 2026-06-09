@@ -5,7 +5,7 @@ import { Search, User, Star, Package, Ticket, Plus, Minus, AlertCircle, BadgeChe
 import {
   searchCustomers, getCustomerProfile, adjustLoyaltyPoints,
   type AdminCustomer, type AdminCustomerProfile,
-} from '@/lib/admin/loyalty'
+} from '@/features/loyalty/api/admin'
 
 const money = (n: number | null) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n ?? 0)

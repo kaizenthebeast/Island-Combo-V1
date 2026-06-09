@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { findCustomerByEmail } from '@/lib/admin/loyalty'
+import { findCustomerByEmail } from '@/features/loyalty/api/admin'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/admin/loyalty/customer?email= — Admin Customer Search (Flow D).

@@ -6,7 +6,7 @@ import {
   updateCategory,
   softDeleteCategory,
   restoreCategory,
-} from '@/lib/admin/categories/category'
+} from '@/features/categories/api/admin/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/features/categories/validations/category'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 

@@ -1,6 +1,6 @@
 /** Order-status presentation helpers (pure; safe for client or server). */
 import type { OrderStatus } from '@/shared/types/order'
-import type { BadgeVariant } from '@/components/admin/StatusBadge'
+import type { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 
 export const ORDER_STATUSES: OrderStatus[] = [
   'pending', 'paid', 'shipped', 'out_for_delivery', 'delivered', 'completed', 'cancelled',

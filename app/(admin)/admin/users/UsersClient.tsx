@@ -1,11 +1,11 @@
 'use client'
 
 import { useMemo, useTransition, useState } from 'react'
-import { PageHeader } from '@/components/admin/PageHeader'
-import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
+import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
-import { deleteUser } from '@/lib/admin/users/users'
+import { deleteUser } from '@/features/users/api/users'
 import type { AdminUser } from '@/shared/types/users'
 
 type Row = {

@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
-import { PageHeader } from '@/components/admin/PageHeader'
-import { DataTable, ColumnDef } from '@/components/admin/DataTable'
-import AddPromoCodeDialog from '@/components/admin/promotional-codes/AddPromoCodeDialog'
-import EditPromoCodeDialog from '@/components/admin/promotional-codes/EditPromoCodeDialog'
-import DeletePromoCodeDialog from '@/components/admin/promotional-codes/DeletePromoCodeDialog'
-import StatusBadge, { BadgeVariant } from '@/components/admin/StatusBadge'
+import { PageHeader } from '@/shared/components/admin/PageHeader'
+import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
+import AddPromoCodeDialog from '@/features/promotions/components/admin/AddPromoCodeDialog'
+import EditPromoCodeDialog from '@/features/promotions/components/admin/EditPromoCodeDialog'
+import DeletePromoCodeDialog from '@/features/promotions/components/admin/DeletePromoCodeDialog'
+import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
-import { archivePromoCode } from '@/lib/admin/promotional-codes/promo-code'
+import { archivePromoCode } from '@/features/promotions/api/admin/promo-code'
 import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/shared/types/promo-code'
 
 // table row shape
