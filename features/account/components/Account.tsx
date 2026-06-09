@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Address } from '@/shared/types/users'
 import CheckoutAddress from '@/features/checkout/components/CheckoutAddressForm'
 import PersonalDetailsForm from '@/features/account/components/PersonalDetailsForm'
+import ChangePasswordButton from '@/features/account/components/ChangePasswordButton'
 import DeleteModal from '@/shared/components/common/modals/DeleteModal'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 
@@ -79,9 +80,12 @@ const Account = ({ email, profile, addresses }: AccountProps) => {
               <p className='text-muted-foreground'>{profile.phone_text}</p>
             </div>
           )}
-          <div>
-            <p className='font-semibold text-foreground'>Password</p>
-            <p className='text-muted-foreground tracking-widest'>••••••••••••</p>
+          <div className='flex items-center justify-between gap-3'>
+            <div>
+              <p className='font-semibold text-foreground'>Password</p>
+              <p className='text-muted-foreground tracking-widest'>••••••••••••</p>
+            </div>
+            <ChangePasswordButton email={email} />
           </div>
         </div>
       </div>
