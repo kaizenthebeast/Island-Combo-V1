@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { useCartStore } from "@/stores/cart-store";
+import { useCartStore } from "@/features/cart/stores/cart-store";
 import { User, Settings, LogOut, Package } from "lucide-react";
 import {
   DropdownMenu,

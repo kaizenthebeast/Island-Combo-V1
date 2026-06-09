@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getProductSuggestions } from '@/lib/products/search'
+import { getProductSuggestions } from '@/features/products/api/search'
 import { apiOk, apiError, HTTP } from '@/shared/lib/http/respond'
 
 export async function GET(req: NextRequest) {

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireUser } from '@/lib/auth'
-import { applyCartDiscount, removeCartDiscount, getCartWithTotals } from '@/lib/cart'
+import { applyCartDiscount, removeCartDiscount, getCartWithTotals } from '@/features/cart/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // Apply Discount Code (§3.3). Unauthenticated guests use their anonymous

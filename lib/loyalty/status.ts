@@ -2,7 +2,7 @@
  *  authenticated userId (derived from the JWT at the route boundary); RLS on
  *  profile_pts / profile enforces the ownership boundary. */
 import { createClient } from '@/lib/supabase/server'
-import { pointsToCash } from '@/lib/cart/loyalty-config'
+import { pointsToCash } from '@/features/cart/api/loyalty-config'
 
 export type LoyaltyStatus = {
   points: number             // accumulated balance (profile_pts.total_pts)

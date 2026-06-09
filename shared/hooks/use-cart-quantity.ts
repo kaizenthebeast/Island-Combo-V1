@@ -1,6 +1,6 @@
 /** Hook for debounced cart-quantity updates. */
 import { useEffect, useRef } from 'react'
-import { useCartStore } from '@/stores/cart-store'
+import { useCartStore } from '@/features/cart/stores/cart-store'
 
 const DEBOUNCE_MS = 500
 

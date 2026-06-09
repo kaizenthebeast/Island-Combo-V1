@@ -2,7 +2,7 @@
 
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { addCategorySchema, AddCategoryFormValues } from '@/lib/validations/category'
+import { addCategorySchema, AddCategoryFormValues } from '@/features/categories/validations/category'
 import { Field, Input } from './CategoryUIForm'
 
 type Props = {

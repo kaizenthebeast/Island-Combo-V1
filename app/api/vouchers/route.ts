@@ -1,6 +1,6 @@
 import { requireUser } from '@/lib/auth'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
-import { getMyCashVouchers } from '@/lib/cash-vouchers/cash-voucher'
+import { getMyCashVouchers } from '@/features/cash-vouchers/api/cash-voucher'
 
 // GET /api/vouchers
 // Fetch Voucher History: the caller's purchased digital products (cash

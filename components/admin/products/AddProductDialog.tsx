@@ -8,7 +8,7 @@ import {
   DialogDescription,
 } from '@/shared/components/ui/dialog'
 import { AddProductForm } from '@/components/admin/products/forms/AddProductForm'
-import type { ProductFormValues } from '@/lib/validations/product'
+import type { ProductFormValues } from '@/features/products/validations/product'
 
 type Props = {
   open: boolean

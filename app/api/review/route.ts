@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
-import { getProductReviews, addProductReview } from '@/lib/reviews/index'
+import { getProductReviews, addProductReview } from '@/features/reviews/api/index'
 
 // GET /api/review?slug=<product-slug>&page=&limit=
 // Public: a product's paginated reviews (reviews_public_read).

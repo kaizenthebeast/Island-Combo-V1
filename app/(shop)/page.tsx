@@ -1,8 +1,8 @@
 import HeroBanner from "@/components/features/home/HeroBanner";
-import ProductCategory from "@/components/features/product/ProductCategories";
+import ProductCategory from "@/features/products/components/ProductCategories";
 import SaleAndPromos from "@/components/features/home/SaleAndPromos";
-import CashVoucherBanner from "@/components/features/cash-voucher/CashVoucherBanner";
-import ProductContainer from "@/components/features/product/ProductContainer";
+import CashVoucherBanner from "@/features/cash-vouchers/components/CashVoucherBanner";
+import ProductContainer from "@/features/products/components/ProductContainer";
 
 export default function Home() {
   return (

@@ -9,7 +9,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
 import { Input } from '@/shared/components/ui/input'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
-import { pointsToCash } from '@/lib/cart/loyalty-config'
+import { pointsToCash } from '@/features/cart/api/loyalty-config'
 import type { LoyaltyHistoryEntry } from '@/lib/loyalty/history'
 
 type Status = { points: number; cashValue: number; cardNumber: string | null; hasPerks: boolean }

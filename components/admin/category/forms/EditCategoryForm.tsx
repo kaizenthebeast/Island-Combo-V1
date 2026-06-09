@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editCategorySchema, EditCategoryFormValues } from '@/lib/validations/category'
+import { editCategorySchema, EditCategoryFormValues } from '@/features/categories/validations/category'
 import { CategoryFields, CategoryOption, Field, Input } from './CategoryUIForm'
 import { restoreCategory } from '@/lib/admin/categories/category'
 import { ArchiveRestore } from 'lucide-react'     

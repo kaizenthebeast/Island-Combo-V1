@@ -2,8 +2,8 @@
 
 import React from 'react'
 import { useRouter } from 'next/navigation'
-import { useCartStore } from '@/stores/cart-store'
-import { useCheckoutStore } from '@/stores/checkout-store'
+import { useCartStore } from '@/features/cart/stores/cart-store'
+import { useCheckoutStore } from '@/features/checkout/stores/checkout-store'
 import { calculateTotals } from '@/lib/checkout/calculate-totals'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import type { ProductCheckoutIntent } from '@/shared/types/order'

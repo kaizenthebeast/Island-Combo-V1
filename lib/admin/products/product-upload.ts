@@ -1,6 +1,6 @@
 /** Admin: upload product variant images to Storage. */
 import { createClient } from '@/lib/supabase/client'
-import type { ProductFormValues } from '@/lib/validations/product'
+import type { ProductFormValues } from '@/features/products/validations/product'
 
 export type UploadedImage = {
   url: string

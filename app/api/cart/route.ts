@@ -8,7 +8,7 @@ import {
   updateCartQuantity,
   removeFromCart,
   removeAllItemFromCart
-} from '@/lib/cart'
+} from '@/features/cart/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // 429 is special-cased here so we can attach a Retry-After header.

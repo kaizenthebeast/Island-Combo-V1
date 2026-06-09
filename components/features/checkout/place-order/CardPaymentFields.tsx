@@ -11,8 +11,8 @@ import {
   usePayPalCardFields,
   usePayPalScriptReducer,
 } from '@paypal/react-paypal-js'
-import { useCartStore } from '@/stores/cart-store'
-import { useCheckoutStore } from '@/stores/checkout-store'
+import { useCartStore } from '@/features/cart/stores/cart-store'
+import { useCheckoutStore } from '@/features/checkout/stores/checkout-store'
 import type { ProductCheckoutIntent } from '@/shared/types/order'
 
 // Public by design — the PayPal SDK needs the client id in the browser.

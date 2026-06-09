@@ -1,4 +1,4 @@
-import WishlistContainer from '@/components/features/wishlist/WishlistContainer'
+import WishlistContainer from '@/features/wishlist/components/WishlistContainer'
 
 const WishlistPage = () => {
     return (

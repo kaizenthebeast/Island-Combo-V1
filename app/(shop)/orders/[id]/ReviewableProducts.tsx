@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { Star, CheckCircle2, AlertCircle } from 'lucide-react'
-import { addProductReview, type ReviewableProduct } from '@/lib/reviews/review'
+import { addProductReview, type ReviewableProduct } from '@/features/reviews/api/review'
 
 // Shown on a completed order: lets the buyer review each purchased product once.
 export default function ReviewableProducts({ products }: { products: ReviewableProduct[] }) {

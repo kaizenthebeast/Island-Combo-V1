@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import CartCount from "@/components/features/cart/CartCount";
-import WishlistCount from "@/components/features/wishlist/WishlistCount";
+import CartCount from "@/features/cart/components/CartCount";
+import WishlistCount from "@/features/wishlist/components/WishlistCount";
 import { UserMenu } from "./UserMenu";
 import { ShoppingCart, Heart } from "lucide-react";
 

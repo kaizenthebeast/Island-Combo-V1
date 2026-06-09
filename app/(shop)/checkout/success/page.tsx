@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { getMyOrderDetail } from '@/lib/orders/orders'
-import ProductContainer from '@/components/features/product/ProductContainer'
+import ProductContainer from '@/features/products/components/ProductContainer'
 
 // Shown after a product order is placed. Card/online orders are already paid
 // ("You paid $X"); cash-on-delivery orders are placed but unpaid, so the wording

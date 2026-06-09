@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useCheckoutStore, type PaymentMethod as PaymentMethodValue } from '@/stores/checkout-store'
+import { useCheckoutStore, type PaymentMethod as PaymentMethodValue } from '@/features/checkout/stores/checkout-store'
 import { PayPalSdk } from '@/shared/components/common/PayPalSdk'
 import CardPaymentFields from '@/components/features/checkout/place-order/CardPaymentFields'
 

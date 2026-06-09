@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { generateRedemptionId } from '@/lib/cash-vouchers/cash-voucher'
+import { generateRedemptionId } from '@/features/cash-vouchers/api/cash-voucher'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // Matches a canonical UUID (v1–v5). Cheap pre-validation before hitting the DB.

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { getMyOrderDetail } from '@/lib/orders/orders'
-import { getReviewableProductsForOrder } from '@/lib/reviews/review'
+import { getReviewableProductsForOrder } from '@/features/reviews/api/review'
 import ReviewableProducts from './ReviewableProducts'
 import type { OrderStatus } from '@/shared/types/order'
 

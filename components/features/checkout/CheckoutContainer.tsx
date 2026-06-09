@@ -3,8 +3,8 @@
 import { useEffect } from "react"
 import BillingSummary from "@/components/features/checkout/BillingSummary"
 import OrderSummary from "@/components/features/checkout/OrderSummary"
-import MobileCart from "@/components/features/cart/MobileCart"
-import { useCartStore } from "@/stores/cart-store"
+import MobileCart from "@/features/cart/components/MobileCart"
+import { useCartStore } from "@/features/cart/stores/cart-store"
 import Image from "next/image"
 import Link from "next/link"
 

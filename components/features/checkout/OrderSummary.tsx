@@ -1,11 +1,11 @@
 'use client'
 
 import { CartItem } from '@/shared/types/cart'
-import { useCartStore } from '@/stores/cart-store'
+import { useCartStore } from '@/features/cart/stores/cart-store'
 import { useCartQuantity } from '@/shared/hooks/use-cart-quantity'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import Image from 'next/image'
-import CartQuantityButton from '../cart/CartQuantityButton'
+import CartQuantityButton from '@/features/cart/components/CartQuantityButton'
 import { X } from 'lucide-react'
 import WholesaleCheckIcon from '@/shared/components/common/icons/WholesaleCheckIcon'
 

@@ -2,13 +2,13 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { CircleDollarSign } from 'lucide-react'
-import PromoCodeForm from '@/components/features/promo/PromoCodeForm'
+import PromoCodeForm from '@/features/promotions/components/PromoCodeForm'
 import { Switch } from '@/shared/components/ui/switch'
 import { Input } from '@/shared/components/ui/input'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/shared/components/ui/sheet'
-import { useCheckoutStore } from '@/stores/checkout-store'
-import { useCartStore } from '@/stores/cart-store'
-import { MIN_REDEEM_POINTS, maxRedeemablePoints, pointsToCash } from '@/lib/cart/loyalty-config'
+import { useCheckoutStore } from '@/features/checkout/stores/checkout-store'
+import { useCartStore } from '@/features/cart/stores/cart-store'
+import { MIN_REDEEM_POINTS, maxRedeemablePoints, pointsToCash } from '@/features/cart/api/loyalty-config'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
 import Link from 'next/link'
 

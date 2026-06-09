@@ -4,7 +4,7 @@ import { ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AuthButtonClient } from "@/components/features/auth/AuthButtonClient";
 import SearchBar from "@/shared/components/layout/SearchBar";
-import CartCount from "@/components/features/cart/CartCount";
+import CartCount from "@/features/cart/components/CartCount";
 
 const Navbar = async () => {
   const supabase = await createClient();

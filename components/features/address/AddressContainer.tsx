@@ -8,9 +8,9 @@ import MobileAddressSelector from "@/components/features/checkout/place-order/Mo
 import PaymentMethod from "@/components/features/checkout/place-order/PaymentMethod"
 import AddressBillingSummary from "@/components/features/checkout/place-order/AddressBillingSummary"
 import { MapPin, Truck, Store, AlertCircle, Loader2, Plus } from "lucide-react"
-import { useCartStore } from "@/stores/cart-store"
-import { useCheckoutStore } from "@/stores/checkout-store"
-import { getZoneFromAddress, type ShippingZone } from "@/lib/shipping/zone"
+import { useCartStore } from "@/features/cart/stores/cart-store"
+import { useCheckoutStore } from "@/features/checkout/stores/checkout-store"
+import { getZoneFromAddress, type ShippingZone } from "@/features/shipping/api/zone"
 
 const MAX_SAVED_ADDRESSES = 3
 

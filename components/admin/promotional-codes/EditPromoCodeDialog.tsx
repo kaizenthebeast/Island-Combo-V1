@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/shared/components/ui/dialog'
 import { EditPromoCodeForm } from '@/components/admin/promotional-codes/forms/EditPromoCodeForm'
-import type { EditPromoCodeFormValues } from '@/lib/validations/promo-code'
+import type { EditPromoCodeFormValues } from '@/features/promotions/validations/promo-code'
 import type { PromoCode } from '@/shared/types/promo-code'
 
 type Props = {

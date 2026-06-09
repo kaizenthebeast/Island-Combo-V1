@@ -1,5 +1,5 @@
-import { getSaleProducts } from '@/lib/products/product'
-import ProductCard from '@/components/features/product/ProductCard'
+import { getSaleProducts } from '@/features/products/api/product'
+import ProductCard from '@/features/products/components/ProductCard'
 import {
   Carousel,
   CarouselContent,
