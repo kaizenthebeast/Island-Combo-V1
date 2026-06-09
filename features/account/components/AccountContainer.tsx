@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { User, Star, Ticket, PackageSearch, CreditCard } from 'lucide-react'
 import Account from '@/features/account/components/Account'
@@ -36,6 +36,13 @@ const AccountContainer = ({ email, profile, addresses }: AccountContainerProps) 
     const [activeLink, setActiveLink] = useState(
         TAB_BY_SLUG[searchParams.get('tab') ?? ''] ?? 'Account Details',
     )
+
+    // Keep the active section in sync with the ?tab= deep-link (e.g. when the
+    // header dropdown navigates here while already on /account).
+    useEffect(() => {
+        const slug = searchParams.get('tab') ?? ''
+        if (TAB_BY_SLUG[slug]) setActiveLink(TAB_BY_SLUG[slug])
+    }, [searchParams])
 
     const handleLinkClick = (link: { name: string; href?: string }) => {
         if (link.href) {

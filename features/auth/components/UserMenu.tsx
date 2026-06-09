@@ -4,7 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/shared/lib/db/client";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/features/cart/stores/cart-store";
-import { User, Settings, LogOut, Package } from "lucide-react";
+import { User, Star, Ticket, PackageSearch, CreditCard, LogOut, type LucideIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useWishlistStore } from "@/features/wishlist/stores/wishlist-store";
+
+// Mirrors the "My Account" sidebar sections (AccountContainer). Each opens the
+// account page on the matching ?tab= deep-link; Buy Cash Voucher is its own route.
+const ACCOUNT_LINKS: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: "Account Details", href: "/account", icon: User },
+  { label: "Loyalty Points", href: "/account?tab=loyalty", icon: Star },
+  { label: "Buy Cash Voucher", href: "/cashvoucher", icon: Ticket },
+  { label: "Orders & Tracking", href: "/account?tab=orders", icon: PackageSearch },
+  { label: "My Cards", href: "/account?tab=cards", icon: CreditCard },
+];
 
 export function UserMenu() {
   const router = useRouter();
@@ -38,19 +48,15 @@ export function UserMenu() {
           <User size={22} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem asChild>
-          <Link href="/account" className="flex items-center gap-2 cursor-pointer">
-            <Settings size={15} />
-            Account
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/account?tab=orders" className="flex items-center gap-2 cursor-pointer">
-            <Package size={15} />
-            My Orders
-          </Link>
-        </DropdownMenuItem>
+      <DropdownMenuContent align="end" className="w-52">
+        {ACCOUNT_LINKS.map(({ label, href, icon: Icon }) => (
+          <DropdownMenuItem key={label} asChild>
+            <Link href={href} className="flex items-center gap-2 cursor-pointer">
+              <Icon size={15} />
+              {label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
           <button
