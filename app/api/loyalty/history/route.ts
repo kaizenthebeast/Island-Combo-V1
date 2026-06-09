@@ -1,5 +1,5 @@
-import { requireUser } from '@/lib/auth'
-import { getLoyaltyHistory } from '@/lib/loyalty/history'
+import { requireUser } from '@/features/auth/api'
+import { getLoyaltyHistory } from '@/features/loyalty/api/history'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/loyalty/history — the signed-in user's points earn/redeem ledger.

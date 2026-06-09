@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
-import { resolveCheckoutAmount, fulfillCheckout, savePendingCheckout } from '@/lib/checkout/checkout'
+import { resolveCheckoutAmount, fulfillCheckout, savePendingCheckout } from '@/features/checkout/api/checkout'
 import { createPayPalOrder, capturePayPalOrder } from '@/shared/lib/paypal'
 import type { CheckoutIntent } from '@/shared/types/order'
 

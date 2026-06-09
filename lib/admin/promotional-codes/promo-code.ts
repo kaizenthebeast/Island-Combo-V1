@@ -2,7 +2,7 @@
 /** Admin promo-code CRUD. */
 
 import { createClient } from '@/lib/supabase/server'
-import { assertAdmin } from '@/lib/auth'
+import { assertAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import type { PromoCode, PromoCodeRow, PromoCodeEffectiveStatus } from '@/shared/types/promo-code'
 import type { AddPromoCodeFormValues, EditPromoCodeFormValues } from '@/features/promotions/validations/promo-code'

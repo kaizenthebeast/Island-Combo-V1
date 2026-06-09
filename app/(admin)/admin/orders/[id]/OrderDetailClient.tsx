@@ -10,7 +10,7 @@ import {
   ORDER_STATUSES,
   orderStatusLabel,
   orderStatusVariant,
-} from '@/lib/orders/order-status'
+} from '@/features/orders/api/order-status'
 import type { AdminOrderDetail, OrderStatus } from '@/shared/types/order'
 import type { TransactionEvent } from '@/shared/types/transaction-event'
 

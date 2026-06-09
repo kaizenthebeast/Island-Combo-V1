@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 
 // Audit index. Layer 1 (proxy.ts) already blocked non-admins; this is the Layer 2
 // server-side re-check before sending the admin to the first category.

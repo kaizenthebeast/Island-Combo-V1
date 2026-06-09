@@ -1,6 +1,6 @@
-import HeroBanner from "@/components/features/home/HeroBanner";
+import HeroBanner from "@/features/home/components/HeroBanner";
 import ProductCategory from "@/features/products/components/ProductCategories";
-import SaleAndPromos from "@/components/features/home/SaleAndPromos";
+import SaleAndPromos from "@/features/home/components/SaleAndPromos";
 import CashVoucherBanner from "@/features/cash-vouchers/components/CashVoucherBanner";
 import ProductContainer from "@/features/products/components/ProductContainer";
 

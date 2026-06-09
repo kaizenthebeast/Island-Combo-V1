@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { loginWithEmail } from '@/lib/auth';
+import { loginWithEmail } from '@/features/auth/api';
 import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond';
 
 export async function POST(request: NextRequest) {

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Check } from 'lucide-react'
-import { getMyOrderDetail } from '@/lib/orders/orders'
+import { getMyOrderDetail } from '@/features/orders/api/orders'
 import ProductContainer from '@/features/products/components/ProductContainer'
 
 // Shown after a product order is placed. Card/online orders are already paid

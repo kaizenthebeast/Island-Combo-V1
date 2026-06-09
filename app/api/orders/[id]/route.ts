@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
-import { getMyOrderDetail } from '@/lib/orders/orders'
+import { getMyOrderDetail } from '@/features/orders/api/orders'
 
 // GET /api/orders/:id
 // Fetch Order Details: a single order's line items, final pricing, shipping

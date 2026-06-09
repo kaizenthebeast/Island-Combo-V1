@@ -3,9 +3,9 @@
  *  inside the SECURITY DEFINER RPCs (is_staff()) as the real boundary. */
 
 import { createClient } from '@/lib/supabase/server'
-import { requireStaff } from '@/lib/auth'
-import { verifyCurrentUserPassword } from '@/lib/auth/reauth'
-import { getOrderEvents } from '@/lib/payments/transaction-events'
+import { requireStaff } from '@/features/auth/api'
+import { verifyCurrentUserPassword } from '@/features/auth/api/reauth'
+import { getOrderEvents } from '@/features/payments/api/transaction-events'
 import type { PaginatedInput, PaginatedResult } from '@/lib/admin/_shared'
 import type { AdminOrderListRow, AdminOrderDetail } from '@/shared/types/order'
 import type { TransactionEvent } from '@/shared/types/transaction-event'

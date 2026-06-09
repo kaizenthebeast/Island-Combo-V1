@@ -13,7 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { requireStaff } from '@/lib/auth'
+import { requireStaff } from '@/features/auth/api'
 import type { CashVoucher } from '@/shared/types/cash-voucher'
 
 type VoucherResult = { success: boolean; voucher?: CashVoucher; message?: string }

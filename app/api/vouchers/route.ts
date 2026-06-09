@@ -1,4 +1,4 @@
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 import { getMyCashVouchers } from '@/features/cash-vouchers/api/cash-voucher'
 

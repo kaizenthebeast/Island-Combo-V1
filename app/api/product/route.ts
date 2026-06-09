@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 import { getPublicProductsPage, type PublicProductSort } from '@/features/products/api/product'
 import {
   addAdminProduct,

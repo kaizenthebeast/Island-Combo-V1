@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { requestPasswordReset } from '@/lib/auth';
+import { requestPasswordReset } from '@/features/auth/api';
 import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond';
 
 export async function POST(request: NextRequest) {

@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import {
   getUserAddress,
   insertAddressInfo,
   updateAddressInfo,
   setDefaultAddress,
   deleteAddress,
-} from '@/lib/account/address'
+} from '@/features/account/api/address'
 import type { AddressFormValues } from '@/shared/types/users'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 

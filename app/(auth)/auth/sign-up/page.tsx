@@ -1,4 +1,4 @@
-import { SignUpForm } from "@/components/features/auth/SignUpForm";
+import { SignUpForm } from "@/features/auth/components/SignUpForm";
 import Image from "next/image";
 
 

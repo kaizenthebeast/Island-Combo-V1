@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { AuthButtonClient } from "@/components/features/auth/AuthButtonClient";
+import { AuthButtonClient } from "@/features/auth/components/AuthButtonClient";
 import SearchBar from "@/shared/components/layout/SearchBar";
 import CartCount from "@/features/cart/components/CartCount";
 

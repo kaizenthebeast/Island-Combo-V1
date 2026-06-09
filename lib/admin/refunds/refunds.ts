@@ -3,8 +3,8 @@
  *  Staff-gated here (fast 403) and inside process_order_refund (is_staff). */
 
 import { createClient } from '@/lib/supabase/server'
-import { requireStaff } from '@/lib/auth'
-import { verifyCurrentUserPassword } from '@/lib/auth/reauth'
+import { requireStaff } from '@/features/auth/api'
+import { verifyCurrentUserPassword } from '@/features/auth/api/reauth'
 import { revalidatePath } from 'next/cache'
 import type { AdminRefundRow, RefundStatus } from '@/shared/types/refund'
 

@@ -1,9 +1,9 @@
 import React from 'react'
 import { redirect } from 'next/navigation'
-import AddressContainer from '@/components/features/address/AddressContainer'
-import { requireUser } from '@/lib/auth'
-import { getUserAddress } from '@/lib/account/address'
-import { getUserProfile } from '@/lib/account/profile'
+import AddressContainer from '@/features/account/components/address/AddressContainer'
+import { requireUser } from '@/features/auth/api'
+import { getUserAddress } from '@/features/account/api/address'
+import { getUserProfile } from '@/features/account/api/profile'
 
 // Per-user, session-derived data: render on the server on every request so the
 // address list is present on first paint (no client-side loading flash). The

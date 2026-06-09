@@ -1,7 +1,7 @@
 'use server'
 /** Admin category CRUD. */
 import { createClient } from '@/lib/supabase/server'
-import { assertAdmin } from '@/lib/auth'
+import { assertAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import type { Category } from '@/shared/types/category'
 import type { AddCategoryFormValues, EditCategoryFormValues } from '@/features/categories/validations/category'

@@ -1,9 +1,9 @@
 'use server'
 /** Admin user & staff management. */
 import { createClient } from '@/lib/supabase/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
-import { EditUserFormValues } from '@/lib/validations/user'
+import { EditUserFormValues } from '@/features/account/validations/user'
 import { escapeIlike, type PaginatedInput, type PaginatedResult } from '@/lib/admin/_shared'
 
 // PAGINATED READS (users + staff)

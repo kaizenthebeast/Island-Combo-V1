@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
-import { getMyOrdersPage } from '@/lib/orders/orders'
-import { ORDER_STATUSES } from '@/lib/orders/order-status'
+import { getMyOrdersPage } from '@/features/orders/api/orders'
+import { ORDER_STATUSES } from '@/features/orders/api/order-status'
 import type { OrderStatus } from '@/shared/types/order'
 
 // GET /api/orders?page=1&pageSize=10&status=shipped

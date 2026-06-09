@@ -1,5 +1,5 @@
 import { apiOk, toApiError } from '@/shared/lib/http/respond'
-import { getAvailablePaymentMethods } from '@/lib/payments/payment-methods'
+import { getAvailablePaymentMethods } from '@/features/payments/api/payment-methods'
 
 // GET /api/payment-methods
 // Fetch Available Payment Methods (§3.5). Open to both guests and signed-in

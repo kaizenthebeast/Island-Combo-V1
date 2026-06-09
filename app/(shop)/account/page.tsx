@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation'
-import AccountContainer from '@/components/features/account/AccountContainer'
-import { requireUser } from '@/lib/auth'
-import { getUserProfile } from '@/lib/account/profile'
-import { getUserAddress } from '@/lib/account/address'
+import AccountContainer from '@/features/account/components/AccountContainer'
+import { requireUser } from '@/features/auth/api'
+import { getUserProfile } from '@/features/account/api/profile'
+import { getUserAddress } from '@/features/account/api/address'
 
 const UserDetailsPage = async () => {
   // The page is the trusted server-side boundary: verify the JWT here and pass

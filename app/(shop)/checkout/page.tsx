@@ -1,5 +1,5 @@
 import React from 'react'
-import CheckoutContainer from '@/components/features/checkout/CheckoutContainer'
+import CheckoutContainer from '@/features/checkout/components/CheckoutContainer'
 import { Suspense } from 'react';
 
 const page = () => {

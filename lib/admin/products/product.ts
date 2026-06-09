@@ -1,7 +1,7 @@
 'use server'
 /** Admin product CRUD + stock management. */
 import { createClient } from '@/lib/supabase/server'
-import { assertAdmin } from '@/lib/auth'
+import { assertAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
 import type { AdminProduct } from '@/shared/types/product'
 import type { VariantWithUploadedImages } from '@/lib/admin/products/product-upload'

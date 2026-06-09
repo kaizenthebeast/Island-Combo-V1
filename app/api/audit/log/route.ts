@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
-import { insertAuditLog } from '@/lib/audit'
+import { insertAuditLog } from '@/features/audit/api/audit'
 
 // POST /api/audit/log — internal endpoint to record an app-level audit entry
 // (logins, manual admin actions). Server-side use only; admin-gated with the same

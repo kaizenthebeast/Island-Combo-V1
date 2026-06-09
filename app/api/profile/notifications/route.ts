@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
-import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/lib/account/profile'
+import { requireUser } from '@/features/auth/api'
+import { getMyNotificationPrefs, updateMyNotificationPrefs } from '@/features/account/api/profile'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/profile/notifications

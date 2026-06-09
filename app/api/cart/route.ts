@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { waitUntil } from '@vercel/functions'
 import { ratelimit } from '@/shared/lib/http/rate-limiter'
 import {

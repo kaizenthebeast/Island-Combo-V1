@@ -3,7 +3,7 @@
 /** Customer cash-voucher purchase + retrieval. Staff claim lives in lib/admin/cash-vouchers. */
 
 import { createClient } from '@/lib/supabase/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import type { CashVoucher, CreateCashVoucherInput } from '@/shared/types/cash-voucher'
 
 // CREATE

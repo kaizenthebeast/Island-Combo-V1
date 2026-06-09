@@ -2,7 +2,7 @@
 /** Admin banner & promotion-ad mutations. */
 
 import { createClient } from '@/lib/supabase/server'
-import { assertAdmin } from '@/lib/auth'
+import { assertAdmin } from '@/features/auth/api'
 import { requireEnv } from '@/shared/config/env'
 import { revalidatePath } from 'next/cache'
 import type {

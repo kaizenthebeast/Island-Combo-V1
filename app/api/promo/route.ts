@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { applyPromoCode } from '@/features/promotions/api/apply-promo-code'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 import { updateUser, restoreUser, softDeleteUser, deleteUser } from '@/lib/admin/users/users'
 import { HTTP, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 

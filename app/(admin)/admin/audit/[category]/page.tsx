@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { requireAdmin } from '@/lib/auth'
-import { getAuditLogs } from '@/lib/audit'
-import { ACTION_OPTIONS, AUDIT_CATEGORIES, isAuditCategory } from '@/lib/audit-config'
+import { requireAdmin } from '@/features/auth/api'
+import { getAuditLogs } from '@/features/audit/api/audit'
+import { ACTION_OPTIONS, AUDIT_CATEGORIES, isAuditCategory } from '@/features/audit/api/audit-config'
 import { PageHeader } from '@/components/admin/PageHeader'
-import AuditFilters from '@/components/audit/AuditFilters'
-import AuditExport from '@/components/audit/AuditExport'
-import AuditTable from '@/components/audit/AuditTable'
+import AuditFilters from '@/features/audit/components/AuditFilters'
+import AuditExport from '@/features/audit/components/AuditExport'
+import AuditTable from '@/features/audit/components/AuditTable'
 
 type SearchParams = Promise<Record<string, string | undefined>>
 

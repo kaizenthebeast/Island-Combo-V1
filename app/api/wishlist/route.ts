@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { getWishlist, addToWishlist, removeFromWishlist } from '@/features/wishlist/api/wishlist'
 import type { AddWishlistPayload } from '@/shared/types/wishlist'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'

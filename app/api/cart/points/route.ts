@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { applyCartPoints, removeCartPoints, getCartWithTotals } from '@/features/cart/api'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 

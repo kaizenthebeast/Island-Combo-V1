@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { capturePayPalOrder } from '@/shared/lib/paypal'
-import { fulfillCheckout, resolveCheckoutAmount } from '@/lib/checkout/checkout'
+import { fulfillCheckout, resolveCheckoutAmount } from '@/features/checkout/api/checkout'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/paypal/orders/:id/capture

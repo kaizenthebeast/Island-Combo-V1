@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
+import { requireAdmin } from '@/features/auth/api'
 import { HTTP, apiError, toApiError } from '@/shared/lib/http/respond'
-import { getAuditLogs } from '@/lib/audit'
-import { isAuditCategory } from '@/lib/audit-config'
+import { getAuditLogs } from '@/features/audit/api/audit'
+import { isAuditCategory } from '@/features/audit/api/audit-config'
 
 // GET /api/audit/:category — paginated audit logs for one category.
 // Layer 2 self-protection: re-validates the admin role with the SAME guard used

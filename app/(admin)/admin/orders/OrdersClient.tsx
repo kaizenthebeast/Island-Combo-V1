@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/components/admin/DataTable'
 import StatusBadge from '@/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
-import { ORDER_STATUSES, orderStatusLabel, orderStatusVariant } from '@/lib/orders/order-status'
+import { ORDER_STATUSES, orderStatusLabel, orderStatusVariant } from '@/features/orders/api/order-status'
 import type { AdminOrderListRow } from '@/shared/types/order'
 
 type Row = {

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireUser } from '@/features/auth/api'
 import { createPayPalOrder } from '@/shared/lib/paypal'
-import { resolveCheckoutAmount } from '@/lib/checkout/checkout'
+import { resolveCheckoutAmount } from '@/features/checkout/api/checkout'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 const MAX_AMOUNT = 100_000

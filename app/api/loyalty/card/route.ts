@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
-import { linkMyLoyaltyCard } from '@/lib/loyalty/card'
-import { getLoyaltyStatus } from '@/lib/loyalty/status'
+import { requireUser } from '@/features/auth/api'
+import { linkMyLoyaltyCard } from '@/features/loyalty/api/card'
+import { getLoyaltyStatus } from '@/features/loyalty/api/status'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // POST /api/loyalty/card — "Retrieve my points": claim my Loyverse card. Credits

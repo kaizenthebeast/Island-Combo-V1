@@ -3,7 +3,7 @@
  *  admin_dashboard_stats RPC (is_staff). */
 
 import { createClient } from '@/lib/supabase/server'
-import { requireStaff } from '@/lib/auth'
+import { requireStaff } from '@/features/auth/api'
 import type { DashboardStats } from '@/shared/types/dashboard'
 
 export const getDashboardStats = async (): Promise<

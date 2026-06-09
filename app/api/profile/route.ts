@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { requireUser } from '@/lib/auth'
-import { getMyAccount, updateMyAccount } from '@/lib/account/profile'
+import { requireUser } from '@/features/auth/api'
+import { getMyAccount, updateMyAccount } from '@/features/account/api/profile'
 import { HTTP, apiOk, apiError, apiResult, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/profile — authenticated aggregator

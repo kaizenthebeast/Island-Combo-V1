@@ -1,5 +1,5 @@
-import { requireUser } from '@/lib/auth'
-import { getLoyaltyStatus } from '@/lib/loyalty/status'
+import { requireUser } from '@/features/auth/api'
+import { getLoyaltyStatus } from '@/features/loyalty/api/status'
 import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 
 // GET /api/loyalty — Loyalty Status & Balance API (§3.8)

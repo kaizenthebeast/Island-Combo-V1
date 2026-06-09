@@ -1,4 +1,4 @@
-import AuthNavbar from "@/components/features/auth/AuthNavbar";
+import AuthNavbar from "@/features/auth/components/AuthNavbar";
 import Footer from "@/shared/components/layout/Footer";
 
 export default function ShopLayout({

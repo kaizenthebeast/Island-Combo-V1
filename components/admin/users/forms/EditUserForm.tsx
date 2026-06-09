@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { editUserSchema, type EditUserFormValues } from '@/lib/validations/user'
+import { editUserSchema, type EditUserFormValues } from '@/features/account/validations/user'
 import { updateUser, restoreUser } from '@/lib/admin/users/users'
 import { UserFields } from './UserUIForm'
 import { ArchiveRestore } from 'lucide-react'          
