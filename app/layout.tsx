@@ -3,8 +3,9 @@ import { Lato } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/shared/components/ui/sonner";
 import AnonAuthProvider from "@/features/auth/api/anon-auth-provider";
+import { getSiteUrl } from "@/shared/config/env";
 
-const defaultUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const defaultUrl = getSiteUrl();
 
 const siteName = "Island Combo";
 

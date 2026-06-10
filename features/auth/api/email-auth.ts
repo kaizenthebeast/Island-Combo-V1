@@ -8,7 +8,7 @@
  */
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@/shared/lib/db/server'
-import { requireEnv } from '@/shared/config/env'
+import { requireEnv, getSiteUrl } from '@/shared/config/env'
 
 type Fail = { success: false; status: number; message: string }
 
@@ -93,7 +93,7 @@ export const signUpWithEmail = async ({
   const { data: signUpData, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/sign-up-success` },
+    options: { emailRedirectTo: `${getSiteUrl()}/auth/sign-up-success` },
   })
   if (error) return { success: false, status: 400, message: error.message }
 
@@ -161,7 +161,7 @@ export const requestPasswordReset = async (
 ): Promise<{ success: true } | Fail> => {
   const supabase = await createClient()
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_BASE_URL}/auth/update-password`,
+    redirectTo: `${getSiteUrl()}/auth/update-password`,
   })
   if (error) return { success: false, status: 500, message: error.message }
   return { success: true }
