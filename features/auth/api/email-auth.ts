@@ -6,11 +6,24 @@
  * Not a 'use server' module: these are called only from the auth route handlers,
  * never directly from the client, so they are not exposed as server actions.
  */
+import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@/shared/lib/db/server'
+import { requireEnv } from '@/shared/config/env'
 
 type Fail = { success: false; status: number; message: string }
 
-export type LoginResult = { success: true; role: string; redirectTo: string } | Fail
+// The signed JWT bundle returned to API (Bearer) clients. `accessToken` is the
+// ES256 access token (carries sub/email/user_role); send it as
+// `Authorization: Bearer <accessToken>`. `refreshToken` exchanges for a new
+// access token at /api/auth/refresh once the access token expires.
+export type TokenBundle = {
+  accessToken: string
+  refreshToken: string
+  expiresAt: number | undefined // unix seconds when accessToken expires
+  tokenType: string             // 'bearer'
+}
+
+export type LoginResult = ({ success: true; role: string; redirectTo: string } & TokenBundle) | Fail
 
 export const loginWithEmail = async ({
   email,
@@ -48,11 +61,22 @@ export const loginWithEmail = async ({
 
   const role = profile?.role ?? 'user'
   const isBackOffice = role === 'admin' || role === 'staff'
-  return { success: true, role, redirectTo: isBackOffice ? '/admin/dashboard' : '/' }
+  const { session } = signInData
+  return {
+    success: true,
+    role,
+    redirectTo: isBackOffice ? '/admin/dashboard' : '/',
+    // Also hand back the JWT so non-browser clients can use the Bearer API.
+    // The browser ignores these and rides the cookie session set above.
+    accessToken: session.access_token,
+    refreshToken: session.refresh_token,
+    expiresAt: session.expires_at,
+    tokenType: session.token_type,
+  }
 }
 
 export type SignUpResult =
-  | { success: true; sessionCreated: boolean; redirectTo: string }
+  | ({ success: true; sessionCreated: boolean; redirectTo: string } & Partial<TokenBundle>)
   | Fail
 
 export const signUpWithEmail = async ({
@@ -88,7 +112,48 @@ export const signUpWithEmail = async ({
     if (mergeError) console.error('Failed to merge guest cart on signup:', mergeError.message)
   }
 
-  return { success: true, sessionCreated, redirectTo: '/auth/sign-up-success' }
+  // When a session exists (email confirmation disabled), return the JWT bundle
+  // too so a Bearer client is logged in immediately. When confirmation is on,
+  // there is no session yet — the client signs in after confirming.
+  const session = signUpData.session
+  return {
+    success: true,
+    sessionCreated,
+    redirectTo: '/auth/sign-up-success',
+    ...(session && {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresAt: session.expires_at,
+      tokenType: session.token_type,
+    }),
+  }
+}
+
+// Exchanges a refresh token for a fresh access token — the renewal half of the
+// Bearer API (access tokens are short-lived). Stateless: a throwaway client with
+// no-op cookies, so nothing is persisted server-side. Mirrors reauth.ts's pattern.
+export type RefreshResult = ({ success: true } & TokenBundle) | Fail
+
+export const refreshAccessToken = async (refreshToken: string): Promise<RefreshResult> => {
+  const supabase = createServerClient(
+    requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL'),
+    requireEnv(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY, 'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY'),
+    { cookies: { getAll: () => [], setAll: () => {} } },
+  )
+
+  const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken })
+  if (error || !data.session) {
+    return { success: false, status: 401, message: error?.message ?? 'Could not refresh session' }
+  }
+
+  const { session } = data
+  return {
+    success: true,
+    accessToken: session.access_token,
+    refreshToken: session.refresh_token,
+    expiresAt: session.expires_at,
+    tokenType: session.token_type,
+  }
 }
 
 export const requestPasswordReset = async (

@@ -1,5 +1,9 @@
 import Link from 'next/link'
 
+// Render per-request so the nonce-based CSP can apply its nonce to Next's
+// scripts (a static 404 ships nonce-less scripts that strict-dynamic blocks).
+export const dynamic = 'force-dynamic'
+
 // Global 404 — App Router special file. Rendered for unmatched routes and any
 // notFound() call that isn't caught by a closer not-found boundary.
 export default function NotFound() {

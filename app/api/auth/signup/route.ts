@@ -16,6 +16,12 @@ export async function POST(request: NextRequest) {
         const response = apiResult({
             message: 'Signup successful.',
             redirectTo: result.redirectTo,
+            // Present only when a session was created (email confirmation off),
+            // so a Bearer client is authenticated right away.
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            expiresAt: result.expiresAt,
+            tokenType: result.tokenType,
         });
 
         // Fallback for when email confirmation IS enabled (no session yet): stash

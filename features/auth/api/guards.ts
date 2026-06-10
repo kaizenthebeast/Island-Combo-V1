@@ -1,5 +1,7 @@
 /** Auth guards: requireUser / requireAdmin / requireStaff. */
 import { cache } from "react";
+import { headers } from "next/headers";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/shared/lib/db/server";
 import { AppError } from "@/shared/lib/http/respond";
 
@@ -10,6 +12,27 @@ export type AuthUser = {
   role: string;          // app role from the `user_role` claim: 'admin' | 'customer' | ...
   isAnonymous: boolean;
 };
+
+// Reads & verifies the caller's JWT claims from EITHER source, transparently:
+//   • `Authorization: Bearer <jwt>` — the standard token API (Postman/mobile/3rd-party)
+//   • the cookie session            — the browser / SSR
+// In both cases `getClaims(token?)` verifies the JWT's ES256 signature + expiry
+// LOCALLY against the project JWKS (no Auth-server round-trip), so a forged,
+// tampered, or expired token yields null (→ a clean 401) rather than access.
+async function readVerifiedClaims(
+  supabase: SupabaseClient,
+): Promise<Record<string, unknown> | null> {
+  const authHeader = (await headers()).get("authorization");
+  const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : null;
+
+  const { data, error } = bearer
+    ? await supabase.auth.getClaims(bearer)
+    : await supabase.auth.getClaims();
+
+  // Any verification failure (bad signature, expired, malformed) = not authenticated.
+  if (error || !data?.claims) return null;
+  return data.claims as Record<string, unknown>;
+}
 
 // `getClaims()` verifies the JWT signature LOCALLY against the project's JWKS
 // (asymmetric ES256) — no network round-trip — and, because it goes through
@@ -22,16 +45,11 @@ export type AuthUser = {
 // cleared between requests, so a refreshed/rotated token is always re-read.
 export const requireUser = cache(async (): Promise<AuthUser | null> => {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getClaims();
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  const claims = data?.claims;
+  const claims = await readVerifiedClaims(supabase);
   if (!claims?.sub) return null;
 
   return {
-    id: claims.sub,
+    id: claims.sub as string,
     email: (claims.email as string | undefined) ?? null,
     role: (claims.user_role as string | undefined) ?? "customer",
     isAnonymous: (claims.is_anonymous as boolean | undefined) ?? false,
@@ -50,8 +68,7 @@ export type AdminCheck =
 export const requireAdmin = async (): Promise<AdminCheck> => {
   const supabase = await createClient();
 
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const claims = await readVerifiedClaims(supabase);
   if (!claims) return { ok: false, status: 401, message: "Unauthorized" };
 
   const userId = claims.sub as string;
@@ -83,8 +100,7 @@ export const requireAdmin = async (): Promise<AdminCheck> => {
 export const requireStaff = async (): Promise<AdminCheck> => {
   const supabase = await createClient();
 
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const claims = await readVerifiedClaims(supabase);
   if (!claims) return { ok: false, status: 401, message: "Unauthorized" };
 
   const userId = claims.sub as string;
