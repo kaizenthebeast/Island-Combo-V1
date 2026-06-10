@@ -1,0 +1,464 @@
+{
+  "info": {
+    "_postman_id": "b7e1f4c2-9a3d-4e7b-bb10-island-combo-001",
+    "name": "Island Combo API (Bearer JWT)",
+    "description": "Standard Bearer-token API for the final-ecom app.\n\nHOW TO USE\n1. Set the `baseUrl` collection variable (default http://localhost:3000).\n2. Run **Auth > Login** with a real email/password. The test script auto-saves `accessToken` + `refreshToken` into collection variables.\n3. Every request under **User**, **Admin**, and **Cash Vouchers** inherits `Authorization: Bearer {{accessToken}}` automatically — just hit Send.\n4. When the token expires (~1h), run **Auth > Refresh Token** to get a fresh one (also auto-saved).\n\nNOTES\n- Auth is the Supabase access token (ES256). It already carries sub/email/user_role; nothing extra to do.\n- **Admin** and **Cash Vouchers** endpoints require an admin/staff token (a customer token gets 403).\n- **Public** endpoints send no token.\n- Email confirmation is ON, so Sign Up returns a token only after the email is confirmed; use Login for testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{accessToken}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('login ok', () => pm.expect(pm.response.code).to.eql(200));",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  console.log('Saved accessToken + refreshToken. role =', res.data.role);",
+                  "} else {",
+                  "  console.warn('No tokens in response:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"you@example.com\",\n  \"password\": \"your-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "auth", "login" ]
+            },
+            "description": "Returns { role, redirectTo, accessToken, refreshToken, expiresAt, tokenType }. The test script saves accessToken + refreshToken for every other request."
+          }
+        },
+        {
+          "name": "Sign Up",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"your-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/signup",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "auth", "signup" ]
+            },
+            "description": "Email confirmation is ON, so the token bundle is returned only once the email is confirmed. Use Login to obtain a token for testing."
+          }
+        },
+        {
+          "name": "Refresh Token (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('refresh ok', () => pm.expect(pm.response.code).to.eql(200));",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  console.log('Refreshed accessToken + refreshToken.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "auth", "refresh" ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public (no token)",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product?sort=date_desc&page=1&limit=20",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "product" ],
+              "query": [
+                { "key": "category_id", "value": "1", "disabled": true },
+                { "key": "min_price", "value": "0", "disabled": true },
+                { "key": "max_price", "value": "100", "disabled": true },
+                { "key": "sort", "value": "date_desc" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Categories",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/category",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "category" ]
+            }
+          }
+        },
+        {
+          "name": "Search Suggestions",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/search/suggestions?q=shirt&limit=8",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "search", "suggestions" ],
+              "query": [
+                { "key": "q", "value": "shirt" },
+                { "key": "limit", "value": "8" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User (Bearer required)",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "profile" ] }
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Hamza\",\n  \"last_name\": \"Nakan\",\n  \"phone_text\": \"555-0100\",\n  \"sex\": \"Male\",\n  \"age\": 25\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "profile" ] }
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/cart", "host": [ "{{baseUrl}}" ], "path": [ "api", "cart" ] }
+          }
+        },
+        {
+          "name": "Add To Cart",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": 1,\n  \"quantity\": 1,\n  \"selectedOption\": null\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/cart", "host": [ "{{baseUrl}}" ], "path": [ "api", "cart" ] }
+          }
+        },
+        {
+          "name": "Update Cart Quantity",
+          "request": {
+            "method": "PATCH",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": 1,\n  \"quantity\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/cart", "host": [ "{{baseUrl}}" ], "path": [ "api", "cart" ] }
+          }
+        },
+        {
+          "name": "Remove From Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"variantId\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/cart", "host": [ "{{baseUrl}}" ], "path": [ "api", "cart" ] },
+            "description": "Send { \"variantId\": N } to remove one line, or { \"clearAll\": true } to empty the cart."
+          }
+        },
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/wishlist", "host": [ "{{baseUrl}}" ], "path": [ "api", "wishlist" ] }
+          }
+        },
+        {
+          "name": "Add To Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/wishlist", "host": [ "{{baseUrl}}" ], "path": [ "api", "wishlist" ] }
+          }
+        },
+        {
+          "name": "Remove From Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/wishlist", "host": [ "{{baseUrl}}" ], "path": [ "api", "wishlist" ] }
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/orders?page=1&pageSize=10",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "orders" ],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "pageSize", "value": "10" },
+                { "key": "status", "value": "shipped", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Loyalty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/loyalty", "host": [ "{{baseUrl}}" ], "path": [ "api", "loyalty" ] }
+          }
+        },
+        {
+          "name": "Get My Addresses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/address", "host": [ "{{baseUrl}}" ], "path": [ "api", "address" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin (Bearer + admin role)",
+      "item": [
+        {
+          "name": "Find Customer By Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/loyalty/customer?email=customer@example.com",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "admin", "loyalty", "customer" ],
+              "query": [ { "key": "email", "value": "customer@example.com" } ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\",\n  \"delivery_notes\": \"Left at front desk\",\n  \"password\": \"your-admin-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders/:id/status",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "admin", "orders", ":id", "status" ],
+              "variable": [ { "key": "id", "value": "1", "description": "order id" } ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Product\",\n  \"slug\": \"sample-product\",\n  \"variants\": [ { \"sku\": \"SAMPLE-1\", \"price\": 9.99, \"stock\": 10 } ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/product", "host": [ "{{baseUrl}}" ], "path": [ "api", "product" ] }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Category\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/category", "host": [ "{{baseUrl}}" ], "path": [ "api", "category" ] }
+          }
+        },
+        {
+          "name": "Create Promo Code",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"SAVE10\",\n  \"value\": 10,\n  \"min_quantity\": 1,\n  \"expires_at\": null,\n  \"status\": \"ACTIVE\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/promo-code", "host": [ "{{baseUrl}}" ], "path": [ "api", "admin", "promo-code" ] }
+          }
+        },
+        {
+          "name": "Process Refund",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\",\n  \"note\": \"Customer request\",\n  \"password\": \"your-admin-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/refunds/:id",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "admin", "refunds", ":id" ],
+              "variable": [ { "key": "id", "value": "1", "description": "refund id" } ]
+            },
+            "description": "action = approve | reject. approve issues the PayPal refund and requires the staff password (step-up)."
+          }
+        },
+        {
+          "name": "Create Banner",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Summer Sale\",\n  \"description\": \"Up to 50% off\",\n  \"image_url\": null,\n  \"cta_label\": \"Shop now\",\n  \"cta_url\": \"/products\",\n  \"start_date\": null,\n  \"end_date\": null,\n  \"display_order\": 1,\n  \"is_active\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{baseUrl}}/api/admin/banner", "host": [ "{{baseUrl}}" ], "path": [ "api", "admin", "banner" ] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cash Vouchers (staff scanner)",
+      "description": "Endpoints for the QR-scanner app. Log in as a STAFF/ADMIN user first (a customer token gets 403). The QR encodes the voucher `code` — send that as `code`.",
+      "item": [
+        {
+          "name": "Validate Voucher (scan)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CV-2026-549A95AED4\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-vouchers/validate",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cash-vouchers", "validate" ]
+            },
+            "description": "Read-only check of a scanned QR `code` — never mutates.\n\n200 => { valid, status, reason, voucher? }\n  valid: true only when status === 'ACTIVE'\n  reason: OK | NOT_FOUND | ALREADY_REDEEMED | EXPIRED | CANCELLED\n\nRequires a staff/admin Bearer token: 401 (no/invalid token), 403 (non-staff)."
+          }
+        },
+        {
+          "name": "Redeem Voucher (release cash)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CV-2026-549A95AED4\",\n  \"redeemerName\": \"Person collecting the cash\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-vouchers/redeem",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "cash-vouchers", "redeem" ]
+            },
+            "description": "Atomically flips an ACTIVE voucher to REDEEMED.\n\n200 => { data: <redeemed voucher>, message }\n400 (missing fields) - 401 (no token) - 403 (non-staff)\n404 (code not found) - 409 (already redeemed / not ACTIVE)\n\nSingle-redeem-safe: a second concurrent redeem gets 409."
+          }
+        }
+      ]
+    }
+  ]
+}
