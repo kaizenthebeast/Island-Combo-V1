@@ -2,17 +2,52 @@
 /** Storefront banner & promotion-ad reads. */
 
 import { createClient } from '@/shared/lib/db/server'
-import type { Banner, PromotionAd, AdPlacement } from '@/shared/types/banner'
+import { PROMO_IMAGE_BUCKET } from '@/shared/config/promo-images'
+import type {
+  Banner, BannerWithImage,
+  PromotionAd, PromotionAdWithImage,
+  AdPlacement,
+} from '@/shared/types/banner'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
-// Reads only — admin mutations live in lib/admin/banner.ts.
+// Reads only — admin mutations live in api/admin/banner.ts.
 // Reads stay here because both the storefront and admin pages use them.
+//
+// image_url in the DB is a bare path inside the PRIVATE promotional-images
+// bucket; rows leave this module with an extra `image_src` — a short-lived
+// signed URL — so no caller ever builds a storage URL by hand.
+
+const SIGNED_URL_TTL_SECONDS = 60 * 60 // 1h: outlives any page view, short enough to stay revocable
+
+/** Resolve each row's stored image path to a signed URL (`image_src`), in one
+ *  storage round-trip. Rows without an image come back with image_src = null. */
+async function resolvePromoImages<T extends { image_url: string | null }>(
+  supabase: SupabaseClient,
+  rows: T[],
+): Promise<(T & { image_src: string | null })[]> {
+  const paths = [...new Set(rows.map((r) => r.image_url).filter((p): p is string => !!p))]
+
+  const signedByPath = new Map<string, string>()
+  if (paths.length) {
+    const { data: signed, error } = await supabase.storage
+      .from(PROMO_IMAGE_BUCKET)
+      .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS)
+    if (error) throw new Error(`resolvePromoImages: ${error.message}`)
+    for (const s of signed ?? []) if (s.signedUrl && s.path) signedByPath.set(s.path, s.signedUrl)
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    image_src: row.image_url ? (signedByPath.get(row.image_url) ?? null) : null,
+  }))
+}
 
 // ════════════════════════════════════════════════════════════════
 // BANNER SLIDER
 // Full-width rotating hero banners
 // ════════════════════════════════════════════════════════════════
 
-export const getBanner = async (activeOnly = false): Promise<Banner[]> => {
+export const getBanner = async (activeOnly = false): Promise<BannerWithImage[]> => {
   const supabase = await createClient()
 
   let query = supabase
@@ -30,7 +65,7 @@ export const getBanner = async (activeOnly = false): Promise<Banner[]> => {
 
   const { data, error } = await query
   if (error) throw new Error(`getBanner: ${error.message}`)
-  return data ?? []
+  return resolvePromoImages<Banner>(supabase, data ?? [])
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -45,7 +80,7 @@ export const getBanner = async (activeOnly = false): Promise<Banner[]> => {
 export const getPromotionAds = async (
   placement?: AdPlacement,
   activeOnly = false,
-): Promise<PromotionAd[]> => {
+): Promise<PromotionAdWithImage[]> => {
   const supabase = await createClient()
 
   let query = supabase
@@ -65,5 +100,5 @@ export const getPromotionAds = async (
 
   const { data, error } = await query
   if (error) throw new Error(`getPromotionAds: ${error.message}`)
-  return data ?? []
+  return resolvePromoImages<PromotionAd>(supabase, data ?? [])
 }

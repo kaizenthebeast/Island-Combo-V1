@@ -6,7 +6,7 @@ export type Banner = {
   id:            string
   title:         string
   description:   string | null
-  image_url:     string | null
+  image_url:     string | null   // bare storage path in the private promotional-images bucket (e.g. "banner/171…-uuid.webp")
   cta_label:     string | null
   cta_url:       string | null
   start_date:    string | null   // ISO 8601 — e.g. "2024-06-01T00:00:00Z"
@@ -20,6 +20,10 @@ export type Banner = {
 export type BannerInsert = Omit<Banner, 'id' | 'created_at' | 'updated_at'>
 export type BannerUpdate = Partial<BannerInsert>
 
+/** Read shape: `image_src` is the short-lived signed URL the lib resolves from
+ *  `image_url` (the bucket is private, so the raw path is not displayable). */
+export type BannerWithImage = Banner & { image_src: string | null }
+
 
 // Promotion Ads
 // Smaller ads shown in specific sections/pages across the storefront.
@@ -32,11 +36,19 @@ export type AdPlacement =
   | 'category'  // shown inside product category pages
   | 'product'   // shown on individual product pages
 
+export const AD_PLACEMENT_LABELS: Record<AdPlacement, string> = {
+  landing:  'Homepage (landing)',
+  checkout: 'Checkout flow',
+  cart:     'Cart page',
+  category: 'Category pages',
+  product:  'Product pages',
+}
+
 export type PromotionAd = {
   id:            string
   title:         string
   description:   string | null
-  image_url:     string | null
+  image_url:     string | null   // bare storage path in the private promotional-images bucket (e.g. "ad/171…-uuid.webp")
   cta_label:     string | null
   cta_url:       string | null
   placement:     AdPlacement        // which page/section this ad targets
@@ -50,6 +62,8 @@ export type PromotionAd = {
 
 export type PromotionAdInsert = Omit<PromotionAd, 'id' | 'created_at' | 'updated_at'>
 export type PromotionAdUpdate = Partial<PromotionAdInsert>
+
+export type PromotionAdWithImage = PromotionAd & { image_src: string | null }
 
 
 // Shared helpers

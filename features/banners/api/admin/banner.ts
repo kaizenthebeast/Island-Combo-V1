@@ -3,20 +3,24 @@
 
 import { createClient } from '@/shared/lib/db/server'
 import { assertAdmin } from '@/features/auth/api'
-import { requireEnv } from '@/shared/config/env'
+import { PROMO_IMAGE_BUCKET, isPromoImagePath } from '@/shared/config/promo-images'
 import { revalidatePath } from 'next/cache'
 import type {
   Banner, BannerInsert, BannerUpdate,
   PromotionAd, PromotionAdInsert, PromotionAdUpdate,
 } from '@/shared/types/banner'
 
-const REVALIDATE    = '/admin/content-management/banner'
-const SUPABASE_URL  = requireEnv(process.env.NEXT_PUBLIC_SUPABASE_URL, 'NEXT_PUBLIC_SUPABASE_URL')
-const BANNER_BUCKET = 'banners' as const
+// image_url is a bare path inside the private promotional-images bucket
+// (uploaded client-side by promo-image-upload.ts). Mutations never see full
+// URLs — resolving paths to signed URLs happens in the read layer.
+
+const REVALIDATE = ['/admin/content-management/banner', '/'] as const
+
+const revalidateAll = () => REVALIDATE.forEach((path) => revalidatePath(path))
 
 // ════════════════════════════════════════════════════════════════
 // BANNER SLIDER — mutations
-// (Reads — getBanner — live in lib/banner.ts since the storefront uses them.)
+// (Reads — getBanner — live in api/banner.ts since the storefront uses them.)
 // ════════════════════════════════════════════════════════════════
 
 export const createBanner = async (payload: BannerInsert): Promise<Banner> => {
@@ -30,11 +34,17 @@ export const createBanner = async (payload: BannerInsert): Promise<Banner> => {
     .single()
 
   if (error) throw new Error(`createBanner: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  revalidateAll()
   return data
 }
 
-export const updateBanner = async (id: string, payload: BannerUpdate): Promise<Banner> => {
+/** @param replacedImagePath old storage path to clean up after the row update
+ *  (set when the admin swapped or removed the image). */
+export const updateBanner = async (
+  id: string,
+  payload: BannerUpdate,
+  replacedImagePath?: string | null,
+): Promise<Banner> => {
   await assertAdmin()
   const supabase = await createClient()
 
@@ -46,27 +56,24 @@ export const updateBanner = async (id: string, payload: BannerUpdate): Promise<B
     .single()
 
   if (error) throw new Error(`updateBanner: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  await removeStoredImage(supabase, replacedImagePath)
+  revalidateAll()
   return data
 }
 
-export const removeBanner = async (id: string, imageUrl?: string | null): Promise<void> => {
+export const removeBanner = async (id: string, imagePath?: string | null): Promise<void> => {
   await assertAdmin()
   const supabase = await createClient()
 
-  if (imageUrl) {
-    const path = extractStoragePath(imageUrl, BANNER_BUCKET)
-    if (path) await supabase.storage.from(BANNER_BUCKET).remove([path])
-  }
-
   const { error } = await supabase.from('banners').delete().eq('id', id)
   if (error) throw new Error(`removeBanner: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  await removeStoredImage(supabase, imagePath)
+  revalidateAll()
 }
 
 // ════════════════════════════════════════════════════════════════
 // PROMOTION ADS — mutations
-// (Reads — getPromotionAds — live in lib/banner.ts since the storefront uses them.)
+// (Reads — getPromotionAds — live in api/banner.ts since the storefront uses them.)
 // ════════════════════════════════════════════════════════════════
 
 export const createPromotionAds = async (payload: PromotionAdInsert): Promise<PromotionAd> => {
@@ -80,13 +87,14 @@ export const createPromotionAds = async (payload: PromotionAdInsert): Promise<Pr
     .single()
 
   if (error) throw new Error(`createPromotionAds: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  revalidateAll()
   return data
 }
 
 export const updatePromotionAds = async (
   id: string,
   payload: PromotionAdUpdate,
+  replacedImagePath?: string | null,
 ): Promise<PromotionAd> => {
   await assertAdmin()
   const supabase = await createClient()
@@ -99,38 +107,34 @@ export const updatePromotionAds = async (
     .single()
 
   if (error) throw new Error(`updatePromotionAds: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  await removeStoredImage(supabase, replacedImagePath)
+  revalidateAll()
   return data
 }
 
 export const removePromotionAds = async (
   id: string,
-  imageUrl?: string | null,
+  imagePath?: string | null,
 ): Promise<void> => {
   await assertAdmin()
   const supabase = await createClient()
 
-  if (imageUrl) {
-    const path = extractStoragePath(imageUrl, BANNER_BUCKET)
-    if (path) await supabase.storage.from(BANNER_BUCKET).remove([path])
-  }
-
   const { error } = await supabase.from('promotion_ads').delete().eq('id', id)
   if (error) throw new Error(`removePromotionAds: ${error.message}`)
-  revalidatePath(REVALIDATE)
+  await removeStoredImage(supabase, imagePath)
+  revalidateAll()
 }
 
 // ════════════════════════════════════════════════════════════════
 // Shared helpers
 // ════════════════════════════════════════════════════════════════
 
-// Inverse of getPublicImageUrl: full URL → storage path (for storage.remove).
-function extractStoragePath(url: string, bucket: string): string | null {
-  try {
-    const marker = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/`
-    if (!url.startsWith(marker)) return null
-    return decodeURIComponent(url.slice(marker.length))
-  } catch {
-    return null
-  }
+// Best-effort: the row mutation already succeeded, so an orphaned file must not
+// fail the request. Only paths we generated are accepted (never full URLs).
+async function removeStoredImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  path: string | null | undefined,
+): Promise<void> {
+  if (!path || !isPromoImagePath(path)) return
+  await supabase.storage.from(PROMO_IMAGE_BUCKET).remove([path])
 }
