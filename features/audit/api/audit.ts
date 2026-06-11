@@ -7,8 +7,9 @@
 //    `log_audit_event` RPC (the same pattern as log_transaction_event), which is
 //    the "service-role only" insert channel for the admin-only audit_logs table.
 //
-//  • getAuditLogs() — admin-gated, paginated read used by both the SSR pages and
-//    GET /api/audit/[category].
+//  • getAuditLogs() — admin-gated, paginated read used by both the SSR page and
+//    GET /api/audit. With no `category` it returns every entity type (the
+//    unified view); pass a category to narrow.
 //
 // This module imports the server-only Supabase client, so it must only be used
 // from Server Components / route handlers (never imported into a client bundle).
@@ -36,13 +37,14 @@ export async function getAuditLogs(query: AuditQuery): Promise<GetAuditResult> {
   const supabase = await createClient()
   let q = supabase.from('audit_logs').select('*', { count: 'exact' })
 
+  // No category → the unified view: every entry across all entity types.
   if (query.category === 'admins') {
     // "Any action performed by an admin account" — filter by actor role.
     const { data: admins } = await supabase.from('profile').select('user_id').eq('role', 'admin')
     const ids = (admins ?? []).map((a) => a.user_id)
     if (ids.length === 0) return { success: true, data: [], count: 0, page, totalPages: 0 }
     q = q.in('actor_id', ids)
-  } else {
+  } else if (query.category) {
     q = q.eq('entity_type', ENTITY_BY_CATEGORY[query.category])
   }
 

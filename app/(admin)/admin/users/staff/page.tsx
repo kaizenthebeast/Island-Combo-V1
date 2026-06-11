@@ -1,6 +1,7 @@
 import React from 'react'
 import StaffClient from './StaffClient'
 import { getStaffPage, type StaffSortKey } from '@/features/users/api/users'
+import { requireUser } from '@/features/auth/api'
 import type { AdminStaff } from '@/shared/types/users'
 
 type SearchParams = Promise<Record<string, string | undefined>>
@@ -30,12 +31,17 @@ const StaffPage = async ({ searchParams }: { searchParams: SearchParams }) => {
     )
   }
 
+  // Provisioning new accounts is admin-only; staff get a read-oriented page
+  // with no invite button. The API route re-checks with requireAdmin anyway.
+  const user = await requireUser()
+
   return (
     <StaffClient
       staff={result.rows as AdminStaff[]}
       total={result.total}
       page={page}
       pageSize={pageSize}
+      canInvite={user?.role === 'admin'}
     />
   )
 }

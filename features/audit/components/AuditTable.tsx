@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import type { AuditCategory, AuditLog } from '@/shared/types/audit'
+import type { AuditLog } from '@/shared/types/audit'
 
 // ── value helpers ────────────────────────────────────────────────────────────
 const get = (r: AuditLog, side: 'old' | 'new', key: string): unknown => {
@@ -11,8 +11,6 @@ const get = (r: AuditLog, side: 'old' | 'new', key: string): unknown => {
   return obj ? obj[key] : undefined
 }
 const str = (v: unknown) => (v === null || v === undefined || v === '' ? '—' : String(v))
-const num = (v: unknown) => (v === null || v === undefined ? null : Number(v))
-const money = (v: number | null) => (v === null || Number.isNaN(v) ? '—' : `$${v.toFixed(2)}`)
 
 const fmtDateTime = (iso: string) =>
   new Date(iso).toLocaleString('en-US', {
@@ -52,54 +50,31 @@ function ActionBadge({ action }: { action: string }) {
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>{action}</span>
 }
 
-// ── per-category columns ─────────────────────────────────────────────────────
+// ── universal columns ────────────────────────────────────────────────────────
+// One column set spanning every entity type — the page is a single unified log,
+// so the table no longer branches per category. Entity-specific nuance (amount,
+// method, IP, full old/new payloads) lives in the expanded row below.
 type Column = { header: string; align?: 'left' | 'right' | 'center'; cell: (r: AuditLog) => React.ReactNode }
 
-const columnsFor = (category: AuditCategory): Column[] => {
-  switch (category) {
-    case 'users':
-      return [
-        { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
-        { header: 'User',      cell: (r) => subjectEmail(r) },
-        { header: 'Action',    cell: (r) => <ActionBadge action={r.action} /> },
-        { header: 'IP address', cell: (r) => str(r.ip_address) },
-        { header: 'Actor',     cell: (r) => str(r.actor_email ?? 'system') },
-      ]
-    case 'orders':
-      return [
-        { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
-        { header: 'Order',     cell: (r) => `#${str(r.entity_id)}` },
-        { header: 'Action',    cell: (r) => <ActionBadge action={r.action} /> },
-        { header: 'Old → New', cell: (r) => diffStr(r, 'order_status') ?? '—' },
-        { header: 'Changed by', cell: (r) => str(r.actor_email ?? 'system') },
-      ]
-    case 'products':
-      return [
-        { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
-        { header: 'Product',   cell: (r) => productLabel(r) },
-        { header: 'Action',    cell: (r) => <ActionBadge action={r.action} /> },
-        { header: 'Old → New', cell: (r) => diffStr(r, 'stock') ?? diffStr(r, 'price') ?? '—' },
-        { header: 'Changed by', cell: (r) => str(r.actor_email ?? 'system') },
-      ]
-    case 'payments':
-      return [
-        { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
-        { header: 'Order',     cell: (r) => `#${str(r.entity_id)}` },
-        { header: 'Amount', align: 'right', cell: (r) => money(num(get(r, 'new', 'amount') ?? get(r, 'old', 'amount'))) },
-        { header: 'Method',    cell: (r) => str(get(r, 'new', 'method') ?? get(r, 'old', 'method')) },
-        { header: 'Status',    cell: (r) => <ActionBadge action={r.action} /> },
-        { header: 'Ref',       cell: (r) => str(get(r, 'new', 'paypal_capture_id') ?? get(r, 'new', 'paypal_order_id')) },
-      ]
-    case 'admins':
-      return [
-        { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
-        { header: 'Admin',     cell: (r) => str(r.actor_email) },
-        { header: 'Action',    cell: (r) => <ActionBadge action={r.action} /> },
-        { header: 'Entity',    cell: (r) => `${r.entity_type}${r.entity_id ? ` #${r.entity_id}` : ''}` },
-        { header: 'Details',   cell: (r) => summarize(r) },
-      ]
-  }
+const TYPE_LABEL: Record<string, string> = {
+  user: 'User', order: 'Order', product: 'Product', payment: 'Payment',
 }
+
+// Best human label for the row's subject, by entity type.
+const entityLabel = (r: AuditLog): string => {
+  if (r.entity_type === 'product') return productLabel(r)
+  if (r.entity_type === 'user')    return subjectEmail(r)
+  return r.entity_id ? `#${r.entity_id}` : '—'
+}
+
+const COLUMNS: Column[] = [
+  { header: 'Timestamp', cell: (r) => fmtDateTime(r.created_at) },
+  { header: 'Type',      cell: (r) => TYPE_LABEL[r.entity_type] ?? r.entity_type },
+  { header: 'Action',    cell: (r) => <ActionBadge action={r.action} /> },
+  { header: 'Subject',   cell: (r) => entityLabel(r) },
+  { header: 'Summary',   cell: (r) => summarize(r) },
+  { header: 'Actor',     cell: (r) => str(r.actor_email ?? 'system') },
+]
 
 // ── detail (expanded row) ────────────────────────────────────────────────────
 function JsonBlock({ label, value }: { label: string; value: unknown }) {
@@ -116,14 +91,12 @@ function JsonBlock({ label, value }: { label: string; value: unknown }) {
 
 // ── table ────────────────────────────────────────────────────────────────────
 export default function AuditTable({
-  category,
   rows,
   total,
   page,
   pageSize,
   totalPages,
 }: {
-  category: AuditCategory
   rows: AuditLog[]
   total: number
   page: number
@@ -136,7 +109,7 @@ export default function AuditTable({
   const [, startTransition] = useTransition()
   const [expanded, setExpanded] = useState<number | null>(null)
 
-  const columns = columnsFor(category)
+  const columns = COLUMNS
   const colCount = columns.length + 1 // + expand toggle
 
   const goToPage = (next: number) => {

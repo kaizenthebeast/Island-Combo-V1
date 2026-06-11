@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
+import { UserPlus } from 'lucide-react'
 import { PageHeader } from '@/shared/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
 import EditUserDialog from '@/features/users/components/admin/EditUserDialog'
+import InviteUserDialog from '@/features/users/components/admin/InviteUserDialog'
 import DeleteStaffDialog from '@/features/users/components/admin/DeleteStaffDialog'
 import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
@@ -41,10 +43,13 @@ interface Props {
   total: number
   page: number
   pageSize: number
+  /** Only admins may provision new accounts — staff never see the invite button. */
+  canInvite?: boolean
 }
 
-export default function StaffClient({ staff, total, page, pageSize }: Props) {
+export default function StaffClient({ staff, total, page, pageSize, canInvite = false }: Props) {
   const [editingUser, setEditingUser] = useState<AdminStaff | null>(null)
+  const [inviteOpen, setInviteOpen] = useState(false)
   const [deletingRow, setDeletingRow] = useState<Row | null>(null)
   const [, startTransition] = useTransition()
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -129,6 +134,11 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
         eyebrow="People"
         title="Staff"
         subtitle="Manage your staff and administrators"
+        actions={canInvite ? [{
+          label: 'Invite Staff',
+          onClick: () => setInviteOpen(true),
+          icon: <UserPlus className="h-4 w-4" />,
+        }] : []}
       />
 
       {deleteError && (
@@ -142,6 +152,13 @@ export default function StaffClient({ staff, total, page, pageSize }: Props) {
         open={!!editingUser}
         onClose={() => setEditingUser(null)}
       />
+
+      {canInvite && (
+        <InviteUserDialog
+          open={inviteOpen}
+          onClose={() => setInviteOpen(false)}
+        />
+      )}
 
       <DeleteStaffDialog
         open={!!deletingRow}

@@ -3,7 +3,9 @@
  *  sensitive action (e.g. an order status change). */
 
 import { createServerClient } from '@supabase/ssr'
+import { headers } from 'next/headers'
 import { requireUser } from '@/features/auth/api/guards'
+import { logSecurityEvent } from '@/features/audit/api/security'
 import { requireEnv } from '@/shared/config/env'
 
 // Verifies the signed-in user's password WITHOUT touching their session: a
@@ -21,5 +23,21 @@ export const verifyCurrentUserPassword = async (password: string): Promise<boole
   )
 
   const { error } = await supabase.auth.signInWithPassword({ email: user.email, password })
+
+  // Security audit: failing a step-up password check on a LIVE session is a
+  // strong signal (e.g. a hijacked session probing a sensitive action). Awaited
+  // (never throws) because server actions have no waitUntil context.
+  if (error) {
+    const h = await headers()
+    await logSecurityEvent({
+      eventType: 'login_failed',
+      email: user.email,
+      ipAddress: h.get('x-forwarded-for')?.split(',')[0]?.trim() || null,
+      userAgent: h.get('user-agent'),
+      route: 'reauth',
+      details: { reason: error.message, context: 'step-up reauthentication' },
+    })
+  }
+
   return !error
 }

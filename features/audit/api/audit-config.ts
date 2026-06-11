@@ -2,7 +2,7 @@
 // client filter/export components. Runtime constants live here instead of in
 // lib/audit.ts because that module imports the server-only Supabase client.
 
-import type { AuditCategory, AuditEntityType } from '@/shared/types/audit'
+import type { AuditCategory, AuditEntityType, SecurityEventType } from '@/shared/types/audit'
 
 export const AUDIT_CATEGORIES: { key: AuditCategory; label: string; description: string }[] = [
   { key: 'users',    label: 'User Activity',      description: 'Logins, profile changes, and role changes' },
@@ -23,6 +23,13 @@ export const ENTITY_BY_CATEGORY: Record<Exclude<AuditCategory, 'admins'>, AuditE
 
 export const isAuditCategory = (v: string): v is AuditCategory =>
   AUDIT_CATEGORIES.some((c) => c.key === v)
+
+// Options for the unified page's "Type" filter — the categories plus an
+// all-types default ('' = no filter).
+export const AUDIT_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'All types' },
+  ...AUDIT_CATEGORIES.map((c) => ({ value: c.key, label: c.label })),
+]
 
 // Action options for the per-category filter dropdown.
 export const ACTION_OPTIONS: Record<AuditCategory, { value: string; label: string }[]> = {
@@ -55,3 +62,27 @@ export const ACTION_OPTIONS: Record<AuditCategory, { value: string; label: strin
   ],
   admins: [], // spans entities — no fixed action list
 }
+
+// Grouped action options for the unified filter's "All types" state — every
+// concrete action, labelled by its category so duplicate labels (e.g. two
+// "Status changed") stay distinguishable in the dropdown.
+export const ACTION_OPTION_GROUPS: { label: string; options: { value: string; label: string }[] }[] =
+  AUDIT_CATEGORIES
+    .filter((c) => ACTION_OPTIONS[c.key].length > 0)
+    .map((c) => ({ label: c.label, options: ACTION_OPTIONS[c.key] }))
+
+// ── Security audit (client-safe) ──────────────────────────────────────────────
+export const SECURITY_EVENT_LABEL: Record<SecurityEventType, string> = {
+  rate_limit_exceeded: 'Rate limit exceeded',
+  login_failed:        'Failed login',
+}
+
+// Options for the security page's "Event" filter ('' = all events).
+export const SECURITY_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: '', label: 'All events' },
+  { value: 'rate_limit_exceeded', label: SECURITY_EVENT_LABEL.rate_limit_exceeded },
+  { value: 'login_failed',        label: SECURITY_EVENT_LABEL.login_failed },
+]
+
+export const isSecurityEventType = (v: string): v is SecurityEventType =>
+  v === 'rate_limit_exceeded' || v === 'login_failed'

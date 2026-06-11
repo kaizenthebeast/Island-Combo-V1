@@ -3,7 +3,8 @@
 import { createClient } from '@/shared/lib/db/server'
 import { requireAdmin } from '@/features/auth/api'
 import { revalidatePath } from 'next/cache'
-import { EditUserFormValues } from '@/features/account/validations/user'
+import { getSiteUrl } from '@/shared/config/env'
+import { EditUserFormValues, InviteUserFormValues } from '@/features/account/validations/user'
 import { escapeIlike, type PaginatedInput, type PaginatedResult } from '@/shared/lib/admin/shared'
 
 // PAGINATED READS (users + staff)
@@ -101,8 +102,58 @@ export const getStaffPage = async (
 }
 
 // MUTATIONS
-// Admins can only edit / archive / restore existing accounts. New staff /
-// admin accounts are provisioned directly in Supabase, not through the app.
+// Admins can edit / archive / restore existing accounts and provision new
+// staff/admin accounts via email invite (inviteUser below).
+
+// Invite a new back-office account (role: staff | admin). Admin-only.
+//
+// Delegates to the `invite-user` Edge Function: the privileged work
+// (inviteUserByEmail + profile-role insert + rollback) runs there with the
+// platform-injected service key, so this app never holds a secret key. The
+// session client forwards the calling admin's JWT; the function independently
+// re-verifies the admin role before doing anything.
+type InviteFnResult = { ok: boolean; error?: string; code?: string }
+
+export const inviteUser = async (data: InviteUserFormValues) => {
+  const auth = await requireAdmin()
+  if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
+
+  const supabase = await createClient()
+  const { data: result, error } = await supabase.functions.invoke<InviteFnResult>('invite-user', {
+    body: {
+      email: data.email,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      role: data.role,
+      // The invite email's landing page (GoTrue enforces its redirect allow-list).
+      redirect_to: `${getSiteUrl()}/auth/update-password`,
+    },
+  })
+
+  // Non-2xx → FunctionsHttpError carrying the Response; surface its message.
+  if (error) {
+    const ctx = (error as { context?: Response }).context
+    const body = ctx ? await ctx.json().catch(() => null) as InviteFnResult | null : null
+    return {
+      success: false,
+      status: ctx?.status ?? 500,
+      message: body?.error ?? 'Failed to send the invitation.',
+    }
+  }
+
+  // 200 with ok:false = handled refusal (e.g. the email already has an account).
+  if (!result?.ok) {
+    return {
+      success: false,
+      status: result?.code === 'email_exists' ? 409 : 500,
+      message: result?.error ?? 'Failed to send the invitation.',
+    }
+  }
+
+  revalidatePath('/admin/users')
+  revalidatePath('/admin/users/staff')
+  return { success: true, status: 201, message: `Invitation sent to ${data.email}` }
+}
 
 export const updateUser = async (userId: string, data: EditUserFormValues) => {
   const supabase = await createClient()

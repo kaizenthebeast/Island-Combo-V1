@@ -4,19 +4,17 @@ import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
-import type { AuditLog } from '@/shared/types/audit'
+import type { SecurityAuditLog } from '@/shared/types/audit'
 
-const CSV_COLUMNS: { key: keyof AuditLog; header: string }[] = [
-  { key: 'created_at',  header: 'Timestamp' },
-  { key: 'actor_email', header: 'Actor Email' },
-  { key: 'actor_id',    header: 'Actor ID' },
-  { key: 'action',      header: 'Action' },
-  { key: 'entity_type', header: 'Entity Type' },
-  { key: 'entity_id',   header: 'Entity ID' },
-  { key: 'ip_address',  header: 'IP Address' },
-  { key: 'old_data',    header: 'Old Data' },
-  { key: 'new_data',    header: 'New Data' },
-  { key: 'metadata',    header: 'Metadata' },
+const CSV_COLUMNS: { key: keyof SecurityAuditLog; header: string }[] = [
+  { key: 'created_at', header: 'Timestamp' },
+  { key: 'event_type', header: 'Event' },
+  { key: 'user_id',    header: 'User ID' },
+  { key: 'email',      header: 'Email' },
+  { key: 'ip_address', header: 'IP Address' },
+  { key: 'route',      header: 'Route' },
+  { key: 'user_agent', header: 'User Agent' },
+  { key: 'details',    header: 'Details' },
 ]
 
 const cell = (value: unknown): string => {
@@ -26,10 +24,9 @@ const cell = (value: unknown): string => {
   return `"${str.replace(/"/g, '""')}"`
 }
 
-// Exports the audit rows matching the CURRENT filters to CSV. Reuses the same
-// /api/audit endpoint (admin-protected); the type filter, if any, rides along
-// in the searchParams.
-export default function AuditExport() {
+// Exports the security events matching the CURRENT filters to CSV via the
+// admin-protected /api/audit/security endpoint.
+export default function SecurityAuditExport() {
   const searchParams = useSearchParams()
   const [busy, setBusy] = useState(false)
 
@@ -40,13 +37,13 @@ export default function AuditExport() {
       params.set('page', '1')
       params.set('limit', '100')
 
-      const res = await fetch(`/api/audit?${params.toString()}`)
+      const res = await fetch(`/api/audit/security?${params.toString()}`)
       const json = await res.json()
       if (!res.ok) throw new Error(json?.message ?? 'Export failed')
 
-      const rows: AuditLog[] = json.data ?? []
+      const rows: SecurityAuditLog[] = json.data ?? []
       if (rows.length === 0) {
-        customToast.error({ title: 'Nothing to export', description: 'No logs match the current filters.' })
+        customToast.error({ title: 'Nothing to export', description: 'No events match the current filters.' })
         return
       }
 
@@ -58,8 +55,7 @@ export default function AuditExport() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const typeLabel = searchParams.get('type') || 'all'
-      a.download = `audit-${typeLabel}-${new Date().toISOString().slice(0, 10)}.csv`
+      a.download = `security-audit-${new Date().toISOString().slice(0, 10)}.csv`
       document.body.appendChild(a)
       a.click()
       a.remove()

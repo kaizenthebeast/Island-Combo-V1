@@ -11,6 +11,15 @@ export const editUserSchema = z.object({
   role:       z.enum(['customer', 'staff', 'admin']),
 })
 
+// Admin → invite a new staff/admin account. Role is restricted to back-office
+// roles on purpose: customers sign themselves up, they are never invited.
+export const inviteUserSchema = z.object({
+  first_name: z.string().min(1, 'First name is required').max(50, 'Max 50 characters'),
+  last_name:  z.string().min(1, 'Last name is required').max(50, 'Max 50 characters'),
+  email:      z.string().email('Invalid email address').nonempty('Email is required'),
+  role:       z.enum(['staff', 'admin']),
+})
+
 export const personalDetailsSchema = z.object({
   first_name: z.string().min(1, 'First name is required').max(15, 'Max 15 characters'),
   last_name:  z.string().min(1, 'Last name is required').max(15, 'Max 15 characters'),
@@ -22,4 +31,5 @@ export const personalDetailsSchema = z.object({
 })
 
 export type EditUserFormValues         = z.infer<typeof editUserSchema>
+export type InviteUserFormValues       = z.infer<typeof inviteUserSchema>
 export type PersonalDetailsFormValues  = z.infer<typeof personalDetailsSchema>

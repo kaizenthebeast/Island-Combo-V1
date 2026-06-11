@@ -4,7 +4,7 @@ import * as React from "react"
 import {
   Users, Package, ShoppingCart, Crown, Megaphone,
   LayoutDashboard, Tag, ListOrdered, Star,
-  Percent, ImagePlay, ShieldAlert, ScrollText,
+  Percent, ImagePlay, ShieldAlert,
   Banknote, QrCode, Undo2,
 } from "lucide-react"
 import { NavMain } from "@/shared/components/admin/sidebar/NavMain"
@@ -13,6 +13,7 @@ import Image from "next/image"
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail,
 } from "@/shared/components/ui/sidebar"
+import { canAccessAdminPath } from "@/shared/config/admin-rbac"
 
 const navMain = [
   {
@@ -74,18 +75,11 @@ const navMain = [
     ],
   },
   {
-    // Admin-only audit log. The whole /admin area is already admin-gated by
-    // proxy.ts, so every item here is implicitly admin-only.
+    // Single unified audit log; the per-entity split is now a Type filter
+    // inside the page rather than separate nav items.
     title: "Audit Logs",
-    url: "/admin/audit/users",
+    url: "/admin/audit",
     icon: ShieldAlert,
-    items: [
-      { title: "User Activity", url: "/admin/audit/users", icon: Users },
-      { title: "Orders", url: "/admin/audit/orders", icon: ListOrdered },
-      { title: "Products & Inventory", url: "/admin/audit/products", icon: Package },
-      { title: "Payments", url: "/admin/audit/payments", icon: Banknote },
-      { title: "Admin Actions", url: "/admin/audit/admins", icon: ScrollText },
-    ],
   },
 ]
 
@@ -95,7 +89,25 @@ type User = {
   avatar: string
 }
 
-export function AppSidebar({ user, ...props }: { user: User } & React.ComponentProps<typeof Sidebar>) {
+// Keep the nav in sync with route access (shared/config/admin-rbac.ts — the
+// same policy the middleware enforces): drop sub-items the role can't open,
+// and whole groups when nothing inside them survives. Hiding nav is UX only;
+// the middleware and lib guards are the enforcement.
+function navForRole(role: string | null) {
+  return navMain
+    .map((group) => {
+      if (!group.items?.length) {
+        return canAccessAdminPath(role, group.url) ? group : null
+      }
+      const items = group.items.filter((item) => canAccessAdminPath(role, item.url))
+      return items.length ? { ...group, items } : null
+    })
+    .filter((group) => group !== null)
+}
+
+// Named userRole (not `role`) to avoid colliding with the ARIA role attribute
+// in the underlying Sidebar div props.
+export function AppSidebar({ user, userRole, ...props }: { user: User; userRole: string | null } & React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -111,7 +123,7 @@ export function AppSidebar({ user, ...props }: { user: User } & React.ComponentP
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain items={navForRole(userRole)} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />

@@ -1,11 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { requireEnv } from "@/shared/config/env";
+import { canAccessAdminPath } from "@/shared/config/admin-rbac";
 
 
 const PROTECTED_ROUTES = ["/protected", "/checkout/address"];
 const ADMIN_ROUTES = ["/admin"];
-const AUDIT_ROUTES = ["/admin/audit"];
 
 const IS_PROD = process.env.NODE_ENV === "production";
 
@@ -125,7 +125,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  //  if the user access the admin route, check if the user is admin or not
+  // Back-office RBAC: staff and admin share the /admin surface; the section
+  // policy in shared/config/admin-rbac.ts decides which subtrees staff may
+  // open (the same policy drives the sidebar, so nav and access can't drift).
+  // Deactivated accounts are stopped at the door — is_staff()/is_admin() in
+  // RLS would block their data access anyway, but don't let them browse.
   if (isAdminRoute) {
     if (!user || user.is_anonymous) {
       const url = request.nextUrl.clone();
@@ -134,30 +138,18 @@ export async function updateSession(request: NextRequest) {
     }
 
     // Validate thru query
-    const { data: profile, error } = await supabase.from('profile').select('role').eq('user_id', user.id).single()
-    if (error || profile?.role !== 'admin') {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth/login";
-      return NextResponse.redirect(url);
-    }
-  }
+    const { data: profile, error } = await supabase
+      .from('profile')
+      .select('role, is_active')
+      .eq('user_id', user.id)
+      .single()
+    const role = !error && profile?.is_active ? profile.role : null
 
-  // Explicit guard for the admin-only Security Audit Log. /admin/audit is already
-  // covered by the /admin admin check above; this dedicated block enforces the
-  // audit subtree's admin-only requirement using the SAME client, role lookup,
-  // and redirect as the existing admin guard.
-  const isAuditRoute = AUDIT_ROUTES.some((route) => path.startsWith(route));
-  if (isAuditRoute) {
-    if (!user || user.is_anonymous) {
+    if (!canAccessAdminPath(role, path)) {
       const url = request.nextUrl.clone();
-      url.pathname = "/auth/login";
-      return NextResponse.redirect(url);
-    }
-
-    const { data: auditProfile, error: auditError } = await supabase.from('profile').select('role').eq('user_id', user.id).single()
-    if (auditError || auditProfile?.role !== 'admin') {
-      const url = request.nextUrl.clone();
-      url.pathname = "/auth/login";
+      // A staff member poking an admin-only section is authenticated — send
+      // them home to their dashboard, not the login page.
+      url.pathname = role === 'staff' ? '/admin/dashboard' : '/auth/login';
       return NextResponse.redirect(url);
     }
   }

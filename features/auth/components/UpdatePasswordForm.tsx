@@ -51,7 +51,12 @@ export function UpdatePasswordForm({
         password: data.password,
       });
       if (error) throw error;
-      router.push("/protected");
+      // Route by role, mirroring login: invited staff/admin land in the back
+      // office, customers (password reset) on the storefront.
+      const { data: claims } = await supabase.auth.getClaims();
+      const role = claims?.claims?.user_role;
+      const isBackOffice = role === "admin" || role === "staff";
+      router.push(isBackOffice ? "/admin/dashboard" : "/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
