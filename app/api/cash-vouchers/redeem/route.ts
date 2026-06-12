@@ -5,9 +5,11 @@ import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 // POST /api/cash-vouchers/redeem   Body: { code: string, redeemerName: string }
 //
 // Staff/admin only (send `Authorization: Bearer <staff access token>`).
-// Atomically flips an ACTIVE voucher to REDEEMED and records who released the
-// cash. The DB RPC is the source of truth: staff check, status check, and a
-// single-redeem guard (a second concurrent redeem loses the race) all live there.
+// `code` may be the redemption UUID (what the QR encodes) or the display code
+// (CV-YYYY-…) — the RPC resolves both. Atomically flips an ACTIVE voucher to
+// REDEEMED and records who released the cash. The DB RPC is the source of truth:
+// staff check, status check, and a single-redeem guard (a second concurrent
+// redeem loses the race) all live there.
 //
 // 200 → { data: <redeemed voucher>, message }
 // 400 (missing fields) · 401 (no/invalid token) · 403 (not staff)

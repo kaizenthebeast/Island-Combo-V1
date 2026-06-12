@@ -24,6 +24,10 @@ type VoucherResult = { success: boolean; voucher?: CashVoucher; message?: string
 // Normalize a scanned/typed code: trim and upper-case (codes are stored upper-case).
 const normalizeCode = (code: string) => code.trim().toUpperCase()
 
+// A scanned value is either the display code (CV-YYYY-…) or the dedicated
+// redemption id (canonical UUID, what new QRs encode). The shapes are disjoint.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 // Map the redeem RPC's SQLSTATE (raised via `USING errcode = …`) to an HTTP status
 // so the API route returns a meaningful code instead of a blanket 400/500.
 const statusForPgError = (code: string | undefined): number => {
@@ -58,8 +62,9 @@ export const findCashVoucherByCode = async (code: string): Promise<VoucherResult
 }
 
 // VALIDATE (Digital Good Validate API) — staff/admin only.
-// Read-only: never mutates. Returns a clear verdict for a scanned QR `code` so a
-// scanner app can decide whether to proceed to redeem.
+// Read-only: never mutates. Returns a clear verdict for a scanned value — either
+// the redemption UUID (what QRs encode) or the display code — so a scanner app
+// can decide whether to proceed to redeem.
 //   reason: OK (redeemable) | NOT_FOUND | ALREADY_REDEEMED | EXPIRED | CANCELLED
 export type VoucherValidation = {
   valid: boolean
@@ -87,11 +92,16 @@ export const validateCashVoucher = async (
   const auth = await requireStaff()
   if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
+  // QR scans carry the redemption UUID; typed/legacy inputs carry the code.
+  const lookup = UUID_RE.test(trimmed)
+    ? { column: 'redemption_uuid', value: trimmed.toLowerCase() }
+    : { column: 'code', value: trimmed }
+
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('cash_voucher')
     .select('code, amount, recipient_name, recipient_email, status, claimed_at, redeemed_recipient_name')
-    .eq('code', trimmed)
+    .eq(lookup.column, lookup.value)
     .maybeSingle<VoucherValidation['voucher']>()
 
   if (error) return { success: false, status: 500, message: error.message }
@@ -111,6 +121,7 @@ export const validateCashVoucher = async (
 }
 
 // REDEEM (Digital Product Redeem API) — staff/admin only (enforced in SQL).
+// `code` may be the display code or the redemption UUID; the RPC resolves both.
 export const redeemCashVoucher = async (
   code: string,
   redeemerName: string,
@@ -121,7 +132,7 @@ export const redeemCashVoucher = async (
 
   const { data, error } = await supabase
     .rpc('redeem_cash_voucher', {
-      p_code: normalizeCode(code),
+      p_code: code.trim(),
       p_redeemer_name: redeemerName,
     })
     .single<CashVoucher>()

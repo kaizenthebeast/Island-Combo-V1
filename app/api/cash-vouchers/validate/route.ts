@@ -5,8 +5,10 @@ import { HTTP, apiOk, apiError, toApiError } from '@/shared/lib/http/respond'
 // POST /api/cash-vouchers/validate   Body: { code: string }
 //
 // Staff/admin only (send `Authorization: Bearer <staff access token>`).
-// Read-only check of a scanned QR `code`: returns whether the voucher exists and
-// is currently redeemable. Never mutates, so a scanner app can call it freely.
+// Read-only check of a scanned value — `code` may be the redemption UUID (what
+// the QR encodes) or the display code (CV-YYYY-…, typed at the counter). Returns
+// whether the voucher exists and is currently redeemable. Never mutates, so a
+// scanner app can call it freely.
 //
 // 200 → { valid, status, reason, voucher? }
 //   valid:  true only when status === 'ACTIVE'

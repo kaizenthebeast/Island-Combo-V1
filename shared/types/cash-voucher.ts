@@ -15,10 +15,9 @@ export type CashVoucher = {
   // The person who actually exchanged the voucher for cash, captured at
   // redemption by the back-office staff (audit trail).
   redeemed_recipient_name: string | null
-  // Optional link to an order (Digital Product Table); NULL for standalone buys.
-  order_id: number | null
   // Cryptographically-unique redemption identifier, minted on demand by the
-  // Generate Id API. NULL until generated. Distinct from the display `code`.
+  // Generate Id API and encoded in the voucher QR. NULL until generated.
+  // Distinct from the display `code`; validate/redeem accept either.
   redemption_uuid: string | null
   // NULL after the purchaser's account is deleted (FK is ON DELETE SET NULL);
   // purchaser_email is retained for post-deletion lookup.

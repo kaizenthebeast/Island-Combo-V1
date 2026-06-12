@@ -6,6 +6,7 @@ import { Copy, Download, Link as LinkIcon } from 'lucide-react'
 import { useQRCode } from '@/shared/hooks/use-qr-code'
 
 type Props = {
+  voucherId: string
   code: string
   amount: number
   recipient: string
@@ -53,6 +54,7 @@ const buildNextSteps = (email: string | null): NextStep[] => [
 ]
 
 const CashVoucherSuccess = ({
+  voucherId,
   code,
   amount,
   recipient,
@@ -62,12 +64,32 @@ const CashVoucherSuccess = ({
   const { qrDataUrl, generateQR } = useQRCode()
   const [copied, setCopied] = useState(false)
 
-  // The QR encodes the database-generated voucher code (the source of truth).
+  // The QR encodes the dedicated redemption id (a server-minted UUID, idempotent
+  // per voucher). If minting fails the QR falls back to the display code — both
+  // identifiers are accepted by the validate/redeem APIs.
   useEffect(() => {
-    generateQR(code)
-    // generateQR is recreated each render; we only want this to run for a new code.
+    let cancelled = false
+    const encode = async () => {
+      try {
+        const res = await fetch('/api/cash-vouchers/redemption-id', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voucherId }),
+        })
+        const json = res.ok ? await res.json().catch(() => null) : null
+        const redemptionId: string | null = json?.data?.redemptionId ?? null
+        if (!cancelled) await generateQR(redemptionId ?? code)
+      } catch {
+        if (!cancelled) await generateQR(code)
+      }
+    }
+    void encode()
+    return () => {
+      cancelled = true
+    }
+    // generateQR is recreated each render; we only want this to run for a new voucher.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code])
+  }, [voucherId, code])
 
   const handleCopy = async () => {
     try {
