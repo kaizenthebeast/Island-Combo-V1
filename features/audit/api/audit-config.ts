@@ -5,20 +5,25 @@
 import type { AuditCategory, AuditEntityType, SecurityEventType } from '@/shared/types/audit'
 
 export const AUDIT_CATEGORIES: { key: AuditCategory; label: string; description: string }[] = [
-  { key: 'users',    label: 'User Activity',      description: 'Logins, profile changes, and role changes' },
-  { key: 'orders',   label: 'Orders',             description: 'Order creation, status changes, cancellations, and refunds' },
-  { key: 'products', label: 'Product & Inventory', description: 'Product create/edit/delete, stock adjustments, and price changes' },
-  { key: 'payments', label: 'Payments',           description: 'Payment attempts, captures, failures, and refund events' },
+  { key: 'users',    label: 'User Activity',      description: 'Staff edits to user profiles and role changes' },
+  { key: 'orders',   label: 'Orders',             description: 'Order status changes, cancellations, and refunds by staff' },
+  { key: 'products', label: 'Product & Inventory', description: 'Product & category create/edit/delete, stock adjustments, and price changes' },
+  { key: 'payments', label: 'Payments',           description: 'Payment record changes made by staff' },
+  { key: 'vouchers', label: 'Cash Vouchers',      description: 'Voucher redemptions and status changes by staff' },
+  { key: 'loyalty',  label: 'Loyalty Points',     description: 'Point balance changes made by staff (adjustments, accruals, restitutions)' },
   { key: 'admins',   label: 'Admin Actions',      description: 'Any action performed by an admin account' },
 ]
 
-// Four categories map straight to an entity_type. 'admins' is special — it means
-// "any action performed by an admin account" (filtered by actor role).
-export const ENTITY_BY_CATEGORY: Record<Exclude<AuditCategory, 'admins'>, AuditEntityType> = {
-  users: 'user',
-  orders: 'order',
-  products: 'product',
-  payments: 'payment',
+// Most categories map to one or more entity_types ('products' spans product AND
+// category rows). 'admins' is special — it means "any action performed by an
+// admin account" (filtered by actor role).
+export const ENTITY_BY_CATEGORY: Record<Exclude<AuditCategory, 'admins'>, AuditEntityType[]> = {
+  users: ['user'],
+  orders: ['order'],
+  products: ['product', 'category'],
+  payments: ['payment'],
+  vouchers: ['voucher'],
+  loyalty: ['loyalty'],
 }
 
 export const isAuditCategory = (v: string): v is AuditCategory =>
@@ -53,12 +58,24 @@ export const ACTION_OPTIONS: Record<AuditCategory, { value: string; label: strin
     { value: 'product.stock_changed', label: 'Stock changed' },
     { value: 'product.price_changed', label: 'Price changed' },
     { value: 'product.deleted',       label: 'Product deleted' },
+    { value: 'category.created',      label: 'Category created' },
+    { value: 'category.updated',      label: 'Category updated' },
+    { value: 'category.deleted',      label: 'Category deleted' },
   ],
   payments: [
     { value: 'payment.created',        label: 'Payment created' },
     { value: 'payment.status_changed', label: 'Status changed' },
     { value: 'payment.updated',        label: 'Payment updated' },
     { value: 'payment.deleted',        label: 'Payment deleted' },
+  ],
+  vouchers: [
+    { value: 'voucher.redeemed',       label: 'Voucher redeemed' },
+    { value: 'voucher.status_changed', label: 'Status changed' },
+    { value: 'voucher.updated',        label: 'Voucher updated' },
+  ],
+  loyalty: [
+    { value: 'loyalty.points_changed', label: 'Points changed' },
+    { value: 'loyalty.updated',        label: 'Loyalty record updated' },
   ],
   admins: [], // spans entities — no fixed action list
 }

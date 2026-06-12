@@ -82,10 +82,10 @@ const CheckoutSuccessPage = async ({
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">{subtitle}</p>
 
           <Link
-            href={order ? `/orders/${order}` : '/'}
+            href={order ? '/account?tab=orders' : '/'}
             className="mt-6 inline-block rounded-full border border-brand px-10 py-2.5 text-sm font-medium text-brand transition-colors hover:bg-brand hover:text-white"
           >
-            {order ? 'View Order' : 'Continue shopping'}
+            {order ? 'View Orders' : 'Continue shopping'}
           </Link>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { ArrowLeft, Copy, Check, CheckCircle2, Circle, ImagePlus, X, Video } fro
 import { cancelMyOrder } from '@/features/orders/api/orders'
 import { uploadRefundMedia } from '@/features/orders/api/refund-upload'
 import { customToast } from '@/shared/components/common/modals/ToastCustom'
+import { Skeleton } from '@/shared/components/ui/skeleton'
 import type { OrderHistoryRow, CustomerOrderDetail } from '@/shared/types/order'
 
 const TRACKED = new Set(['shipped', 'out_for_delivery', 'delivered', 'completed'])
@@ -142,7 +143,31 @@ export default function OrderDetailSheet({
         {loadErr ? (
           <p className="p-6 text-sm text-danger">{loadErr}</p>
         ) : !detail ? (
-          <p className="p-6 text-sm text-muted-foreground">Loading…</p>
+          <div className="space-y-5 p-5">
+            {/* Timeline */}
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-32" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="mt-0.5 h-4 w-4 shrink-0 rounded-full" />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className="h-3.5 w-2/3" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Items + totals */}
+            <Skeleton className="h-20 w-full rounded-md" />
+            <div className="space-y-2">
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-3.5 w-full" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          </div>
         ) : (
           <div className="space-y-5 p-5">
             {order.order_status === 'paid' && !tracked && (

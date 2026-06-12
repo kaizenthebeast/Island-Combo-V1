@@ -1,4 +1,5 @@
 import React from 'react'
+import { Skeleton } from '@/shared/components/ui/skeleton'
 
 // DataTable.tsx
 // Fully controlled data table. All state (page, pageSize, search, filter, sort)
@@ -131,10 +132,11 @@ function EmptyState({ colSpan }: { colSpan: number }) {
 function LoadingState({ colSpan }: { colSpan: number }) {
   return (
     <tr>
-      <td colSpan={colSpan} className="py-16 text-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="w-6 h-6 border-2 border-border border-t-slate-500 rounded-full animate-spin" />
-          <p className="text-xs text-muted-foreground">Loading…</p>
+      <td colSpan={colSpan} className="px-2 py-3">
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
         </div>
       </td>
     </tr>

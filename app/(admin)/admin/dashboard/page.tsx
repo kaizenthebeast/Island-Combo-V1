@@ -4,18 +4,34 @@ import {
 import { PageHeader } from '@/shared/components/admin/PageHeader'
 import RevenueAreaChart from '@/shared/components/admin/charts/RevenueAreaChart'
 import StatusDonut from '@/shared/components/admin/charts/StatusDonut'
+import { WelcomeBanner } from '@/features/dashboard/components/WelcomeBanner'
 import { getDashboardStats } from '@/features/dashboard/api'
+import { requireUser } from '@/features/auth/api'
 
 const money = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n ?? 0)
 const money2 = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n ?? 0)
 
+// Derive a friendly display name from the admin's email local-part:
+// "hamza.nakan04@x.com" → "Hamza Nakan".
+const displayName = (email: string | null): string => {
+  const local = (email ?? '').split('@')[0]
+  const cleaned = local
+    .replace(/[._-]+/g, ' ')
+    .replace(/\d+/g, '')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return cleaned || 'Admin'
+}
+
 const DashboardPage = async () => {
-  const res = await getDashboardStats()
+  const [res, user] = await Promise.all([getDashboardStats(), requireUser()])
+  const name = displayName(user?.email ?? null)
+
   if (!res.success) {
     return (
-      <section className="min-h-full bg-muted px-6 py-10">
+      <section className="min-h-full bg-muted px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
         <PageHeader eyebrow="Overview" title="Dashboard" subtitle="Store analytics" />
         <p className="text-sm text-danger">{res.message}</p>
       </section>
@@ -24,11 +40,18 @@ const DashboardPage = async () => {
   const s = res.stats
 
   return (
-    <section className="min-h-full bg-muted px-6 py-10">
-      <PageHeader eyebrow="Overview" title="Dashboard" subtitle="Your store at a glance" />
+    <section className="min-h-full bg-muted px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+      <WelcomeBanner
+        name={name}
+        highlights={[
+          { label: 'Revenue today', value: money(s.revenue.today) },
+          { label: 'Orders today', value: String(s.orders.today) },
+          { label: 'To fulfill', value: String(s.orders.pending_fulfillment) },
+        ]}
+      />
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <Kpi icon={<DollarSign size={18} />} label="Revenue (30d)" value={money(s.revenue.last_30_days)} sub={`${money(s.revenue.today)} today`} />
         <Kpi icon={<TrendingUp size={18} />} label="Avg order value" value={money2(s.orders.aov)} sub={`${s.orders.total} orders total`} />
         <Kpi icon={<ShoppingCart size={18} />} label="To fulfill" value={String(s.orders.pending_fulfillment)} sub={`${s.orders.today} placed today`} accent={s.orders.pending_fulfillment > 0} />
@@ -112,17 +135,26 @@ function Kpi({ icon, label, value, sub, accent }: {
   icon: React.ReactNode; label: string; value: string; sub?: string; accent?: boolean
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-white p-4 shadow-xs">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <span className={accent ? 'text-brand' : ''}>{icon}</span>
-        <span className="text-xs font-medium">{label}</span>
+    <div className="group rounded-2xl border border-border bg-white p-4 shadow-xs transition duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-md">
+      <div className="flex items-start justify-between">
+        <span
+          className={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+            accent ? 'bg-brand text-brand-foreground' : 'bg-brand-tint text-brand'
+          }`}
+        >
+          {icon}
+        </span>
+        {accent && <span className="mt-1 h-2 w-2 animate-pulse rounded-full bg-brand" />}
       </div>
-      <p className={`mt-2 text-2xl font-extrabold ${accent ? 'text-brand' : 'text-foreground'}`}>{value}</p>
+      <p className={`mt-3 text-2xl font-extrabold tracking-tight ${accent ? 'text-brand' : 'text-foreground'}`}>{value}</p>
+      <p className="text-xs font-semibold text-foreground/70">{label}</p>
       {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
     </div>
   )
 }
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-border bg-white p-5 shadow-xs ${className}`}>{children}</div>
+  return (
+    <div className={`rounded-2xl border border-border bg-white p-4 shadow-xs sm:p-5 ${className}`}>{children}</div>
+  )
 }

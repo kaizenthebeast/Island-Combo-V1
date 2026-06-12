@@ -60,6 +60,22 @@ export default function SecurityAuditExport() {
       a.click()
       a.remove()
       URL.revokeObjectURL(url)
+
+      // Audit the export itself (fire-and-forget; the endpoint is admin-gated
+      // and writes through the SECURITY DEFINER log_audit_event RPC).
+      void fetch('/api/audit/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'data.exported',
+          entity_type: 'admin',
+          metadata: {
+            export: 'security_audit_logs',
+            filters: Object.fromEntries(params),
+            rows: rows.length,
+          },
+        }),
+      }).catch(() => {})
     } catch (e) {
       customToast.error({ title: 'Export failed', description: e instanceof Error ? e.message : 'Please try again.' })
     } finally {

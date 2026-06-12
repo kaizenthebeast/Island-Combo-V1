@@ -74,6 +74,20 @@ Deno.serve(async (req) => {
     { auth: { autoRefreshToken: false, persistSession: false } },
   )
 
+  // Refuse BEFORE sending: inviteUserByEmail dispatches the email immediately,
+  // so a failure in the profile insert below would roll back the auth user and
+  // leave a dead link in the invitee's inbox ("One-time token not found").
+  // A conflicting profile row (unique email) is the realistic failure — catch it here.
+  const { data: existingProfile } = await admin
+    .from('profile').select('user_id').eq('email', email).maybeSingle()
+  if (existingProfile) {
+    return json({
+      ok: false,
+      error: 'An account with this email already exists.',
+      code: 'email_exists',
+    }, 200)
+  }
+
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
     // Traceability only — the authoritative role lives on the profile row.
     data: {
@@ -110,7 +124,12 @@ Deno.serve(async (req) => {
   // auth user back so the admin can simply retry.
   if (profileError) {
     await admin.auth.admin.deleteUser(invited.user.id)
-    return json({ ok: false, error: `Failed to provision the account: ${profileError.message}` }, 502)
+    // The invite email is already out and its link is now dead — say so.
+    return json({
+      ok: false,
+      error: `Failed to provision the account: ${profileError.message}. ` +
+        'The emailed invite link will not work — fix the issue and invite again.',
+    }, 502)
   }
 
   return json({ ok: true, user_id: invited.user.id, email, role })

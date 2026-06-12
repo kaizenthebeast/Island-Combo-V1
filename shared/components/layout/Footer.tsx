@@ -56,19 +56,19 @@ const Footer = () => {
 
           <ul className="flex flex-col space-y-4 text-sm mt-6 text-foreground items-center md:items-start">
             <li>
-              <Link href="#" className="inline-block hover:text-black">
+              <Link href="/about" className="inline-block hover:text-brand">
                 Who we are
               </Link>
             </li>
 
             <li>
-              <Link href="#" className="inline-block hover:text-black">
-                Terms and Condition
+              <Link href="/terms" className="inline-block hover:text-brand">
+                Terms and Conditions
               </Link>
             </li>
 
             <li>
-              <Link href="#" className="inline-block hover:text-black">
+              <Link href="/privacy" className="inline-block hover:text-brand">
                 Privacy Policy
               </Link>
             </li>

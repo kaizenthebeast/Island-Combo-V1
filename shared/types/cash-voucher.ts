@@ -20,7 +20,9 @@ export type CashVoucher = {
   // Cryptographically-unique redemption identifier, minted on demand by the
   // Generate Id API. NULL until generated. Distinct from the display `code`.
   redemption_uuid: string | null
-  purchaser_id: string
+  // NULL after the purchaser's account is deleted (FK is ON DELETE SET NULL);
+  // purchaser_email is retained for post-deletion lookup.
+  purchaser_id: string | null
   purchaser_email: string | null
   payment_method: string | null
   payment_reference: string | null

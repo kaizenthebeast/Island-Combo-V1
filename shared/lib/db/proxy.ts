@@ -4,10 +4,10 @@ import { requireEnv } from "@/shared/config/env";
 import { canAccessAdminPath } from "@/shared/config/admin-rbac";
 
 
-// /orders requires a real account: its SSR libs throw 'Unauthorized' for
+// These routes require a real account: their SSR libs throw 'Unauthorized' for
 // sessionless visitors (crawlers, first hit before the anonymous session
 // exists) — redirect them to login instead of erroring the page.
-const PROTECTED_ROUTES = ["/protected", "/checkout/address", "/orders"];
+const PROTECTED_ROUTES = ["/protected", "/checkout/address"];
 const ADMIN_ROUTES = ["/admin"];
 
 const IS_PROD = process.env.NODE_ENV === "production";

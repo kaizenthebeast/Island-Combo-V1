@@ -45,7 +45,7 @@ export async function getAuditLogs(query: AuditQuery): Promise<GetAuditResult> {
     if (ids.length === 0) return { success: true, data: [], count: 0, page, totalPages: 0 }
     q = q.in('actor_id', ids)
   } else if (query.category) {
-    q = q.eq('entity_type', ENTITY_BY_CATEGORY[query.category])
+    q = q.in('entity_type', ENTITY_BY_CATEGORY[query.category])
   }
 
   if (query.from)       q = q.gte('created_at', dayStart(query.from))

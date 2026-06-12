@@ -187,6 +187,23 @@ export const deleteUser = async (userId: string) => {
   const auth = await requireAdmin()
   if (!auth.ok) return { success: false, status: auth.status, message: auth.message }
 
+  // Friendly pre-check only — the BEFORE DELETE trigger (migration 0055) is
+  // the authoritative, race-safe gate and also covers NULL-status orders.
+  const { count, error: openOrdersError } = await supabase
+    .from('orders')
+    .select('order_id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .not('order_status', 'in', '(completed,cancelled)')
+
+  if (openOrdersError) return { success: false, status: 403, message: openOrdersError.message }
+  if ((count ?? 0) > 0) {
+    return {
+      success: false,
+      status: 409,
+      message: `Cannot delete: this user still has ${count} open order(s). Complete or cancel them first, or deactivate the account instead.`,
+    }
+  }
+
   const { error } = await supabase
     .from('profile')
     .delete()

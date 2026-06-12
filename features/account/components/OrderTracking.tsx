@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Package, CheckCircle2, Truck, Star } from 'lucide-react'
 import OrderDetailSheet from './OrderDetailSheet'
 import OrderReviewSheet from './OrderReviewSheet'
+import { Skeleton } from '@/shared/components/ui/skeleton'
 import type { OrderHistoryRow } from '@/shared/types/order'
 
 const PLACEHOLDER = '/images/placeholder.png'
@@ -37,6 +38,28 @@ type SheetState =
   | { kind: 'details'; order: OrderHistoryRow }
   | { kind: 'review'; order: OrderHistoryRow; rating: number }
   | null
+
+// Mirrors an order card: status row, 80×80 thumbnail, title/price lines.
+const OrderListSkeleton = () => (
+  <ul className="divide-y divide-border">
+    {Array.from({ length: 3 }).map((_, i) => (
+      <li key={i} className="py-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-3.5 w-24" />
+          <Skeleton className="h-3.5 w-20" />
+        </div>
+        <div className="mt-3 flex gap-3">
+          <Skeleton className="h-20 w-20 shrink-0 rounded-md" />
+          <div className="min-w-0 flex-1">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="mt-1.5 h-3 w-24" />
+            <Skeleton className="mt-3 h-4 w-32" />
+          </div>
+        </div>
+      </li>
+    ))}
+  </ul>
+)
 
 export default function OrderTracking({ customerName }: { customerName: string }) {
   const [orders, setOrders] = useState<OrderHistoryRow[] | null>(null)
@@ -94,7 +117,7 @@ export default function OrderTracking({ customerName }: { customerName: string }
       {error ? (
         <p className="py-10 text-center text-sm text-danger">{error}</p>
       ) : orders === null ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">Loading…</p>
+        <OrderListSkeleton />
       ) : visible.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-14 text-center">
           <Package className="h-8 w-8 text-muted-foreground" />

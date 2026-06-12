@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import ProductDetails from '@/features/products/components/ProductDetails'
 import ProductReview from '@/features/reviews/components/ProductReview'
 import RecommendedProducts from '@/features/products/components/RecommendedProducts'
+import { ProductDetailsSkeleton } from '@/shared/components/common/skeletons'
 import { notFound } from 'next/navigation'
 
 type Props = {
@@ -40,7 +41,7 @@ const ProductDetailsContainer = async ({ slug }: Props) => {
     return (
         <section className="min-h-svh max-w-7xl mx-auto flex flex-col p-5 mt-5">
             <div className="flex flex-col md:flex-row gap-10 w-full">
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<ProductDetailsSkeleton />}>
                     <ProductDetails product={product} />
                 </Suspense>
             </div>

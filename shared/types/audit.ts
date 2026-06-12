@@ -1,12 +1,12 @@
 // Shared audit-log types. Import from here everywhere — never redefine inline.
 
-// Audit "type" filters on the single /admin/audit page. Four map directly to an
+// Audit "type" filters on the single /admin/audit page. Most map directly to an
 // entity_type; 'admins' is special — it means "any action performed by an admin
 // account" (filtered by actor role, not entity_type). Leaving the filter unset
 // shows every entry across all types.
-export type AuditCategory = 'users' | 'orders' | 'products' | 'payments' | 'admins'
+export type AuditCategory = 'users' | 'orders' | 'products' | 'payments' | 'vouchers' | 'loyalty' | 'admins'
 
-export type AuditEntityType = 'user' | 'order' | 'product' | 'payment'
+export type AuditEntityType = 'user' | 'order' | 'product' | 'payment' | 'voucher' | 'loyalty' | 'category'
 
 // One row of the public.audit_logs table.
 export interface AuditLog {
