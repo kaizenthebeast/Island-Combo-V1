@@ -1,0 +1,139 @@
+{
+  "info": {
+    "_postman_id": "f3a8c2d1-7b4e-4a09-9c55-1d2e3f4a5b6c",
+    "name": "Island Combo - Scanner API (Login + Cash Vouchers)",
+    "description": "Minimal partner-facing surface for the voucher scanner app.\n\nFLOW\n1. POST /api/auth/login with a STAFF (or admin) account -> saves accessToken + refreshToken into collection variables.\n2. Every voucher request sends `Authorization: Bearer {{accessToken}}` (collection-level auth) automatically.\n3. When the access token expires (~1h, see `expiresAt`), run Auth > Refresh Token -> new tokens are saved automatically.\n\nRESPONSE ENVELOPE (all endpoints)\nSuccess: { \"success\": true, \"data\": ..., \"message\"? }\nFailure: { \"success\": false, \"message\": \"...\" }\n\nSet the `baseUrl` collection variable to the deployment you are targeting before running.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('login ok', () => pm.expect(pm.response.code).to.eql(200));",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  console.log('Saved accessToken + refreshToken. role =', res.data.role);",
+                  "} else {",
+                  "  console.warn('No tokens in response:', JSON.stringify(res));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff@example.com\",\n  \"password\": \"your-password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Sign in with a STAFF or ADMIN account. Returns { role, redirectTo, accessToken, refreshToken, expiresAt, tokenType }. The test script saves accessToken + refreshToken for the voucher requests.\n\n400 = invalid credentials (failed attempts are recorded in the security audit log)."
+          }
+        },
+        {
+          "name": "Refresh Token (saves tokens)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('refresh ok', () => pm.expect(pm.response.code).to.eql(200));",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "  console.log('Refreshed accessToken + refreshToken.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "refresh"]
+            },
+            "description": "Exchange the refreshToken for a fresh token bundle when the access token expires (~1h). Returns { accessToken, refreshToken, expiresAt, tokenType }. 401 = refresh token invalid/expired: log in again."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cash Vouchers (staff scanner)",
+      "item": [
+        {
+          "name": "Validate Voucher (scan / read)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CV-2026-549A95AED4\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-vouchers/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cash-vouchers", "validate"]
+            },
+            "description": "Read-only check of a scanned QR `code` - never mutates, safe to call on every scan.\n\n200 = { success, data: { valid, status, reason, voucher? } }\n  valid:  true only when status === 'ACTIVE'\n  status: ACTIVE | REDEEMED | EXPIRED | CANCELLED | NOT_FOUND\n  reason: OK | NOT_FOUND | ALREADY_REDEEMED | EXPIRED | CANCELLED\n  voucher (when found): { code, amount, recipient_name, recipient_email, status, claimed_at, redeemed_recipient_name }\n\nAn unknown code is a 200 with valid:false / NOT_FOUND (a verdict, not an error).\n400 (no code) | 401 (no/invalid token) | 403 (not staff)."
+          }
+        },
+        {
+          "name": "Redeem Voucher (release cash)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CV-2026-549A95AED4\",\n  \"redeemerName\": \"Person collecting the cash\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/cash-vouchers/redeem",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cash-vouchers", "redeem"]
+            },
+            "description": "Atomically flips an ACTIVE voucher to REDEEMED and records who released the cash. Single-redeem-safe: a second concurrent redeem loses the race and gets 409.\n\n200 = { success, data: <full voucher row>, message: 'Voucher redeemed.' }\n400 (missing fields) | 401 (no/invalid token) | 403 (not staff)\n404 (code not found) | 409 (already redeemed / not ACTIVE / lost the race)"
+          }
+        }
+      ]
+    }
+  ]
+}
