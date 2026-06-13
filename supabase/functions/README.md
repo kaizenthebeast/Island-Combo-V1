@@ -9,9 +9,46 @@ Postgres (third-party APIs) and incoming webhooks.
 | Abandoned-guest cleanup | **pg_cron + SQL** (`prune_abandoned_guests`, migration 0021) | daily 03:00 UTC | ✅ live |
 | Loyverse points sync | edge function `loyverse-points-sync` | scheduled | ⏳ needs deploy + token |
 | PayPal fulfillment webhook | edge function `paypal-webhook` | PayPal webhook | ⏳ needs deploy + config |
+| Transactional email (Resend) | edge function `send-email` | invoked by the app | ⏳ needs `RESEND_API_KEY` |
 
 The cleanup is **not** an edge function on purpose — pruning DB rows belongs in the
 database (no network hop). It's already scheduled.
+
+---
+
+## send-email (transactional email via Resend)
+
+The app's single outbound mail channel. It replaced an unused SMTP/nodemailer
+placeholder that never sent anything. The function (not the Next app) holds the
+Resend key, so there's no mail credential in the app env — same reasoning as
+`invite-user` holding the service key.
+
+It is **not an open relay**: callers pass only a record id + a `type`, and the
+function re-verifies the caller, then re-derives the recipient and all content
+from trusted DB rows. Three types:
+
+| `type` | When | Who may call | Recipient |
+|---|---|---|---|
+| `order_update` | staff move an order to a milestone status (`shipped`, `out_for_delivery`, `delivered`, `completed`, `cancelled`) | staff/admin | the order's customer |
+| `voucher_issued` | a cash voucher is created — includes a scannable QR (inline + attached) | the voucher's purchaser (or staff) | `recipient_email ?? purchaser_email` |
+| `voucher_redeemed` | staff redeem a voucher in store ("cash claimed" alert) | staff/admin | `recipient_email ?? purchaser_email` |
+
+The app invokes it through `shared/lib/email/sendTransactionalEmail.ts`, which is
+**best-effort**: a mail failure is logged and swallowed so it never breaks the
+order/voucher/status-change it accompanies.
+
+```bash
+supabase functions deploy send-email          # keep verify_jwt ON
+supabase secrets set RESEND_API_KEY=re_...     # until set, the function is a safe no-op
+# Optional overrides (sensible defaults baked in):
+supabase secrets set \
+  RESEND_FROM='Island Combo <onboarding@resend.dev>' \
+  SITE_URL=https://island-combo.onrender.com
+```
+
+**Sender caveat:** the default `onboarding@resend.dev` is Resend's test sender — it
+only delivers to your own Resend-account email. To reach real recipients, verify a
+domain in Resend and repoint `RESEND_FROM` (secret change only, no code change).
 
 ---
 

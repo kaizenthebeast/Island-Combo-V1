@@ -6,6 +6,7 @@ import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
 import { verifyCurrentUserPassword } from '@/features/auth/api/reauth'
 import { getOrderEvents } from '@/features/payments/api/transaction-events'
+import { sendTransactionalEmail } from '@/shared/lib/email/sendTransactionalEmail'
 import type { PaginatedInput, PaginatedResult } from '@/shared/lib/admin/shared'
 import type { AdminOrderListRow, AdminOrderDetail } from '@/shared/types/order'
 import type { TransactionEvent } from '@/shared/types/transaction-event'
@@ -127,8 +128,25 @@ export const updateOrderStatus = async (
   })
 
   if (error) return { success: false, status: 400, message: error.message }
+
+  // Notify the customer on customer-facing milestones only (skip internal
+  // pending/paid churn). Awaited but best-effort — the helper swallows failures
+  // (and caps its own runtime), so a mail problem never blocks the update.
+  if (ORDER_EMAIL_MILESTONES.has(status)) {
+    await sendTransactionalEmail({ type: 'order_update', orderId })
+  }
+
   return { success: true, status: 200, data }
 }
+
+// Status transitions worth emailing the customer about.
+const ORDER_EMAIL_MILESTONES = new Set<string>([
+  'shipped',
+  'out_for_delivery',
+  'delivered',
+  'completed',
+  'cancelled',
+])
 
 // ── Fulfillment / tracking (order_fulfillment, 1:1 with orders) ───────────────
 // Staff-only. RLS on order_fulfillment also gates writes to is_staff(), so this

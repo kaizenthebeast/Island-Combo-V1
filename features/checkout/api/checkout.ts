@@ -21,7 +21,8 @@ import { applyPromoCode } from '@/features/promotions/api/apply-promo-code'
 import { calculateTotals } from '@/features/checkout/api/calculate-totals'
 import { pointsToCash } from '@/features/cart/api/loyalty-config'
 import { chargeTotal, voucherValueFromTotal } from '@/features/cash-vouchers/api/pricing'
-import { createCashVoucher } from '@/features/cash-vouchers/api/cash-voucher'
+import { createCashVoucher, generateRedemptionId } from '@/features/cash-vouchers/api/cash-voucher'
+import { sendTransactionalEmail } from '@/shared/lib/email/sendTransactionalEmail'
 import { getZoneFromAddress } from '@/features/shipping/api/zone'
 import { quoteShipping, selectShippingFee } from '@/features/shipping/api/quote'
 import type { CartItem } from '@/shared/types/cart'
@@ -188,6 +189,16 @@ async function fulfillVoucher(
   if (!result.success || !result.voucher) {
     throw new Error(result.message ?? 'Payment captured but the voucher could not be created.')
   }
+
+  // Mint the redemption id up front so the emailed QR encodes the same canonical
+  // value as the on-screen success QR (both idempotent). Best-effort; if it fails
+  // the email's QR falls back to the display code, which redeem/validate accept.
+  await generateRedemptionId(result.voucher.id).catch(() => {})
+
+  // Email the recipient their voucher + QR. Awaited but non-fatal: the purchase
+  // already succeeded, and the helper swallows failures + caps its own runtime,
+  // so a mail problem can never surface as a fulfilment error.
+  await sendTransactionalEmail({ type: 'voucher_issued', voucherId: result.voucher.id })
 
   return { kind: 'cash_voucher', voucher: result.voucher }
 }

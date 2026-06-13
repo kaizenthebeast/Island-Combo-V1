@@ -17,6 +17,7 @@
 
 import { createClient } from '@/shared/lib/db/server'
 import { requireStaff } from '@/features/auth/api'
+import { sendTransactionalEmail } from '@/shared/lib/email/sendTransactionalEmail'
 import type { CashVoucher, CashVoucherStatus } from '@/shared/types/cash-voucher'
 
 type VoucherResult = { success: boolean; voucher?: CashVoucher; message?: string; status?: number }
@@ -144,6 +145,11 @@ export const redeemCashVoucher = async (
       message: error?.message ?? 'Could not redeem the voucher.',
     }
   }
+
+  // "Cash claimed" confirmation to the recipient. Awaited but best-effort: the
+  // redemption is already committed, and the helper swallows failures + caps its
+  // own runtime, so a mail problem can never fail the redeem.
+  await sendTransactionalEmail({ type: 'voucher_redeemed', voucherId: data.id })
 
   return { success: true, voucher: data }
 }
