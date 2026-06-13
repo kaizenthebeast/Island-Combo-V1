@@ -1,0 +1,8 @@
+slug,name,description,category,type,status,discount,variant_sku,variant_price,variant_stock,variant_is_active,variant_attributes,variant_pricing_tiers,variant_images,product_details
+classic-cotton-tee,Classic Cotton Tee,Soft 100% cotton crew-neck tee.,Apparel,Physical,ACTIVE,0,,299,50,true,Size:S,wholesale:12:10,variants/tee-front.png|variants/tee-back.png,Material:100% Cotton|Care:Machine wash cold
+classic-cotton-tee,Classic Cotton Tee,,Apparel,Physical,ACTIVE,0,,299,40,true,Size:M,wholesale:12:10,variants/tee-front.png,
+classic-cotton-tee,Classic Cotton Tee,,Apparel,Physical,ACTIVE,0,,299,35,true,Size:L,wholesale:12:10,variants/tee-front.png,
+ceramic-mug-12oz,Ceramic Mug 12oz,"Glossy stoneware mug, microwave safe.",Home,Physical,ACTIVE,5,,199,120,true,Color:White,,variants/mug-white.png,Capacity:12oz|Material:Stoneware
+ceramic-mug-12oz,Ceramic Mug 12oz,,Home,Physical,ACTIVE,5,,219,80,true,Color:Matte Black,,variants/mug-black.png,
+leather-card-holder,Slim Leather Card Holder,Full-grain leather holder for up to 6 cards.,Accessories,Physical,ACTIVE,0,,549,30,true,Color:Tan,wholesale:6:8,variants/cardholder-tan.png,Material:Full-grain leather|Cards:6
+digital-gift-card-500,Digital Gift Card 500,Emailed gift card redeemable in-store.,,Digital,DRAFT,0,,500,0,true,Denomination:500,,,Delivery:Email

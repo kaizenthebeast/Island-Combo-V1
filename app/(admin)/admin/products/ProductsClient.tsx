@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/shared/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
 import AddProductDialog from '@/features/products/components/admin/AddProductDialog'
 import EditProductDialog from '@/features/products/components/admin/EditProductDialog'
 import DeleteProductDialog from '@/features/products/components/admin/DeleteProductDialog'
+import ImportDialog from '@/shared/components/admin/ImportDialog'
+import { useCsvExport } from '@/shared/components/admin/useCsvExport'
 import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
 import type { AdminProduct, ProductStatus } from '@/shared/types/product'
@@ -38,10 +41,13 @@ interface Props {
 
 export default function ProductsClient({ products, total, page, pageSize }: Props) {
     const [open, setOpen] = useState(false)
+    const [importOpen, setImportOpen] = useState(false)
     const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(null)
     const [deletingRow, setDeletingRow] = useState<Row | null>(null)
     const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
+    const router = useRouter()
+    const { exporting, exportCsv } = useCsvExport()
 
     const {
         state,
@@ -115,9 +121,20 @@ export default function ProductsClient({ products, total, page, pageSize }: Prop
                 title="Products"
                 subtitle="Manage your product inventory"
                 actions={[
-                    { label: 'Import',         onClick: () => {},            variant: 'secondary' },
-                    { label: 'Create Product', onClick: () => setOpen(true), variant: 'primary'   },
+                    { label: exporting ? 'Exporting…' : 'Export', onClick: () => exportCsv('/api/admin/products/export', 'products.csv'), variant: 'secondary', disabled: exporting },
+                    { label: 'Import',         onClick: () => setImportOpen(true), variant: 'secondary' },
+                    { label: 'Create Product', onClick: () => setOpen(true),       variant: 'primary'   },
                 ]}
+            />
+
+            <ImportDialog
+                open={importOpen}
+                onClose={() => setImportOpen(false)}
+                title="Import products"
+                description="Upload a CSV to bulk-create or update products. One row per variant; rows sharing a slug become one product."
+                importUrl="/api/admin/products/import"
+                templateHref="/templates/products-import-template.csv"
+                onImported={() => router.refresh()}
             />
 
             {deleteError && (

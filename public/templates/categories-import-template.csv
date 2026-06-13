@@ -1,0 +1,8 @@
+name,slug,parent,is_active
+Apparel,apparel,,true
+Home,home,,true
+Accessories,accessories,,true
+T-Shirts,t-shirts,apparel,true
+Hoodies,hoodies,apparel,true
+Mugs,mugs,home,true
+Wallets,wallets,accessories,true

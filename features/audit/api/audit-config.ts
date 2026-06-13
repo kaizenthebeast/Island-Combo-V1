@@ -58,9 +58,13 @@ export const ACTION_OPTIONS: Record<AuditCategory, { value: string; label: strin
     { value: 'product.stock_changed', label: 'Stock changed' },
     { value: 'product.price_changed', label: 'Price changed' },
     { value: 'product.deleted',       label: 'Product deleted' },
+    { value: 'product.imported',      label: 'Products imported (CSV)' },
+    { value: 'product.exported',      label: 'Products exported (CSV)' },
     { value: 'category.created',      label: 'Category created' },
     { value: 'category.updated',      label: 'Category updated' },
     { value: 'category.deleted',      label: 'Category deleted' },
+    { value: 'category.imported',     label: 'Categories imported (CSV)' },
+    { value: 'category.exported',     label: 'Categories exported (CSV)' },
   ],
   payments: [
     { value: 'payment.created',        label: 'Payment created' },

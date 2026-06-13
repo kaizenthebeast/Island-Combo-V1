@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useMemo, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { PageHeader } from '@/shared/components/admin/PageHeader'
 import { DataTable, ColumnDef } from '@/shared/components/admin/DataTable'
 import AddCategoryDialog from '@/features/categories/components/admin/AddCategoryDialog'
 import EditCategoryDialog from '@/features/categories/components/admin/EditCategoryDialog'
 import DeleteCategoryDialog from '@/features/categories/components/admin/DeleteCategoryDialog'
+import ImportDialog from '@/shared/components/admin/ImportDialog'
+import { useCsvExport } from '@/shared/components/admin/useCsvExport'
 import StatusBadge, { BadgeVariant } from '@/shared/components/admin/StatusBadge'
 import { CategoryOption } from '@/features/categories/components/admin/forms/CategoryUIForm'
 import { useTableUrlState } from '@/shared/hooks/use-table-url-state'
@@ -45,10 +48,13 @@ export default function CategoryClient({
     pageSize,
 }: Props) {
     const [open, setOpen] = useState(false)
+    const [importOpen, setImportOpen] = useState(false)
     const [editingCategory, setEditingCategory] = useState<Category | null>(null)
     const [deletingRow, setDeletingRow] = useState<Row | null>(null)
     const [, startTransition] = useTransition()
     const [deleteError, setDeleteError] = useState<string | null>(null)
+    const router = useRouter()
+    const { exporting, exportCsv } = useCsvExport()
 
     const {
         state,
@@ -117,8 +123,20 @@ export default function CategoryClient({
                 title="Categories"
                 subtitle="Manage your product categories"
                 actions={[
-                    { label: 'Add Category', onClick: () => setOpen(true), variant: 'primary' },
+                    { label: exporting ? 'Exporting…' : 'Export', onClick: () => exportCsv('/api/admin/categories/export', 'categories.csv'), variant: 'secondary', disabled: exporting },
+                    { label: 'Import',       onClick: () => setImportOpen(true), variant: 'secondary' },
+                    { label: 'Add Category', onClick: () => setOpen(true),       variant: 'primary'   },
                 ]}
+            />
+
+            <ImportDialog
+                open={importOpen}
+                onClose={() => setImportOpen(false)}
+                title="Import categories"
+                description="Upload a CSV to bulk-create or update categories. List top-level categories before their children."
+                importUrl="/api/admin/categories/import"
+                templateHref="/templates/categories-import-template.csv"
+                onImported={() => router.refresh()}
             />
 
             {deleteError && (
